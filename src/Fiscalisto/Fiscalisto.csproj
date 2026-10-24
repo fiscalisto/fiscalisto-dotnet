@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>Fiscalisto</RootNamespace>
+    <PackageId>Fiscalisto</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Fiscalisto</Authors>
+    <Description>El SDK de la API de facturación de Fiscalisto: timbre CFDI 4.0 (facturas, pagos, notas de crédito, nómina, retenciones y lotes) desde .NET.</Description>
+    <PackageTags>cfdi;facturacion;sat;mexico;factura-electronica;fiscalisto</PackageTags>
+    <PackageProjectUrl>https://fiscalisto.com/docs/api/sdk</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="Fiscalisto.Tests" />
+  </ItemGroup>
+
+</Project>
