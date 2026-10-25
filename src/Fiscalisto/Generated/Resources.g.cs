@@ -100,6 +100,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Listas del SAT.</summary>
     public SatListsResource SatLists => _satLists ??= new SatListsResource(this);
 
+    private SatDownloadsResource? _satDownloads;
+
+    /// <summary>Descargas del SAT.</summary>
+    public SatDownloadsResource SatDownloads => _satDownloads ??= new SatDownloadsResource(this);
+
+    private SatInvoicesResource? _satInvoices;
+
+    /// <summary>Descargas del SAT.</summary>
+    public SatInvoicesResource SatInvoices => _satInvoices ??= new SatInvoicesResource(this);
+
     private WebhookEndpointsResource? _webhookEndpoints;
 
     /// <summary>Webhooks.</summary>
@@ -258,7 +268,7 @@ public sealed class IssuersResource
     /// Firmar el contrato con el PAC
     /// </summary>
     /// <remarks>
-    /// Una sola vez por RFC antes de timbrar en producción: firma el contrato de servicio del PAC (Finkok) con la e.firma del emisor. La e.firma se usa en memoria para esa firma y nunca se guarda.
+    /// Una sola vez por RFC antes de timbrar en producción: firma el contrato de servicio del PAC (Finkok) con la e.firma del emisor. La e.firma se usa en memoria para esa firma y no se guarda, salvo que mande keep_for_downloads: true para pedirle al SAT las facturas del emisor (POST /v1/sat_downloads); entonces se guarda cifrada y puede borrarla con DELETE.
     /// <br/>
     /// <c>POST /v1/issuers/{id}/efirma</c>
     /// <br/>
@@ -267,6 +277,20 @@ public sealed class IssuersResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Issuer> SignEfirmaAsync(string id, SignEfirmaParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/efirma", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Borrar la e.firma guardada
+    /// </summary>
+    /// <remarks>
+    /// Borra la e.firma que guardó con keep_for_downloads. El emisor sigue timbrando; ya no puede pedir descargas al SAT hasta que la mande de nuevo.
+    /// <br/>
+    /// <c>DELETE /v1/issuers/{id}/efirma</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/delete-efirma"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Issuer> DeleteEfirmaAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Issuer>("DELETE", $"/v1/issuers/{Uri.EscapeDataString(id)}/efirma", null, null, options, false, cancellationToken);
 
     /// <summary>
     /// Crear una liga de alta
@@ -1083,6 +1107,116 @@ public sealed class SatListsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SatListCheckList> CheckAsync(CheckSatListsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<SatListCheckList>("POST", "/v1/sat_lists/check", @params, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Descargas del SAT: <c>fiscalisto.SatDownloads</c>.
+/// </summary>
+public sealed class SatDownloadsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatDownloadsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Pedirle al SAT las facturas de un emisor
+    /// </summary>
+    /// <remarks>
+    /// La descarga masiva del SAT: las facturas que el emisor recibió (o emitió) en un periodo de hasta un año, con su XML. Contesta 202 de inmediato; el SAT tarda de minutos a horas y al terminar llega sat_download.completed (o sat_download.failed) y las facturas quedan en GET /v1/sat_invoices. En producción necesita la e.firma guardada del emisor; en pruebas no se le pregunta al SAT: la descarga trae facturas de ejemplo al instante. No usa timbres.
+    /// <br/>
+    /// <c>POST /v1/sat_downloads</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/create-sat-download"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatDownload> CreateAsync(CreateSatDownloadParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatDownload>("POST", "/v1/sat_downloads", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Listar descargas del SAT
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/sat_downloads</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/list-sat-downloads"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SatDownload>> ListAsync(ListSatDownloadsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SatDownload>("/v1/sat_downloads", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar descargas del SAT: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SatDownload> ListAutoPagingAsync(ListSatDownloadsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SatDownload>("/v1/sat_downloads", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una descarga del SAT
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/sat_downloads/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-download"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatDownload> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatDownload>("GET", $"/v1/sat_downloads/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Descargas del SAT: <c>fiscalisto.SatInvoices</c>.
+/// </summary>
+public sealed class SatInvoicesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatInvoicesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar facturas del SAT
+    /// </summary>
+    /// <remarks>
+    /// Las facturas que trajeron sus descargas (y las demás que Fiscalisto tenga del emisor), de la más reciente a la más antigua por fecha.
+    /// <br/>
+    /// <c>GET /v1/sat_invoices</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/list-sat-invoices"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SatInvoice>> ListAsync(ListSatInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SatInvoice>("/v1/sat_invoices", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar facturas del SAT: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SatInvoice> ListAutoPagingAsync(ListSatInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SatInvoice>("/v1/sat_invoices", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una factura del SAT
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/sat_invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatInvoice> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatInvoice>("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar el XML de una factura del SAT
+    /// </summary>
+    /// <remarks>
+    /// El CFDI tal como lo entregó el SAT.
+    /// <br/>
+    /// <c>GET /v1/sat_invoices/{id}/xml</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-invoice-xml"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> XmlAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/xml", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

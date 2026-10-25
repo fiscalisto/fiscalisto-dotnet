@@ -1926,6 +1926,58 @@ public sealed partial class CreateRetentionParamsTotals
 }
 
 /// <summary>
+/// Los campos de «Pedirle al SAT las facturas de un emisor».
+/// </summary>
+public sealed partial class CreateSatDownloadParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// received (las facturas que le hicieron al emisor, por omisión) o issued (las que emitió, aunque no haya sido con Fiscalisto).
+    /// <br/>
+    /// Valores: received, issued.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string? Direction { get; set; }
+
+    /// <summary>
+    /// Desde qué día (incluido), en hora de la Ciudad de México.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public required string From { get; set; }
+
+    /// <summary>
+    /// Hasta qué día (incluido). A lo más un año después de from, y no después de hoy.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public required string To { get; set; }
+
+    /// <summary>
+    /// Solo un tipo de comprobante: I, E, P, T o N. Por omisión, todos.
+    /// <br/>
+    /// Valores: I, E, P, T, N.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Solo las de un RFC: el emisor de las recibidas, o el receptor de las emitidas.
+    /// </summary>
+    [JsonPropertyName("counterparty_tax_id")]
+    public string? CounterpartyTaxId { get; set; }
+
+    /// <summary>
+    /// Una sola factura, por su folio fiscal (UUID).
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear un webhook».
 /// </summary>
 public sealed partial class CreateWebhookEndpointParams
@@ -2549,7 +2601,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready o balance.low.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, issuer.ready o balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -6462,6 +6514,12 @@ public sealed partial class Issuer
     public IssuerCertificate? Certificate { get; set; }
 
     /// <summary>
+    /// Si puede pedirle al SAT sus facturas (POST /v1/sat_downloads): available es true en pruebas, y en producción mientras su e.firma guardada esté vigente (efirma_expires_at).
+    /// </summary>
+    [JsonPropertyName("sat_downloads")]
+    public IssuerSatDownloads SatDownloads { get; set; } = default!;
+
+    /// <summary>
     /// Registro patronal ante el IMSS (RegistroPatronal), 11 caracteres. Necesario para timbrar nómina.
     /// </summary>
     [JsonPropertyName("employer_registration")]
@@ -6595,6 +6653,24 @@ public sealed partial class IssuerOnboardingLink
 }
 
 /// <summary>
+/// Si puede pedirle al SAT sus facturas (POST /v1/sat_downloads): available es true en pruebas, y en producción mientras su e.firma guardada esté vigente (efirma_expires_at).
+/// </summary>
+public sealed partial class IssuerSatDownloads
+{
+    /// <summary>
+    /// true si puede pedir descargas al SAT ahora: siempre en pruebas; en producción con su e.firma guardada y vigente.
+    /// </summary>
+    [JsonPropertyName("available")]
+    public bool Available { get; set; }
+
+    /// <summary>
+    /// Cuándo vence la e.firma guardada para las descargas, o null si no hay una.
+    /// </summary>
+    [JsonPropertyName("efirma_expires_at")]
+    public string? EfirmaExpiresAt { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar anticipos sin aplicar».
 /// </summary>
 public sealed partial class ListAdvancesParams
@@ -6710,7 +6786,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -6912,6 +6988,88 @@ public sealed partial class ListRetentionsParams
     /// </summary>
     [JsonPropertyName("year")]
     public string? Year { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar descargas del SAT».
+/// </summary>
+public sealed partial class ListSatDownloadsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar facturas del SAT».
+/// </summary>
+public sealed partial class ListSatInvoicesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// received (por omisión) o issued.
+    /// <br/>
+    /// Valores: received, issued.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string? Direction { get; set; }
+
+    /// <summary>
+    /// I, E, P, T o N.
+    /// <br/>
+    /// Valores: I, E, P, T, N.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// El RFC de quien la emitió (recibidas) o de quien la recibió (emitidas).
+    /// </summary>
+    [JsonPropertyName("counterparty_tax_id")]
+    public string? CounterpartyTaxId { get; set; }
+
+    /// <summary>
+    /// Con fecha desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// Con fecha hasta este día (AAAA-MM-DD), incluido.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLte { get; set; }
 }
 
 /// <summary>
@@ -7895,6 +8053,402 @@ public sealed partial class SatCatalogEntryList
 }
 
 /// <summary>
+/// Una solicitud al SAT de las facturas emitidas o recibidas de un emisor en un periodo.
+/// </summary>
+public sealed partial class SatDownload
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor cuyas facturas se piden.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// received (las que le hicieron) o issued (las que emitió).
+    /// <br/>
+    /// Valores: received, issued.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// Desde qué día (incluido).
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Hasta qué día (incluido).
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// El tipo de comprobante pedido, o null si todos.
+    /// <br/>
+    /// Valores: I, E, P, T, N.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// El RFC de la contraparte pedido, o null.
+    /// </summary>
+    [JsonPropertyName("counterparty_tax_id")]
+    public string? CounterpartyTaxId { get; set; }
+
+    /// <summary>
+    /// El folio fiscal pedido, o null.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// processing (el SAT la está preparando: de minutos a horas), completed (las facturas ya están en GET /v1/sat_invoices) o failed (el motivo en error).
+    /// <br/>
+    /// Valores: processing, completed, failed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas facturas nuevas trajo (las que ya tenía no cuentan). null mientras no termine.
+    /// </summary>
+    [JsonPropertyName("new_invoices")]
+    public long? NewInvoices { get; set; }
+
+    /// <summary>
+    /// Por qué falló, como lo dijo el SAT. null si no falló.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+
+    /// <summary>
+    /// Cuándo se pidió.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo terminó, o null.
+    /// </summary>
+    [JsonPropertyName("completed_at")]
+    public string? CompletedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatDownloadList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatDownload> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una factura que el SAT tiene del emisor, emitida o recibida, traída con una descarga.
+/// </summary>
+public sealed partial class SatInvoice
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor de su cuenta (iss_…) a quien pertenece esta factura.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El folio fiscal (UUID del timbre).
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// received (se la hicieron al emisor) o issued (la emitió).
+    /// <br/>
+    /// Valores: received, issued.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: I, E, P, T, N.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// La fecha del comprobante (Fecha), en la hora local con que se emitió.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Serie (Serie), o null.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public string? Series { get; set; }
+
+    /// <summary>
+    /// Folio (Folio), o null.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// Quien la emitió (Emisor).
+    /// </summary>
+    [JsonPropertyName("issued_by")]
+    public SatInvoiceIssuedBy IssuedBy { get; set; } = default!;
+
+    /// <summary>
+    /// A quien se la emitieron (Receptor).
+    /// </summary>
+    [JsonPropertyName("issued_to")]
+    public SatInvoiceIssuedTo IssuedTo { get; set; } = default!;
+
+    /// <summary>
+    /// Moneda (Moneda): MXN, USD…
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// Tipo de cambio (TipoCambio), o null en pesos.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// Método de pago (MetodoPago): PUE o PPD.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// Forma de pago (FormaPago), clave de c_FormaPago.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// Uso del CFDI (UsoCFDI).
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Subtotal (SubTotal).
+    /// </summary>
+    [JsonPropertyName("subtotal")]
+    public decimal? Subtotal { get; set; }
+
+    /// <summary>
+    /// Total (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// Impuestos del comprobante: trasladados (iva, ieps), retenidos (iva_withheld, isr_withheld, ieps_withheld) y locales.
+    /// </summary>
+    [JsonPropertyName("taxes")]
+    public SatInvoiceTaxes Taxes { get; set; } = default!;
+
+    /// <summary>
+    /// Su estado en el SAT cuando se revisó: active (vigente) o canceled. null si aún no se revisa.
+    /// <br/>
+    /// Valores: active, canceled.
+    /// </summary>
+    [JsonPropertyName("sat_status")]
+    public string? SatStatus { get; set; }
+
+    /// <summary>
+    /// La descarga (sdl_…) que la trajo, o null.
+    /// </summary>
+    [JsonPropertyName("sat_download")]
+    public string? SatDownload { get; set; }
+
+    /// <summary>
+    /// Cuándo llegó.
+    /// </summary>
+    [JsonPropertyName("downloaded_at")]
+    public string? DownloadedAt { get; set; }
+}
+
+/// <summary>
+/// Quien la emitió (Emisor).
+/// </summary>
+public sealed partial class SatInvoiceIssuedBy
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// A quien se la emitieron (Receptor).
+/// </summary>
+public sealed partial class SatInvoiceIssuedTo
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatInvoiceList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatInvoice> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Impuestos del comprobante: trasladados (iva, ieps), retenidos (iva_withheld, isr_withheld, ieps_withheld) y locales.
+/// </summary>
+public sealed partial class SatInvoiceTaxes
+{
+    /// <summary>
+    /// IVA trasladado.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public decimal Iva { get; set; }
+
+    /// <summary>
+    /// IEPS trasladado.
+    /// </summary>
+    [JsonPropertyName("ieps")]
+    public decimal Ieps { get; set; }
+
+    /// <summary>
+    /// IVA retenido.
+    /// </summary>
+    [JsonPropertyName("iva_withheld")]
+    public decimal IvaWithheld { get; set; }
+
+    /// <summary>
+    /// ISR retenido.
+    /// </summary>
+    [JsonPropertyName("isr_withheld")]
+    public decimal IsrWithheld { get; set; }
+
+    /// <summary>
+    /// IEPS retenido.
+    /// </summary>
+    [JsonPropertyName("ieps_withheld")]
+    public decimal IepsWithheld { get; set; }
+
+    /// <summary>
+    /// Impuestos locales trasladados (ISH y similares).
+    /// </summary>
+    [JsonPropertyName("local_transferred")]
+    public decimal LocalTransferred { get; set; }
+
+    /// <summary>
+    /// Impuestos locales retenidos.
+    /// </summary>
+    [JsonPropertyName("local_withheld")]
+    public decimal LocalWithheld { get; set; }
+}
+
+/// <summary>
 /// Si un RFC aparece en las listas del SAT (69-B, 69-B Bis y art. 69).
 /// </summary>
 public sealed partial class SatListCheck
@@ -8070,6 +8624,12 @@ public sealed partial class SignEfirmaParams
     /// </summary>
     [JsonPropertyName("password")]
     public required string Password { get; set; }
+
+    /// <summary>
+    /// true para guardarla (cifrada) y poder pedir al SAT las facturas del emisor con POST /v1/sat_downloads. Sin esto solo firma el contrato con el PAC y no se guarda.
+    /// </summary>
+    [JsonPropertyName("keep_for_downloads")]
+    public bool? KeepForDownloads { get; set; }
 }
 
 /// <summary>
@@ -8232,7 +8792,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }

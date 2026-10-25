@@ -42,8 +42,11 @@ public static class ErrorCode
     /// <summary>El cliente ya mandó sus datos con esa liga: una solicitud completada no se cancela.</summary>
     public const string DataRequestCompleted = "data_request_completed";
 
-    /// <summary>La e.firma no sirve para firmar el contrato con el PAC: no es una e.firma (es un CSD), es de otro RFC o está vencida.</summary>
+    /// <summary>La e.firma no sirve: no es una e.firma (es un CSD), es de otro RFC, está vencida o la contraseña no abre la llave.</summary>
     public const string EfirmaInvalid = "efirma_invalid";
+
+    /// <summary>Para pedirle al SAT las facturas de un emisor en producción, guarde antes su e.firma: POST /v1/issuers/{id}/efirma con keep_for_downloads: true. También si la guardada venció.</summary>
+    public const string EfirmaRequired = "efirma_required";
 
     /// <summary>No se pudo mandar el correo; el comprobante sí está timbrado.</summary>
     public const string EmailFailed = "email_failed";
@@ -143,6 +146,9 @@ public static class ErrorCode
 
     /// <summary>No existe esa ruta. Revise la dirección y la versión (/v1).</summary>
     public const string RouteNotFound = "route_not_found";
+
+    /// <summary>El SAT rechazó la solicitud de descarga. El mensaje trae su motivo, por ejemplo que ya se pidió el mismo periodo con los mismos filtros demasiadas veces (el SAT pone un límite de por vida).</summary>
+    public const string SatRequestRejected = "sat_request_rejected";
 
     /// <summary>Demasiados timbres seguidos del mismo emisor. Espere lo que dice Retry-After; para muchas facturas use POST /v1/invoice_batches.</summary>
     public const string StampRateLimit = "stamp_rate_limit";
