@@ -3977,6 +3977,12 @@ public sealed partial class ErrorErrorValue
     public string? SatCode { get; set; }
 
     /// <summary>
+    /// Con Accept-Language: en, el mensaje original en español cuando message solo dice en inglés qué significa el código.
+    /// </summary>
+    [JsonPropertyName("message_es")]
+    public string? MessageEs { get; set; }
+
+    /// <summary>
     /// La explicación de este código en la documentación.
     /// </summary>
     [JsonPropertyName("doc_url")]

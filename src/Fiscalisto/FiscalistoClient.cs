@@ -25,6 +25,9 @@ public sealed class FiscalistoClientOptions
     /// <summary>La versión de la API (Fiscalisto-Version); con null, la fijada en la cuenta. Por omisión <see cref="FiscalistoClient.ApiVersion"/>.</summary>
     public string? ApiVersion { get; set; } = FiscalistoClient.ApiVersion;
 
+    /// <summary>"en": los mensajes de error en inglés (Accept-Language). Por omisión en español.</summary>
+    public string? Language { get; set; }
+
     /// <summary>Cuántas veces repetir lo que es seguro repetir (por omisión 2).</summary>
     public int MaxRetries { get; set; } = 2;
 
@@ -260,6 +263,7 @@ public sealed partial class FiscalistoClient : IDisposable
             request.Headers.UserAgent.ParseAdd($"fiscalisto-dotnet/{Version}");
             request.Headers.Accept.ParseAdd("application/json");
             if (_options.ApiVersion is not null) request.Headers.Add("Fiscalisto-Version", _options.ApiVersion);
+            if (_options.Language is not null) request.Headers.Add("Accept-Language", _options.Language);
             if (idempotencyKey is not null) request.Headers.Add("Idempotency-Key", idempotencyKey);
             if (json is not null)
             {
