@@ -3,7 +3,7 @@
 El SDK de la [API de facturación de Fiscalisto](https://fiscalisto.com/docs/api): timbre CFDI 4.0 (facturas, pagos, notas de crédito, nómina, retenciones y lotes) desde C#.
 
 - Una clase para lo que manda y para lo que recibe, con la descripción de cada campo y su nombre en el XML del SAT; `required` en lo obligatorio, para que el compilador le avise.
-- `Idempotency-Key` automática en lo que timbra: un reintento nunca timbra dos veces.
+- `Idempotency-Key` automática en cada `POST`: un reintento nunca timbra, crea ni manda nada dos veces.
 - Reintentos solo de lo que es seguro repetir.
 - Listas que se recorren solas con `await foreach`.
 - Webhooks verificados en una línea.

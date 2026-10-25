@@ -211,7 +211,7 @@ public sealed class TestDataResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<TestDataReset> ResetAsync(ResetTestDataParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<TestDataReset>("POST", "/v1/test_data/reset", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<TestDataReset>("POST", "/v1/test_data/reset", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -235,7 +235,7 @@ public sealed class SandboxesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Sandbox> CreateAsync(CreateSandboxParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Sandbox>("POST", "/v1/sandboxes", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Sandbox>("POST", "/v1/sandboxes", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar entornos de prueba
@@ -321,7 +321,7 @@ public sealed class IssuersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Issuer> CreateAsync(CreateIssuerParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Issuer>("POST", "/v1/issuers", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Issuer>("POST", "/v1/issuers", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar emisores
@@ -365,7 +365,7 @@ public sealed class IssuersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Issuer> UpdateAsync(string id, UpdateIssuerParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Archivar un emisor
@@ -393,7 +393,7 @@ public sealed class IssuersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Issuer> UploadCertificateAsync(string id, UploadCertificateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/certificates", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/certificates", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Firmar el contrato con el PAC
@@ -407,7 +407,7 @@ public sealed class IssuersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Issuer> SignEfirmaAsync(string id, SignEfirmaParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/efirma", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/efirma", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Borrar la e.firma guardada
@@ -435,7 +435,7 @@ public sealed class IssuersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<IssuerOnboardingLink> CreateOnboardingLinkAsync(string id, CreateIssuerOnboardingLinkParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<IssuerOnboardingLink>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/onboarding_links", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<IssuerOnboardingLink>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/onboarding_links", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Ver el portal de autofactura de un emisor
@@ -461,7 +461,7 @@ public sealed class IssuersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SelfInvoicing> UpdateSelfInvoicingAsync(string id, UpdateSelfInvoicingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<SelfInvoicing>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/self_invoicing", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<SelfInvoicing>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/self_invoicing", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -573,7 +573,7 @@ public sealed class InvoicesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> CancelAsync(string id, CancelInvoiceParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/cancel", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/cancel", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Sustituir una factura
@@ -601,7 +601,7 @@ public sealed class InvoicesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> MarkPaidAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_paid", null, null, options, false, cancellationToken);
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_paid", null, null, options, true, cancellationToken);
 
     /// <summary>
     /// Marcar por cobrar
@@ -615,7 +615,7 @@ public sealed class InvoicesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> MarkUnpaidAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_unpaid", null, null, options, false, cancellationToken);
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_unpaid", null, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -669,7 +669,7 @@ public sealed class BankTransactionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<BankImport> CreateAsync(CreateBankTransactionsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<BankImport>("POST", "/v1/bank_transactions", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<BankImport>("POST", "/v1/bank_transactions", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar depósitos
@@ -715,7 +715,7 @@ public sealed class BankTransactionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<BankTransaction> MatchAsync(string id, MatchBankTransactionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/match", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/match", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Explicar un depósito sin factura
@@ -729,7 +729,7 @@ public sealed class BankTransactionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<BankTransaction> ClassifyAsync(string id, ClassifyBankTransactionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/classify", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/classify", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Deshacer la conciliación
@@ -743,7 +743,7 @@ public sealed class BankTransactionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<BankTransaction> ReopenAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/reopen", null, null, options, false, cancellationToken);
+        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/reopen", null, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -929,7 +929,7 @@ public sealed class RetentionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Retention> SendAsync(string id, SendRetentionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Retention>("POST", $"/v1/retentions/{Uri.EscapeDataString(id)}/send", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Retention>("POST", $"/v1/retentions/{Uri.EscapeDataString(id)}/send", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Cancelar una constancia
@@ -943,7 +943,7 @@ public sealed class RetentionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Retention> CancelAsync(string id, CancelRetentionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Retention>("POST", $"/v1/retentions/{Uri.EscapeDataString(id)}/cancel", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Retention>("POST", $"/v1/retentions/{Uri.EscapeDataString(id)}/cancel", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -965,7 +965,7 @@ public sealed class EmployeesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Employee> CreateAsync(CreateEmployeeParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Employee>("POST", "/v1/employees", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Employee>("POST", "/v1/employees", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar empleados
@@ -1007,7 +1007,7 @@ public sealed class EmployeesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Employee> UpdateAsync(string id, UpdateEmployeeParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Employee>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Employee>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Borrar un empleado
@@ -1057,7 +1057,7 @@ public sealed class PayrollReceiptsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollReceiptPreview> PreviewAsync(PreviewPayrollReceiptParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<PayrollReceiptPreview>("POST", "/v1/payroll_receipts/preview", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<PayrollReceiptPreview>("POST", "/v1/payroll_receipts/preview", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -1137,7 +1137,7 @@ public sealed class TaxIdsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<TaxIdValidation> ValidateAsync(ValidateTaxIdParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<TaxIdValidation>("POST", "/v1/tax_ids/validate", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<TaxIdValidation>("POST", "/v1/tax_ids/validate", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -1159,7 +1159,7 @@ public sealed class CustomersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Customer> CreateAsync(CreateCustomerParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Customer>("POST", "/v1/customers", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Customer>("POST", "/v1/customers", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar clientes
@@ -1201,7 +1201,7 @@ public sealed class CustomersResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Customer> UpdateAsync(string id, UpdateCustomerParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Customer>("POST", $"/v1/customers/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Customer>("POST", $"/v1/customers/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Borrar un cliente
@@ -1237,7 +1237,7 @@ public sealed class CustomerDataRequestsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<CustomerDataRequest> CreateAsync(CreateCustomerDataRequestParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<CustomerDataRequest>("POST", "/v1/customer_data_requests", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<CustomerDataRequest>("POST", "/v1/customer_data_requests", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar solicitudes de datos
@@ -1303,7 +1303,7 @@ public sealed class ProductsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Product> CreateAsync(CreateProductParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Product>("POST", "/v1/products", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Product>("POST", "/v1/products", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar productos
@@ -1345,7 +1345,7 @@ public sealed class ProductsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Product> UpdateAsync(string id, UpdateProductParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Product>("POST", $"/v1/products/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Product>("POST", $"/v1/products/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Borrar un producto
@@ -1419,7 +1419,7 @@ public sealed class SatListsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SatListCheckList> CheckAsync(CheckSatListsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<SatListCheckList>("POST", "/v1/sat_lists/check", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<SatListCheckList>("POST", "/v1/sat_lists/check", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -1443,7 +1443,7 @@ public sealed class SatDownloadsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SatDownload> CreateAsync(CreateSatDownloadParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<SatDownload>("POST", "/v1/sat_downloads", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<SatDownload>("POST", "/v1/sat_downloads", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar descargas del SAT
@@ -1553,7 +1553,7 @@ public sealed class TicketsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Ticket> CreateAsync(CreateTicketParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Ticket>("POST", "/v1/tickets", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Ticket>("POST", "/v1/tickets", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar tickets
@@ -1723,7 +1723,7 @@ public sealed class StoreConnectionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<StoreConnection> CreateAsync(CreateStoreConnectionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<StoreConnection>("POST", "/v1/store_connections", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<StoreConnection>("POST", "/v1/store_connections", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar tiendas
@@ -1769,7 +1769,7 @@ public sealed class StoreConnectionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<StoreConnection> UpdateAsync(string id, UpdateStoreConnectionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<StoreConnection>("POST", $"/v1/store_connections/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<StoreConnection>("POST", $"/v1/store_connections/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Desconectar una tienda
@@ -1797,7 +1797,7 @@ public sealed class StoreConnectionsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<StoreImport> ImportOrdersAsync(string id, ImportStoreOrdersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<StoreImport>("POST", $"/v1/store_connections/{Uri.EscapeDataString(id)}/import_orders", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<StoreImport>("POST", $"/v1/store_connections/{Uri.EscapeDataString(id)}/import_orders", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -1821,7 +1821,7 @@ public sealed class RecurringInvoicesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<RecurringInvoice> CreateAsync(CreateRecurringInvoiceParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<RecurringInvoice>("POST", "/v1/recurring_invoices", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<RecurringInvoice>("POST", "/v1/recurring_invoices", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar facturas recurrentes
@@ -1867,7 +1867,7 @@ public sealed class RecurringInvoicesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<RecurringInvoice> UpdateAsync(string id, UpdateRecurringInvoiceParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<RecurringInvoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<RecurringInvoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Borrar una factura recurrente
@@ -1895,7 +1895,7 @@ public sealed class RecurringInvoicesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<RecurringInvoice> SkipAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<RecurringInvoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}/skip", null, null, options, false, cancellationToken);
+        => _client.RequestAsync<RecurringInvoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}/skip", null, null, options, true, cancellationToken);
 
     /// <summary>
     /// Timbrar ahora la que toca
@@ -1909,7 +1909,7 @@ public sealed class RecurringInvoicesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> RunAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Invoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}/run", null, null, options, false, cancellationToken);
+        => _client.RequestAsync<Invoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}/run", null, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -1933,7 +1933,7 @@ public sealed class QuotesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Quote> CreateAsync(CreateQuoteParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Quote>("POST", "/v1/quotes", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Quote>("POST", "/v1/quotes", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar cotizaciones
@@ -1981,7 +1981,7 @@ public sealed class QuotesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Quote> UpdateAsync(string id, UpdateQuoteParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Borrar una cotización
@@ -2009,7 +2009,7 @@ public sealed class QuotesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Quote> SendAsync(string id, SendQuoteParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/send", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/send", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Marcar aceptada
@@ -2023,7 +2023,7 @@ public sealed class QuotesResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Quote> AcceptAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/accept", null, null, options, false, cancellationToken);
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/accept", null, null, options, true, cancellationToken);
 
     /// <summary>
     /// Facturar una cotización
@@ -2075,7 +2075,7 @@ public sealed class WebhookEndpointsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<WebhookEndpoint> CreateAsync(CreateWebhookEndpointParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<WebhookEndpoint>("POST", "/v1/webhook_endpoints", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<WebhookEndpoint>("POST", "/v1/webhook_endpoints", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar webhooks
@@ -2117,7 +2117,7 @@ public sealed class WebhookEndpointsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<WebhookEndpoint> UpdateAsync(string id, UpdateWebhookEndpointParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<WebhookEndpoint>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<WebhookEndpoint>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Borrar un webhook
@@ -2143,7 +2143,7 @@ public sealed class WebhookEndpointsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<WebhookEndpoint> RollSecretAsync(string id, RollWebhookSecretParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<WebhookEndpoint>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/roll_secret", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<WebhookEndpoint>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/roll_secret", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Mandar un evento de prueba
@@ -2157,7 +2157,7 @@ public sealed class WebhookEndpointsResource
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<WebhookTest> TestAsync(string id, TestWebhookEndpointParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<WebhookTest>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/test", @params, null, options, false, cancellationToken);
+        => _client.RequestAsync<WebhookTest>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/test", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

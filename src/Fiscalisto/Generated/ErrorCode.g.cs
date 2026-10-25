@@ -60,10 +60,13 @@ public static class ErrorCode
     /// <summary>La cuenta llegó al máximo de webhooks en este modo.</summary>
     public const string EndpointLimit = "endpoint_limit";
 
+    /// <summary>Idempotency-Key es de 1 a 255 caracteres ASCII, sin acentos ni ñ: el id de su pedido o un UUID.</summary>
+    public const string IdempotencyKeyInvalid = "idempotency_key_invalid";
+
     /// <summary>Lo que timbra exige el encabezado Idempotency-Key (8 a 255 caracteres, uno nuevo por comprobante). Así un reintento nunca timbra dos veces.</summary>
     public const string IdempotencyKeyMissing = "idempotency_key_missing";
 
-    /// <summary>Esa Idempotency-Key ya se usó con otro cuerpo. Use una nueva para un comprobante distinto.</summary>
+    /// <summary>Esa Idempotency-Key ya se usó en las últimas 24 horas con otra solicitud (otra ruta u otro cuerpo). Use una nueva para cada operación distinta.</summary>
     public const string IdempotencyKeyReused = "idempotency_key_reused";
 
     /// <summary>La cuenta no tiene timbres de producción. Compre un paquete en Desarrolladores › Timbres. En pruebas nunca pasa. Para enterarse antes, escuche balance.low o active la recarga automática.</summary>
@@ -165,7 +168,7 @@ public static class ErrorCode
     /// <summary>La factura recurrente está en pausa: reanúdela con active: true para timbrarla.</summary>
     public const string RecurringPaused = "recurring_paused";
 
-    /// <summary>Otra solicitud con la misma Idempotency-Key sigue en proceso. Espere un momento y repítala.</summary>
+    /// <summary>Otra solicitud con la misma Idempotency-Key sigue en proceso (409, con Retry-After). Repítala en un momento con la misma llave: contestará lo mismo.</summary>
     public const string RequestInProgress = "request_in_progress";
 
     /// <summary>No existe un objeto con ese id (o es de otro emisor o del otro modo).</summary>

@@ -105,14 +105,27 @@ public class ClientTests
     }
 
     [Fact]
+    public async Task RepeatsACreateWithTheSameKey()
+    {
+        var (client, handler, _) = Client(new FakeHandler()
+            .Answer(500, """{"error":{"type":"api_error","code":"internal","message":"Falló."}}""")
+            .Answer(201, """{"id":"cus_1"}"""));
+        await client.Customers.CreateAsync(new CreateCustomerParams { TaxId = "XAXX010101000", LegalName = "PUBLICO EN GENERAL", TaxSystem = "616", Zip = "06000" });
+        Assert.Equal(2, handler.Sent.Count);
+        Assert.Single(handler.Sent.Select(s => s.Request.Headers.GetValues("Idempotency-Key").Single()).Distinct());
+    }
+
+    [Fact]
     public async Task DoesNotRepeatAPostWithoutIdempotencyKeyAfterA500()
     {
+        // Your own call to a route, without idempotent: it may have worked, so it isn't repeated.
         var (client, handler, _) = Client(new FakeHandler()
             .Answer(500, """{"error":{"type":"api_error","code":"internal","message":"Falló."}}"""));
         var error = await Assert.ThrowsAsync<FiscalistoException>(() =>
-            client.Customers.CreateAsync(new CreateCustomerParams { TaxId = "XAXX010101000", LegalName = "PUBLICO EN GENERAL", TaxSystem = "616", Zip = "06000" }));
+            client.RequestAsync<System.Text.Json.JsonElement>("POST", "/v1/customers", new { tax_id = "XAXX010101000" }));
         Assert.Equal(500, error.StatusCode);
         Assert.Single(handler.Sent);
+        Assert.False(handler.Sent[0].Request.Headers.Contains("Idempotency-Key"));
     }
 
     [Fact]
