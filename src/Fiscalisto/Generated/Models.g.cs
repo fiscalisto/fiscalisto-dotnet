@@ -71,6 +71,18 @@ public sealed partial class AccountKey
     /// </summary>
     [JsonPropertyName("issuers")]
     public List<string>? Issuers { get; set; }
+
+    /// <summary>
+    /// true si la llave solo consulta (key_read_only en lo demás).
+    /// </summary>
+    [JsonPropertyName("read_only")]
+    public bool ReadOnly { get; set; }
+
+    /// <summary>
+    /// Cuándo deja de funcionar: la vigencia elegida al crearla, o el fin del traslape al cambiarla. null si no vence.
+    /// </summary>
+    [JsonPropertyName("expires_at")]
+    public string? ExpiresAt { get; set; }
 }
 
 /// <summary>
