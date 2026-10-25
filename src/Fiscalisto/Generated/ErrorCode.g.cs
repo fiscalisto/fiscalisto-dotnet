@@ -126,6 +126,18 @@ public static class ErrorCode
     /// <summary>El recibo de nómina no se puede calcular o timbrar con esos datos (periodo, días, registro patronal del emisor…).</summary>
     public const string PayrollInvalid = "payroll_invalid";
 
+    /// <summary>La cotización no tiene los datos fiscales del cliente: agrégueselos con POST /v1/quotes/{id} (customer) o mándela con auto_invoice para que los dé al aceptarla.</summary>
+    public const string QuoteCustomerMissing = "quote_customer_missing";
+
+    /// <summary>La cotización no se pudo guardar o ya no cambia (aceptada, rechazada o facturada), o no se puede mandar así. El mensaje dice por qué.</summary>
+    public const string QuoteInvalid = "quote_invalid";
+
+    /// <summary>Solo se borra una cotización que nunca se envió.</summary>
+    public const string QuoteNotDraft = "quote_not_draft";
+
+    /// <summary>La cotización se rechazó o venció: no se factura. Si venció, cámbiele valid_until (es una versión nueva).</summary>
+    public const string QuoteNotInvoiceable = "quote_not_invoiceable";
+
     /// <summary>Demasiadas solicitudes con la llave. Espere lo que dice Retry-After y reintente.</summary>
     public const string RateLimit = "rate_limit";
 

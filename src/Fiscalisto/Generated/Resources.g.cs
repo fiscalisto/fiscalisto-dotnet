@@ -125,6 +125,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Facturas recurrentes.</summary>
     public RecurringInvoicesResource RecurringInvoices => _recurringInvoices ??= new RecurringInvoicesResource(this);
 
+    private QuotesResource? _quotes;
+
+    /// <summary>Cotizaciones.</summary>
+    public QuotesResource Quotes => _quotes ??= new QuotesResource(this);
+
     private WebhookEndpointsResource? _webhookEndpoints;
 
     /// <summary>Webhooks.</summary>
@@ -1464,6 +1469,148 @@ public sealed class RecurringInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> RunAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Invoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}/run", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cotizaciones: <c>fiscalisto.Quotes</c>.
+/// </summary>
+public sealed class QuotesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal QuotesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una cotización
+    /// </summary>
+    /// <remarks>
+    /// Una cotización en borrador, con los conceptos y las condiciones de pago de una factura (se revisan con las mismas reglas, así que siempre se puede facturar). customer es un cliente de su catálogo, uno con sus datos fiscales (se agrega a sus clientes) o solo name y email si aún no los tiene. Se manda con POST /v1/quotes/{id}/send.
+    /// <br/>
+    /// <c>POST /v1/quotes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/create-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Quote> CreateAsync(CreateQuoteParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Quote>("POST", "/v1/quotes", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Listar cotizaciones
+    /// </summary>
+    /// <remarks>
+    /// Las más recientes primero, cada una en su última versión.
+    /// <br/>
+    /// <c>GET /v1/quotes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/list-quotes"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Quote>> ListAsync(ListQuotesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Quote>("/v1/quotes", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar cotizaciones: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Quote> ListAutoPagingAsync(ListQuotesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Quote>("/v1/quotes", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una cotización
+    /// </summary>
+    /// <remarks>
+    /// Su última versión.
+    /// <br/>
+    /// <c>GET /v1/quotes/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/get-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Quote> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Quote>("GET", $"/v1/quotes/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una cotización
+    /// </summary>
+    /// <remarks>
+    /// Solo lo que mande cambia. Un borrador cambia ahí mismo; una que ya se envió se vuelve una versión nueva en borrador (mismo número, version + 1) que el cliente ve al mandarla; mientras, su liga muestra la anterior. Una aceptada, rechazada o facturada ya no cambia.
+    /// <br/>
+    /// <c>POST /v1/quotes/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/update-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Quote> UpdateAsync(string id, UpdateQuoteParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Borrar una cotización
+    /// </summary>
+    /// <remarks>
+    /// Solo una que nunca se envió; si no, 400 quote_not_draft.
+    /// <br/>
+    /// <c>DELETE /v1/quotes/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/delete-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/quotes/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Mandar una cotización
+    /// </summary>
+    /// <remarks>
+    /// La manda por correo con su PDF y la liga donde el cliente la ve, la acepta, pide cambios o la rechaza. Con send_email: false solo se marca enviada y contesta url, para que usted la mande por WhatsApp o su propio correo.
+    /// <br/>
+    /// <c>POST /v1/quotes/{id}/send</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/send-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Quote> SendAsync(string id, SendQuoteParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/send", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Marcar aceptada
+    /// </summary>
+    /// <remarks>
+    /// El cliente le dijo que sí por teléfono, en persona… Llega quote.accepted. No timbra: para eso, POST /v1/quotes/{id}/invoice.
+    /// <br/>
+    /// <c>POST /v1/quotes/{id}/accept</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/accept-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Quote> AcceptAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/accept", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Facturar una cotización
+    /// </summary>
+    /// <remarks>
+    /// Timbra la factura con los conceptos de la cotización y los datos fiscales del cliente, y la deja facturada (invoice). Si no estaba aceptada, la marca aceptada. Una en otra moneda va al tipo de cambio de hoy. Sin los datos fiscales del cliente, 400 quote_customer_missing; rechazada o vencida, 400 quote_not_invoiceable. Si ya se facturó, contesta esa factura.
+    /// <br/>
+    /// <c>POST /v1/quotes/{id}/invoice</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/invoice-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> InvoiceAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/invoice", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Descargar el PDF
+    /// </summary>
+    /// <remarks>
+    /// El PDF de su última versión, con el diseño de PDF del emisor.
+    /// <br/>
+    /// <c>GET /v1/quotes/{id}/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/get-quote-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/quotes/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
