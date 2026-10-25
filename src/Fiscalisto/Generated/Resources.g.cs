@@ -115,6 +115,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Descargas del SAT.</summary>
     public SatInvoicesResource SatInvoices => _satInvoices ??= new SatInvoicesResource(this);
 
+    private TicketsResource? _tickets;
+
+    /// <summary>Autofactura.</summary>
+    public TicketsResource Tickets => _tickets ??= new TicketsResource(this);
+
     private WebhookEndpointsResource? _webhookEndpoints;
 
     /// <summary>Webhooks.</summary>
@@ -334,6 +339,32 @@ public sealed class IssuersResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<IssuerOnboardingLink> CreateOnboardingLinkAsync(string id, CreateIssuerOnboardingLinkParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<IssuerOnboardingLink>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/onboarding_links", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver el portal de autofactura de un emisor
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/issuers/{id}/self_invoicing</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/get-self-invoicing"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SelfInvoicing> GetSelfInvoicingAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SelfInvoicing>("GET", $"/v1/issuers/{Uri.EscapeDataString(id)}/self_invoicing", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar las reglas de autofactura
+    /// </summary>
+    /// <remarks>
+    /// Hasta cuándo se puede facturar un ticket y cada cuánto se timbra la factura global.
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/self_invoicing</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/update-self-invoicing"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SelfInvoicing> UpdateSelfInvoicingAsync(string id, UpdateSelfInvoicingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SelfInvoicing>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/self_invoicing", @params, null, options, false, cancellationToken);
 }
 
 /// <summary>
@@ -1246,6 +1277,76 @@ public sealed class SatInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> XmlAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/xml", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Autofactura: <c>fiscalisto.Tickets</c>.
+/// </summary>
+public sealed class TicketsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TicketsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Registrar un ticket
+    /// </summary>
+    /// <remarks>
+    /// Una venta que su comprador factura él mismo: con el código (code) y el total en el portal del emisor (url, que puede incrustar en su página con fiscalisto.js), da sus datos fiscales y la factura se timbra al momento con los timbres de su cuenta. Lo que nadie factura entra solo en la factura global del periodo. Registrar otra vez el mismo folio con el mismo total contesta el ticket que ya existe (los reintentos son seguros); con otro total, 409.
+    /// <br/>
+    /// <c>POST /v1/tickets</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/create-ticket"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Ticket> CreateAsync(CreateTicketParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Ticket>("POST", "/v1/tickets", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Listar tickets
+    /// </summary>
+    /// <remarks>
+    /// Del más reciente al más antiguo por fecha de venta.
+    /// <br/>
+    /// <c>GET /v1/tickets</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/list-tickets"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Ticket>> ListAsync(ListTicketsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Ticket>("/v1/tickets", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar tickets: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Ticket> ListAutoPagingAsync(ListTicketsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Ticket>("/v1/tickets", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un ticket
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/tickets/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/get-ticket"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Ticket> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Ticket>("GET", $"/v1/tickets/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cancelar un ticket
+    /// </summary>
+    /// <remarks>
+    /// Una venta que no se hizo (devolución, error): ya no se puede facturar ni entra en la factura global. Solo mientras esté pendiente.
+    /// <br/>
+    /// <c>DELETE /v1/tickets/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/cancel-ticket"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Ticket> CancelAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Ticket>("DELETE", $"/v1/tickets/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

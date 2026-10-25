@@ -159,6 +159,15 @@ public static class ErrorCode
     /// <summary>Esto solo existe en pruebas (como reiniciar los datos de prueba): use su llave fk_test_.</summary>
     public const string TestModeOnly = "test_mode_only";
 
+    /// <summary>Ese folio ya está registrado para el emisor con otro total o con otra propina (409). Con el mismo total se contesta el ticket que ya existe.</summary>
+    public const string TicketFolioTaken = "ticket_folio_taken";
+
+    /// <summary>El ticket no se pudo registrar: el folio trae caracteres no válidos, la fecha de venta está en el futuro o es de hace más de un año, el producto ya no está en el catálogo… El mensaje dice cuál.</summary>
+    public const string TicketInvalid = "ticket_invalid";
+
+    /// <summary>El ticket ya se facturó o entró en una factura global: no se puede cancelar.</summary>
+    public const string TicketNotPending = "ticket_not_pending";
+
     /// <summary>La API no contestó a tiempo (connection_error). Con lo que timbra, repita con la misma Idempotency-Key para saber si se timbró.</summary>
     public const string Timeout = "timeout";
 

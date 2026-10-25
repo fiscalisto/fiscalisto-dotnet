@@ -1978,6 +1978,80 @@ public sealed partial class CreateSatDownloadParams
 }
 
 /// <summary>
+/// Los campos de «Registrar un ticket».
+/// </summary>
+public sealed partial class CreateTicketParams
+{
+    /// <summary>
+    /// El emisor (iss_…) que vendió. Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El folio de la venta en su sistema, único por emisor: letras, números, - _ / y punto. Registrar el mismo folio con el mismo total responde el ticket que ya existe.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public required string Folio { get; set; }
+
+    /// <summary>
+    /// Lo que se cobró, impuestos incluidos y sin propina.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public required decimal Total { get; set; }
+
+    /// <summary>
+    /// Propina: no va en la factura. El cliente puede escribir el total con ella o sin ella.
+    /// </summary>
+    [JsonPropertyName("tip")]
+    public decimal? Tip { get; set; }
+
+    /// <summary>
+    /// c_FormaPago de la venta: 01 efectivo, 04 tarjeta de crédito…
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public required string PaymentForm { get; set; }
+
+    /// <summary>
+    /// Cuándo se vendió: ISO 8601 (2026-10-02T13:45:00-06:00) o la hora de la Ciudad de México sin zona. Por omisión, ahora.
+    /// </summary>
+    [JsonPropertyName("sold_at")]
+    public string? SoldAt { get; set; }
+
+    /// <summary>
+    /// Un producto (prd_…) de su catálogo: el concepto de la factura.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string? Product { get; set; }
+
+    /// <summary>
+    /// El concepto. Con `product`, reemplaza su descripción; sin él, va con `product_key`.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// c_ClaveProdServ (8 dígitos), si no usa `product`.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// c_ClaveUnidad. Por omisión, la de la clave del producto.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Tasa de IVA incluida en el total. Por omisión 0.16.
+    /// <br/>
+    /// Valores: 0, 0.16, 0.08, exento.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public string? Iva { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear un webhook».
 /// </summary>
 public sealed partial class CreateWebhookEndpointParams
@@ -2601,7 +2675,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, issuer.ready o balance.low.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, issuer.ready o balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -6786,7 +6860,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -7070,6 +7144,50 @@ public sealed partial class ListSatInvoicesParams
     /// </summary>
     [JsonPropertyName("date_lte")]
     public string? DateLte { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar tickets».
+/// </summary>
+public sealed partial class ListTicketsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// pending, invoiced, global o cancelled.
+    /// <br/>
+    /// Valores: pending, invoiced, global, cancelled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Vendidos desde (ISO 8601 o AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("sold_at_gte")]
+    public string? SoldAtGte { get; set; }
+
+    /// <summary>
+    /// Vendidos hasta (ISO 8601 o AAAA-MM-DD, el día completo).
+    /// </summary>
+    [JsonPropertyName("sold_at_lte")]
+    public string? SoldAtLte { get; set; }
 }
 
 /// <summary>
@@ -8585,6 +8703,58 @@ public sealed partial class SatListCheckListsItem
 }
 
 /// <summary>
+/// El portal de autofactura de un emisor y sus reglas.
+/// </summary>
+public sealed partial class SelfInvoicing
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El portal permanente del emisor: ahí cualquier comprador factura con su código y su total.
+    /// </summary>
+    [JsonPropertyName("portal_url")]
+    public string PortalUrl { get; set; } = default!;
+
+    /// <summary>
+    /// month: se factura hasta el fin del mes de la venta. days: hasta window_days días después.
+    /// <br/>
+    /// Valores: month, days.
+    /// </summary>
+    [JsonPropertyName("window")]
+    public string Window { get; set; } = default!;
+
+    /// <summary>
+    /// Días para facturar con window: days.
+    /// </summary>
+    [JsonPropertyName("window_days")]
+    public long WindowDays { get; set; }
+
+    /// <summary>
+    /// Cada cuánto se timbra sola la factura global con lo que nadie facturó: 01 diaria, 02 semanal, 03 quincenal, 04 mensual.
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("global_periodicity")]
+    public string GlobalPeriodicity { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Enviar por correo».
 /// </summary>
 public sealed partial class SendInvoiceParams
@@ -8852,10 +9022,180 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
+}
+
+/// <summary>
+/// Una venta que su comprador puede facturar él mismo en el portal del emisor (autofactura).
+/// </summary>
+public sealed partial class Ticket
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor que vendió.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El folio de la venta en su sistema.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string Folio { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que su comprador escribe en el portal junto con el total: el folio y 4 caracteres al azar (A123-K7QX). Imprímalo en el ticket o mándelo con la compra.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// pending (se puede facturar), invoiced (su comprador lo facturó: la factura en invoice), global (entró en la factura global del periodo) o cancelled.
+    /// <br/>
+    /// Valores: pending, invoiced, global, cancelled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// La página del portal con el código ya escrito: el comprador pone el total y sus datos. Puede incrustarla con fiscalisto.js. null si ya no está pendiente.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+
+    /// <summary>
+    /// Lo que se cobró, impuestos incluidos y sin propina.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// La propina (no va en la factura).
+    /// </summary>
+    [JsonPropertyName("tip")]
+    public decimal Tip { get; set; }
+
+    /// <summary>
+    /// c_FormaPago de la venta.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string PaymentForm { get; set; } = default!;
+
+    /// <summary>
+    /// El concepto de la factura.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// c_ClaveProdServ del concepto.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string ProductKey { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se vendió.
+    /// </summary>
+    [JsonPropertyName("sold_at")]
+    public string SoldAt { get; set; } = default!;
+
+    /// <summary>
+    /// El último día (AAAA-MM-DD) en que el comprador puede facturarlo; después entra en la factura global.
+    /// </summary>
+    [JsonPropertyName("invoiceable_until")]
+    public string InvoiceableUntil { get; set; } = default!;
+
+    /// <summary>
+    /// La factura (inv_…) que hizo su comprador, o null.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
+
+    /// <summary>
+    /// La factura global (inv_…) en que entró, o null.
+    /// </summary>
+    [JsonPropertyName("global_invoice")]
+    public string? GlobalInvoice { get; set; }
+
+    /// <summary>
+    /// A quién se facturó, o null.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public TicketCustomer? Customer { get; set; }
+
+    /// <summary>
+    /// Cuándo se registró.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;TicketCustomer&lt;/c&gt;.
+/// </summary>
+public sealed partial class TicketCustomer
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class TicketList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Ticket> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -9188,6 +9528,34 @@ public sealed partial class UpdateProductParams
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar las reglas de autofactura».
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParams
+{
+    /// <summary>
+    /// Hasta cuándo se puede facturar un ticket: `month`, hasta el fin del mes de la venta (lo usual ante el SAT); `days`, `window_days` días después.
+    /// <br/>
+    /// Valores: month, days.
+    /// </summary>
+    [JsonPropertyName("window")]
+    public string? Window { get; set; }
+
+    /// <summary>
+    /// Días para facturar con `window: days`.
+    /// </summary>
+    [JsonPropertyName("window_days")]
+    public long? WindowDays { get; set; }
+
+    /// <summary>
+    /// c_Periodicidad de la factura global con los tickets que nadie facturó: 01 diaria, 02 semanal, 03 quincenal, 04 mensual.
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("global_periodicity")]
+    public string? GlobalPeriodicity { get; set; }
 }
 
 /// <summary>
