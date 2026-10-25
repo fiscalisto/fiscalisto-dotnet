@@ -45,6 +45,9 @@ public static class ErrorCode
     /// <summary>El cliente ya mandó sus datos con esa liga: una solicitud completada no se cancela.</summary>
     public const string DataRequestCompleted = "data_request_completed";
 
+    /// <summary>El mes no tiene pagos a proveedores: esa DIOT se presenta sin operaciones desde el portal del SAT.</summary>
+    public const string DiotEmpty = "diot_empty";
+
     /// <summary>La e.firma no sirve: no es una e.firma (es un CSD), es de otro RFC, está vencida o la contraseña no abre la llave.</summary>
     public const string EfirmaInvalid = "efirma_invalid";
 
@@ -182,6 +185,21 @@ public static class ErrorCode
 
     /// <summary>Demasiados timbres seguidos del mismo emisor. Espere lo que dice Retry-After; para muchas facturas use POST /v1/invoice_batches.</summary>
     public const string StampRateLimit = "stamp_rate_limit";
+
+    /// <summary>Esa tienda ya está conectada a este emisor.</summary>
+    public const string StoreAlreadyConnected = "store_already_connected";
+
+    /// <summary>La tienda no aceptó la conexión o no respondió como se esperaba (llaves equivocadas, permisos read_orders/write_orders que faltan, una tienda que no vende en pesos). El mensaje dice qué contestó.</summary>
+    public const string StoreConnectionFailed = "store_connection_failed";
+
+    /// <summary>La tienda se desconectó: conéctela otra vez con POST /v1/store_connections.</summary>
+    public const string StoreDisconnected = "store_disconnected";
+
+    /// <summary>El vendedor aún no autoriza la conexión en authorize_url.</summary>
+    public const string StoreNotAuthorized = "store_not_authorized";
+
+    /// <summary>Esa plataforma aún no está disponible en Fiscalisto.</summary>
+    public const string StorePlatformUnavailable = "store_platform_unavailable";
 
     /// <summary>Los complementos de pago y las notas de crédito no se sustituyen: se cancelan y se emite otro.</summary>
     public const string SubstitutionUnsupported = "substitution_unsupported";

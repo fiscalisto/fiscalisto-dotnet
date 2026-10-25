@@ -2954,6 +2954,118 @@ public sealed partial class CreateSatDownloadParams
 }
 
 /// <summary>
+/// Los campos de «Conectar una tienda».
+/// </summary>
+public sealed partial class CreateStoreConnectionParams
+{
+    /// <summary>
+    /// El emisor (iss_…) dueño de la tienda. Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// shopify o mercadolibre.
+    /// <br/>
+    /// Valores: shopify, mercadolibre.
+    /// </summary>
+    [JsonPropertyName("platform")]
+    public required string Platform { get; set; }
+
+    /// <summary>
+    /// Shopify: el dominio de la tienda (mi-tienda.myshopify.com).
+    /// </summary>
+    [JsonPropertyName("shop")]
+    public string? Shop { get; set; }
+
+    /// <summary>
+    /// Shopify: el Client ID de la app de la tienda (Dev Dashboard).
+    /// </summary>
+    [JsonPropertyName("client_id")]
+    public string? ClientId { get; set; }
+
+    /// <summary>
+    /// Shopify: el Client secret de esa app; con él se firman los webhooks. Se guarda cifrado y nunca se muestra.
+    /// </summary>
+    [JsonPropertyName("client_secret")]
+    public string? ClientSecret { get; set; }
+
+    /// <summary>
+    /// Shopify, solo apps personalizadas antiguas: su token de la Admin API (shpat_…); client_secret es entonces su API secret key.
+    /// </summary>
+    [JsonPropertyName("access_token")]
+    public string? AccessToken { get; set; }
+
+    /// <summary>
+    /// Mercado Libre: a dónde volver después de autorizar (se agregan store_connection y status).
+    /// </summary>
+    [JsonPropertyName("return_url")]
+    public string? ReturnUrl { get; set; }
+
+    /// <summary>
+    /// Cómo se vuelve ticket cada pedido.
+    /// </summary>
+    [JsonPropertyName("settings")]
+    public CreateStoreConnectionParamsSettings? Settings { get; set; }
+}
+
+/// <summary>
+/// Cómo se vuelve ticket cada pedido.
+/// </summary>
+public sealed partial class CreateStoreConnectionParamsSettings
+{
+    /// <summary>
+    /// c_ClaveProdServ de lo que vende (8 dígitos).
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// c_ClaveUnidad. Por omisión, la de la clave del producto.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Tasa de IVA incluida en los precios. Por omisión 0.16.
+    /// <br/>
+    /// Valores: 0, 0.16, 0.08, exento.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public string? Iva { get; set; }
+
+    /// <summary>
+    /// El concepto de cada ticket. Por omisión, el pedido y sus artículos («Pedido 1001: Playera (2), Gorra»).
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Lo que va antes del número del pedido en el folio del ticket. Por omisión SHOP- o ML-.
+    /// </summary>
+    [JsonPropertyName("folio_prefix")]
+    public string? FolioPrefix { get; set; }
+
+    /// <summary>
+    /// c_FormaPago cuando la forma de pago del pedido no está en payment_forms. Por omisión 04 (Shopify) o 31 (Mercado Libre).
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// c_FormaPago por pasarela de Shopify (shopify_payments, paypal, manual…) o tipo de pago de Mercado Libre (credit_card, debit_card, account_money, ticket, bank_transfer).
+    /// </summary>
+    [JsonPropertyName("payment_forms")]
+    public Dictionary<string, string>? PaymentForms { get; set; }
+
+    /// <summary>
+    /// Mercado Libre: timbrar en cuanto se paga si el comprador dejó sus datos fiscales completos. Por omisión true.
+    /// </summary>
+    [JsonPropertyName("auto_invoice")]
+    public bool? AutoInvoice { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Registrar un ticket».
 /// </summary>
 public sealed partial class CreateTicketParams
@@ -3380,6 +3492,190 @@ public sealed partial class Deleted
 }
 
 /// <summary>
+/// La DIOT de un mes: lo pagado a cada proveedor, por tipo de operación.
+/// </summary>
+public sealed partial class Diot
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// La proporción de IVA acreditable del mes para gastos comunes (1 si no la aplica).
+    /// </summary>
+    [JsonPropertyName("proportion")]
+    public decimal Proportion { get; set; }
+
+    /// <summary>
+    /// Una línea por proveedor y tipo de operación, con lo pagado en el mes.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<DiotLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que conviene revisar antes de presentarla.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<string> Warnings { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;DiotLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class DiotLinesItem
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Tipo de tercero: 04 nacional, 05 extranjero, 15 global.
+    /// <br/>
+    /// Valores: 15, 04, 05.
+    /// </summary>
+    [JsonPropertyName("third_party_type")]
+    public string ThirdPartyType { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de operación: 02 enajenación de bienes, 03 servicios profesionales, 06 uso o goce temporal, 07 importación, 85 otros, 87 operaciones globales.
+    /// <br/>
+    /// Valores: 85, 87, 02, 03, 06, 07.
+    /// </summary>
+    [JsonPropertyName("operation_type")]
+    public string OperationType { get; set; } = default!;
+
+    /// <summary>
+    /// Lo pagado en el mes por tasa, en pesos, con su IVA.
+    /// </summary>
+    [JsonPropertyName("paid")]
+    public DiotLinesItemPaid Paid { get; set; } = default!;
+
+    /// <summary>
+    /// Las devoluciones (notas de crédito) del mes, por tasa.
+    /// </summary>
+    [JsonPropertyName("returns")]
+    public DiotLinesItemReturns Returns { get; set; } = default!;
+
+    /// <summary>
+    /// El proveedor está en la lista 69-B definitiva: revise si deduce sus CFDI.
+    /// </summary>
+    [JsonPropertyName("blacklisted")]
+    public bool Blacklisted { get; set; }
+}
+
+/// <summary>
+/// Lo pagado en el mes por tasa, en pesos, con su IVA.
+/// </summary>
+public sealed partial class DiotLinesItemPaid
+{
+    /// <summary>
+    /// Valor de los actos al 16 %.
+    /// </summary>
+    [JsonPropertyName("base_16")]
+    public decimal Base16 { get; set; }
+
+    /// <summary>
+    /// Valor de los actos al 8 % (región fronteriza).
+    /// </summary>
+    [JsonPropertyName("base_8")]
+    public decimal Base8 { get; set; }
+
+    /// <summary>
+    /// Valor de los actos al 0 %.
+    /// </summary>
+    [JsonPropertyName("base_0")]
+    public decimal Base0 { get; set; }
+
+    /// <summary>
+    /// Valor de los actos exentos.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Valor de los actos no objeto de IVA.
+    /// </summary>
+    [JsonPropertyName("not_taxable")]
+    public decimal NotTaxable { get; set; }
+
+    /// <summary>
+    /// El IVA de esos actos.
+    /// </summary>
+    [JsonPropertyName("vat")]
+    public decimal Vat { get; set; }
+}
+
+/// <summary>
+/// Las devoluciones (notas de crédito) del mes, por tasa.
+/// </summary>
+public sealed partial class DiotLinesItemReturns
+{
+    /// <summary>
+    /// Valor de los actos al 16 %.
+    /// </summary>
+    [JsonPropertyName("base_16")]
+    public decimal Base16 { get; set; }
+
+    /// <summary>
+    /// Valor de los actos al 8 % (región fronteriza).
+    /// </summary>
+    [JsonPropertyName("base_8")]
+    public decimal Base8 { get; set; }
+
+    /// <summary>
+    /// Valor de los actos al 0 %.
+    /// </summary>
+    [JsonPropertyName("base_0")]
+    public decimal Base0 { get; set; }
+
+    /// <summary>
+    /// Valor de las devoluciones exentas.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Valor de los actos no objeto de IVA.
+    /// </summary>
+    [JsonPropertyName("not_taxable")]
+    public decimal NotTaxable { get; set; }
+
+    /// <summary>
+    /// El IVA de esos actos.
+    /// </summary>
+    [JsonPropertyName("vat")]
+    public decimal Vat { get; set; }
+}
+
+/// <summary>
 /// Un empleado de un emisor, para sus recibos de nómina.
 /// </summary>
 public sealed partial class Employee
@@ -3724,6 +4020,100 @@ public sealed partial class EventList
 }
 
 /// <summary>
+/// Los campos de «Descargar la DIOT para el SAT».
+/// </summary>
+public sealed partial class GetDiotFileParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// true para agrupar proveedores de hasta $50,000 en el mes (regla 4.5.2).
+    /// </summary>
+    [JsonPropertyName("group_small_suppliers")]
+    public bool? GroupSmallSuppliers { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver la DIOT de un mes».
+/// </summary>
+public sealed partial class GetDiotParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Descargar la contabilidad electrónica».
+/// </summary>
+public sealed partial class GetElectronicAccountingParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// normal (BN, por omisión) o complementary (BC, con modified_on).
+    /// <br/>
+    /// Valores: normal, complementary.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// complementary: el día en que se modificó (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("modified_on")]
+    public string? ModifiedOn { get; set; }
+
+    /// <summary>
+    /// Para incluir las pólizas: AF acto de fiscalización, FC fiscalización compulsa (con order_number), DE devolución o CO compensación (con procedure_number).
+    /// <br/>
+    /// Valores: AF, FC, DE, CO.
+    /// </summary>
+    [JsonPropertyName("journal_request")]
+    public string? JournalRequest { get; set; }
+
+    /// <summary>
+    /// AF y FC: el número de orden (ABC1234567/26).
+    /// </summary>
+    [JsonPropertyName("order_number")]
+    public string? OrderNumber { get; set; }
+
+    /// <summary>
+    /// DE y CO: el número de trámite (AB123456789012).
+    /// </summary>
+    [JsonPropertyName("procedure_number")]
+    public string? ProcedureNumber { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver una factura».
 /// </summary>
 public sealed partial class GetInvoiceParams
@@ -3823,6 +4213,36 @@ public sealed partial class GetSatCatalogParams
     /// </summary>
     [JsonPropertyName("limit")]
     public long? Limit { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver la balanza de comprobación».
+/// </summary>
+public sealed partial class GetTrialBalanceParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Traer pedidos pagados».
+/// </summary>
+public sealed partial class ImportStoreOrdersParams
+{
+    /// <summary>
+    /// Desde qué día (AAAA-MM-DD, hasta 31 días atrás). Por omisión, hace 7 días.
+    /// </summary>
+    [JsonPropertyName("since")]
+    public string? Since { get; set; }
 }
 
 /// <summary>
@@ -7747,6 +8167,224 @@ public sealed partial class IssuerSatDownloads
 }
 
 /// <summary>
+/// La póliza de diario de un CFDI: sus cargos y abonos, que siempre cuadran.
+/// </summary>
+public sealed partial class JournalEntry
+{
+    /// <summary>
+    /// El número de la póliza: D-AAAAMM-NNNNN, en orden de fecha dentro del mes.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha del CFDI.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Factura o nota de crédito, su folio y la contraparte.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// La factura (inv_…) si la timbró este emisor; null si la recibió.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
+
+    /// <summary>
+    /// El folio fiscal del CFDI.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC de la contraparte (cliente o proveedor).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// El total del CFDI, en su moneda.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// La moneda del CFDI.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de cambio, si no es en pesos; null si es en pesos.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// Los movimientos, en pesos: el cargo (debit) o abono (credit) a cada cuenta.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<JournalEntryLinesItem> Lines { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;JournalEntryLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class JournalEntryLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// El cargo, en pesos.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono, en pesos.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class JournalEntryList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<JournalEntry> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una cuenta del catálogo, con su código agrupador del SAT.
+/// </summary>
+public sealed partial class LedgerAccount
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El número de cuenta (NumCta).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El código agrupador del SAT (Anexo 24).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// debit (deudora) o credit (acreedora).
+    /// <br/>
+    /// Valores: debit, credit.
+    /// </summary>
+    [JsonPropertyName("nature")]
+    public string Nature { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class LedgerAccountList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<LedgerAccount> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Listar anticipos sin aplicar».
 /// </summary>
 public sealed partial class ListAdvancesParams
@@ -8027,6 +8665,48 @@ public sealed partial class ListIssuersParams
 }
 
 /// <summary>
+/// Los campos de «Listar las pólizas de un mes».
+/// </summary>
+public sealed partial class ListJournalEntriesParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// Cuántas por página, de 1 a 1,000. Por omisión 100.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id de la última póliza de la página anterior.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver el catálogo de cuentas».
+/// </summary>
+public sealed partial class ListLedgerAccountsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar productos».
 /// </summary>
 public sealed partial class ListProductsParams
@@ -8280,6 +8960,30 @@ public sealed partial class ListSatInvoicesParams
     /// </summary>
     [JsonPropertyName("date_lte")]
     public string? DateLte { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar tiendas».
+/// </summary>
+public sealed partial class ListStoreConnectionsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -9414,7 +10118,7 @@ public sealed partial class RecurringInvoiceItemsItem
 public sealed partial class RecurringInvoiceLastError
 {
     /// <summary>
-    /// Qué pasó y cómo corregirlo, para una persona.
+    /// Qué pasó.
     /// </summary>
     [JsonPropertyName("message")]
     public string? Message { get; set; }
@@ -10597,6 +11301,264 @@ public sealed partial class SignEfirmaParams
 }
 
 /// <summary>
+/// Una tienda de Shopify o Mercado Libre cuyos pedidos pagados se vuelven tickets de autofactura del emisor.
+/// </summary>
+public sealed partial class StoreConnection
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor dueño de la tienda.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// shopify o mercadolibre.
+    /// <br/>
+    /// Valores: shopify, mercadolibre.
+    /// </summary>
+    [JsonPropertyName("platform")]
+    public string Platform { get; set; } = default!;
+
+    /// <summary>
+    /// El dominio de la tienda de Shopify, o el id del vendedor en Mercado Libre (al autorizar).
+    /// </summary>
+    [JsonPropertyName("shop")]
+    public string? Shop { get; set; }
+
+    /// <summary>
+    /// pending (Mercado Libre espera que el vendedor autorice en authorize_url), active o disconnected.
+    /// <br/>
+    /// Valores: pending, active, disconnected.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Si está pending: la página de Mercado Libre donde el vendedor autoriza (vale un día; cada consulta da una nueva). Si no, null.
+    /// </summary>
+    [JsonPropertyName("authorize_url")]
+    public string? AuthorizeUrl { get; set; }
+
+    /// <summary>
+    /// Cómo se vuelve ticket cada pedido.
+    /// </summary>
+    [JsonPropertyName("settings")]
+    public StoreConnectionSettings Settings { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos pedidos se han vuelto tickets.
+    /// </summary>
+    [JsonPropertyName("orders_count")]
+    public long OrdersCount { get; set; }
+
+    /// <summary>
+    /// Cuándo llegó el último, o null.
+    /// </summary>
+    [JsonPropertyName("last_order_at")]
+    public string? LastOrderAt { get; set; }
+
+    /// <summary>
+    /// El último problema (un pedido en dólares, un ticket que ya se facturó cuando se canceló el pedido…), o null.
+    /// </summary>
+    [JsonPropertyName("last_error")]
+    public StoreConnectionLastError? LastError { get; set; }
+
+    /// <summary>
+    /// Cuándo se conectó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;StoreConnectionLastError&lt;/c&gt;.
+/// </summary>
+public sealed partial class StoreConnectionLastError
+{
+    /// <summary>
+    /// Qué pasó.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo.
+    /// </summary>
+    [JsonPropertyName("at")]
+    public string? At { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class StoreConnectionList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<StoreConnection> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Cómo se vuelve ticket cada pedido.
+/// </summary>
+public sealed partial class StoreConnectionSettings
+{
+    /// <summary>
+    /// c_ClaveProdServ de lo que vende, o null.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// c_ClaveUnidad, o null (la de la clave del producto).
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Tasa de IVA incluida en los precios.
+    /// <br/>
+    /// Valores: 0, 0.16, 0.08, exento.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public string Iva { get; set; } = default!;
+
+    /// <summary>
+    /// El concepto fijo de cada ticket, o null (el pedido y sus artículos).
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Lo que va antes del número del pedido en el folio.
+    /// </summary>
+    [JsonPropertyName("folio_prefix")]
+    public string FolioPrefix { get; set; } = default!;
+
+    /// <summary>
+    /// c_FormaPago cuando la del pedido no está en payment_forms, o null.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// c_FormaPago por pasarela o tipo de pago.
+    /// </summary>
+    [JsonPropertyName("payment_forms")]
+    public Dictionary<string, string> PaymentForms { get; set; } = default!;
+
+    /// <summary>
+    /// Mercado Libre: si se timbra al momento con los datos fiscales del comprador; null en Shopify.
+    /// </summary>
+    [JsonPropertyName("auto_invoice")]
+    public bool? AutoInvoice { get; set; }
+}
+
+/// <summary>
+/// Los pedidos pagados que se trajeron.
+/// </summary>
+public sealed partial class StoreImport
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// La conexión (stc_…).
+    /// </summary>
+    [JsonPropertyName("store_connection")]
+    public string StoreConnection { get; set; } = default!;
+
+    /// <summary>
+    /// Desde qué día se buscaron pedidos.
+    /// </summary>
+    [JsonPropertyName("since")]
+    public string Since { get; set; } = default!;
+
+    /// <summary>
+    /// Pedidos que son tickets (los que ya lo eran cuentan otra vez).
+    /// </summary>
+    [JsonPropertyName("tickets")]
+    public long Tickets { get; set; }
+
+    /// <summary>
+    /// De ellos, los que se facturaron al momento con los datos del comprador.
+    /// </summary>
+    [JsonPropertyName("invoiced")]
+    public long Invoiced { get; set; }
+
+    /// <summary>
+    /// Los que no se volvieron ticket, con el motivo.
+    /// </summary>
+    [JsonPropertyName("skipped")]
+    public List<StoreImportSkippedItem> Skipped { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;StoreImportSkippedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class StoreImportSkippedItem
+{
+    /// <summary>
+    /// El pedido.
+    /// </summary>
+    [JsonPropertyName("order")]
+    public string Order { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué no se volvió ticket.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+}
+
+/// <summary>
 /// Si los datos fiscales de un cliente van a pasar el SAT.
 /// </summary>
 public sealed partial class TaxIdValidation
@@ -10978,6 +11940,134 @@ public sealed partial class TicketList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// La balanza de comprobación de un mes.
+/// </summary>
+public sealed partial class TrialBalance
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas pólizas tuvo el mes.
+    /// </summary>
+    [JsonPropertyName("journal_entries")]
+    public long JournalEntries { get; set; }
+
+    /// <summary>
+    /// Cada cuenta con movimiento o saldo: saldo inicial, cargos, abonos y saldo final.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<TrialBalanceAccountsItem> Accounts { get; set; } = default!;
+
+    /// <summary>
+    /// Cargos y abonos del mes: siempre iguales.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public TrialBalanceTotals Totals { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;TrialBalanceAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TrialBalanceAccountsItem
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// debit (deudora) o credit (acreedora).
+    /// <br/>
+    /// Valores: debit, credit.
+    /// </summary>
+    [JsonPropertyName("nature")]
+    public string Nature { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo al empezar el mes.
+    /// </summary>
+    [JsonPropertyName("opening_balance")]
+    public decimal OpeningBalance { get; set; }
+
+    /// <summary>
+    /// Los cargos del mes.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// Los abonos del mes.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+
+    /// <summary>
+    /// El saldo al terminar el mes.
+    /// </summary>
+    [JsonPropertyName("closing_balance")]
+    public decimal ClosingBalance { get; set; }
+}
+
+/// <summary>
+/// Cargos y abonos del mes: siempre iguales.
+/// </summary>
+public sealed partial class TrialBalanceTotals
+{
+    /// <summary>
+    /// Todos los cargos del mes.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// Todos los abonos del mes.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
 }
 
 /// <summary>
@@ -11992,6 +13082,74 @@ public sealed partial class UpdateSelfInvoicingParams
     /// </summary>
     [JsonPropertyName("global_periodicity")]
     public string? GlobalPeriodicity { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar cómo se vuelven tickets sus pedidos».
+/// </summary>
+public sealed partial class UpdateStoreConnectionParams
+{
+    /// <summary>
+    /// Lo que cambia; lo demás queda.
+    /// </summary>
+    [JsonPropertyName("settings")]
+    public required UpdateStoreConnectionParamsSettings Settings { get; set; }
+}
+
+/// <summary>
+/// Lo que cambia; lo demás queda.
+/// </summary>
+public sealed partial class UpdateStoreConnectionParamsSettings
+{
+    /// <summary>
+    /// c_ClaveProdServ de lo que vende (8 dígitos).
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// c_ClaveUnidad. Por omisión, la de la clave del producto.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Tasa de IVA incluida en los precios. Por omisión 0.16.
+    /// <br/>
+    /// Valores: 0, 0.16, 0.08, exento.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public string? Iva { get; set; }
+
+    /// <summary>
+    /// El concepto de cada ticket. Por omisión, el pedido y sus artículos («Pedido 1001: Playera (2), Gorra»).
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Lo que va antes del número del pedido en el folio del ticket. Por omisión SHOP- o ML-.
+    /// </summary>
+    [JsonPropertyName("folio_prefix")]
+    public string? FolioPrefix { get; set; }
+
+    /// <summary>
+    /// c_FormaPago cuando la forma de pago del pedido no está en payment_forms. Por omisión 04 (Shopify) o 31 (Mercado Libre).
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// c_FormaPago por pasarela de Shopify (shopify_payments, paypal, manual…) o tipo de pago de Mercado Libre (credit_card, debit_card, account_money, ticket, bank_transfer).
+    /// </summary>
+    [JsonPropertyName("payment_forms")]
+    public Dictionary<string, string>? PaymentForms { get; set; }
+
+    /// <summary>
+    /// Mercado Libre: timbrar en cuanto se paga si el comprador dejó sus datos fiscales completos. Por omisión true.
+    /// </summary>
+    [JsonPropertyName("auto_invoice")]
+    public bool? AutoInvoice { get; set; }
 }
 
 /// <summary>

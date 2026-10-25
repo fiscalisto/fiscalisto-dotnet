@@ -130,6 +130,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Autofactura.</summary>
     public TicketsResource Tickets => _tickets ??= new TicketsResource(this);
 
+    private AccountingResource? _accounting;
+
+    /// <summary>Contabilidad.</summary>
+    public AccountingResource Accounting => _accounting ??= new AccountingResource(this);
+
+    private StoreConnectionsResource? _storeConnections;
+
+    /// <summary>Tiendas en línea.</summary>
+    public StoreConnectionsResource StoreConnections => _storeConnections ??= new StoreConnectionsResource(this);
+
     private RecurringInvoicesResource? _recurringInvoices;
 
     /// <summary>Facturas recurrentes.</summary>
@@ -1523,6 +1533,204 @@ public sealed class TicketsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Ticket> CancelAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Ticket>("DELETE", $"/v1/tickets/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.Accounting</c>.
+/// </summary>
+public sealed class AccountingResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal AccountingResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar las pólizas de un mes
+    /// </summary>
+    /// <remarks>
+    /// Una póliza de diario por cada CFDI de ingreso o egreso vigente del mes, emitido o recibido (los recibidos con la categoría de su gasto), con sus cuentas y código agrupador del SAT. En pesos; un CFDI en otra moneda sin tipo de cambio no se registra. Es un punto de partida para su contador: no incluye bancos, nómina ni depreciaciones.
+    /// <br/>
+    /// <c>GET /v1/accounting/journal_entries</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-journal-entries"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<JournalEntry>> JournalEntriesAsync(ListJournalEntriesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<JournalEntry>("/v1/accounting/journal_entries", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar las pólizas de un mes: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<JournalEntry> JournalEntriesAutoPagingAsync(ListJournalEntriesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<JournalEntry>("/v1/accounting/journal_entries", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver la balanza de comprobación
+    /// </summary>
+    /// <remarks>
+    /// Saldo inicial, cargos, abonos y saldo final de cada cuenta en el mes. Los saldos iniciales se acumulan desde el primer CFDI (las de resultados, desde enero), y los resultados de cada año anterior se cierran a capital.
+    /// <br/>
+    /// <c>GET /v1/accounting/trial_balance</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-trial-balance"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrialBalance> TrialBalanceAsync(GetTrialBalanceParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrialBalance>("GET", "/v1/accounting/trial_balance", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver el catálogo de cuentas
+    /// </summary>
+    /// <remarks>
+    /// Las cuentas que usan las pólizas, con su código agrupador del SAT.
+    /// <br/>
+    /// <c>GET /v1/accounting/accounts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-ledger-accounts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<LedgerAccountList> AccountsAsync(ListLedgerAccountsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<LedgerAccountList>("GET", "/v1/accounting/accounts", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar la contabilidad electrónica
+    /// </summary>
+    /// <remarks>
+    /// El ZIP del mes para el Buzón Tributario: el catálogo (CT) y la balanza (BN, o BC si es complementaria), cada uno en su ZIP con el nombre que espera el SAT, en el formato 1.3 del Anexo 24. Con journal_request, también las pólizas (PL), que se entregan cuando el SAT las pide.
+    /// <br/>
+    /// <c>GET /v1/accounting/electronic_accounting</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-electronic-accounting"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> ElectronicAccountingAsync(GetElectronicAccountingParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", "/v1/accounting/electronic_accounting", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver la DIOT de un mes
+    /// </summary>
+    /// <remarks>
+    /// Lo efectivamente pagado a cada proveedor en el mes (facturas PUE y complementos de pago recibidos), con sus notas de crédito como devoluciones, por tipo de operación. Sale de las facturas recibidas que trajo de las descargas del SAT. Desde enero de 2025 (formato 2025).
+    /// <br/>
+    /// <c>GET /v1/accounting/diot</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-diot"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Diot> DiotAsync(GetDiotParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Diot>("GET", "/v1/accounting/diot", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar la DIOT para el SAT
+    /// </summary>
+    /// <remarks>
+    /// El TXT de carga masiva de la DIOT 2025: 54 campos separados por |, pesos enteros. Con group_small_suppliers=true junta en una línea global a los proveedores chicos (regla 4.5.2 RMF). Un mes sin pagos a proveedores responde diot_empty: esa se presenta sin operaciones en el portal del SAT.
+    /// <br/>
+    /// <c>GET /v1/accounting/diot/file</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-diot-file"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> DiotFileAsync(GetDiotFileParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", "/v1/accounting/diot/file", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Tiendas en línea: <c>fiscalisto.StoreConnections</c>.
+/// </summary>
+public sealed class StoreConnectionsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal StoreConnectionsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Conectar una tienda
+    /// </summary>
+    /// <remarks>
+    /// Shopify: con el dominio y las llaves de la app de la tienda (Dev Dashboard, permisos read_orders y write_orders) registra los webhooks y queda active. Mercado Libre: queda pending hasta que el vendedor autorice en authorize_url. Desde entonces cada pedido pagado es un ticket (folio SHOP-1001 o ML-…), que su comprador factura en el portal o entra en la factura global; un pedido cancelado o reembolsado completo cancela su ticket.
+    /// <br/>
+    /// <c>POST /v1/store_connections</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/tiendas-en-linea/create-store-connection"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StoreConnection> CreateAsync(CreateStoreConnectionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StoreConnection>("POST", "/v1/store_connections", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Listar tiendas
+    /// </summary>
+    /// <remarks>
+    /// Las más recientes primero, también las desconectadas.
+    /// <br/>
+    /// <c>GET /v1/store_connections</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/tiendas-en-linea/list-store-connections"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<StoreConnection>> ListAsync(ListStoreConnectionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<StoreConnection>("/v1/store_connections", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar tiendas: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<StoreConnection> ListAutoPagingAsync(ListStoreConnectionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<StoreConnection>("/v1/store_connections", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una tienda
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/store_connections/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/tiendas-en-linea/get-store-connection"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StoreConnection> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StoreConnection>("GET", $"/v1/store_connections/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar cómo se vuelven tickets sus pedidos
+    /// </summary>
+    /// <remarks>
+    /// Cuenta para los pedidos que lleguen; los tickets ya hechos no cambian.
+    /// <br/>
+    /// <c>POST /v1/store_connections/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/tiendas-en-linea/update-store-connection"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StoreConnection> UpdateAsync(string id, UpdateStoreConnectionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StoreConnection>("POST", $"/v1/store_connections/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Desconectar una tienda
+    /// </summary>
+    /// <remarks>
+    /// Sus pedidos dejan de llegar y se borran sus llaves y webhooks. Los tickets que ya hizo siguen.
+    /// <br/>
+    /// <c>DELETE /v1/store_connections/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/tiendas-en-linea/delete-store-connection"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StoreConnection> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StoreConnection>("DELETE", $"/v1/store_connections/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Traer pedidos pagados
+    /// </summary>
+    /// <remarks>
+    /// Los pedidos pagados desde una fecha (hasta 31 días, 200 a la vez) que no llegaron por webhook: la tienda se conectó después o estuvo caída. Un pedido que ya es ticket no se repite.
+    /// <br/>
+    /// <c>POST /v1/store_connections/{id}/import_orders</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/tiendas-en-linea/import-store-orders"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StoreImport> ImportOrdersAsync(string id, ImportStoreOrdersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StoreImport>("POST", $"/v1/store_connections/{Uri.EscapeDataString(id)}/import_orders", @params, null, options, false, cancellationToken);
 }
 
 /// <summary>
