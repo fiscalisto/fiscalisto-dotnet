@@ -156,6 +156,9 @@ public static class ErrorCode
     /// <summary>Los complementos de pago y las notas de crédito no se sustituyen: se cancelan y se emite otro.</summary>
     public const string SubstitutionUnsupported = "substitution_unsupported";
 
+    /// <summary>Esto solo existe en pruebas (como reiniciar los datos de prueba): use su llave fk_test_.</summary>
+    public const string TestModeOnly = "test_mode_only";
+
     /// <summary>La API no contestó a tiempo (connection_error). Con lo que timbra, repita con la misma Idempotency-Key para saber si se timbró.</summary>
     public const string Timeout = "timeout";
 

@@ -7619,6 +7619,18 @@ public sealed partial class ProductList
 }
 
 /// <summary>
+/// Los campos de «Reiniciar los datos de prueba».
+/// </summary>
+public sealed partial class ResetTestDataParams
+{
+    /// <summary>
+    /// true (por omisión) para dejarle a cada emisor de pruebas 3 clientes y 3 productos de ejemplo. false para dejarlo vacío.
+    /// </summary>
+    [JsonPropertyName("seed")]
+    public bool? Seed { get; set; }
+}
+
+/// <summary>
 /// Una constancia de retenciones e información de pagos (CFDI de retenciones 2.0).
 /// </summary>
 public sealed partial class Retention
@@ -8782,6 +8794,54 @@ public sealed partial class TaxIdValidationWarningsItem
     /// </summary>
     [JsonPropertyName("suggestion")]
     public string? Suggestion { get; set; }
+}
+
+/// <summary>
+/// Lo que se borró (y se creó) al reiniciar los datos de prueba.
+/// </summary>
+public sealed partial class TestDataReset
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Cuántos emisores de pruebas se vaciaron (archivados incluidos).
+    /// </summary>
+    [JsonPropertyName("issuers")]
+    public long Issuers { get; set; }
+
+    /// <summary>
+    /// Cuántos registros se borraron: facturas, clientes, productos, lotes, ligas, descargas…
+    /// </summary>
+    [JsonPropertyName("deleted_rows")]
+    public long DeletedRows { get; set; }
+
+    /// <summary>
+    /// Cuántos eventos de pruebas se borraron (con sus entregas).
+    /// </summary>
+    [JsonPropertyName("deleted_events")]
+    public long DeletedEvents { get; set; }
+
+    /// <summary>
+    /// Clientes de ejemplo creados (con seed).
+    /// </summary>
+    [JsonPropertyName("customers_created")]
+    public long CustomersCreated { get; set; }
+
+    /// <summary>
+    /// Productos de ejemplo creados (con seed).
+    /// </summary>
+    [JsonPropertyName("products_created")]
+    public long ProductsCreated { get; set; }
 }
 
 /// <summary>

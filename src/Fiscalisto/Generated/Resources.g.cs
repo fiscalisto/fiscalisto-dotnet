@@ -20,6 +20,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Cuenta.</summary>
     public AccountResource Account => _account ??= new AccountResource(this);
 
+    private TestDataResource? _testData;
+
+    /// <summary>Cuenta.</summary>
+    public TestDataResource TestData => _testData ??= new TestDataResource(this);
+
     private BalanceResource? _balance;
 
     /// <summary>Cuenta.</summary>
@@ -143,6 +148,30 @@ public sealed class AccountResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Account> GetAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Account>("GET", "/v1/account", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cuenta: <c>fiscalisto.TestData</c>.
+/// </summary>
+public sealed class TestDataResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TestDataResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Reiniciar los datos de prueba
+    /// </summary>
+    /// <remarks>
+    /// Deja el modo de pruebas como nuevo: cada emisor de pruebas conserva su RFC y su CSD de pruebas pero pierde sus facturas, clientes, productos, lotes, ligas y descargas, y se borran los eventos y el registro de solicitudes de pruebas. Las llaves y los webhooks se quedan. Con seed (por omisión) deja 3 clientes y 3 productos de ejemplo. Solo con una llave fk_test_; producción nunca se toca.
+    /// <br/>
+    /// <c>POST /v1/test_data/reset</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cuenta/reset-test-data"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TestDataReset> ResetAsync(ResetTestDataParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TestDataReset>("POST", "/v1/test_data/reset", @params, null, options, false, cancellationToken);
 }
 
 /// <summary>
