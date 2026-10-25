@@ -22,6 +22,9 @@ public sealed class FiscalistoClientOptions
     /// <summary>La dirección de la API. Por omisión https://api.fiscalisto.com.</summary>
     public Uri BaseUrl { get; set; } = new("https://api.fiscalisto.com");
 
+    /// <summary>La versión de la API (Fiscalisto-Version); con null, la fijada en la cuenta. Por omisión <see cref="FiscalistoClient.ApiVersion"/>.</summary>
+    public string? ApiVersion { get; set; } = FiscalistoClient.ApiVersion;
+
     /// <summary>Cuántas veces repetir lo que es seguro repetir (por omisión 2).</summary>
     public int MaxRetries { get; set; } = 2;
 
@@ -83,6 +86,9 @@ public sealed partial class FiscalistoClient : IDisposable
 {
     /// <summary>La versión del SDK.</summary>
     public const string Version = "0.1.0";
+
+    /// <summary>La versión de la API para la que se hizo este SDK (encabezado Fiscalisto-Version).</summary>
+    public const string ApiVersion = "2026-10-24";
 
     /// <summary>
     /// Cómo se escribe y lee el JSON de la API: snake_case, sin los campos null. Úselas para
@@ -253,6 +259,7 @@ public sealed partial class FiscalistoClient : IDisposable
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _key);
             request.Headers.UserAgent.ParseAdd($"fiscalisto-dotnet/{Version}");
             request.Headers.Accept.ParseAdd("application/json");
+            if (_options.ApiVersion is not null) request.Headers.Add("Fiscalisto-Version", _options.ApiVersion);
             if (idempotencyKey is not null) request.Headers.Add("Idempotency-Key", idempotencyKey);
             if (json is not null)
             {

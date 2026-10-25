@@ -43,6 +43,18 @@ public sealed partial class Account
     public string Name { get; set; } = default!;
 
     /// <summary>
+    /// La versión de la API de la cuenta (la de sus solicitudes sin Fiscalisto-Version). Ver Versiones.
+    /// </summary>
+    [JsonPropertyName("api_version")]
+    public string ApiVersion { get; set; } = default!;
+
+    /// <summary>
+    /// La versión más reciente de la API.
+    /// </summary>
+    [JsonPropertyName("latest_api_version")]
+    public string LatestApiVersion { get; set; } = default!;
+
+    /// <summary>
     /// La llave con que se hizo la solicitud: id, nombre y emisores a los que se limita.
     /// </summary>
     [JsonPropertyName("key")]
@@ -3203,6 +3215,12 @@ public sealed partial class CreateWebhookEndpointParams
     /// </summary>
     [JsonPropertyName("description")]
     public string? Description { get; set; }
+
+    /// <summary>
+    /// La versión de la API en que llegan sus eventos (por ejemplo 2026-10-24); null o sin mandar: la de la cuenta. Así actualiza un endpoint a la vez.
+    /// </summary>
+    [JsonPropertyName("api_version")]
+    public string? ApiVersion { get; set; }
 }
 
 /// <summary>
@@ -12343,6 +12361,18 @@ public sealed partial class TrialBalanceTotals
 }
 
 /// <summary>
+/// Los campos de «Cambiar la versión de la API».
+/// </summary>
+public sealed partial class UpdateAccountParams
+{
+    /// <summary>
+    /// La versión de la API de la cuenta: la que reciben sus solicitudes sin Fiscalisto-Version y sus webhooks sin api_version propio. Pruebe antes la nueva con el encabezado.
+    /// </summary>
+    [JsonPropertyName("api_version")]
+    public required string ApiVersion { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar un cliente».
 /// </summary>
 public sealed partial class UpdateCustomerParams
@@ -13452,6 +13482,12 @@ public sealed partial class UpdateWebhookEndpointParams
     /// </summary>
     [JsonPropertyName("disabled")]
     public bool? Disabled { get; set; }
+
+    /// <summary>
+    /// La versión de la API en que llegan sus eventos (por ejemplo 2026-10-24); null o sin mandar: la de la cuenta. Así actualiza un endpoint a la vez.
+    /// </summary>
+    [JsonPropertyName("api_version")]
+    public string? ApiVersion { get; set; }
 }
 
 /// <summary>
@@ -13592,6 +13628,12 @@ public sealed partial class WebhookEndpoint
     /// </summary>
     [JsonPropertyName("previous_secret_expires_at")]
     public string? PreviousSecretExpiresAt { get; set; }
+
+    /// <summary>
+    /// La versión de la API de sus eventos; null: la de la cuenta.
+    /// </summary>
+    [JsonPropertyName("api_version")]
+    public string? ApiVersion { get; set; }
 
     /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).

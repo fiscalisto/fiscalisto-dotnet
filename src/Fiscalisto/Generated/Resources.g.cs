@@ -193,6 +193,20 @@ public sealed class AccountResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Account> GetAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Account>("GET", "/v1/account", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar la versión de la API
+    /// </summary>
+    /// <remarks>
+    /// Mueve la versión de la API de la cuenta: la que reciben sus solicitudes sin el encabezado Fiscalisto-Version y sus webhooks sin api_version propio. Antes, pruebe la nueva mandando Fiscalisto-Version en sus solicitudes. Con una llave de la cuenta con todos los permisos (no de un entorno de prueba). Queda en Desarrolladores › Actividad.
+    /// <br/>
+    /// <c>POST /v1/account</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cuenta/update-account"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Account> UpdateAsync(UpdateAccountParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Account>("POST", "/v1/account", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

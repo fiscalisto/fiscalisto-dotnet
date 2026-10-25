@@ -9,6 +9,9 @@ namespace Fiscalisto;
 /// </summary>
 public static class ErrorCode
 {
+    /// <summary>No existe esa versión de la API (en Fiscalisto-Version o api_version). El mensaje dice cuáles hay; vea Versiones.</summary>
+    public const string ApiVersionInvalid = "api_version_invalid";
+
     /// <summary>El depósito no se puede conciliar, clasificar o reabrir así (ya está conciliado, las facturas son de otro cliente o una está cancelada…). El mensaje dice por qué.</summary>
     public const string BankTransactionInvalid = "bank_transaction_invalid";
 
