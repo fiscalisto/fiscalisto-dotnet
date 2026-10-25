@@ -129,6 +129,18 @@ public static class ErrorCode
     /// <summary>Demasiadas solicitudes con la llave. Espere lo que dice Retry-After y reintente.</summary>
     public const string RateLimit = "rate_limit";
 
+    /// <summary>La factura recurrente no se pudo guardar: el día, la hora, la zona o la factura no son válidos. El mensaje dice cuál.</summary>
+    public const string RecurringInvalid = "recurring_invalid";
+
+    /// <summary>El emisor ya tiene el máximo de facturas recurrentes activas (25 en pruebas, 5,000 en producción). Pause o borre las que ya no use.</summary>
+    public const string RecurringLimit = "recurring_limit";
+
+    /// <summary>Aún no toca timbrar la factura recurrente (409): su next_invoice_on es después de hoy. Para una factura antes de tiempo, use POST /v1/invoices.</summary>
+    public const string RecurringNotDue = "recurring_not_due";
+
+    /// <summary>La factura recurrente está en pausa: reanúdela con active: true para timbrarla.</summary>
+    public const string RecurringPaused = "recurring_paused";
+
     /// <summary>Otra solicitud con la misma Idempotency-Key sigue en proceso. Espere un momento y repítala.</summary>
     public const string RequestInProgress = "request_in_progress";
 

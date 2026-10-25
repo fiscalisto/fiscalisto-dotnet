@@ -1572,6 +1572,284 @@ public sealed partial class CreateProductParams
 }
 
 /// <summary>
+/// Los campos de «Crear una factura recurrente».
+/// </summary>
+public sealed partial class CreateRecurringInvoiceParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Para reconocerla: «Renta oficina 3», «Plan Pro de ACME».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Cada cuánto y a qué hora se timbra.
+    /// </summary>
+    [JsonPropertyName("schedule")]
+    public required CreateRecurringInvoiceParamsSchedule Schedule { get; set; }
+
+    /// <summary>
+    /// La factura que se repite: el cuerpo de POST /v1/invoices, sin issuer, folio, date, global ni metadata. En description puede usar {mes}, {mes anterior}, {mes siguiente}, {año}, {año anterior}, {año siguiente} y {periodo}: cada factura los llena con su fecha.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public required CreateRecurringInvoiceParamsInvoice Invoice { get; set; }
+
+    /// <summary>
+    /// Mandar cada factura al correo del cliente (customer.email o el del catálogo). Por omisión true.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Si quedaron periodos sin timbrar (sin timbres, en pausa con su fecha pasada): all los timbra todos, cada uno con su mes; latest solo el más reciente. Por omisión all.
+    /// <br/>
+    /// Valores: all, latest.
+    /// </summary>
+    [JsonPropertyName("catch_up")]
+    public string? CatchUp { get; set; }
+}
+
+/// <summary>
+/// La factura que se repite: el cuerpo de POST /v1/invoices, sin issuer, folio, date, global ni metadata. En description puede usar {mes}, {mes anterior}, {mes siguiente}, {año}, {año anterior}, {año siguiente} y {periodo}: cada factura los llena con su fecha.
+/// </summary>
+public sealed partial class CreateRecurringInvoiceParamsInvoice
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public required StringOr<InvoiceCreateCustomer> Customer { get; set; }
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public required List<InvoiceCreateItemsItem> Items { get; set; }
+
+    /// <summary>
+    /// I ingreso (por omisión; con global, factura global) o T traslado. Notas de crédito: POST /v1/credit_notes. Pagos: POST /v1/payments.
+    /// <br/>
+    /// Valores: I, T.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Complemento Carta Porte 3.1 (traslado de mercancías).
+    /// </summary>
+    [JsonPropertyName("carta_porte")]
+    public InvoiceCreateCartaPorte? CartaPorte { get; set; }
+
+    /// <summary>
+    /// Complemento INE (procesos electorales).
+    /// </summary>
+    [JsonPropertyName("ine")]
+    public InvoiceCreateIne? Ine { get; set; }
+
+    /// <summary>
+    /// Complemento de leyendas fiscales.
+    /// </summary>
+    [JsonPropertyName("leyendas")]
+    public List<InvoiceCreateLeyendasItem>? Leyendas { get; set; }
+
+    /// <summary>
+    /// Complemento de donatarias.
+    /// </summary>
+    [JsonPropertyName("donation")]
+    public InvoiceCreateDonation? Donation { get; set; }
+
+    /// <summary>
+    /// Impuestos locales (complemento implocal): traslados y retenciones estatales.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<InvoiceCreateLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva…
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("export")]
+    public string? Export { get; set; }
+
+    /// <summary>
+    /// Complemento de comercio exterior 2.0.
+    /// </summary>
+    [JsonPropertyName("comercio_exterior")]
+    public InvoiceCreateComercioExterior? ComercioExterior { get; set; }
+
+    /// <summary>
+    /// Factura global a público en general (InformacionGlobal): periodicidad, meses y año.
+    /// </summary>
+    [JsonPropertyName("global")]
+    public InvoiceCreateGlobal? Global { get; set; }
+
+    /// <summary>
+    /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Forma de pago (FormaPago), clave de c_FormaPago: 01 efectivo, 03 transferencia, 04 tarjeta de crédito, 28 débito, 99 por definir… Obligatoria con PUE; con PPD es 99.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// Método de pago (MetodoPago): PUE (una sola exhibición, por omisión) o PPD (en parcialidades o diferido, se cobra con complementos de pago).
+    /// <br/>
+    /// Valores: PUE, PPD.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// Con PUE: true si aún no le pagan («Por cobrar» en la app) aunque se pagará este mes.
+    /// </summary>
+    [JsonPropertyName("paid_later")]
+    public bool? PaidLater { get; set; }
+
+    /// <summary>
+    /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public string? Series { get; set; }
+
+    /// <summary>
+    /// Observaciones que aparecen en el PDF (no van en el XML).
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+
+    /// <summary>
+    /// Idioma del PDF: es (por omisión) o en.
+    /// <br/>
+    /// Valores: es, en, bi.
+    /// </summary>
+    [JsonPropertyName("pdf_language")]
+    public string? PdfLanguage { get; set; }
+
+    /// <summary>
+    /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
+    /// </summary>
+    [JsonPropertyName("addenda")]
+    public InvoiceCreateAddenda? Addenda { get; set; }
+
+    /// <summary>
+    /// CFDI relacionados (CfdiRelacionados): tipo de relación de c_TipoRelacion y los UUID.
+    /// </summary>
+    [JsonPropertyName("related")]
+    public InvoiceCreateRelated? Related { get; set; }
+
+    /// <summary>
+    /// Tipo de cambio a pesos (TipoCambio). Obligatorio si la moneda no es MXN; use el del DOF del día anterior.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public long? Folio { get; set; }
+
+    /// <summary>
+    /// Con un folio elegido: true para que los siguientes sigan desde ese número.
+    /// </summary>
+    [JsonPropertyName("continue_sequence")]
+    public bool? ContinueSequence { get; set; }
+
+    /// <summary>
+    /// Fecha de emisión (Fecha) si no es ahora, AAAA-MM-DDTHH:MM:SS hora de la Ciudad de México: hasta 72 horas antes.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Correos con copia, separados por comas.
+    /// </summary>
+    [JsonPropertyName("email_cc")]
+    public string? EmailCc { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// Cada cuánto y a qué hora se timbra.
+/// </summary>
+public sealed partial class CreateRecurringInvoiceParamsSchedule
+{
+    /// <summary>
+    /// monthly: cada interval meses en day_of_month. weekly o daily: cada interval semanas o días desde start_date.
+    /// <br/>
+    /// Valores: monthly, weekly, daily.
+    /// </summary>
+    [JsonPropertyName("frequency")]
+    public required string Frequency { get; set; }
+
+    /// <summary>
+    /// Cada cuántos meses, semanas o días. Por omisión 1. Hasta 24 meses, 52 semanas o 365 días.
+    /// </summary>
+    [JsonPropertyName("interval")]
+    public long? Interval { get; set; }
+
+    /// <summary>
+    /// Con monthly: el día, del 1 al 28, o "last" (el último del mes). Por omisión el día de start_date, o el de hoy.
+    /// </summary>
+    [JsonPropertyName("day_of_month")]
+    public JsonElement? DayOfMonth { get; set; }
+
+    /// <summary>
+    /// La primera factura, AAAA-MM-DD (hoy o después). Por omisión: con monthly, el próximo day_of_month; con weekly o daily, hoy.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// La hora (0 a 23) en que se timbra, en time_zone. Por omisión 7.
+    /// </summary>
+    [JsonPropertyName("hour")]
+    public long? Hour { get; set; }
+
+    /// <summary>
+    /// La zona de esa hora. Por omisión America/Mexico_City.
+    /// <br/>
+    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Ciudad_Juarez.
+    /// </summary>
+    [JsonPropertyName("time_zone")]
+    public string? TimeZone { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Timbrar una constancia de retenciones».
 /// </summary>
 public sealed partial class CreateRetentionParams
@@ -2675,7 +2953,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, issuer.ready o balance.low.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, issuer.ready o balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -3025,6 +3303,12 @@ public sealed partial class Invoice
     /// </summary>
     [JsonPropertyName("error")]
     public InvoiceError? Error { get; set; }
+
+    /// <summary>
+    /// La factura recurrente (rin_…) que la timbró sola, o null si se timbró con una llamada.
+    /// </summary>
+    [JsonPropertyName("recurring_invoice")]
+    public string? RecurringInvoice { get; set; }
 
     /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
@@ -6860,7 +7144,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -7018,6 +7302,38 @@ public sealed partial class ListProductsParams
     /// </summary>
     [JsonPropertyName("product_key")]
     public string? ProductKey { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar facturas recurrentes».
+/// </summary>
+public sealed partial class ListRecurringInvoicesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// active o paused.
+    /// <br/>
+    /// Valores: active, paused.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
 }
 
 /// <summary>
@@ -7734,6 +8050,258 @@ public sealed partial class ProductList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una factura que el emisor timbra solo, cada mes, semana o día.
+/// </summary>
+public sealed partial class RecurringInvoice
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Para reconocerla.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// active (timbra en cada fecha) o paused.
+    /// <br/>
+    /// Valores: active, paused.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cada cuánto: frequency (monthly, weekly o daily), interval, day_of_month (con monthly; "last" es el último del mes), y la hora (hour, en time_zone) en que se timbra.
+    /// </summary>
+    [JsonPropertyName("schedule")]
+    public RecurringInvoiceSchedule Schedule { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha (AAAA-MM-DD) de la siguiente factura.
+    /// </summary>
+    [JsonPropertyName("next_invoice_on")]
+    public string NextInvoiceOn { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha del último periodo que timbró, o null si aún no timbra ninguna.
+    /// </summary>
+    [JsonPropertyName("last_invoiced_on")]
+    public string? LastInvoicedOn { get; set; }
+
+    /// <summary>
+    /// La última factura (inv_…) que timbró, o null.
+    /// </summary>
+    [JsonPropertyName("last_invoice")]
+    public string? LastInvoice { get; set; }
+
+    /// <summary>
+    /// Por qué no se pudo timbrar la última vez (sin timbres, el cliente borrado, el SAT la rechazó…), o null. Se vuelve a intentar a la siguiente hora del día siguiente; también llega recurring_invoice.failed.
+    /// </summary>
+    [JsonPropertyName("last_error")]
+    public RecurringInvoiceLastError? LastError { get; set; }
+
+    /// <summary>
+    /// Si cada factura se manda al correo del cliente.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool SendEmail { get; set; }
+
+    /// <summary>
+    /// Si quedaron periodos sin timbrar: all los timbra todos, latest solo el más reciente.
+    /// <br/>
+    /// Valores: all, latest.
+    /// </summary>
+    [JsonPropertyName("catch_up")]
+    public string CatchUp { get; set; } = default!;
+
+    /// <summary>
+    /// A quién se factura.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public RecurringInvoiceCustomer Customer { get; set; } = default!;
+
+    /// <summary>
+    /// La moneda de la factura.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// Los conceptos, con description tal como se guardó ({mes}, {año}… se llenan en cada factura).
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<RecurringInvoiceItemsItem> Items { get; set; } = default!;
+
+    /// <summary>
+    /// El total de cada factura con los precios de hoy.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// A quién se factura.
+/// </summary>
+public sealed partial class RecurringInvoiceCustomer
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RecurringInvoiceItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RecurringInvoiceItemsItem
+{
+    /// <summary>
+    /// Descripción del concepto (Descripcion), hasta 1,000 caracteres.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Clave del producto o servicio (ClaveProdServ), 8 dígitos de c_ClaveProdServ. Búsquela con GET /v1/sat_catalogs/product_keys?q=…
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string ProductKey { get; set; } = default!;
+
+    /// <summary>
+    /// Cantidad (Cantidad). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal? Quantity { get; set; }
+
+    /// <summary>
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Precio unitario antes de impuestos (ValorUnitario).
+    /// </summary>
+    [JsonPropertyName("unit_price")]
+    public decimal UnitPrice { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RecurringInvoiceLastError&lt;/c&gt;.
+/// </summary>
+public sealed partial class RecurringInvoiceLastError
+{
+    /// <summary>
+    /// Qué pasó y cómo corregirlo, para una persona.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class RecurringInvoiceList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<RecurringInvoice> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Cada cuánto: frequency (monthly, weekly o daily), interval, day_of_month (con monthly; "last" es el último del mes), y la hora (hour, en time_zone) en que se timbra.
+/// </summary>
+public sealed partial class RecurringInvoiceSchedule
+{
+    /// <summary>
+    /// monthly: cada interval meses en day_of_month. weekly o daily: cada interval semanas o días.
+    /// <br/>
+    /// Valores: monthly, weekly, daily.
+    /// </summary>
+    [JsonPropertyName("frequency")]
+    public string Frequency { get; set; } = default!;
+
+    /// <summary>
+    /// Cada cuántos meses, semanas o días.
+    /// </summary>
+    [JsonPropertyName("interval")]
+    public long Interval { get; set; }
+
+    /// <summary>
+    /// Con monthly: el día del mes, del 1 al 28, o "last" (el último). null con weekly o daily.
+    /// </summary>
+    [JsonPropertyName("day_of_month")]
+    public JsonElement? DayOfMonth { get; set; }
+
+    /// <summary>
+    /// La hora (0 a 23) en que se timbra, en time_zone.
+    /// </summary>
+    [JsonPropertyName("hour")]
+    public long Hour { get; set; }
+
+    /// <summary>
+    /// La zona de esa hora (America/Mexico_City, America/Cancun…).
+    /// </summary>
+    [JsonPropertyName("time_zone")]
+    public string TimeZone { get; set; } = default!;
 }
 
 /// <summary>
@@ -9022,7 +9590,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -9528,6 +10096,284 @@ public sealed partial class UpdateProductParams
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar o pausar una factura recurrente».
+/// </summary>
+public sealed partial class UpdateRecurringInvoiceParams
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Cada cuánto y a qué hora se timbra.
+    /// </summary>
+    [JsonPropertyName("schedule")]
+    public UpdateRecurringInvoiceParamsSchedule? Schedule { get; set; }
+
+    /// <summary>
+    /// La factura completa que se repite desde la siguiente vez (reemplaza la anterior).
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public UpdateRecurringInvoiceParamsInvoice? Invoice { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Si quedaron periodos sin timbrar: all los timbra todos, cada uno con su mes; latest solo el más reciente.
+    /// <br/>
+    /// Valores: all, latest.
+    /// </summary>
+    [JsonPropertyName("catch_up")]
+    public string? CatchUp { get; set; }
+
+    /// <summary>
+    /// false la pausa; true la reanuda desde hoy, sin timbrar las fechas que pasaron en pausa.
+    /// </summary>
+    [JsonPropertyName("active")]
+    public bool? Active { get; set; }
+}
+
+/// <summary>
+/// La factura completa que se repite desde la siguiente vez (reemplaza la anterior).
+/// </summary>
+public sealed partial class UpdateRecurringInvoiceParamsInvoice
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public required StringOr<InvoiceCreateCustomer> Customer { get; set; }
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public required List<InvoiceCreateItemsItem> Items { get; set; }
+
+    /// <summary>
+    /// I ingreso (por omisión; con global, factura global) o T traslado. Notas de crédito: POST /v1/credit_notes. Pagos: POST /v1/payments.
+    /// <br/>
+    /// Valores: I, T.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Complemento Carta Porte 3.1 (traslado de mercancías).
+    /// </summary>
+    [JsonPropertyName("carta_porte")]
+    public InvoiceCreateCartaPorte? CartaPorte { get; set; }
+
+    /// <summary>
+    /// Complemento INE (procesos electorales).
+    /// </summary>
+    [JsonPropertyName("ine")]
+    public InvoiceCreateIne? Ine { get; set; }
+
+    /// <summary>
+    /// Complemento de leyendas fiscales.
+    /// </summary>
+    [JsonPropertyName("leyendas")]
+    public List<InvoiceCreateLeyendasItem>? Leyendas { get; set; }
+
+    /// <summary>
+    /// Complemento de donatarias.
+    /// </summary>
+    [JsonPropertyName("donation")]
+    public InvoiceCreateDonation? Donation { get; set; }
+
+    /// <summary>
+    /// Impuestos locales (complemento implocal): traslados y retenciones estatales.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<InvoiceCreateLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva…
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("export")]
+    public string? Export { get; set; }
+
+    /// <summary>
+    /// Complemento de comercio exterior 2.0.
+    /// </summary>
+    [JsonPropertyName("comercio_exterior")]
+    public InvoiceCreateComercioExterior? ComercioExterior { get; set; }
+
+    /// <summary>
+    /// Factura global a público en general (InformacionGlobal): periodicidad, meses y año.
+    /// </summary>
+    [JsonPropertyName("global")]
+    public InvoiceCreateGlobal? Global { get; set; }
+
+    /// <summary>
+    /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Forma de pago (FormaPago), clave de c_FormaPago: 01 efectivo, 03 transferencia, 04 tarjeta de crédito, 28 débito, 99 por definir… Obligatoria con PUE; con PPD es 99.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// Método de pago (MetodoPago): PUE (una sola exhibición, por omisión) o PPD (en parcialidades o diferido, se cobra con complementos de pago).
+    /// <br/>
+    /// Valores: PUE, PPD.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// Con PUE: true si aún no le pagan («Por cobrar» en la app) aunque se pagará este mes.
+    /// </summary>
+    [JsonPropertyName("paid_later")]
+    public bool? PaidLater { get; set; }
+
+    /// <summary>
+    /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public string? Series { get; set; }
+
+    /// <summary>
+    /// Observaciones que aparecen en el PDF (no van en el XML).
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+
+    /// <summary>
+    /// Idioma del PDF: es (por omisión) o en.
+    /// <br/>
+    /// Valores: es, en, bi.
+    /// </summary>
+    [JsonPropertyName("pdf_language")]
+    public string? PdfLanguage { get; set; }
+
+    /// <summary>
+    /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
+    /// </summary>
+    [JsonPropertyName("addenda")]
+    public InvoiceCreateAddenda? Addenda { get; set; }
+
+    /// <summary>
+    /// CFDI relacionados (CfdiRelacionados): tipo de relación de c_TipoRelacion y los UUID.
+    /// </summary>
+    [JsonPropertyName("related")]
+    public InvoiceCreateRelated? Related { get; set; }
+
+    /// <summary>
+    /// Tipo de cambio a pesos (TipoCambio). Obligatorio si la moneda no es MXN; use el del DOF del día anterior.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public long? Folio { get; set; }
+
+    /// <summary>
+    /// Con un folio elegido: true para que los siguientes sigan desde ese número.
+    /// </summary>
+    [JsonPropertyName("continue_sequence")]
+    public bool? ContinueSequence { get; set; }
+
+    /// <summary>
+    /// Fecha de emisión (Fecha) si no es ahora, AAAA-MM-DDTHH:MM:SS hora de la Ciudad de México: hasta 72 horas antes.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Correos con copia, separados por comas.
+    /// </summary>
+    [JsonPropertyName("email_cc")]
+    public string? EmailCc { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// Cada cuánto y a qué hora se timbra.
+/// </summary>
+public sealed partial class UpdateRecurringInvoiceParamsSchedule
+{
+    /// <summary>
+    /// monthly: cada interval meses en day_of_month. weekly o daily: cada interval semanas o días desde start_date.
+    /// <br/>
+    /// Valores: monthly, weekly, daily.
+    /// </summary>
+    [JsonPropertyName("frequency")]
+    public string? Frequency { get; set; }
+
+    /// <summary>
+    /// Cada cuántos meses, semanas o días. Por omisión 1. Hasta 24 meses, 52 semanas o 365 días.
+    /// </summary>
+    [JsonPropertyName("interval")]
+    public long? Interval { get; set; }
+
+    /// <summary>
+    /// Con monthly: el día, del 1 al 28, o "last" (el último del mes). Por omisión el día de start_date, o el de hoy.
+    /// </summary>
+    [JsonPropertyName("day_of_month")]
+    public JsonElement? DayOfMonth { get; set; }
+
+    /// <summary>
+    /// La primera factura, AAAA-MM-DD (hoy o después). Por omisión: con monthly, el próximo day_of_month; con weekly o daily, hoy.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// La hora (0 a 23) en que se timbra, en time_zone. Por omisión 7.
+    /// </summary>
+    [JsonPropertyName("hour")]
+    public long? Hour { get; set; }
+
+    /// <summary>
+    /// La zona de esa hora. Por omisión America/Mexico_City.
+    /// <br/>
+    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Ciudad_Juarez.
+    /// </summary>
+    [JsonPropertyName("time_zone")]
+    public string? TimeZone { get; set; }
 }
 
 /// <summary>

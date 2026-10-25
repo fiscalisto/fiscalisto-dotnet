@@ -120,6 +120,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Autofactura.</summary>
     public TicketsResource Tickets => _tickets ??= new TicketsResource(this);
 
+    private RecurringInvoicesResource? _recurringInvoices;
+
+    /// <summary>Facturas recurrentes.</summary>
+    public RecurringInvoicesResource RecurringInvoices => _recurringInvoices ??= new RecurringInvoicesResource(this);
+
     private WebhookEndpointsResource? _webhookEndpoints;
 
     /// <summary>Webhooks.</summary>
@@ -1347,6 +1352,118 @@ public sealed class TicketsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Ticket> CancelAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Ticket>("DELETE", $"/v1/tickets/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Facturas recurrentes: <c>fiscalisto.RecurringInvoices</c>.
+/// </summary>
+public sealed class RecurringInvoicesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal RecurringInvoicesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una factura recurrente
+    /// </summary>
+    /// <remarks>
+    /// Una factura que el emisor timbra solo en cada fecha (cada interval meses en day_of_month, o cada interval semanas o días), a la hora que elija, con los timbres de su cuenta, y la manda al cliente si send_email. Cada una es una factura normal (invoice.stamped, con recurring_invoice) y nunca se timbra dos veces el mismo periodo. invoice es el cuerpo de POST /v1/invoices: se revisa ahora, con las mismas reglas.
+    /// <br/>
+    /// <c>POST /v1/recurring_invoices</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/create-recurring-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RecurringInvoice> CreateAsync(CreateRecurringInvoiceParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RecurringInvoice>("POST", "/v1/recurring_invoices", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Listar facturas recurrentes
+    /// </summary>
+    /// <remarks>
+    /// Las más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/recurring_invoices</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/list-recurring-invoices"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<RecurringInvoice>> ListAsync(ListRecurringInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<RecurringInvoice>("/v1/recurring_invoices", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar facturas recurrentes: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<RecurringInvoice> ListAutoPagingAsync(ListRecurringInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<RecurringInvoice>("/v1/recurring_invoices", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una factura recurrente
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/recurring_invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/get-recurring-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RecurringInvoice> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RecurringInvoice>("GET", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar o pausar una factura recurrente
+    /// </summary>
+    /// <remarks>
+    /// Solo lo que mande cambia. invoice reemplaza la factura completa desde la siguiente vez. active: false la pausa; active: true la reanuda desde hoy, sin timbrar las fechas que pasaron en pausa. schedule.start_date mueve la siguiente fecha.
+    /// <br/>
+    /// <c>POST /v1/recurring_invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/update-recurring-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RecurringInvoice> UpdateAsync(string id, UpdateRecurringInvoiceParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RecurringInvoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Borrar una factura recurrente
+    /// </summary>
+    /// <remarks>
+    /// Ya no timbra más; las facturas que timbró se quedan.
+    /// <br/>
+    /// <c>DELETE /v1/recurring_invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/delete-recurring-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Saltar la siguiente factura
+    /// </summary>
+    /// <remarks>
+    /// La siguiente fecha pasa a la que sigue, sin timbrar nada.
+    /// <br/>
+    /// <c>POST /v1/recurring_invoices/{id}/skip</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/skip-recurring-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RecurringInvoice> SkipAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RecurringInvoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}/skip", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Timbrar ahora la que toca
+    /// </summary>
+    /// <remarks>
+    /// Timbra el periodo que ya toca (next_invoice_on es hoy o antes) sin esperar su hora. Si no toca aún, 409 recurring_not_due. Si la hora llega mientras tanto, no se timbra dos veces: es el mismo periodo.
+    /// <br/>
+    /// <c>POST /v1/recurring_invoices/{id}/run</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/run-recurring-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> RunAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/recurring_invoices/{Uri.EscapeDataString(id)}/run", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
