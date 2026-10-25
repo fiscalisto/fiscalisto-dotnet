@@ -40,6 +40,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Facturas.</summary>
     public InvoicesResource Invoices => _invoices ??= new InvoicesResource(this);
 
+    private ReceivablesResource? _receivables;
+
+    /// <summary>Cuentas por cobrar.</summary>
+    public ReceivablesResource Receivables => _receivables ??= new ReceivablesResource(this);
+
+    private BankTransactionsResource? _bankTransactions;
+
+    /// <summary>Conciliación bancaria.</summary>
+    public BankTransactionsResource BankTransactions => _bankTransactions ??= new BankTransactionsResource(this);
+
     private PaymentsResource? _payments;
 
     /// <summary>Pagos y notas de crédito.</summary>
@@ -501,6 +511,162 @@ public sealed class InvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> SubstituteAsync(string id, InvoiceCreate @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/substitute", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Marcar pagada
+    /// </summary>
+    /// <remarks>
+    /// Una factura PUE timbrada con paid_later (o marcada por cobrar) ya se pagó: queda paid y llega invoice.paid. Una PPD se paga con su complemento de pago (POST /v1/payments).
+    /// <br/>
+    /// <c>POST /v1/invoices/{id}/mark_paid</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cuentas-por-cobrar/mark-invoice-paid"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> MarkPaidAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_paid", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Marcar por cobrar
+    /// </summary>
+    /// <remarks>
+    /// Una factura PUE que el cliente aún no paga (le paga este mes): queda unpaid hasta POST /v1/invoices/{id}/mark_paid. Si el mes termina sin pago, la ley pide sustituirla por una PPD (regla 2.7.1.39 de la RMF).
+    /// <br/>
+    /// <c>POST /v1/invoices/{id}/mark_unpaid</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cuentas-por-cobrar/mark-invoice-unpaid"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> MarkUnpaidAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_unpaid", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cuentas por cobrar: <c>fiscalisto.Receivables</c>.
+/// </summary>
+public sealed class ReceivablesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ReceivablesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver lo que le deben
+    /// </summary>
+    /// <remarks>
+    /// Lo que debe cada cliente, por moneda, de sus facturas abiertas (PPD con saldo y PUE por cobrar), ordenado por RFC. Las facturas de cada uno: GET /v1/invoices?customer=RFC&amp;payment_status=open.
+    /// <br/>
+    /// <c>GET /v1/receivables</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cuentas-por-cobrar/list-receivables"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Receivable>> ListAsync(ListReceivablesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Receivable>("/v1/receivables", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Ver lo que le deben: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Receivable> ListAutoPagingAsync(ListReceivablesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Receivable>("/v1/receivables", @params, options, cancellationToken);
+}
+
+/// <summary>
+/// Conciliación bancaria: <c>fiscalisto.BankTransactions</c>.
+/// </summary>
+public sealed class BankTransactionsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal BankTransactionsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Mandar depósitos
+    /// </summary>
+    /// <remarks>
+    /// Los depósitos de la cuenta del emisor (de la API de su banco o de un estado de cuenta), hasta 1,000 por solicitud. Uno que ya mandó (mismo día, monto, referencia y concepto) se omite, así que puede mandar periodos que se enciman. Cada uno trae suggested_match: las facturas que parece pagar.
+    /// <br/>
+    /// <c>POST /v1/bank_transactions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/conciliacion-bancaria/create-bank-transactions"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<BankImport> CreateAsync(CreateBankTransactionsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<BankImport>("POST", "/v1/bank_transactions", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Listar depósitos
+    /// </summary>
+    /// <remarks>
+    /// Los más recientes primero; los abiertos con su suggested_match.
+    /// <br/>
+    /// <c>GET /v1/bank_transactions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/conciliacion-bancaria/list-bank-transactions"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<BankTransaction>> ListAsync(ListBankTransactionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<BankTransaction>("/v1/bank_transactions", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar depósitos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<BankTransaction> ListAutoPagingAsync(ListBankTransactionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<BankTransaction>("/v1/bank_transactions", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un depósito
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/bank_transactions/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/conciliacion-bancaria/get-bank-transaction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<BankTransaction> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<BankTransaction>("GET", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Conciliar un depósito
+    /// </summary>
+    /// <remarks>
+    /// El depósito pagó estas facturas (de un mismo cliente), o sin invoices, las de suggested_match. Sus facturas PUE por cobrar quedan pagadas (invoice.paid). No timbra: para pagar una PPD con este depósito, POST /v1/payments con bank_transaction.
+    /// <br/>
+    /// <c>POST /v1/bank_transactions/{id}/match</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/conciliacion-bancaria/match-bank-transaction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<BankTransaction> MatchAsync(string id, MatchBankTransactionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/match", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Explicar un depósito sin factura
+    /// </summary>
+    /// <remarks>
+    /// Un depósito que ninguna factura explica: venta (aún sin facturar), prestamo, traspaso o devolucion. El SAT puede presumir ingreso un depósito sin explicar (CFF art. 59 fr. III).
+    /// <br/>
+    /// <c>POST /v1/bank_transactions/{id}/classify</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/conciliacion-bancaria/classify-bank-transaction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<BankTransaction> ClassifyAsync(string id, ClassifyBankTransactionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/classify", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Deshacer la conciliación
+    /// </summary>
+    /// <remarks>
+    /// Vuelve a open, y sus facturas vuelven a deber. Si se pagó con un complemento vigente, cancélelo antes.
+    /// <br/>
+    /// <c>POST /v1/bank_transactions/{id}/reopen</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/conciliacion-bancaria/reopen-bank-transaction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<BankTransaction> ReopenAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<BankTransaction>("POST", $"/v1/bank_transactions/{Uri.EscapeDataString(id)}/reopen", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

@@ -9,6 +9,9 @@ namespace Fiscalisto;
 /// </summary>
 public static class ErrorCode
 {
+    /// <summary>El depósito no se puede conciliar, clasificar o reabrir así (ya está conciliado, las facturas son de otro cliente o una está cancelada…). El mensaje dice por qué.</summary>
+    public const string BankTransactionInvalid = "bank_transaction_invalid";
+
     /// <summary>Una factura del lote no pasa la revisión; param dice cuál (invoices.3.items.0.unit_price). Ninguna del lote se timbró.</summary>
     public const string BatchInvalid = "batch_invalid";
 
@@ -74,6 +77,9 @@ public static class ErrorCode
 
     /// <summary>La factura no cumple una regla del SAT que Fiscalisto revisa antes de mandarla al PAC (uso contra régimen, totales, complementos…). No se usó ningún timbre.</summary>
     public const string InvoiceInvalid = "invoice_invalid";
+
+    /// <summary>Solo una factura de ingreso PUE vigente se marca pagada o por cobrar; una PPD se paga con su complemento de pago (type P).</summary>
+    public const string InvoiceNotMarkable = "invoice_not_markable";
 
     /// <summary>La acción es para facturas timbradas (enviar, cancelar, sustituir).</summary>
     public const string InvoiceNotStamped = "invoice_not_stamped";

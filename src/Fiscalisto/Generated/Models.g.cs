@@ -522,6 +522,230 @@ public sealed partial class BalancePacksItem
 }
 
 /// <summary>
+/// Los depósitos que se agregaron.
+/// </summary>
+public sealed partial class BankImport
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos depósitos se agregaron.
+    /// </summary>
+    [JsonPropertyName("added")]
+    public long Added { get; set; }
+
+    /// <summary>
+    /// Cuántos ya estaban (se omitieron).
+    /// </summary>
+    [JsonPropertyName("duplicates")]
+    public long Duplicates { get; set; }
+
+    /// <summary>
+    /// Los depósitos agregados.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<BankTransaction> Data { get; set; } = default!;
+}
+
+/// <summary>
+/// Un depósito de la cuenta del emisor, y las facturas que pagó.
+/// </summary>
+public sealed partial class BankTransaction
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El día del depósito (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Lo depositado, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El concepto del banco.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// La referencia o clave de rastreo, o null.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// Los últimos 4 dígitos de la cuenta, o null.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// El RFC de quien depositó, si se sabe.
+    /// </summary>
+    [JsonPropertyName("payer_tax_id")]
+    public string? PayerTaxId { get; set; }
+
+    /// <summary>
+    /// open (sin conciliar), matched (pagó facturas) o classified (no es de una factura).
+    /// <br/>
+    /// Valores: open, matched, classified.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// classified: venta (aún sin facturar), prestamo, traspaso o devolucion; si no, null.
+    /// <br/>
+    /// Valores: venta, prestamo, traspaso, devolucion.
+    /// </summary>
+    [JsonPropertyName("classification")]
+    public string? Classification { get; set; }
+
+    /// <summary>
+    /// Una nota al clasificarlo, o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Las facturas (inv_…) que pagó, si está conciliado.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public List<string> Invoices { get; set; } = default!;
+
+    /// <summary>
+    /// El complemento de pago (inv_…) timbrado con él, o null.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public string? Payment { get; set; }
+
+    /// <summary>
+    /// Si está abierto, las facturas que parece pagar (por monto, RFC, folio en el concepto y fecha): invoices, lo que toca a cada una (amounts), method, confidence (high o medium) y por qué (reasons). null si ninguna encaja.
+    /// </summary>
+    [JsonPropertyName("suggested_match")]
+    public BankTransactionSuggestedMatch? SuggestedMatch { get; set; }
+
+    /// <summary>
+    /// Cuándo se mandó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class BankTransactionList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<BankTransaction> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;BankTransactionSuggestedMatch&lt;/c&gt;.
+/// </summary>
+public sealed partial class BankTransactionSuggestedMatch
+{
+    /// <summary>
+    /// Las facturas, como el cuerpo de POST /v1/invoices, con reference opcional.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public List<string> Invoices { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que el depósito pagaría de cada factura (por inv_…).
+    /// </summary>
+    [JsonPropertyName("amounts")]
+    public Dictionary<string, JsonElement> Amounts { get; set; } = default!;
+
+    /// <summary>
+    /// egreso (la factura completa y después una nota de crédito por el anticipo, opción A) o remanente (la factura solo por lo que falta, opción B).
+    /// <br/>
+    /// Valores: PPD, PUE.
+    /// </summary>
+    [JsonPropertyName("method")]
+    public string Method { get; set; } = default!;
+
+    /// <summary>
+    /// high (el monto y además el RFC, el nombre o el folio coinciden) o medium (revíselo antes).
+    /// <br/>
+    /// Valores: high, medium.
+    /// </summary>
+    [JsonPropertyName("confidence")]
+    public string Confidence { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué se sugiere, en palabras.
+    /// </summary>
+    [JsonPropertyName("reasons")]
+    public List<string> Reasons { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Cancelar una factura».
 /// </summary>
 public sealed partial class CancelInvoiceParams
@@ -571,6 +795,26 @@ public sealed partial class CheckSatListsParams
     /// </summary>
     [JsonPropertyName("tax_ids")]
     public required List<string> TaxIds { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Explicar un depósito sin factura».
+/// </summary>
+public sealed partial class ClassifyBankTransactionParams
+{
+    /// <summary>
+    /// venta (una venta que aún no se factura), prestamo, traspaso (entre cuentas propias) o devolucion.
+    /// <br/>
+    /// Valores: venta, prestamo, traspaso, devolucion.
+    /// </summary>
+    [JsonPropertyName("classification")]
+    public required string Classification { get; set; }
+
+    /// <summary>
+    /// Una nota para su equipo (de dónde vino, por qué).
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }
 
 /// <summary>
@@ -723,6 +967,66 @@ public sealed partial class CreateAdvanceParamsCustomerForeign
     /// </summary>
     [JsonPropertyName("tax_id")]
     public required string TaxId { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Mandar depósitos».
+/// </summary>
+public sealed partial class CreateBankTransactionsParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La cuenta (CLABE o número; se guardan sus últimos 4 dígitos).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// Los depósitos, hasta 1,000 por solicitud.
+    /// </summary>
+    [JsonPropertyName("transactions")]
+    public required List<CreateBankTransactionsParamsTransactionsItem> Transactions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateBankTransactionsParamsTransactionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateBankTransactionsParamsTransactionsItem
+{
+    /// <summary>
+    /// El día del depósito (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// Lo depositado, en pesos. Los retiros no se mandan.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// El concepto del banco, como viene (SPEI, nombre del ordenante…).
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// La referencia o clave de rastreo.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// El RFC de quien depositó, si lo sabe (ayuda a sugerir la factura).
+    /// </summary>
+    [JsonPropertyName("payer_tax_id")]
+    public string? PayerTaxId { get; set; }
 }
 
 /// <summary>
@@ -1389,6 +1693,12 @@ public sealed partial class CreatePaymentParams
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// El depósito (btx_…) con que le pagaron: queda conciliado con este complemento, y date es su día si no manda otra.
+    /// </summary>
+    [JsonPropertyName("bank_transaction")]
+    public string? BankTransaction { get; set; }
 }
 
 /// <summary>
@@ -3341,7 +3651,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready o balance.low.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready o balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -3649,6 +3959,26 @@ public sealed partial class Invoice
     /// </summary>
     [JsonPropertyName("total")]
     public decimal? Total { get; set; }
+
+    /// <summary>
+    /// Si ya se cobró (Cuentas por cobrar): paid, partial (complementos de pago o notas de crédito por una parte) o unpaid. Una PUE está paid, salvo con paid_later hasta POST /v1/invoices/{id}/mark_paid. null si no es de ingreso o no está vigente.
+    /// <br/>
+    /// Valores: paid, partial, unpaid.
+    /// </summary>
+    [JsonPropertyName("payment_status")]
+    public string? PaymentStatus { get; set; }
+
+    /// <summary>
+    /// Lo que falta por cobrar, en su moneda, o null.
+    /// </summary>
+    [JsonPropertyName("amount_due")]
+    public decimal? AmountDue { get; set; }
+
+    /// <summary>
+    /// Lo cobrado: complementos de pago y notas de crédito vigentes, o todo si es PUE pagada. null si no aplica.
+    /// </summary>
+    [JsonPropertyName("amount_paid")]
+    public decimal? AmountPaid { get; set; }
 
     /// <summary>
     /// CFDI relacionados (CfdiRelacionados): tipo de relación de c_TipoRelacion y los UUID.
@@ -7435,6 +7765,38 @@ public sealed partial class ListAdvancesParams
 }
 
 /// <summary>
+/// Los campos de «Listar depósitos».
+/// </summary>
+public sealed partial class ListBankTransactionsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// open (sin conciliar), matched o classified.
+    /// <br/>
+    /// Valores: open, matched, classified.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar solicitudes de datos».
 /// </summary>
 public sealed partial class ListCustomerDataRequestsParams
@@ -7532,7 +7894,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -7612,6 +7974,14 @@ public sealed partial class ListInvoicesParams
     /// </summary>
     [JsonPropertyName("customer")]
     public string? Customer { get; set; }
+
+    /// <summary>
+    /// Facturas de ingreso por lo que deben: unpaid, partial, open (unpaid o partial) o paid.
+    /// <br/>
+    /// Valores: unpaid, partial, open, paid.
+    /// </summary>
+    [JsonPropertyName("payment_status")]
+    public string? PaymentStatus { get; set; }
 
     /// <summary>
     /// Creadas desde, en ISO 8601. Un día solo (2026-10-01) cuenta desde su inicio en hora de la Ciudad de México.
@@ -7722,6 +8092,36 @@ public sealed partial class ListQuotesParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver lo que le deben».
+/// </summary>
+public sealed partial class ListReceivablesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo este RFC.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public string? Customer { get; set; }
 }
 
 /// <summary>
@@ -7942,6 +8342,18 @@ public sealed partial class ListWebhookEndpointsParams
     /// </summary>
     [JsonPropertyName("starting_after")]
     public string? StartingAfter { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Conciliar un depósito».
+/// </summary>
+public sealed partial class MatchBankTransactionParams
+{
+    /// <summary>
+    /// Las facturas (inv_… o UUID) que pagó este depósito, de un mismo cliente. Sin ellas, las de suggested_match.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public List<string>? Invoices { get; set; }
 }
 
 /// <summary>
@@ -8702,6 +9114,114 @@ public sealed partial class QuoteList
     /// </summary>
     [JsonPropertyName("data")]
     public List<Quote> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que un cliente le debe a un emisor en una moneda, de sus facturas abiertas.
+/// </summary>
+public sealed partial class Receivable
+{
+    /// <summary>
+    /// El RFC y la moneda (RFC:MXN): para starting_after.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El cliente que debe.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public ReceivableCustomer Customer { get; set; } = default!;
+
+    /// <summary>
+    /// La moneda de esas facturas.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que debe en total, en esa moneda.
+    /// </summary>
+    [JsonPropertyName("amount_due")]
+    public decimal AmountDue { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas tiene abiertas.
+    /// </summary>
+    [JsonPropertyName("open_invoices")]
+    public long OpenInvoices { get; set; }
+
+    /// <summary>
+    /// La fecha (AAAA-MM-DD) de su factura abierta más antigua.
+    /// </summary>
+    [JsonPropertyName("oldest_invoice_date")]
+    public string OldestInvoiceDate { get; set; } = default!;
+}
+
+/// <summary>
+/// El cliente que debe.
+/// </summary>
+public sealed partial class ReceivableCustomer
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ReceivableList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Receivable> Data { get; set; } = default!;
 
     /// <summary>
     /// true si hay más: pida la siguiente con starting_after igual al id del último.
@@ -10284,7 +10804,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
