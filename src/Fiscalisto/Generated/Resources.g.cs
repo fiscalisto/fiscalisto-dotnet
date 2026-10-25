@@ -25,6 +25,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Cuenta.</summary>
     public TestDataResource TestData => _testData ??= new TestDataResource(this);
 
+    private SandboxesResource? _sandboxes;
+
+    /// <summary>Entornos de prueba.</summary>
+    public SandboxesResource Sandboxes => _sandboxes ??= new SandboxesResource(this);
+
     private BalanceResource? _balance;
 
     /// <summary>Cuenta.</summary>
@@ -207,6 +212,68 @@ public sealed class TestDataResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<TestDataReset> ResetAsync(ResetTestDataParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<TestDataReset>("POST", "/v1/test_data/reset", @params, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Entornos de prueba: <c>fiscalisto.Sandboxes</c>.
+/// </summary>
+public sealed class SandboxesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SandboxesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear un entorno de prueba
+    /// </summary>
+    /// <remarks>
+    /// Un modo de pruebas propio para una persona o un proyecto: nace con el emisor de pruebas del SAT y una llave fk_test_ (key.secret, una sola vez) que solo ve los emisores, webhooks y eventos del entorno, y que reinicia solo los suyos. Se crea con una llave de pruebas de la cuenta (no de otro entorno ni limitada a emisores). Hasta 25 por cuenta.
+    /// <br/>
+    /// <c>POST /v1/sandboxes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/create-sandbox"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Sandbox> CreateAsync(CreateSandboxParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Sandbox>("POST", "/v1/sandboxes", @params, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Listar entornos de prueba
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/sandboxes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/list-sandboxes"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SandboxList> ListAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SandboxList>("GET", "/v1/sandboxes", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver un entorno de prueba
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/sandboxes/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/get-sandbox"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Sandbox> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Sandbox>("GET", $"/v1/sandboxes/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Borrar un entorno de prueba
+    /// </summary>
+    /// <remarks>
+    /// Sus llaves dejan de funcionar al momento, sus emisores se archivan y sus webhooks se borran. No toca nada de la cuenta ni de otros entornos.
+    /// <br/>
+    /// <c>DELETE /v1/sandboxes/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/delete-sandbox"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/sandboxes/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

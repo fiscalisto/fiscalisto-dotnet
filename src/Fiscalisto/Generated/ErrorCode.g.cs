@@ -108,6 +108,9 @@ public static class ErrorCode
     /// <summary>La cuenta tiene varios emisores y la solicitud no dice cuál: mande issuer (iss_…).</summary>
     public const string IssuerRequired = "issuer_required";
 
+    /// <summary>La llave es de un entorno de prueba y la solicitud es de toda la cuenta (como crear o borrar entornos): use una llave de pruebas de la cuenta.</summary>
+    public const string KeyInSandbox = "key_in_sandbox";
+
     /// <summary>La llave es de solo lectura: puede hacer GET, validar RFC, revisar listas del SAT y calcular recibos de nómina, pero nada que timbre, cancele, envíe o cambie datos.</summary>
     public const string KeyReadOnly = "key_read_only";
 
@@ -179,6 +182,9 @@ public static class ErrorCode
 
     /// <summary>No existe esa ruta. Revise la dirección y la versión (/v1).</summary>
     public const string RouteNotFound = "route_not_found";
+
+    /// <summary>No se pudo crear el entorno de prueba: falta su nombre o la cuenta ya tiene 25 (borre uno que ya no use).</summary>
+    public const string SandboxInvalid = "sandbox_invalid";
 
     /// <summary>El SAT rechazó la solicitud de descarga. El mensaje trae su motivo, por ejemplo que ya se pidió el mismo periodo con los mismos filtros demasiadas veces (el SAT pone un límite de por vida).</summary>
     public const string SatRequestRejected = "sat_request_rejected";

@@ -83,6 +83,12 @@ public sealed partial class AccountKey
     /// </summary>
     [JsonPropertyName("expires_at")]
     public string? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// El entorno de prueba (sbx_…) de la llave: solo ve sus emisores, webhooks y eventos. null si es de la cuenta.
+    /// </summary>
+    [JsonPropertyName("sandbox")]
+    public string? Sandbox { get; set; }
 }
 
 /// <summary>
@@ -2899,6 +2905,18 @@ public sealed partial class CreateRetentionParamsTotals
     /// </summary>
     [JsonPropertyName("exempt")]
     public decimal? Exempt { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear un entorno de prueba».
+/// </summary>
+public sealed partial class CreateSandboxParams
+{
+    /// <summary>
+    /// Para quién o para qué es, por ejemplo el nombre de quien lo usa.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
 }
 
 /// <summary>
@@ -8034,6 +8052,12 @@ public sealed partial class Issuer
     public string StampsAs { get; set; } = default!;
 
     /// <summary>
+    /// El entorno de prueba (sbx_…) al que pertenece, o null si es de la cuenta. Vea /v1/sandboxes.
+    /// </summary>
+    [JsonPropertyName("sandbox")]
+    public string? Sandbox { get; set; }
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -10588,6 +10612,114 @@ public sealed partial class RollWebhookSecretParams
     /// </summary>
     [JsonPropertyName("previous_secret_expires_in")]
     public long? PreviousSecretExpiresIn { get; set; }
+}
+
+/// <summary>
+/// Un entorno de prueba: el modo de pruebas propio de una persona, con su emisor, llaves, webhooks y eventos aparte.
+/// </summary>
+public sealed partial class Sandbox
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Emisores activos en el entorno.
+    /// </summary>
+    [JsonPropertyName("issuers")]
+    public long Issuers { get; set; }
+
+    /// <summary>
+    /// El emisor de pruebas del SAT con que nace (solo al crearlo).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public Issuer? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo al crearlo.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public SandboxKey? Key { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Siempre true.
+    /// </summary>
+    [JsonPropertyName("deleted")]
+    public bool? Deleted { get; set; }
+}
+
+/// <summary>
+/// Solo al crearlo.
+/// </summary>
+public sealed partial class SandboxKey
+{
+    /// <summary>
+    /// Id de la llave.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// La llave fk_test_… del entorno. Solo se ve esta vez: guárdela.
+    /// </summary>
+    [JsonPropertyName("secret")]
+    public string Secret { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SandboxList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Sandbox> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -13270,6 +13402,12 @@ public sealed partial class WebhookEndpoint
     /// </summary>
     [JsonPropertyName("object")]
     public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El entorno de prueba (sbx_…) al que pertenece, o null si es de la cuenta. Vea /v1/sandboxes.
+    /// </summary>
+    [JsonPropertyName("sandbox")]
+    public string? Sandbox { get; set; }
 
     /// <summary>
     /// Dirección https de su servidor que recibe los avisos.
