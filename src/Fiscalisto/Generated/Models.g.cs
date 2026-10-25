@@ -437,10 +437,46 @@ public sealed partial class Balance
     public bool Unlimited { get; set; }
 
     /// <summary>
+    /// Con esta cantidad o menos llega balance.low (y otra vez al acabarse). Se elige en Desarrolladores › Timbres.
+    /// </summary>
+    [JsonPropertyName("low_balance_at")]
+    public long LowBalanceAt { get; set; }
+
+    /// <summary>
+    /// La recarga automática con la tarjeta guardada, o null si está apagada.
+    /// </summary>
+    [JsonPropertyName("auto_recharge")]
+    public BalanceAutoRecharge? AutoRecharge { get; set; }
+
+    /// <summary>
     /// Los paquetes con timbres, el que vence antes primero (en ese orden se usan).
     /// </summary>
     [JsonPropertyName("packs")]
     public List<BalancePacksItem> Packs { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;BalanceAutoRecharge&lt;/c&gt;.
+/// </summary>
+public sealed partial class BalanceAutoRecharge
+{
+    /// <summary>
+    /// Timbres del paquete que se compra.
+    /// </summary>
+    [JsonPropertyName("timbres")]
+    public long Timbres { get; set; }
+
+    /// <summary>
+    /// Se compra con esta cantidad o menos.
+    /// </summary>
+    [JsonPropertyName("at")]
+    public long At { get; set; }
+
+    /// <summary>
+    /// Como máximo tantas compras al mes.
+    /// </summary>
+    [JsonPropertyName("max_per_month")]
+    public long MaxPerMonth { get; set; }
 }
 
 /// <summary>
@@ -2501,7 +2537,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed o issuer.ready.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready o balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -6662,7 +6698,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -8184,7 +8220,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, issuer.ready, balance.low.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
