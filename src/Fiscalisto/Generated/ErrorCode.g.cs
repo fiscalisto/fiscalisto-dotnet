@@ -213,6 +213,21 @@ public static class ErrorCode
     /// <summary>Los complementos de pago y las notas de crédito no se sustituyen: se cancelan y se emite otro.</summary>
     public const string SubstitutionUnsupported = "substitution_unsupported";
 
+    /// <summary>El reloj se está adelantando en otra solicitud (409, con Retry-After). Espere a test_clock.ready y repita.</summary>
+    public const string TestClockAdvancing = "test_clock_advancing";
+
+    /// <summary>El emisor ya tiene un reloj de prueba: adelántelo, o bórrelo para volver a la hora real.</summary>
+    public const string TestClockExists = "test_clock_exists";
+
+    /// <summary>frozen_time no sirve: no es una fecha y hora ISO 8601, es anterior a la hora del reloj (solo avanza) o va más de dos años adelante de la hora real.</summary>
+    public const string TestClockInvalid = "test_clock_invalid";
+
+    /// <summary>El emisor no tiene reloj de prueba: créelo con POST /v1/issuers/{id}/test_clock.</summary>
+    public const string TestClockMissing = "test_clock_missing";
+
+    /// <summary>Los relojes de prueba son de emisores de prueba: use su llave fk_test_ y un emisor de pruebas.</summary>
+    public const string TestClockUnsupported = "test_clock_unsupported";
+
     /// <summary>Esto solo existe en pruebas (como reiniciar los datos de prueba): use su llave fk_test_.</summary>
     public const string TestModeOnly = "test_mode_only";
 

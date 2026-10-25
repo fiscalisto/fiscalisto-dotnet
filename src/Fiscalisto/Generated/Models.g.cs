@@ -206,6 +206,18 @@ public sealed partial class AdvanceList
 }
 
 /// <summary>
+/// Los campos de «Adelantar el reloj de prueba».
+/// </summary>
+public sealed partial class AdvanceTestClockParams
+{
+    /// <summary>
+    /// A dónde adelantarlo: después de la hora actual del reloj. Lo que toca en el camino se hace día por día.
+    /// </summary>
+    [JsonPropertyName("frozen_time")]
+    public required string FrozenTime { get; set; }
+}
+
+/// <summary>
 /// El cuerpo de POST /v1/invoices (la factura de lo vendido) con method y remainder.
 /// </summary>
 public sealed partial class ApplyAdvanceParams
@@ -3084,6 +3096,18 @@ public sealed partial class CreateStoreConnectionParamsSettings
 }
 
 /// <summary>
+/// Los campos de «Crear un reloj de prueba».
+/// </summary>
+public sealed partial class CreateTestClockParams
+{
+    /// <summary>
+    /// Dónde empieza el reloj; si no la manda, ahora.
+    /// </summary>
+    [JsonPropertyName("frozen_time")]
+    public string? FrozenTime { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Registrar un ticket».
 /// </summary>
 public sealed partial class CreateTicketParams
@@ -3965,7 +3989,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready o balance.low.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low o test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -8058,6 +8082,12 @@ public sealed partial class Issuer
     public string? Sandbox { get; set; }
 
     /// <summary>
+    /// Su reloj de prueba (solo emisores de prueba): la hora que es «hoy» para él, o null si va con la hora real. Vea POST /v1/issuers/{id}/test_clock.
+    /// </summary>
+    [JsonPropertyName("test_clock")]
+    public IssuerTestClock? TestClock { get; set; }
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -8188,6 +8218,18 @@ public sealed partial class IssuerSatDownloads
     /// </summary>
     [JsonPropertyName("efirma_expires_at")]
     public string? EfirmaExpiresAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;IssuerTestClock&lt;/c&gt;.
+/// </summary>
+public sealed partial class IssuerTestClock
+{
+    /// <summary>
+    /// La hora del reloj.
+    /// </summary>
+    [JsonPropertyName("frozen_time")]
+    public string FrozenTime { get; set; } = default!;
 }
 
 /// <summary>
@@ -8556,7 +8598,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -11843,6 +11885,104 @@ public sealed partial class TaxIdValidationWarningsItem
 }
 
 /// <summary>
+/// El reloj de prueba de un emisor de pruebas: su «hoy», que solo avanza cuando usted lo adelanta, haciendo día por día lo que toca.
+/// </summary>
+public sealed partial class TestClock
+{
+    /// <summary>
+    /// clk_ y la clave del emisor.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor de pruebas que vive en esta hora.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La hora del reloj: el «hoy» del emisor para sus facturas recurrentes, cotizaciones, cuentas por cobrar y tickets.
+    /// </summary>
+    [JsonPropertyName("frozen_time")]
+    public string FrozenTime { get; set; } = default!;
+
+    /// <summary>
+    /// advancing mientras una solicitud lo adelanta; ready en cualquier otro momento.
+    /// <br/>
+    /// Valores: ready, advancing.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Al adelantarlo: lo que se hizo en el camino.
+    /// </summary>
+    [JsonPropertyName("advanced")]
+    public TestClockAdvanced? Advanced { get; set; }
+
+    /// <summary>
+    /// true si se detuvo antes de requested_time porque ya timbró 25 comprobantes en esta solicitud: adelántelo otra vez para seguir.
+    /// </summary>
+    [JsonPropertyName("stopped_early")]
+    public bool? StoppedEarly { get; set; }
+
+    /// <summary>
+    /// A dónde se pidió adelantarlo (con stopped_early).
+    /// </summary>
+    [JsonPropertyName("requested_time")]
+    public string? RequestedTime { get; set; }
+
+    /// <summary>
+    /// Siempre true.
+    /// </summary>
+    [JsonPropertyName("deleted")]
+    public bool? Deleted { get; set; }
+}
+
+/// <summary>
+/// Al adelantarlo: lo que se hizo en el camino.
+/// </summary>
+public sealed partial class TestClockAdvanced
+{
+    /// <summary>
+    /// Facturas recurrentes timbradas en el camino.
+    /// </summary>
+    [JsonPropertyName("recurring_invoices")]
+    public long RecurringInvoices { get; set; }
+
+    /// <summary>
+    /// Cotizaciones que vencieron en el camino.
+    /// </summary>
+    [JsonPropertyName("quotes_expired")]
+    public long QuotesExpired { get; set; }
+
+    /// <summary>
+    /// Facturas globales de tickets timbradas en el camino.
+    /// </summary>
+    [JsonPropertyName("global_invoices")]
+    public long GlobalInvoices { get; set; }
+}
+
+/// <summary>
 /// Lo que se borró (y se creó) al reiniciar los datos de prueba.
 /// </summary>
 public sealed partial class TestDataReset
@@ -11898,7 +12038,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }

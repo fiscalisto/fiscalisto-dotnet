@@ -30,6 +30,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Entornos de prueba.</summary>
     public SandboxesResource Sandboxes => _sandboxes ??= new SandboxesResource(this);
 
+    private TestClocksResource? _testClocks;
+
+    /// <summary>Entornos de prueba.</summary>
+    public TestClocksResource TestClocks => _testClocks ??= new TestClocksResource(this);
+
     private BalanceResource? _balance;
 
     /// <summary>Cuenta.</summary>
@@ -274,6 +279,70 @@ public sealed class SandboxesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/sandboxes/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Entornos de prueba: <c>fiscalisto.TestClocks</c>.
+/// </summary>
+public sealed class TestClocksResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TestClocksResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear un reloj de prueba
+    /// </summary>
+    /// <remarks>
+    /// Le da a un emisor de pruebas su propia hora, congelada en frozen_time (ahora, si no la manda): sus facturas recurrentes, cotizaciones, cuentas por cobrar y tickets cuentan los días con ella, y nada de eso corre solo hasta que usted lo adelanta. Para ver en segundos lo que pasa en meses. Solo emisores de prueba; uno por emisor.
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/test_clock</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/create-test-clock"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TestClock> CreateAsync(string id, CreateTestClockParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TestClock>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/test_clock", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver el reloj de prueba
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/issuers/{id}/test_clock</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/get-test-clock"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TestClock> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TestClock>("GET", $"/v1/issuers/{Uri.EscapeDataString(id)}/test_clock", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Borrar el reloj de prueba
+    /// </summary>
+    /// <remarks>
+    /// El emisor vuelve a la hora real; lo que el reloj dejó pendiente lo hacen los procesos diarios.
+    /// <br/>
+    /// <c>DELETE /v1/issuers/{id}/test_clock</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/delete-test-clock"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TestClock> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TestClock>("DELETE", $"/v1/issuers/{Uri.EscapeDataString(id)}/test_clock", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Adelantar el reloj de prueba
+    /// </summary>
+    /// <remarks>
+    /// Mueve el reloj hasta frozen_time haciendo, día por día, lo que habría pasado: timbra las facturas recurrentes de cada periodo, vence las cotizaciones y hace las facturas globales de tickets, con sus eventos. Contesta cuando terminó, con lo que hizo en advanced, y llega test_clock.ready. Hasta 25 comprobantes por solicitud: si se detiene antes, stopped_early y otra llamada sigue. Los CFDI se timbran con la fecha real (el SAT solo acepta la de hoy); el periodo, los vencimientos y los eventos siguen al reloj.
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/test_clock/advance</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/advance-test-clock"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TestClock> AdvanceAsync(string id, AdvanceTestClockParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TestClock>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/test_clock/advance", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
