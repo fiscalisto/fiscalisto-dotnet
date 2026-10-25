@@ -63,6 +63,9 @@ public static class ErrorCode
     /// <summary>La cuenta llegó al máximo de webhooks en este modo.</summary>
     public const string EndpointLimit = "endpoint_limit";
 
+    /// <summary>Un campo de expand[] no existe en la respuesta, no es el id de otro objeto, o se pidieron demasiados (hasta 10 campos, 4 niveles). Vea Expandir objetos.</summary>
+    public const string ExpandInvalid = "expand_invalid";
+
     /// <summary>Idempotency-Key es de 1 a 255 caracteres ASCII, sin acentos ni ñ: el id de su pedido o un UUID.</summary>
     public const string IdempotencyKeyInvalid = "idempotency_key_invalid";
 
