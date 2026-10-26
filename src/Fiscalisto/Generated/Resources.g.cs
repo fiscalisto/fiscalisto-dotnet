@@ -1801,7 +1801,7 @@ public sealed class AccountingResource
     /// Listar las pólizas de un mes
     /// </summary>
     /// <remarks>
-    /// Una póliza de diario por cada CFDI de ingreso o egreso vigente del mes, emitido o recibido (los recibidos con la categoría de su gasto), con sus cuentas y código agrupador del SAT. En pesos; un CFDI en otra moneda sin tipo de cambio no se registra. Es un punto de partida para su contador: no incluye bancos, nómina ni depreciaciones.
+    /// Las pólizas de diario del mes, con sus cuentas y código agrupador del SAT: una por cada CFDI de ingreso o egreso vigente, emitido o recibido (los recibidos con la categoría de su gasto); una por cada pago de un complemento; una por cada recibo de nómina, y una con la depreciación de los activos fijos. Un PUE se registra cobrado o pagado según su forma de pago. En pesos; un CFDI en otra moneda sin tipo de cambio no se registra. No incluye movimientos de banco sin CFDI ni provisiones.
     /// <br/>
     /// <c>GET /v1/accounting/journal_entries</c>
     /// <br/>
@@ -1821,7 +1821,7 @@ public sealed class AccountingResource
     /// Ver la balanza de comprobación
     /// </summary>
     /// <remarks>
-    /// Saldo inicial, cargos, abonos y saldo final de cada cuenta en el mes. Los saldos iniciales se acumulan desde el primer CFDI (las de resultados, desde enero), y los resultados de cada año anterior se cierran a capital.
+    /// Saldo inicial, cargos, abonos y saldo final de cada cuenta en el mes. Los saldos iniciales se acumulan desde el primer CFDI, o desde los saldos iniciales capturados en la app (las de resultados, desde enero), y los resultados de cada año anterior se cierran a capital.
     /// <br/>
     /// <c>GET /v1/accounting/trial_balance</c>
     /// <br/>
@@ -1830,6 +1830,34 @@ public sealed class AccountingResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<TrialBalance> TrialBalanceAsync(GetTrialBalanceParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<TrialBalance>("GET", "/v1/accounting/trial_balance", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver los estados financieros
+    /// </summary>
+    /// <remarks>
+    /// El estado de resultados (del mes y del año hasta ese mes) y el balance general al cierre del mes, leídos de la misma balanza, así que siempre suman las mismas pólizas.
+    /// <br/>
+    /// <c>GET /v1/accounting/financial_statements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-financial-statements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FinancialStatements> FinancialStatementsAsync(GetFinancialStatementsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FinancialStatements>("GET", "/v1/accounting/financial_statements", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cruzar lo declarado con lo facturado
+    /// </summary>
+    /// <remarks>
+    /// Cada mes ya vencido del año: el IVA trasladado, acreditable y retenido y los ingresos para ISR que el emisor declaró (de GET /v1/sat_declarations, después de POST /v1/sat_declarations/refresh) contra lo que dicen sus CFDI. Hasta $2 de diferencia es redondeo (las declaraciones van en pesos enteros). Una cifra que la declaración no trae en un renglón reconocible es unreadable con declared null, nunca 0. También el IVA a favor y el régimen con que factura. Gratis: no consulta al SAT.
+    /// <br/>
+    /// <c>GET /v1/accounting/cross_checks</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-cross-checks"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CrossChecks> CrossChecksAsync(GetCrossChecksParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CrossChecks>("GET", "/v1/accounting/cross_checks", null, @params, options, false, cancellationToken);
 
     /// <summary>
     /// Ver el catálogo de cuentas

@@ -3260,6 +3260,234 @@ public sealed partial class CreateWebhookEndpointParams
 }
 
 /// <summary>
+/// Lo que el emisor declaró cada mes contra lo que dicen sus CFDI, el IVA a favor y el régimen con que factura.
+/// </summary>
+public sealed partial class CrossChecks
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Cada mes cuya declaración mensual ya venció (el día 17 del mes siguiente), con sus cruces. Un mes con complementaria toma, por impuesto, la más reciente que lo trae.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public List<CrossChecksMonthsItem> Months { get; set; } = default!;
+
+    /// <summary>
+    /// El IVA a favor que muestran las declaraciones del año y lo que meses posteriores acreditaron. Una estimación con las declaraciones leídas, no la cuenta del SAT.
+    /// </summary>
+    [JsonPropertyName("vat_balance_in_favor")]
+    public CrossChecksVatBalanceInFavor VatBalanceInFavor { get; set; } = default!;
+
+    /// <summary>
+    /// Los regímenes del emisor (registered, de su constancia) y con cuáles facturó en el año.
+    /// </summary>
+    [JsonPropertyName("tax_regimes")]
+    public CrossChecksTaxRegimes TaxRegimes { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CrossChecksMonthsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossChecksMonthsItem
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El peor de sus cruces: differs (no coincide), unreadable (una cifra no se pudo leer), not_filed (sin declaración mensual) o matches.
+    /// <br/>
+    /// Valores: matches, differs, not_filed, unreadable.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Un cruce por cifra.
+    /// </summary>
+    [JsonPropertyName("checks")]
+    public List<CrossChecksMonthsItemChecksItem> Checks { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CrossChecksMonthsItemChecksItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossChecksMonthsItemChecksItem
+{
+    /// <summary>
+    /// Qué cifra: vat_charged (IVA trasladado), vat_creditable (IVA acreditable), vat_withheld (IVA que le retuvieron) o isr_income (ingresos para ISR: nominales en persona moral, cobrados en los demás).
+    /// <br/>
+    /// Valores: vat_charged, vat_creditable, vat_withheld, isr_income.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// matches (hasta $2 de diferencia), differs, not_filed (no hay declaración del mes) o unreadable (la declaración no trae la cifra en un renglón reconocible).
+    /// <br/>
+    /// Valores: matches, differs, not_filed, unreadable.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Lo declarado, en pesos; null si no hay declaración o no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("declared")]
+    public decimal? Declared { get; set; }
+
+    /// <summary>
+    /// Lo que dicen los CFDI del mes, con los mismos cálculos de Impuestos.
+    /// </summary>
+    [JsonPropertyName("invoiced")]
+    public decimal Invoiced { get; set; }
+
+    /// <summary>
+    /// declared menos invoiced; null si declared es null.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal? Difference { get; set; }
+
+    /// <summary>
+    /// El número de operación de la declaración de donde salió la cifra.
+    /// </summary>
+    [JsonPropertyName("operation_number")]
+    public string? OperationNumber { get; set; }
+}
+
+/// <summary>
+/// Los regímenes del emisor (registered, de su constancia) y con cuáles facturó en el año.
+/// </summary>
+public sealed partial class CrossChecksTaxRegimes
+{
+    /// <summary>
+    /// Los regímenes de su constancia (c_RegimenFiscal), capturados en la app.
+    /// </summary>
+    [JsonPropertyName("registered")]
+    public List<string> Registered { get; set; } = default!;
+
+    /// <summary>
+    /// Cada régimen con que facturó en el año (RegimenFiscal del emisor).
+    /// </summary>
+    [JsonPropertyName("invoiced")]
+    public List<CrossChecksTaxRegimesInvoicedItem> Invoiced { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CrossChecksTaxRegimesInvoicedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossChecksTaxRegimesInvoicedItem
+{
+    /// <summary>
+    /// El régimen (c_RegimenFiscal).
+    /// </summary>
+    [JsonPropertyName("tax_regime")]
+    public string TaxRegime { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos CFDI lo llevan (ingreso, egreso y pago, sin cancelados).
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// La fecha del primero (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("first_date")]
+    public string FirstDate { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha del último (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("last_date")]
+    public string LastDate { get; set; } = default!;
+
+    /// <summary>
+    /// Si el régimen está en su constancia; null si no se capturaron los regímenes de la constancia.
+    /// </summary>
+    [JsonPropertyName("registered")]
+    public bool? Registered { get; set; }
+}
+
+/// <summary>
+/// El IVA a favor que muestran las declaraciones del año y lo que meses posteriores acreditaron. Una estimación con las declaraciones leídas, no la cuenta del SAT.
+/// </summary>
+public sealed partial class CrossChecksVatBalanceInFavor
+{
+    /// <summary>
+    /// Cada mes con IVA a favor.
+    /// </summary>
+    [JsonPropertyName("periods")]
+    public List<CrossChecksVatBalanceInFavorPeriodsItem> Periods { get; set; } = default!;
+
+    /// <summary>
+    /// La suma del IVA a favor del año.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Lo que las declaraciones del año acreditaron de saldos a favor de periodos anteriores.
+    /// </summary>
+    [JsonPropertyName("credited")]
+    public decimal Credited { get; set; }
+
+    /// <summary>
+    /// total menos credited, nunca menos de 0: lo que quedaría por acreditar o pedir en devolución.
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public decimal Remaining { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CrossChecksVatBalanceInFavorPeriodsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossChecksVatBalanceInFavorPeriodsItem
+{
+    /// <summary>
+    /// El mes cuya declaración muestra el IVA a favor.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El IVA a favor de ese mes.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El número de operación de esa declaración.
+    /// </summary>
+    [JsonPropertyName("operation_number")]
+    public string OperationNumber { get; set; } = default!;
+}
+
+/// <summary>
 /// Un cliente del catálogo de un emisor.
 /// </summary>
 public sealed partial class Customer
@@ -4134,6 +4362,568 @@ public sealed partial class EventList
 }
 
 /// <summary>
+/// El estado de resultados y el balance general de un mes, leídos de su balanza.
+/// </summary>
+public sealed partial class FinancialStatements
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El estado de resultados del mes (month) y del año hasta ese mes (year_to_date). Cada sección suma en positivo lo que aumenta la utilidad (ingresos) y en negativo lo que la reduce (costos y gastos).
+    /// </summary>
+    [JsonPropertyName("income_statement")]
+    public FinancialStatementsIncomeStatement IncomeStatement { get; set; } = default!;
+
+    /// <summary>
+    /// El balance general al cierre del mes, agrupado por el primer nivel del código agrupador. difference es activo menos pasivo y capital: 0 cuando los libros cuadran.
+    /// </summary>
+    [JsonPropertyName("balance_sheet")]
+    public FinancialStatementsBalanceSheet BalanceSheet { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas pólizas tuvo el mes.
+    /// </summary>
+    [JsonPropertyName("journal_entries")]
+    public long JournalEntries { get; set; }
+
+    /// <summary>
+    /// Desde qué fecha cuentan los saldos iniciales capturados en la app; null si no hay.
+    /// </summary>
+    [JsonPropertyName("opening_balances_date")]
+    public string? OpeningBalancesDate { get; set; }
+
+    /// <summary>
+    /// Pagos que se refieren a facturas que no están en Fiscalisto y no se registraron.
+    /// </summary>
+    [JsonPropertyName("missing_invoices")]
+    public long MissingInvoices { get; set; }
+}
+
+/// <summary>
+/// El balance general al cierre del mes, agrupado por el primer nivel del código agrupador. difference es activo menos pasivo y capital: 0 cuando los libros cuadran.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheet
+{
+    /// <summary>
+    /// El activo: su total y sus grupos.
+    /// </summary>
+    [JsonPropertyName("assets")]
+    public FinancialStatementsBalanceSheetAssets Assets { get; set; } = default!;
+
+    /// <summary>
+    /// El pasivo: su total y sus grupos.
+    /// </summary>
+    [JsonPropertyName("liabilities")]
+    public FinancialStatementsBalanceSheetLiabilities Liabilities { get; set; } = default!;
+
+    /// <summary>
+    /// El capital contable sin el resultado del ejercicio: su total y sus grupos.
+    /// </summary>
+    [JsonPropertyName("equity")]
+    public FinancialStatementsBalanceSheetEquity Equity { get; set; } = default!;
+
+    /// <summary>
+    /// El resultado del ejercicio hasta el mes, parte del capital.
+    /// </summary>
+    [JsonPropertyName("net_income_year_to_date")]
+    public decimal NetIncomeYearToDate { get; set; }
+
+    /// <summary>
+    /// Pasivo más capital más el resultado del ejercicio.
+    /// </summary>
+    [JsonPropertyName("liabilities_and_equity")]
+    public decimal LiabilitiesAndEquity { get; set; }
+
+    /// <summary>
+    /// Activo menos pasivo y capital: 0 cuando los libros cuadran.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal Difference { get; set; }
+}
+
+/// <summary>
+/// El activo: su total y sus grupos.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetAssets
+{
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<FinancialStatementsBalanceSheetAssetsGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsBalanceSheetAssetsGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetAssetsGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<FinancialStatementsBalanceSheetAssetsGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsBalanceSheetAssetsGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetAssetsGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El capital contable sin el resultado del ejercicio: su total y sus grupos.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetEquity
+{
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<FinancialStatementsBalanceSheetEquityGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsBalanceSheetEquityGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetEquityGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<FinancialStatementsBalanceSheetEquityGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsBalanceSheetEquityGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetEquityGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El pasivo: su total y sus grupos.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetLiabilities
+{
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<FinancialStatementsBalanceSheetLiabilitiesGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsBalanceSheetLiabilitiesGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetLiabilitiesGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<FinancialStatementsBalanceSheetLiabilitiesGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsBalanceSheetLiabilitiesGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsBalanceSheetLiabilitiesGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El estado de resultados del mes (month) y del año hasta ese mes (year_to_date). Cada sección suma en positivo lo que aumenta la utilidad (ingresos) y en negativo lo que la reduce (costos y gastos).
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatement
+{
+    /// <summary>
+    /// El estado de resultados del mes.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public FinancialStatementsIncomeStatementMonth Month { get; set; } = default!;
+
+    /// <summary>
+    /// El estado de resultados de enero al mes.
+    /// </summary>
+    [JsonPropertyName("year_to_date")]
+    public FinancialStatementsIncomeStatementYearToDate YearToDate { get; set; } = default!;
+}
+
+/// <summary>
+/// El estado de resultados del mes.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementMonth
+{
+    /// <summary>
+    /// Ingresos, costos, gastos, financiamiento y otros, cada uno con su total.
+    /// </summary>
+    [JsonPropertyName("sections")]
+    public List<FinancialStatementsIncomeStatementMonthSectionsItem> Sections { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad (o pérdida, negativa) antes de impuestos del mes.
+    /// </summary>
+    [JsonPropertyName("net_income")]
+    public decimal NetIncome { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsIncomeStatementMonthSectionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementMonthSectionsItem
+{
+    /// <summary>
+    /// El archivo .key en base64 (puede traer el prefijo data:).
+    /// <br/>
+    /// Valores: ingresos, costos, gastos, financiamiento, otros.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<FinancialStatementsIncomeStatementMonthSectionsItemGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsIncomeStatementMonthSectionsItemGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementMonthSectionsItemGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<FinancialStatementsIncomeStatementMonthSectionsItemGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsIncomeStatementMonthSectionsItemGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementMonthSectionsItemGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El estado de resultados de enero al mes.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementYearToDate
+{
+    /// <summary>
+    /// Ingresos, costos, gastos, financiamiento y otros, cada uno con su total.
+    /// </summary>
+    [JsonPropertyName("sections")]
+    public List<FinancialStatementsIncomeStatementYearToDateSectionsItem> Sections { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad (o pérdida, negativa) antes de impuestos de enero al mes.
+    /// </summary>
+    [JsonPropertyName("net_income")]
+    public decimal NetIncome { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsIncomeStatementYearToDateSectionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementYearToDateSectionsItem
+{
+    /// <summary>
+    /// El archivo .key en base64 (puede traer el prefijo data:).
+    /// <br/>
+    /// Valores: ingresos, costos, gastos, financiamiento, otros.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<FinancialStatementsIncomeStatementYearToDateSectionsItemGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsIncomeStatementYearToDateSectionsItemGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementYearToDateSectionsItemGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<FinancialStatementsIncomeStatementYearToDateSectionsItemGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialStatementsIncomeStatementYearToDateSectionsItemGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialStatementsIncomeStatementYearToDateSectionsItemGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cruzar lo declarado con lo facturado».
+/// </summary>
+public sealed partial class GetCrossChecksParams
+{
+    /// <summary>
+    /// El ejercicio. Por omisión, el actual.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Descargar la DIOT para el SAT».
 /// </summary>
 public sealed partial class GetDiotFileParams
@@ -4219,6 +5009,24 @@ public sealed partial class GetElectronicAccountingParams
     /// </summary>
     [JsonPropertyName("procedure_number")]
     public string? ProcedureNumber { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver los estados financieros».
+/// </summary>
+public sealed partial class GetFinancialStatementsParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
 
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
@@ -8305,7 +9113,7 @@ public sealed partial class IssuerTestClock
 }
 
 /// <summary>
-/// La póliza de diario de un CFDI: sus cargos y abonos, que siempre cuadran.
+/// Una póliza de diario (de un CFDI, un pago, un recibo de nómina o la depreciación del mes): sus cargos y abonos, que siempre cuadran.
 /// </summary>
 public sealed partial class JournalEntry
 {
@@ -8334,43 +9142,51 @@ public sealed partial class JournalEntry
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// La fecha del CFDI.
+    /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina) o depreciation (la depreciación del mes de los activos fijos).
+    /// <br/>
+    /// Valores: invoice, payment_received, payment_made, payroll, depreciation.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha del CFDI o del pago; en la depreciación, el último día del mes.
     /// </summary>
     [JsonPropertyName("date")]
     public string Date { get; set; } = default!;
 
     /// <summary>
-    /// Factura o nota de crédito, su folio y la contraparte.
+    /// El documento, su folio y la contraparte.
     /// </summary>
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 
     /// <summary>
-    /// La factura (inv_…) si la timbró este emisor; null si la recibió.
+    /// La factura (inv_…) si es la póliza de un CFDI que timbró este emisor; null en los demás casos.
     /// </summary>
     [JsonPropertyName("invoice")]
     public string? Invoice { get; set; }
 
     /// <summary>
-    /// El folio fiscal del CFDI.
+    /// El folio fiscal del CFDI (o del complemento de pago); null en la depreciación.
     /// </summary>
     [JsonPropertyName("uuid")]
-    public string Uuid { get; set; } = default!;
+    public string? Uuid { get; set; }
 
     /// <summary>
-    /// El RFC de la contraparte (cliente o proveedor).
+    /// El RFC de la contraparte (cliente, proveedor o empleado); null en la depreciación.
     /// </summary>
     [JsonPropertyName("tax_id")]
-    public string TaxId { get; set; } = default!;
+    public string? TaxId { get; set; }
 
     /// <summary>
-    /// El total del CFDI, en su moneda.
+    /// El total del documento, en su moneda.
     /// </summary>
     [JsonPropertyName("total")]
     public decimal Total { get; set; }
 
     /// <summary>
-    /// La moneda del CFDI.
+    /// La moneda del documento.
     /// </summary>
     [JsonPropertyName("currency")]
     public string Currency { get; set; } = default!;
