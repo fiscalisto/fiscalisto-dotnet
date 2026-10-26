@@ -1,0 +1,27 @@
+# Publishes the package to NuGet when a version tag (v0.1.1) arrives from Fiscalisto's
+# repository (scripts/sdk-release.sh), after its tests. Trusted publishing: NuGet trades this
+# workflow's identity for a key that lasts an hour, so no key is stored.
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  nuget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: The tag is the package's version
+        run: grep -q "<Version>${GITHUB_REF_NAME#v}</Version>" src/Fiscalisto/Fiscalisto.csproj
+      - run: dotnet test tests/Fiscalisto.Tests --nologo
+      - run: dotnet pack src/Fiscalisto -c Release -o out --nologo
+      - uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - run: dotnet nuget push "out/*.nupkg" --source https://api.nuget.org/v3/index.json --api-key "${{ steps.login.outputs.NUGET_API_KEY }}"

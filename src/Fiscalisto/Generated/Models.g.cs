@@ -1866,7 +1866,13 @@ public sealed partial class CreateProductParams
     /// Precio unitario antes de impuestos (ValorUnitario).
     /// </summary>
     [JsonPropertyName("unit_price")]
-    public required decimal UnitPrice { get; set; }
+    public decimal? UnitPrice { get; set; }
+
+    /// <summary>
+    /// Precio abierto: sin precio fijo (una noche de hotel que cambia cada día); cada factura manda su unit_price.
+    /// </summary>
+    [JsonPropertyName("open_price")]
+    public bool? OpenPrice { get; set; }
 
     /// <summary>
     /// Objeto de impuesto (ObjetoImp), c_ObjetoImp: 01 no objeto, 02 sí objeto (por omisión), 03 sin desglose, 04 no causa…
@@ -1909,6 +1915,36 @@ public sealed partial class CreateProductParams
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
+
+    /// <summary>
+    /// Impuestos locales que lleva, como el ISH 3% de hospedaje: van en cada factura con él, sobre sus conceptos.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<CreateProductParamsLocalTaxesItem>? LocalTaxes { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateProductParamsLocalTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateProductParamsLocalTaxesItem
+{
+    /// <summary>
+    /// true si es una retención local; false si es un traslado.
+    /// </summary>
+    [JsonPropertyName("retention")]
+    public required bool Retention { get; set; }
+
+    /// <summary>
+    /// Nombre del impuesto local (ImpLocTrasladado o ImpLocRetenido), como ISH.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Tasa en por ciento (TasadeTraslado o TasadeRetencion).
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
 }
 
 /// <summary>
@@ -3301,6 +3337,12 @@ public sealed partial class Customer
     public bool IepsTaxpayer { get; set; }
 
     /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo cambió por última vez, ISO 8601 (-06:00).
     /// </summary>
     [JsonPropertyName("updated_at")]
@@ -3895,6 +3937,12 @@ public sealed partial class Employee
     /// </summary>
     [JsonPropertyName("warnings")]
     public List<string> Warnings { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
 }
 
 /// <summary>
@@ -8486,7 +8534,7 @@ public sealed partial class ListAdvancesParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// RFC del cliente.
+    /// RFC del cliente o su id (cus_…).
     /// </summary>
     [JsonPropertyName("customer")]
     public string? Customer { get; set; }
@@ -8698,7 +8746,7 @@ public sealed partial class ListInvoicesParams
     public string? Type { get; set; }
 
     /// <summary>
-    /// RFC del cliente.
+    /// RFC del cliente o su id (cus_…).
     /// </summary>
     [JsonPropertyName("customer")]
     public string? Customer { get; set; }
@@ -8888,7 +8936,7 @@ public sealed partial class ListReceivablesParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// Solo este RFC.
+    /// Solo este cliente: su RFC o su id (cus_…).
     /// </summary>
     [JsonPropertyName("customer")]
     public string? Customer { get; set; }
@@ -8968,6 +9016,44 @@ public sealed partial class ListRetentionsParams
     /// </summary>
     [JsonPropertyName("year")]
     public string? Year { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar declaraciones del SAT».
+/// </summary>
+public sealed partial class ListSatDeclarationsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de un ejercicio, como 2025.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// monthly (provisionales o definitivas), annual (la anual) o dyp (Declaraciones y pagos).
+    /// <br/>
+    /// Valores: monthly, annual, dyp.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string? Source { get; set; }
 }
 
 /// <summary>
@@ -9606,6 +9692,12 @@ public sealed partial class Product
     public decimal UnitPrice { get; set; }
 
     /// <summary>
+    /// Precio abierto: el producto no tiene precio fijo y cada concepto con él manda su unit_price.
+    /// </summary>
+    [JsonPropertyName("open_price")]
+    public bool OpenPrice { get; set; }
+
+    /// <summary>
     /// Objeto de impuesto (ObjetoImp), c_ObjetoImp: 01 no objeto, 02 sí objeto (por omisión), 03 sin desglose, 04 no causa…
     /// </summary>
     [JsonPropertyName("taxability")]
@@ -9642,6 +9734,18 @@ public sealed partial class Product
     public decimal IsrRetention { get; set; }
 
     /// <summary>
+    /// Impuestos locales (complemento implocal): traslados y retenciones estatales.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<ProductLocalTaxesItem> LocalTaxes { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo cambió por última vez, ISO 8601 (-06:00).
     /// </summary>
     [JsonPropertyName("updated_at")]
@@ -9676,6 +9780,30 @@ public sealed partial class ProductList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ProductLocalTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ProductLocalTaxesItem
+{
+    /// <summary>
+    /// true si es una retención local; false si es un traslado.
+    /// </summary>
+    [JsonPropertyName("retention")]
+    public bool Retention { get; set; }
+
+    /// <summary>
+    /// Nombre del impuesto local (ImpLocTrasladado o ImpLocRetenido), como ISH.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Tasa en por ciento (TasadeTraslado o TasadeRetencion).
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public decimal Rate { get; set; }
 }
 
 /// <summary>
@@ -10283,6 +10411,18 @@ public sealed partial class RecurringInvoiceSchedule
 }
 
 /// <summary>
+/// Los campos de «Consultar las declaraciones de un emisor en el SAT».
+/// </summary>
+public sealed partial class RefreshSatDeclarationsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Reiniciar los datos de prueba».
 /// </summary>
 public sealed partial class ResetTestDataParams
@@ -10834,6 +10974,372 @@ public sealed partial class SatCatalogEntryList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una declaración que el emisor presentó ante el SAT (provisional o definitiva, anual o del servicio anterior Declaraciones y pagos), con sus cifras y sus archivos.
+/// </summary>
+public sealed partial class SatDeclaration
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor que la presentó.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// monthly (provisional o definitiva, desde 2022), annual (la anual de persona moral) o dyp (el servicio anterior Declaraciones y pagos, 2021 y antes).
+    /// <br/>
+    /// Valores: monthly, annual, dyp.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// El mes (1 a 12), o null en la anual y otros periodos.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public long? Month { get; set; }
+
+    /// <summary>
+    /// El periodo como lo nombra el SAT: «Enero», «Del Ejercicio»…
+    /// </summary>
+    [JsonPropertyName("period")]
+    public string Period { get; set; } = default!;
+
+    /// <summary>
+    /// normal o complementary (complementaria).
+    /// <br/>
+    /// Valores: normal, complementary.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de complementaria como lo dice el SAT («Modificación de obligaciones»…), o null.
+    /// </summary>
+    [JsonPropertyName("complementary_type")]
+    public string? ComplementaryType { get; set; }
+
+    /// <summary>
+    /// El número de operación que le dio el SAT.
+    /// </summary>
+    [JsonPropertyName("operation_number")]
+    public string OperationNumber { get; set; } = default!;
+
+    /// <summary>
+    /// La línea de captura, si hubo algo a pagar.
+    /// </summary>
+    [JsonPropertyName("payment_line")]
+    public string? PaymentLine { get; set; }
+
+    /// <summary>
+    /// Cuándo se presentó (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("filed_on")]
+    public string? FiledOn { get; set; }
+
+    /// <summary>
+    /// El coeficiente de utilidad que aplicó (ISR de personas morales), o null.
+    /// </summary>
+    [JsonPropertyName("profit_coefficient")]
+    public decimal? ProfitCoefficient { get; set; }
+
+    /// <summary>
+    /// El ISR a cargo, según el acuse.
+    /// </summary>
+    [JsonPropertyName("isr_due")]
+    public decimal? IsrDue { get; set; }
+
+    /// <summary>
+    /// El IVA a cargo, según el acuse.
+    /// </summary>
+    [JsonPropertyName("vat_due")]
+    public decimal? VatDue { get; set; }
+
+    /// <summary>
+    /// El total a pagar, según el acuse.
+    /// </summary>
+    [JsonPropertyName("total_due")]
+    public decimal? TotalDue { get; set; }
+
+    /// <summary>
+    /// Las cifras de la declaración por impuesto (tax), cada una con su texto como lo imprime el SAT (label) y su valor. Vacío en las de Declaraciones y pagos (su PDF trae dos columnas que no se leen con certeza) o si el PDF aún no llega.
+    /// </summary>
+    [JsonPropertyName("sections")]
+    public List<SatDeclarationSectionsItem> Sections { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que dice el acuse: cada concepto con su cantidad a cargo y a pagar, el total, la línea de captura y su vigencia. null si el acuse aún no llega.
+    /// </summary>
+    [JsonPropertyName("receipt")]
+    public SatDeclarationReceipt? Receipt { get; set; }
+
+    /// <summary>
+    /// Qué archivos ya tiene: pdf (GET …/pdf), receipt (GET …/receipt) y financial_statements (GET …/financial_statements, solo en la anual de persona moral).
+    /// </summary>
+    [JsonPropertyName("files")]
+    public SatDeclarationFiles Files { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué falta un archivo, como lo dijo el SAT (por ejemplo «No se puede generar el archivo»). Se vuelve a pedir en la siguiente consulta.
+    /// </summary>
+    [JsonPropertyName("files_error")]
+    public string? FilesError { get; set; }
+
+    /// <summary>
+    /// Cuándo se trajo por primera vez.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// Qué archivos ya tiene: pdf (GET …/pdf), receipt (GET …/receipt) y financial_statements (GET …/financial_statements, solo en la anual de persona moral).
+/// </summary>
+public sealed partial class SatDeclarationFiles
+{
+    /// <summary>
+    /// Si ya tiene la declaración en PDF (GET …/pdf).
+    /// </summary>
+    [JsonPropertyName("pdf")]
+    public bool Pdf { get; set; }
+
+    /// <summary>
+    /// Si ya tiene el acuse (GET …/receipt).
+    /// </summary>
+    [JsonPropertyName("receipt")]
+    public bool Receipt { get; set; }
+
+    /// <summary>
+    /// Si ya tiene el Excel de estados financieros (GET …/financial_statements), solo en la anual de persona moral.
+    /// </summary>
+    [JsonPropertyName("financial_statements")]
+    public bool FinancialStatements { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatDeclarationList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatDeclaration> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationReceipt&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationReceipt
+{
+    /// <summary>
+    /// Cada impuesto del acuse.
+    /// </summary>
+    [JsonPropertyName("concepts")]
+    public List<SatDeclarationReceiptConceptsItem> Concepts { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// La línea de captura del acuse.
+    /// </summary>
+    [JsonPropertyName("payment_line")]
+    public string? PaymentLine { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo sirve la línea de captura (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("valid_until")]
+    public string? ValidUntil { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationReceiptConceptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationReceiptConceptsItem
+{
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que resultó a cargo.
+    /// </summary>
+    [JsonPropertyName("due")]
+    public decimal? Due { get; set; }
+
+    /// <summary>
+    /// La cantidad a cargo.
+    /// </summary>
+    [JsonPropertyName("amount_due")]
+    public decimal? AmountDue { get; set; }
+
+    /// <summary>
+    /// La cantidad a pagar.
+    /// </summary>
+    [JsonPropertyName("amount_to_pay")]
+    public decimal? AmountToPay { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationSectionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationSectionsItem
+{
+    /// <summary>
+    /// Impuesto: isr, iva o ieps (ImpuestoRet 001, 002, 003).
+    /// </summary>
+    [JsonPropertyName("tax")]
+    public string Tax { get; set; } = default!;
+
+    /// <summary>
+    /// Los renglones del impuesto, en el orden del PDF.
+    /// </summary>
+    [JsonPropertyName("fields")]
+    public List<SatDeclarationSectionsItemFieldsItem> Fields { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationSectionsItemFieldsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationSectionsItemFieldsItem
+{
+    /// <summary>
+    /// El renglón como lo imprime el SAT.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public JsonElement? Value { get; set; }
+}
+
+/// <summary>
+/// Lo que trajo una consulta de las declaraciones del emisor en el SAT.
+/// </summary>
+public sealed partial class SatDeclarationsRefresh
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor consultado.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// completed (ya bajó todo) o processing (queda algo por bajar: sigue solo en la siguiente hora, sin otro timbre).
+    /// <br/>
+    /// Valores: completed, processing.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas declaraciones listó el SAT en los años consultados.
+    /// </summary>
+    [JsonPropertyName("found")]
+    public long Found { get; set; }
+
+    /// <summary>
+    /// Cuántos archivos bajó en esta consulta.
+    /// </summary>
+    [JsonPropertyName("downloaded")]
+    public long Downloaded { get; set; }
+
+    /// <summary>
+    /// Cuántas declaraciones quedan con archivos por bajar.
+    /// </summary>
+    [JsonPropertyName("pending")]
+    public long Pending { get; set; }
+
+    /// <summary>
+    /// Si una parte del SAT falló (por ejemplo, la anual), lo que dijo; lo demás sí se trajo. null si todo salió.
+    /// </summary>
+    [JsonPropertyName("warning")]
+    public string? Warning { get; set; }
+
+    /// <summary>
+    /// Cuándo se consultó.
+    /// </summary>
+    [JsonPropertyName("refreshed_at")]
+    public string RefreshedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo se puede volver a consultar este emisor (10 minutos después).
+    /// </summary>
+    [JsonPropertyName("next_refresh_at")]
+    public string NextRefreshAt { get; set; } = default!;
 }
 
 /// <summary>
@@ -12668,6 +13174,12 @@ public sealed partial class UpdateProductParams
     public decimal? UnitPrice { get; set; }
 
     /// <summary>
+    /// Precio abierto: sin precio fijo (una noche de hotel que cambia cada día); cada factura manda su unit_price.
+    /// </summary>
+    [JsonPropertyName("open_price")]
+    public bool? OpenPrice { get; set; }
+
+    /// <summary>
     /// Objeto de impuesto (ObjetoImp), c_ObjetoImp: 01 no objeto, 02 sí objeto (por omisión), 03 sin desglose, 04 no causa…
     /// <br/>
     /// Valores: 01, 02, 03, 04, 05, 06, 07, 08.
@@ -12708,6 +13220,36 @@ public sealed partial class UpdateProductParams
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
+
+    /// <summary>
+    /// Impuestos locales que lleva, como el ISH 3% de hospedaje: van en cada factura con él, sobre sus conceptos.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<UpdateProductParamsLocalTaxesItem>? LocalTaxes { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateProductParamsLocalTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateProductParamsLocalTaxesItem
+{
+    /// <summary>
+    /// true si es una retención local; false si es un traslado.
+    /// </summary>
+    [JsonPropertyName("retention")]
+    public required bool Retention { get; set; }
+
+    /// <summary>
+    /// Nombre del impuesto local (ImpLocTrasladado o ImpLocRetenido), como ISH.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Tasa en por ciento (TasadeTraslado o TasadeRetencion).
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
 }
 
 /// <summary>

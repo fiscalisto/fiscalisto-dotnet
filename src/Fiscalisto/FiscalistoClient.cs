@@ -88,7 +88,7 @@ public sealed class Page<T>
 public sealed partial class FiscalistoClient : IDisposable
 {
     /// <summary>La versión del SDK.</summary>
-    public const string Version = "0.1.0";
+    public const string Version = "0.1.1";
 
     /// <summary>La versión de la API para la que se hizo este SDK (encabezado Fiscalisto-Version).</summary>
     public const string ApiVersion = "2026-10-24";
@@ -157,7 +157,7 @@ public sealed partial class FiscalistoClient : IDisposable
         bool idempotent = false,
         CancellationToken cancellationToken = default)
     {
-        var bytes = await SendAsync(method, path, body, query, options, idempotent, cancellationToken).ConfigureAwait(false);
+        var bytes = await SendAsync(method, path, body, query, options, idempotent, cancellationToken, expectJson: true).ConfigureAwait(false);
         return JsonSerializer.Deserialize<T>(bytes, JsonOptions)!;
     }
 
@@ -198,7 +198,7 @@ public sealed partial class FiscalistoClient : IDisposable
             pairs.RemoveAll(p => p.Key == "starting_after");
             pairs.Add(new("starting_after", startingAfter));
         }
-        var bytes = await SendAsync("GET", path, null, pairs, options, false, cancellationToken).ConfigureAwait(false);
+        var bytes = await SendAsync("GET", path, null, pairs, options, false, cancellationToken, expectJson: true).ConfigureAwait(false);
         using var doc = JsonDocument.Parse(bytes);
         string? lastId = null;
         if (doc.RootElement.TryGetProperty("data", out var data) && data.GetArrayLength() > 0
@@ -242,9 +242,11 @@ public sealed partial class FiscalistoClient : IDisposable
     }
 
     private async Task<byte[]> SendAsync(
-        string method, string path, object? body, object? query, RequestOptions? options, bool idempotent, CancellationToken cancellationToken)
+        string method, string path, object? body, object? query, RequestOptions? options, bool idempotent, CancellationToken cancellationToken,
+        bool expectJson = false)
     {
-        var url = new Uri(_options.BaseUrl, path);
+        // A proxy's path stays: https://proxy.example.com/fiscalisto + /v1/invoices.
+        var url = new Uri(_options.BaseUrl.ToString().TrimEnd('/') + path);
         var pairs = QueryPairs(query);
         if (pairs.Count > 0)
             url = new Uri($"{url}?{string.Join("&", pairs.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"))}");
@@ -306,8 +308,12 @@ public sealed partial class FiscalistoClient : IDisposable
             {
                 var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
                 var status = (int)response.StatusCode;
-                if (status is >= 200 and < 300) return bytes;
                 var requestId = response.Headers.TryGetValues("Request-Id", out var ids) ? ids.FirstOrDefault() : null;
+                if (status is >= 200 and < 300)
+                {
+                    if (expectJson && !IsJson(bytes)) throw InvalidResponse(bytes, status, requestId);
+                    return bytes;
+                }
                 JsonElement? error = null;
                 try
                 {
@@ -331,5 +337,37 @@ public sealed partial class FiscalistoClient : IDisposable
                 throw FiscalistoException.FromError(error, status, requestId);
             }
         }
+    }
+
+    private static bool IsJson(byte[] bytes)
+    {
+        var reader = new Utf8JsonReader(bytes);
+        try
+        {
+            while (reader.Read())
+            {
+            }
+            return reader.BytesConsumed > 0;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>A success that isn't the API's JSON: a proxy's or a network portal's page answered instead.</summary>
+    private static FiscalistoException InvalidResponse(byte[] bytes, int status, string? requestId)
+    {
+        var text = string.Join(" ", Encoding.UTF8.GetString(bytes).Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        if (text.Length > 80) text = text[..80];
+        return new FiscalistoException(
+            "api_error",
+            "invalid_response",
+            $"La respuesta ({status}) no es de la API: {(text.Length > 0 ? text : "vacía")}. ¿Hay un proxy o un portal de por medio?",
+            statusCode: status,
+            requestId: requestId,
+            raw: null,
+            idempotencyKey: null,
+            inner: null);
     }
 }

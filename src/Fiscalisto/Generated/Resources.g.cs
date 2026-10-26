@@ -135,6 +135,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Descargas del SAT.</summary>
     public SatInvoicesResource SatInvoices => _satInvoices ??= new SatInvoicesResource(this);
 
+    private SatDeclarationsResource? _satDeclarations;
+
+    /// <summary>Declaraciones del SAT.</summary>
+    public SatDeclarationsResource SatDeclarations => _satDeclarations ??= new SatDeclarationsResource(this);
+
     private TicketsResource? _tickets;
 
     /// <summary>Autofactura.</summary>
@@ -648,7 +653,7 @@ public sealed class InvoicesResource
     /// Cancelar una factura
     /// </summary>
     /// <remarks>
-    /// Pide la cancelación al SAT. Si el cliente debe aceptarla queda en pending (escuche invoice.canceled o invoice.cancellation_rejected). Usa un timbre la primera vez que el SAT acepta la solicitud; repetirla, o pedirla otra vez después de un rechazo, no. Nunca se niega por falta de timbres.
+    /// Pide la cancelación al SAT. Si el cliente debe aceptarla queda en pending (escuche invoice.canceled o invoice.cancellation_rejected). No usa timbres.
     /// <br/>
     /// <c>POST /v1/invoices/{id}/cancel</c>
     /// <br/>
@@ -1018,7 +1023,7 @@ public sealed class RetentionsResource
     /// Cancelar una constancia
     /// </summary>
     /// <remarks>
-    /// Se cancela en el momento (no espera aceptación). Usa un timbre.
+    /// Se cancela en el momento (no espera aceptación). No usa timbres.
     /// <br/>
     /// <c>POST /v1/retentions/{id}/cancel</c>
     /// <br/>
@@ -1518,7 +1523,7 @@ public sealed class SatDownloadsResource
     /// Pedirle al SAT las facturas de un emisor
     /// </summary>
     /// <remarks>
-    /// La descarga masiva del SAT: las facturas que el emisor recibió (o emitió) en un periodo de hasta un año, con su XML. Contesta 202 de inmediato; el SAT tarda de minutos a horas y al terminar llega sat_download.completed (o sat_download.failed) y las facturas quedan en GET /v1/sat_invoices. En producción necesita la e.firma guardada del emisor; en pruebas no se le pregunta al SAT: la descarga trae facturas de ejemplo al instante. No usa timbres.
+    /// La descarga masiva del SAT: las facturas que el emisor recibió (o emitió) en un periodo de hasta un año, con su XML. Contesta 202 de inmediato; el SAT tarda de minutos a horas y al terminar llega sat_download.completed (o sat_download.failed) y las facturas quedan en GET /v1/sat_invoices. En producción necesita la e.firma guardada del emisor; en pruebas no se le pregunta al SAT: la descarga trae facturas de ejemplo al instante. En producción usa 1 timbre por cada 100 CFDI que trae (al menos 1).
     /// <br/>
     /// <c>POST /v1/sat_downloads</c>
     /// <br/>
@@ -1613,6 +1618,104 @@ public sealed class SatInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> XmlAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/xml", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Declaraciones del SAT: <c>fiscalisto.SatDeclarations</c>.
+/// </summary>
+public sealed class SatDeclarationsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatDeclarationsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Consultar las declaraciones de un emisor en el SAT
+    /// </summary>
+    /// <remarks>
+    /// Entra al SAT con la e.firma guardada del emisor y trae las declaraciones que presentó: provisionales o definitivas (desde 2022), la anual de persona moral (desde 2019) y las del servicio anterior Declaraciones y pagos, con su PDF, su acuse y sus cifras. La primera consulta trae todos los años que el SAT conserva; las siguientes, este año y el anterior. Solo consulta: nunca presenta ni firma nada. En producción usa 1 timbre por consulta (regresa si el SAT no contesta) y se puede hacer una vez cada 10 minutos por emisor. Contesta en menos de un minuto; si queda algo por bajar (status processing), sigue solo en la siguiente hora sin otro timbre. En pruebas no se le pregunta al SAT: trae declaraciones de ejemplo al instante.
+    /// <br/>
+    /// <c>POST /v1/sat_declarations/refresh</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/refresh-sat-declarations"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatDeclarationsRefresh> RefreshAsync(RefreshSatDeclarationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatDeclarationsRefresh>("POST", "/v1/sat_declarations/refresh", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar declaraciones del SAT
+    /// </summary>
+    /// <remarks>
+    /// Las declaraciones que trajeron sus consultas, del ejercicio y mes más recientes a los más antiguos (la anual antes de los meses de su año). No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_declarations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/list-sat-declarations"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SatDeclaration>> ListAsync(ListSatDeclarationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SatDeclaration>("/v1/sat_declarations", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar declaraciones del SAT: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SatDeclaration> ListAutoPagingAsync(ListSatDeclarationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SatDeclaration>("/v1/sat_declarations", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una declaración del SAT
+    /// </summary>
+    /// <remarks>
+    /// <c>GET /v1/sat_declarations/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-declaration"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatDeclaration> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatDeclaration>("GET", $"/v1/sat_declarations/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar el PDF de una declaración
+    /// </summary>
+    /// <remarks>
+    /// La declaración como la da el SAT. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_declarations/{id}/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-declaration-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/sat_declarations/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar el acuse de una declaración
+    /// </summary>
+    /// <remarks>
+    /// El acuse de recibo, con la línea de captura si hay algo a pagar. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_declarations/{id}/receipt</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-declaration-receipt"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> ReceiptAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/sat_declarations/{Uri.EscapeDataString(id)}/receipt", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar los estados financieros de una anual
+    /// </summary>
+    /// <remarks>
+    /// El Excel de estados financieros de la anual de persona moral, como lo da el SAT. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_declarations/{id}/financial_statements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-declaration-financial-statements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> FinancialStatementsAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", $"/v1/sat_declarations/{Uri.EscapeDataString(id)}/financial_statements", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

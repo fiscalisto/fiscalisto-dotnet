@@ -60,6 +60,9 @@ public static class ErrorCode
     /// <summary>No se pudo mandar el correo; el comprobante sí está timbrado.</summary>
     public const string EmailFailed = "email_failed";
 
+    /// <summary>Ya hay un webhook con esa dirección en este modo; el mensaje dice cuál. Cámbielo en vez de crear otro.</summary>
+    public const string EndpointExists = "endpoint_exists";
+
     /// <summary>La cuenta llegó al máximo de webhooks en este modo.</summary>
     public const string EndpointLimit = "endpoint_limit";
 
@@ -75,7 +78,7 @@ public static class ErrorCode
     /// <summary>Esa Idempotency-Key ya se usó en las últimas 24 horas con otra solicitud (otra ruta u otro cuerpo). Use una nueva para cada operación distinta.</summary>
     public const string IdempotencyKeyReused = "idempotency_key_reused";
 
-    /// <summary>La cuenta no tiene timbres de producción. Compre un paquete en Desarrolladores › Timbres. En pruebas nunca pasa. Para enterarse antes, escuche balance.low o active la recarga automática.</summary>
+    /// <summary>La cuenta no tiene timbres de producción: para timbrar, revisar RFC en las listas, consultar constancias o pedir descargas al SAT. Compre un paquete en Desarrolladores › Timbres. En pruebas nunca pasa. Para enterarse antes, escuche balance.low o active la recarga automática.</summary>
     public const string InsufficientBalance = "insufficient_balance";
 
     /// <summary>Algo falló de nuestro lado. Repita la solicitud con la misma Idempotency-Key: nunca se timbra dos veces. Si sigue, escríbanos con el request_id.</summary>
@@ -86,6 +89,9 @@ public static class ErrorCode
 
     /// <summary>El cuerpo no es un objeto JSON válido.</summary>
     public const string InvalidJson = "invalid_json";
+
+    /// <summary>La respuesta no se pudo leer (api_error): no es el JSON de la API, sino la página de un proxy o de un portal de la red. status dice qué contestó.</summary>
+    public const string InvalidResponse = "invalid_response";
 
     /// <summary>La factura no cumple una regla del SAT que Fiscalisto revisa antes de mandarla al PAC (uso contra régimen, totales, complementos…). No se usó ningún timbre.</summary>
     public const string InvoiceInvalid = "invoice_invalid";
@@ -141,7 +147,7 @@ public static class ErrorCode
     /// <summary>Falta un campo obligatorio. param dice cuál.</summary>
     public const string ParameterMissing = "parameter_missing";
 
-    /// <summary>Mandó un campo que no existe (casi siempre un nombre mal escrito, como legalName en vez de legal_name). Nunca se ignora en silencio.</summary>
+    /// <summary>Mandó un campo o un parámetro de la URL que no existe (casi siempre un nombre mal escrito, como legalName en vez de legal_name, o ?statuss= en vez de ?status=). Nunca se ignora en silencio.</summary>
     public const string ParameterUnknown = "parameter_unknown";
 
     /// <summary>El recibo de nómina no se puede calcular o timbrar con esos datos (periodo, días, registro patronal del emisor…).</summary>
@@ -174,7 +180,7 @@ public static class ErrorCode
     /// <summary>La factura recurrente está en pausa: reanúdela con active: true para timbrarla.</summary>
     public const string RecurringPaused = "recurring_paused";
 
-    /// <summary>Otra solicitud con la misma Idempotency-Key sigue en proceso (409, con Retry-After). Repítala en un momento con la misma llave: contestará lo mismo.</summary>
+    /// <summary>Otra solicitud con la misma Idempotency-Key sigue en proceso, o otra solicitud está cambiando el mismo objeto (dos actualizaciones del mismo cliente a la vez esperan su turno hasta 15 segundos) (409, con Retry-After). Repítala en un momento con la misma llave: contestará lo mismo.</summary>
     public const string RequestInProgress = "request_in_progress";
 
     /// <summary>No existe un objeto con ese id (o es de otro emisor o del otro modo).</summary>
@@ -195,8 +201,14 @@ public static class ErrorCode
     /// <summary>No se pudo crear el entorno de prueba: falta su nombre o la cuenta ya tiene 25 (borre uno que ya no use).</summary>
     public const string SandboxInvalid = "sandbox_invalid";
 
+    /// <summary>Las declaraciones de ese emisor se consultaron en el SAT hace menos de 10 minutos (cada consulta entra al SAT con su e.firma). Retry-After dice cuántos segundos faltan; lo que ya trajo está en GET /v1/sat_declarations.</summary>
+    public const string SatRefreshTooSoon = "sat_refresh_too_soon";
+
     /// <summary>El SAT rechazó la solicitud de descarga. El mensaje trae su motivo, por ejemplo que ya se pidió el mismo periodo con los mismos filtros demasiadas veces (el SAT pone un límite de por vida).</summary>
     public const string SatRequestRejected = "sat_request_rejected";
+
+    /// <summary>El SAT no contestó o no dejó entrar con la e.firma del emisor. El mensaje trae lo que dijo; no se usó ningún timbre. Reintente en 10 minutos.</summary>
+    public const string SatUnavailable = "sat_unavailable";
 
     /// <summary>Demasiados timbres seguidos del mismo emisor. Espere lo que dice Retry-After; para muchas facturas use POST /v1/invoice_batches.</summary>
     public const string StampRateLimit = "stamp_rate_limit";
