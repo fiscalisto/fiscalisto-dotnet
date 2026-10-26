@@ -265,6 +265,8 @@ public sealed class SandboxesResource
     /// Listar entornos de prueba
     /// </summary>
     /// <remarks>
+    /// Los entornos de prueba de la cuenta, cada uno con su emisor de prueba y su llave fk_test_. Hasta 25 por cuenta.
+    /// <br/>
     /// <c>GET /v1/sandboxes</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/list-sandboxes"/>
@@ -277,6 +279,8 @@ public sealed class SandboxesResource
     /// Ver un entorno de prueba
     /// </summary>
     /// <remarks>
+    /// Un entorno de prueba: su nombre, su emisor y lo que lleva usado hoy de sus reinicios.
+    /// <br/>
     /// <c>GET /v1/sandboxes/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/get-sandbox"/>
@@ -327,6 +331,8 @@ public sealed class TestClocksResource
     /// Ver el reloj de prueba
     /// </summary>
     /// <remarks>
+    /// La hora que es «hoy» para un emisor de prueba y hasta dónde se ha adelantado. Solo emisores de prueba.
+    /// <br/>
     /// <c>GET /v1/issuers/{id}/test_clock</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/get-test-clock"/>
@@ -415,6 +421,8 @@ public sealed class IssuersResource
     /// Listar emisores
     /// </summary>
     /// <remarks>
+    /// Los emisores de la cuenta en el modo de la llave, los más recientes primero. Una llave limitada a algunos emisores solo ve los suyos.
+    /// <br/>
     /// <c>GET /v1/issuers</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/list-issuers"/>
@@ -433,6 +441,8 @@ public sealed class IssuersResource
     /// Ver un emisor
     /// </summary>
     /// <remarks>
+    /// Un emisor: sus datos fiscales, si ya puede timbrar (status, CSD y contrato con el PAC) y su registro patronal.
+    /// <br/>
     /// <c>GET /v1/issuers/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/get-issuer"/>
@@ -529,6 +539,8 @@ public sealed class IssuersResource
     /// Ver el portal de autofactura de un emisor
     /// </summary>
     /// <remarks>
+    /// El portal de autofactura del emisor: su dirección, hasta cuándo se puede facturar un ticket y cómo se arma la factura global.
+    /// <br/>
     /// <c>GET /v1/issuers/{id}/self_invoicing</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/get-self-invoicing"/>
@@ -613,6 +625,8 @@ public sealed class InvoicesResource
     /// Descargar el PDF
     /// </summary>
     /// <remarks>
+    /// La representación impresa del CFDI, como la recibe su cliente. En vez del id puede usar el UUID (con issuer si la cuenta tiene varios emisores).
+    /// <br/>
     /// <c>GET /v1/invoices/{id}/pdf</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/facturas/get-invoice-pdf"/>
@@ -783,6 +797,8 @@ public sealed class BankTransactionsResource
     /// Ver un depósito
     /// </summary>
     /// <remarks>
+    /// Un depósito mandado a conciliación, con las facturas que se le encontraron o el pago que se registró con él.
+    /// <br/>
     /// <c>GET /v1/bank_transactions/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/conciliacion-bancaria/get-bank-transaction"/>
@@ -909,6 +925,8 @@ public sealed class AdvancesResource
     /// Listar anticipos sin aplicar
     /// </summary>
     /// <remarks>
+    /// Los anticipos timbrados que todavía no se aplican a una factura, con lo que queda de cada uno. Filtre por customer para los de un cliente.
+    /// <br/>
     /// <c>GET /v1/advances</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/anticipos/list-advances"/>
@@ -945,6 +963,8 @@ public sealed class RetentionsResource
     /// Timbrar una constancia de retenciones
     /// </summary>
     /// <remarks>
+    /// Timbra una constancia de retenciones e información de pagos (Retenciones 2.0) con los folios RET1, RET2… del emisor. Una vez por Idempotency-Key; con send_email y email la manda al receptor al timbrarla.
+    /// <br/>
     /// <c>POST /v1/retentions</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/retenciones/create-retention"/>
@@ -957,6 +977,8 @@ public sealed class RetentionsResource
     /// Listar constancias
     /// </summary>
     /// <remarks>
+    /// Las constancias del emisor, las más recientes primero.
+    /// <br/>
     /// <c>GET /v1/retentions</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/retenciones/list-retentions"/>
@@ -975,6 +997,8 @@ public sealed class RetentionsResource
     /// Ver una constancia
     /// </summary>
     /// <remarks>
+    /// Una constancia de retenciones con su estado, sus impuestos retenidos y, si se mandó, a quién.
+    /// <br/>
     /// <c>GET /v1/retentions/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/retenciones/get-retention"/>
@@ -987,6 +1011,8 @@ public sealed class RetentionsResource
     /// Descargar el PDF
     /// </summary>
     /// <remarks>
+    /// La representación impresa de la constancia.
+    /// <br/>
     /// <c>GET /v1/retentions/{id}/pdf</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/retenciones/get-retention-pdf"/>
@@ -999,6 +1025,8 @@ public sealed class RetentionsResource
     /// Descargar el XML
     /// </summary>
     /// <remarks>
+    /// El XML timbrado de la constancia, tal como lo tiene el SAT.
+    /// <br/>
     /// <c>GET /v1/retentions/{id}/xml</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/retenciones/get-retention-xml"/>
@@ -1011,6 +1039,8 @@ public sealed class RetentionsResource
     /// Enviar por correo
     /// </summary>
     /// <remarks>
+    /// Manda el PDF y el XML de la constancia a los correos de to (o al que se dio al timbrarla). Dos envíos a la vez de la misma constancia: el segundo contesta email_failed.
+    /// <br/>
     /// <c>POST /v1/retentions/{id}/send</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/retenciones/send-retention"/>
@@ -1047,6 +1077,8 @@ public sealed class EmployeesResource
     /// Crear un empleado
     /// </summary>
     /// <remarks>
+    /// Un empleado del emisor para sus recibos de nómina: RFC, CURP, NSS, salario diario, salario diario integrado y periodicidad. Lo que no mande tiene el valor usual (contrato indefinido, jornada diurna, quincenal, riesgo clase I). warnings dice lo que el SAT podría rechazar.
+    /// <br/>
     /// <c>POST /v1/employees</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-employee"/>
@@ -1059,6 +1091,8 @@ public sealed class EmployeesResource
     /// Listar empleados
     /// </summary>
     /// <remarks>
+    /// Los empleados del emisor, los más recientes primero.
+    /// <br/>
     /// <c>GET /v1/employees</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-employees"/>
@@ -1077,6 +1111,8 @@ public sealed class EmployeesResource
     /// Ver un empleado
     /// </summary>
     /// <remarks>
+    /// Un empleado con sus datos y lo que el SAT podría rechazar en warnings.
+    /// <br/>
     /// <c>GET /v1/employees/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee"/>
@@ -1089,6 +1125,8 @@ public sealed class EmployeesResource
     /// Actualizar un empleado
     /// </summary>
     /// <remarks>
+    /// Cambia solo los campos que manda; los recibos ya timbrados no cambian.
+    /// <br/>
     /// <c>POST /v1/employees/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-employee"/>
@@ -1139,6 +1177,8 @@ public sealed class PayrollReceiptsResource
     /// Calcular un recibo sin timbrar
     /// </summary>
     /// <remarks>
+    /// El recibo como se timbraría (percepciones, ISR con el subsidio para el empleo, cuotas IMSS y el neto), sin timbrar ni usar timbres.
+    /// <br/>
     /// <c>POST /v1/payroll_receipts/preview</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/preview-payroll-receipt"/>
@@ -1175,6 +1215,8 @@ public sealed class InvoiceBatchesResource
     /// Listar lotes
     /// </summary>
     /// <remarks>
+    /// Los lotes de facturas, los más recientes primero, con cuántas se timbraron y cuántas fallaron.
+    /// <br/>
     /// <c>GET /v1/invoice_batches</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/lotes/list-invoice-batches"/>
@@ -1241,6 +1283,8 @@ public sealed class CustomersResource
     /// Crear un cliente
     /// </summary>
     /// <remarks>
+    /// Un cliente del catálogo del emisor, con sus datos fiscales como vienen en su constancia. Un RFC que ya está en el catálogo contesta customer_exists.
+    /// <br/>
     /// <c>POST /v1/customers</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/create-customer"/>
@@ -1253,6 +1297,8 @@ public sealed class CustomersResource
     /// Listar clientes
     /// </summary>
     /// <remarks>
+    /// Los clientes del emisor, los más recientes primero. Con tax_id, el de ese RFC.
+    /// <br/>
     /// <c>GET /v1/customers</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/list-customers"/>
@@ -1271,6 +1317,8 @@ public sealed class CustomersResource
     /// Ver un cliente
     /// </summary>
     /// <remarks>
+    /// Un cliente del catálogo.
+    /// <br/>
     /// <c>GET /v1/customers/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/get-customer"/>
@@ -1283,6 +1331,8 @@ public sealed class CustomersResource
     /// Actualizar un cliente
     /// </summary>
     /// <remarks>
+    /// Cambia solo los campos que manda. Las facturas ya timbradas no cambian.
+    /// <br/>
     /// <c>POST /v1/customers/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/update-customer"/>
@@ -1295,6 +1345,8 @@ public sealed class CustomersResource
     /// Borrar un cliente
     /// </summary>
     /// <remarks>
+    /// Lo quita del catálogo. Sus facturas timbradas siguen igual.
+    /// <br/>
     /// <c>DELETE /v1/customers/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/delete-customer"/>
@@ -1331,6 +1383,8 @@ public sealed class CustomerDataRequestsResource
     /// Listar solicitudes de datos
     /// </summary>
     /// <remarks>
+    /// Las ligas para pedir datos fiscales, las más recientes primero, con su estado.
+    /// <br/>
     /// <c>GET /v1/customer_data_requests</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/list-customer-data-requests"/>
@@ -1349,6 +1403,8 @@ public sealed class CustomerDataRequestsResource
     /// Ver una solicitud de datos
     /// </summary>
     /// <remarks>
+    /// Una solicitud de datos: su liga y, si el cliente ya contestó, sus datos fiscales y el cliente que se guardó.
+    /// <br/>
     /// <c>GET /v1/customer_data_requests/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/get-customer-data-request"/>
@@ -1385,6 +1441,8 @@ public sealed class ProductsResource
     /// Crear un producto
     /// </summary>
     /// <remarks>
+    /// Un producto o servicio del catálogo del emisor, con su clave del SAT, su unidad, su precio y sus impuestos, para usarlo en items con product.
+    /// <br/>
     /// <c>POST /v1/products</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/productos/create-product"/>
@@ -1397,6 +1455,8 @@ public sealed class ProductsResource
     /// Listar productos
     /// </summary>
     /// <remarks>
+    /// Los productos del emisor, los más recientes primero. Filtre por sku o product_key.
+    /// <br/>
     /// <c>GET /v1/products</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/productos/list-products"/>
@@ -1415,6 +1475,8 @@ public sealed class ProductsResource
     /// Ver un producto
     /// </summary>
     /// <remarks>
+    /// Un producto del catálogo.
+    /// <br/>
     /// <c>GET /v1/products/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/productos/get-product"/>
@@ -1427,6 +1489,8 @@ public sealed class ProductsResource
     /// Actualizar un producto
     /// </summary>
     /// <remarks>
+    /// Cambia solo los campos que manda. Las facturas ya timbradas no cambian.
+    /// <br/>
     /// <c>POST /v1/products/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/productos/update-product"/>
@@ -1439,6 +1503,8 @@ public sealed class ProductsResource
     /// Borrar un producto
     /// </summary>
     /// <remarks>
+    /// Lo quita del catálogo. Las facturas que lo usaron siguen igual.
+    /// <br/>
     /// <c>DELETE /v1/products/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/productos/delete-product"/>
@@ -1537,6 +1603,8 @@ public sealed class SatDownloadsResource
     /// Listar descargas del SAT
     /// </summary>
     /// <remarks>
+    /// Las descargas pedidas al SAT, las más recientes primero, con su estado.
+    /// <br/>
     /// <c>GET /v1/sat_downloads</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/list-sat-downloads"/>
@@ -1555,6 +1623,8 @@ public sealed class SatDownloadsResource
     /// Ver una descarga del SAT
     /// </summary>
     /// <remarks>
+    /// Una descarga del SAT: su periodo, su estado y cuántos CFDI trajo. Al terminar llega sat_download.completed.
+    /// <br/>
     /// <c>GET /v1/sat_downloads/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-download"/>
@@ -1597,6 +1667,8 @@ public sealed class SatInvoicesResource
     /// Ver una factura del SAT
     /// </summary>
     /// <remarks>
+    /// Un CFDI que trajo una descarga del SAT, con sus importes y su estado ante el SAT.
+    /// <br/>
     /// <c>GET /v1/sat_invoices/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-invoice"/>
@@ -1664,9 +1736,25 @@ public sealed class SatDeclarationsResource
         => _client.ListAllAsync<SatDeclaration>("/v1/sat_declarations", @params, options, cancellationToken);
 
     /// <summary>
+    /// Ver el año mes por mes
+    /// </summary>
+    /// <remarks>
+    /// Cada mes del ejercicio con sus obligaciones: presentada (con sus declaraciones), falta (venció y no la encontramos) o por presentar, con el día en que vence (el 17 del mes siguiente, o el día hábil siguiente, más los días por el sexto dígito del RFC). Se arma con lo que trajeron sus consultas; no usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_declarations/calendar</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-declaration-calendar"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatDeclarationCalendar> CalendarAsync(GetSatDeclarationCalendarParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatDeclarationCalendar>("GET", "/v1/sat_declarations/calendar", null, @params, options, false, cancellationToken);
+
+    /// <summary>
     /// Ver una declaración del SAT
     /// </summary>
     /// <remarks>
+    /// Una declaración presentada al SAT, con sus cifras en summary y si ya están su PDF y su acuse.
+    /// <br/>
     /// <c>GET /v1/sat_declarations/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-declaration"/>
@@ -1765,6 +1853,8 @@ public sealed class TicketsResource
     /// Ver un ticket
     /// </summary>
     /// <remarks>
+    /// Un ticket de autofactura: si ya se facturó (invoice) o entró en la factura global (global_invoice).
+    /// <br/>
     /// <c>GET /v1/tickets/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/autofactura/get-ticket"/>
@@ -1963,6 +2053,8 @@ public sealed class StoreConnectionsResource
     /// Ver una tienda
     /// </summary>
     /// <remarks>
+    /// Una tienda conectada (Shopify, Mercado Libre o WooCommerce), su estado y lo último que importó.
+    /// <br/>
     /// <c>GET /v1/store_connections/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/tiendas-en-linea/get-store-connection"/>
@@ -2061,6 +2153,8 @@ public sealed class RecurringInvoicesResource
     /// Ver una factura recurrente
     /// </summary>
     /// <remarks>
+    /// Una factura recurrente: su calendario, la próxima fecha, la última factura que timbró y, si falló, por qué en last_error.
+    /// <br/>
     /// <c>GET /v1/recurring_invoices/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/facturas-recurrentes/get-recurring-invoice"/>
@@ -2295,6 +2389,8 @@ public sealed class WebhookEndpointsResource
     /// Listar webhooks
     /// </summary>
     /// <remarks>
+    /// Los webhooks del modo de la llave. Hasta 16 por modo.
+    /// <br/>
     /// <c>GET /v1/webhook_endpoints</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/webhooks/list-webhook-endpoints"/>
@@ -2313,6 +2409,8 @@ public sealed class WebhookEndpointsResource
     /// Ver un webhook
     /// </summary>
     /// <remarks>
+    /// Un webhook: su dirección, los eventos que recibe y si sus entregas fallan. El secreto solo viene al crearlo.
+    /// <br/>
     /// <c>GET /v1/webhook_endpoints/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/webhooks/get-webhook-endpoint"/>
@@ -2325,6 +2423,8 @@ public sealed class WebhookEndpointsResource
     /// Actualizar un webhook
     /// </summary>
     /// <remarks>
+    /// Cambia su dirección, sus eventos, su descripción o su versión de la API; con disabled: false vuelve a encender uno que se apagó.
+    /// <br/>
     /// <c>POST /v1/webhook_endpoints/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/webhooks/update-webhook-endpoint"/>
@@ -2337,6 +2437,8 @@ public sealed class WebhookEndpointsResource
     /// Borrar un webhook
     /// </summary>
     /// <remarks>
+    /// Deja de mandar eventos a esa dirección. Los eventos siguen en GET /v1/events.
+    /// <br/>
     /// <c>DELETE /v1/webhook_endpoints/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/webhooks/delete-webhook-endpoint"/>
@@ -2407,6 +2509,8 @@ public sealed class EventsResource
     /// Ver un evento
     /// </summary>
     /// <remarks>
+    /// Un evento de los últimos 30 días, con el objeto como estaba cuando pasó.
+    /// <br/>
     /// <c>GET /v1/events/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/eventos/get-event"/>

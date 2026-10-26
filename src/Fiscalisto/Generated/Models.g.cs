@@ -781,7 +781,7 @@ public sealed partial class BankTransactionSuggestedMatch
 public sealed partial class CancelInvoiceParams
 {
     /// <summary>
-    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 nominativa en una global.
+    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 solo en una factura global, cuando una venta incluida se facturó a nombre del cliente.
     /// <br/>
     /// Valores: 01, 02, 03, 04.
     /// </summary>
@@ -801,7 +801,7 @@ public sealed partial class CancelInvoiceParams
 public sealed partial class CancelRetentionParams
 {
     /// <summary>
-    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 nominativa en una global.
+    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 solo en una factura global, cuando una venta incluida se facturó a nombre del cliente.
     /// <br/>
     /// Valores: 01, 02, 03, 04.
     /// </summary>
@@ -3339,15 +3339,15 @@ public sealed partial class CrossChecksMonthsItem
 public sealed partial class CrossChecksMonthsItemChecksItem
 {
     /// <summary>
-    /// Qué cifra: vat_charged (IVA trasladado), vat_creditable (IVA acreditable), vat_withheld (IVA que le retuvieron) o isr_income (ingresos para ISR: nominales en persona moral, cobrados en los demás).
+    /// Qué cifra: vat_charged (IVA trasladado), vat_creditable (IVA acreditable), vat_withheld (IVA que le retuvieron), isr_income (ingresos para ISR: nominales en persona moral, cobrados en los demás) y, solo en los meses en que retuvo, isr_withheld_salaries (ISR retenido por salarios y asimilados, contra sus recibos de nómina), isr_withheld_suppliers (ISR retenido por honorarios y arrendamiento, contra las facturas recibidas que pagó) o vat_withheld_suppliers (IVA retenido a proveedores).
     /// <br/>
-    /// Valores: vat_charged, vat_creditable, vat_withheld, isr_income.
+    /// Valores: vat_charged, vat_creditable, vat_withheld, isr_income, isr_withheld_salaries, isr_withheld_suppliers, vat_withheld_suppliers.
     /// </summary>
     [JsonPropertyName("key")]
     public string Key { get; set; } = default!;
 
     /// <summary>
-    /// matches (hasta $2 de diferencia), differs, not_filed (no hay declaración del mes) o unreadable (la declaración no trae la cifra en un renglón reconocible).
+    /// matches (hasta $2 de diferencia), differs, not_filed (no hay declaración del mes, o en una retención ninguna declaración del mes la trae) o unreadable (la declaración no trae la cifra en un renglón reconocible).
     /// <br/>
     /// Valores: matches, differs, not_filed, unreadable.
     /// </summary>
@@ -4289,7 +4289,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low o test_clock.ready.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low o test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -5138,6 +5138,24 @@ public sealed partial class GetSatCatalogParams
 }
 
 /// <summary>
+/// Los campos de «Ver el año mes por mes».
+/// </summary>
+public sealed partial class GetSatDeclarationCalendarParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El ejercicio, como 2026. Por omisión, el actual.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver la balanza de comprobación».
 /// </summary>
 public sealed partial class GetTrialBalanceParams
@@ -5631,7 +5649,7 @@ public sealed partial class InvoiceCancellation
     public string? Status { get; set; }
 
     /// <summary>
-    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 nominativa en una global.
+    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 solo en una factura global, cuando una venta incluida se facturó a nombre del cliente.
     /// </summary>
     [JsonPropertyName("motive")]
     public string? Motive { get; set; }
@@ -9486,7 +9504,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -9870,6 +9888,20 @@ public sealed partial class ListSatDeclarationsParams
     /// </summary>
     [JsonPropertyName("source")]
     public string? Source { get; set; }
+
+    /// <summary>
+    /// Solo las de un mes (1 a 12).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public long? Month { get; set; }
+
+    /// <summary>
+    /// normal o complementary (complementarias).
+    /// <br/>
+    /// Valores: normal, complementary.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
 }
 
 /// <summary>
@@ -11420,7 +11452,7 @@ public sealed partial class RetentionCancellation
     public string Status { get; set; } = default!;
 
     /// <summary>
-    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 nominativa en una global.
+    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 solo en una factura global, cuando una venta incluida se facturó a nombre del cliente.
     /// </summary>
     [JsonPropertyName("motive")]
     public string? Motive { get; set; }
@@ -11916,6 +11948,12 @@ public sealed partial class SatDeclaration
     public SatDeclarationReceipt? Receipt { get; set; }
 
     /// <summary>
+    /// Las mismas cifras con nombres fijos, por obligación (ISR, IVA, cada retención), para leerlas igual cada mes sin conocer el formato del SAT. Una cifra que no viene en la declaración o no se pudo leer es null, nunca 0. En Declaraciones y pagos solo trae lo del acuse.
+    /// </summary>
+    [JsonPropertyName("summary")]
+    public SatDeclarationSummary Summary { get; set; } = default!;
+
+    /// <summary>
     /// Qué archivos ya tiene: pdf (GET …/pdf), receipt (GET …/receipt) y financial_statements (GET …/financial_statements, solo en la anual de persona moral).
     /// </summary>
     [JsonPropertyName("files")]
@@ -11938,6 +11976,100 @@ public sealed partial class SatDeclaration
     /// </summary>
     [JsonPropertyName("updated_at")]
     public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// El ejercicio del emisor mes por mes: qué obligaciones presentó, cuáles parecen faltar y cuáles aún no vencen.
+/// </summary>
+public sealed partial class SatDeclarationCalendar
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Cuántas obligaciones ya vencidas no encontramos presentadas en el SAT.
+    /// </summary>
+    [JsonPropertyName("missing")]
+    public long Missing { get; set; }
+
+    /// <summary>
+    /// Los 12 meses y, en persona moral, la anual (month null). Las obligaciones se deducen de lo que el emisor presenta: ISR e IVA cada mes desde el primero que presentó; una retención si la presentó en 2 de los 3 meses anteriores o antes y después. La opinión de cumplimiento del SAT es la que manda.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public List<SatDeclarationCalendarMonthsItem> Months { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationCalendarMonthsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationCalendarMonthsItem
+{
+    /// <summary>
+    /// El mes (1 a 12), o null para la anual.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public long? Month { get; set; }
+
+    /// <summary>
+    /// El último día para presentarla (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("due_on")]
+    public string DueOn { get; set; } = default!;
+
+    /// <summary>
+    /// Las obligaciones del mes.
+    /// </summary>
+    [JsonPropertyName("obligations")]
+    public List<SatDeclarationCalendarMonthsItemObligationsItem> Obligations { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationCalendarMonthsItemObligationsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationCalendarMonthsItemObligationsItem
+{
+    /// <summary>
+    /// Qué obligación es (las de summary.obligations), o annual_return para la anual.
+    /// <br/>
+    /// Valores: isr, vat, ieps, isr_salaries, isr_assimilated_salaries, isr_professional_services, isr_rent, vat_withholdings, other.
+    /// </summary>
+    [JsonPropertyName("obligation")]
+    public string Obligation { get; set; } = default!;
+
+    /// <summary>
+    /// filed (presentada), missing (venció y no la encontramos) o due (aún no vence).
+    /// <br/>
+    /// Valores: filed, missing, due.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Las declaraciones (dcl_…) que la presentaron, la normal y sus complementarias.
+    /// </summary>
+    [JsonPropertyName("declarations")]
+    public List<string> Declarations { get; set; } = default!;
 }
 
 /// <summary>
@@ -12088,6 +12220,68 @@ public sealed partial class SatDeclarationSectionsItemFieldsItem
     /// </summary>
     [JsonPropertyName("value")]
     public JsonElement? Value { get; set; }
+}
+
+/// <summary>
+/// Las mismas cifras con nombres fijos, por obligación (ISR, IVA, cada retención), para leerlas igual cada mes sin conocer el formato del SAT. Una cifra que no viene en la declaración o no se pudo leer es null, nunca 0. En Declaraciones y pagos solo trae lo del acuse.
+/// </summary>
+public sealed partial class SatDeclarationSummary
+{
+    /// <summary>
+    /// Cada obligación de la declaración: isr, vat, ieps, isr_salaries, isr_assimilated_salaries, isr_professional_services, isr_rent, vat_withholdings u other.
+    /// </summary>
+    [JsonPropertyName("obligations")]
+    public List<SatDeclarationSummaryObligationsItem> Obligations { get; set; } = default!;
+
+    /// <summary>
+    /// El total a pagar del acuse; si no hay acuse, la suma de las obligaciones cuando todas se conocen.
+    /// </summary>
+    [JsonPropertyName("total_to_pay")]
+    public decimal? TotalToPay { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationSummaryObligationsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationSummaryObligationsItem
+{
+    /// <summary>
+    /// Qué obligación es.
+    /// <br/>
+    /// Valores: isr, vat, ieps, isr_salaries, isr_assimilated_salaries, isr_professional_services, isr_rent, vat_withholdings, other.
+    /// </summary>
+    [JsonPropertyName("obligation")]
+    public string Obligation { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre como lo imprime el SAT.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// true si sus cifras se leyeron de la declaración; false si solo vienen del acuse.
+    /// </summary>
+    [JsonPropertyName("read")]
+    public bool Read { get; set; }
+
+    /// <summary>
+    /// La cantidad a cargo.
+    /// </summary>
+    [JsonPropertyName("amount_due")]
+    public decimal? AmountDue { get; set; }
+
+    /// <summary>
+    /// La cantidad a pagar.
+    /// </summary>
+    [JsonPropertyName("amount_to_pay")]
+    public decimal? AmountToPay { get; set; }
+
+    /// <summary>
+    /// Sus cifras con nombres fijos. ISR: income, invoiced_income, income_ytd, deductions, profit_coefficient, taxable_profit, losses_applied, tax_base, tax_caused, prior_payments, withheld. IVA: taxable_16, taxable_0, exempt, charged, paid_16, creditable, withheld, balance_applied. Salarios: workers, payments, exempt, withheld. Todas: surcharges, inflation, paid_before, due, in_favor, to_pay. null si no viene o no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("figures")]
+    public Dictionary<string, JsonElement> Figures { get; set; } = default!;
 }
 
 /// <summary>
@@ -13384,7 +13578,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
