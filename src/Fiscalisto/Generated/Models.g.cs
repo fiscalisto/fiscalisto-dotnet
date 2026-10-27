@@ -3863,7 +3863,7 @@ public sealed partial class CrossCheckCfdiCfdiItem
     /// <summary>
     /// invoice (factura de ingreso, PUE), credit_note (nota de crédito: resta) o payment (lo pagado en el mes de una factura PPD).
     /// <br/>
-    /// Valores: invoice, credit_note, payment.
+    /// Valores: invoice, credit_note, payment, withholding_certificate.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
