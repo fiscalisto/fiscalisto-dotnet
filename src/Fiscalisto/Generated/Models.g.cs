@@ -3059,7 +3059,7 @@ public sealed partial class CreateRetentionParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero…
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) aún no se puede emitir.
     /// </summary>
     [JsonPropertyName("code")]
     public required string Code { get; set; }
@@ -3111,6 +3111,48 @@ public sealed partial class CreateRetentionParams
     /// </summary>
     [JsonPropertyName("foreign_payment")]
     public CreateRetentionParamsForeignPayment? ForeignPayment { get; set; }
+
+    /// <summary>
+    /// Complemento de arrendamiento en fideicomiso (Arrendamientoenfideicomiso 1.0), obligatorio con code 17.
+    /// </summary>
+    [JsonPropertyName("trust_lease")]
+    public CreateRetentionParamsTrustLease? TrustLease { get; set; }
+
+    /// <summary>
+    /// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 19.
+    /// </summary>
+    [JsonPropertyName("share_sale")]
+    public CreateRetentionParamsShareSale? ShareSale { get; set; }
+
+    /// <summary>
+    /// Complemento de premios (Premios 1.0), obligatorio con code 20. Sus montos son los de totals.
+    /// </summary>
+    [JsonPropertyName("prize")]
+    public CreateRetentionParamsPrize? Prize { get; set; }
+
+    /// <summary>
+    /// Complemento de fideicomisos que no realizan actividades empresariales (Fideicomisonoempresarial 1.0), obligatorio con code 21.
+    /// </summary>
+    [JsonPropertyName("trust")]
+    public CreateRetentionParamsTrust? Trust { get; set; }
+
+    /// <summary>
+    /// Complemento de planes personales de retiro (Planesderetiro 1.1), obligatorio con code 22: lo del año anterior.
+    /// </summary>
+    [JsonPropertyName("retirement_plan")]
+    public CreateRetentionParamsRetirementPlan? RetirementPlan { get; set; }
+
+    /// <summary>
+    /// Complemento de intereses reales deducibles por créditos hipotecarios (Intereseshipotecarios 1.0), obligatorio con code 23.
+    /// </summary>
+    [JsonPropertyName("mortgage_interest")]
+    public CreateRetentionParamsMortgageInterest? MortgageInterest { get; set; }
+
+    /// <summary>
+    /// Complemento de operaciones financieras derivadas de capital (Operacionesconderivados 1.0), obligatorio con code 24.
+    /// </summary>
+    [JsonPropertyName("financial_derivatives")]
+    public CreateRetentionParamsFinancialDerivatives? FinancialDerivatives { get; set; }
 
     /// <summary>
     /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
@@ -3187,6 +3229,24 @@ public sealed partial class CreateRetentionParamsDividends
     /// </summary>
     [JsonPropertyName("accumulated_foreign")]
     public decimal? AccumulatedForeign { get; set; }
+}
+
+/// <summary>
+/// Complemento de operaciones financieras derivadas de capital (Operacionesconderivados 1.0), obligatorio con code 24.
+/// </summary>
+public sealed partial class CreateRetentionParamsFinancialDerivatives
+{
+    /// <summary>
+    /// Ganancia acumulable (MontGanAcum).
+    /// </summary>
+    [JsonPropertyName("gain")]
+    public required decimal Gain { get; set; }
+
+    /// <summary>
+    /// Pérdida deducible (MontPerdDed).
+    /// </summary>
+    [JsonPropertyName("loss")]
+    public required decimal Loss { get; set; }
 }
 
 /// <summary>
@@ -3282,6 +3342,54 @@ public sealed partial class CreateRetentionParamsInterest
 }
 
 /// <summary>
+/// Complemento de intereses reales deducibles por créditos hipotecarios (Intereseshipotecarios 1.0), obligatorio con code 23.
+/// </summary>
+public sealed partial class CreateRetentionParamsMortgageInterest
+{
+    /// <summary>
+    /// true si el crédito lo otorgó una institución financiera (CreditoDeInstFinanc).
+    /// </summary>
+    [JsonPropertyName("financial_institution")]
+    public required bool FinancialInstitution { get; set; }
+
+    /// <summary>
+    /// Saldo insoluto al 31 de diciembre del año anterior, o a la fecha del contrato si es de este año (SaldoInsoluto).
+    /// </summary>
+    [JsonPropertyName("outstanding_balance")]
+    public required decimal OutstandingBalance { get; set; }
+
+    /// <summary>
+    /// Proporción deducible del crédito sobre los intereses reales devengados y pagados (PropDeducDelCredit).
+    /// </summary>
+    [JsonPropertyName("deductible_proportion")]
+    public decimal? DeductibleProportion { get; set; }
+
+    /// <summary>
+    /// Intereses nominales devengados (MontTotIntNominalesDev).
+    /// </summary>
+    [JsonPropertyName("nominal_accrued")]
+    public decimal? NominalAccrued { get; set; }
+
+    /// <summary>
+    /// Intereses nominales devengados y pagados (MontTotIntNominalesDevYPag).
+    /// </summary>
+    [JsonPropertyName("nominal_accrued_paid")]
+    public decimal? NominalAccruedPaid { get; set; }
+
+    /// <summary>
+    /// Intereses reales pagados deducibles (MontTotIntRealPagDeduc).
+    /// </summary>
+    [JsonPropertyName("real_deductible")]
+    public decimal? RealDeductible { get; set; }
+
+    /// <summary>
+    /// Número de contrato del crédito hipotecario (NumContrato).
+    /// </summary>
+    [JsonPropertyName("contract")]
+    public string? Contract { get; set; }
+}
+
+/// <summary>
 /// Periodo (Periodo): mes inicial, mes final y año.
 /// </summary>
 public sealed partial class CreateRetentionParamsPeriod
@@ -3309,6 +3417,18 @@ public sealed partial class CreateRetentionParamsPeriod
     /// </summary>
     [JsonPropertyName("to_month")]
     public long? ToMonth { get; set; }
+}
+
+/// <summary>
+/// Complemento de premios (Premios 1.0), obligatorio con code 20. Sus montos son los de totals.
+/// </summary>
+public sealed partial class CreateRetentionParamsPrize
+{
+    /// <summary>
+    /// Entidad federativa donde se paga el premio (EntidadFederativa), c_EntidadesFederativas de catRetenciones: 01 Aguascalientes … 09 Ciudad de México … 32 Zacatecas.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public required string State { get; set; }
 }
 
 /// <summary>
@@ -3345,6 +3465,128 @@ public sealed partial class CreateRetentionParamsRecipient
     /// </summary>
     [JsonPropertyName("curp")]
     public string? Curp { get; set; }
+}
+
+/// <summary>
+/// Complemento de planes personales de retiro (Planesderetiro 1.1), obligatorio con code 22: lo del año anterior.
+/// </summary>
+public sealed partial class CreateRetentionParamsRetirementPlan
+{
+    /// <summary>
+    /// true si el plan es del sistema financiero (SistemaFinanc).
+    /// </summary>
+    [JsonPropertyName("financial_system")]
+    public required bool FinancialSystem { get; set; }
+
+    /// <summary>
+    /// Aportaciones actualizadas del año anterior (MontTotAportAnioInmAnterior).
+    /// </summary>
+    [JsonPropertyName("contributions_last_year")]
+    public decimal? ContributionsLastYear { get; set; }
+
+    /// <summary>
+    /// Intereses reales devengados o percibidos el año anterior (MontIntRealesDevengAniooInmAnt).
+    /// </summary>
+    [JsonPropertyName("real_interest")]
+    public required decimal RealInterest { get; set; }
+
+    /// <summary>
+    /// true si hubo retiros antes de cumplir los requisitos de permanencia (HuboRetirosAnioInmAntPer).
+    /// </summary>
+    [JsonPropertyName("early_withdrawals")]
+    public required bool EarlyWithdrawals { get; set; }
+
+    /// <summary>
+    /// Monto retirado antes de cumplir la permanencia (MontTotRetiradoAnioInmAntPer); obligatorio con early_withdrawals.
+    /// </summary>
+    [JsonPropertyName("early_withdrawn")]
+    public decimal? EarlyWithdrawn { get; set; }
+
+    /// <summary>
+    /// Monto exento de lo retirado el año anterior (MontTotExentRetiradoAnioInmAnt).
+    /// </summary>
+    [JsonPropertyName("exempt_withdrawn")]
+    public decimal? ExemptWithdrawn { get; set; }
+
+    /// <summary>
+    /// Excedente del monto exento de lo retirado el año anterior (MontTotExedenteAnioInmAnt).
+    /// </summary>
+    [JsonPropertyName("excess_withdrawn")]
+    public decimal? ExcessWithdrawn { get; set; }
+
+    /// <summary>
+    /// true si hubo retiros el año anterior (HuboRetirosAnioInmAnt).
+    /// </summary>
+    [JsonPropertyName("withdrawals")]
+    public required bool Withdrawals { get; set; }
+
+    /// <summary>
+    /// Monto retirado el año anterior (MontTotRetiradoAnioInmAnt); obligatorio con withdrawals.
+    /// </summary>
+    [JsonPropertyName("withdrawn")]
+    public decimal? Withdrawn { get; set; }
+
+    /// <summary>
+    /// Número de referencia, contrato o cuenta del cliente (NumReferencia).
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// Aportaciones o depósitos (AportacionesODepositos), uno por tipo y hasta tres.
+    /// </summary>
+    [JsonPropertyName("contributions")]
+    public List<CreateRetentionParamsRetirementPlanContributionsItem>? Contributions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRetentionParamsRetirementPlanContributionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRetentionParamsRetirementPlanContributionsItem
+{
+    /// <summary>
+    /// Tipo de aportación (TipoAportacionODeposito): a (art. 151 fracc. V LISR), b (art. 185 LISR) o c (art. 258 RLISR, con trustee_rfc).
+    /// <br/>
+    /// Valores: a, b, c.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Monto de la aportación o depósito (MontAportODep).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// RFC de la fiduciaria que administra el plan (RFCFiduciaria); obligatorio con el tipo c.
+    /// </summary>
+    [JsonPropertyName("trustee_rfc")]
+    public string? TrusteeRfc { get; set; }
+}
+
+/// <summary>
+/// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 19.
+/// </summary>
+public sealed partial class CreateRetentionParamsShareSale
+{
+    /// <summary>
+    /// Descripción del contrato de intermediación (ContratoIntermediacion).
+    /// </summary>
+    [JsonPropertyName("contract")]
+    public required string Contract { get; set; }
+
+    /// <summary>
+    /// Ganancia obtenida (Ganancia).
+    /// </summary>
+    [JsonPropertyName("gain")]
+    public required decimal Gain { get; set; }
+
+    /// <summary>
+    /// Pérdida (Perdida).
+    /// </summary>
+    [JsonPropertyName("loss")]
+    public required decimal Loss { get; set; }
 }
 
 /// <summary>
@@ -3399,6 +3641,156 @@ public sealed partial class CreateRetentionParamsTotals
     /// </summary>
     [JsonPropertyName("exempt")]
     public decimal? Exempt { get; set; }
+}
+
+/// <summary>
+/// Complemento de fideicomisos que no realizan actividades empresariales (Fideicomisonoempresarial 1.0), obligatorio con code 21.
+/// </summary>
+public sealed partial class CreateRetentionParamsTrust
+{
+    /// <summary>
+    /// Ingresos o entradas del fideicomiso en el periodo (IngresosOEntradas) y la parte del receptor.
+    /// </summary>
+    [JsonPropertyName("income")]
+    public required CreateRetentionParamsTrustIncome Income { get; set; }
+
+    /// <summary>
+    /// Deducciones o salidas del fideicomiso en el periodo (DeduccOSalidas) y la parte del receptor.
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public required CreateRetentionParamsTrustDeductions Deductions { get; set; }
+
+    /// <summary>
+    /// Retención efectuada al fideicomiso (RetEfectFideicomiso).
+    /// </summary>
+    [JsonPropertyName("withholding")]
+    public required CreateRetentionParamsTrustWithholding Withholding { get; set; }
+}
+
+/// <summary>
+/// Deducciones o salidas del fideicomiso en el periodo (DeduccOSalidas) y la parte del receptor.
+/// </summary>
+public sealed partial class CreateRetentionParamsTrustDeductions
+{
+    /// <summary>
+    /// Concepto de los egresos (IntegracEgresos/ConceptoS), hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public required string Concept { get; set; }
+
+    /// <summary>
+    /// Egresos totales del fideicomiso en el periodo (MontTotEgresPeriodo).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public required decimal Total { get; set; }
+
+    /// <summary>
+    /// Parte proporcional de las deducciones autorizadas del receptor (PartPropDelFideicom).
+    /// </summary>
+    [JsonPropertyName("share")]
+    public required decimal Share { get; set; }
+
+    /// <summary>
+    /// Proporción de participación del receptor según el contrato (PropDelMontTot).
+    /// </summary>
+    [JsonPropertyName("proportion")]
+    public required decimal Proportion { get; set; }
+}
+
+/// <summary>
+/// Ingresos o entradas del fideicomiso en el periodo (IngresosOEntradas) y la parte del receptor.
+/// </summary>
+public sealed partial class CreateRetentionParamsTrustIncome
+{
+    /// <summary>
+    /// Concepto de los ingresos (IntegracIngresos/Concepto), hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public required string Concept { get; set; }
+
+    /// <summary>
+    /// Ingresos totales del fideicomiso en el periodo (MontTotEntradasPeriodo).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public required decimal Total { get; set; }
+
+    /// <summary>
+    /// Parte proporcional de los ingresos acumulables del receptor (PartPropAcumDelFideicom).
+    /// </summary>
+    [JsonPropertyName("share")]
+    public required decimal Share { get; set; }
+
+    /// <summary>
+    /// Proporción de participación del receptor según el contrato (PropDelMontTot).
+    /// </summary>
+    [JsonPropertyName("proportion")]
+    public required decimal Proportion { get; set; }
+}
+
+/// <summary>
+/// Complemento de arrendamiento en fideicomiso (Arrendamientoenfideicomiso 1.0), obligatorio con code 17.
+/// </summary>
+public sealed partial class CreateRetentionParamsTrustLease
+{
+    /// <summary>
+    /// Pago provisional que el fiduciario efectuó al arrendador en el periodo (PagProvEfecPorFiduc).
+    /// </summary>
+    [JsonPropertyName("trustee_payment")]
+    public required decimal TrusteePayment { get; set; }
+
+    /// <summary>
+    /// Rendimientos del periodo por el arrendamiento de los bienes (RendimFideicom).
+    /// </summary>
+    [JsonPropertyName("income")]
+    public required decimal Income { get; set; }
+
+    /// <summary>
+    /// Deducciones del arrendamiento en el periodo (DeduccCorresp).
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public required decimal Deductions { get; set; }
+
+    /// <summary>
+    /// Monto total retenido del arrendamiento en el periodo (MontTotRet).
+    /// </summary>
+    [JsonPropertyName("withheld_total")]
+    public decimal? WithheldTotal { get; set; }
+
+    /// <summary>
+    /// Resultado fiscal distribuido por FIBRAS (MontResFiscDistFibras).
+    /// </summary>
+    [JsonPropertyName("fibra_result")]
+    public decimal? FibraResult { get; set; }
+
+    /// <summary>
+    /// Monto de otros conceptos distribuidos (MontOtrosConceptDistr).
+    /// </summary>
+    [JsonPropertyName("other_amount")]
+    public decimal? OtherAmount { get; set; }
+
+    /// <summary>
+    /// Qué son los otros conceptos distribuidos (DescrMontOtrosConceptDistr); obligatoria con other_amount.
+    /// </summary>
+    [JsonPropertyName("other_description")]
+    public string? OtherDescription { get; set; }
+}
+
+/// <summary>
+/// Retención efectuada al fideicomiso (RetEfectFideicomiso).
+/// </summary>
+public sealed partial class CreateRetentionParamsTrustWithholding
+{
+    /// <summary>
+    /// Monto de la retención (MontRetRelPagFideic).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Descripción de la retención (DescRetRelPagFideic), hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
 }
 
 /// <summary>
@@ -12298,7 +12690,7 @@ public sealed partial class Retention
     public string? Date { get; set; }
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero…
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) aún no se puede emitir.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -12350,6 +12742,48 @@ public sealed partial class Retention
     /// </summary>
     [JsonPropertyName("foreign_payment")]
     public Dictionary<string, JsonElement>? ForeignPayment { get; set; }
+
+    /// <summary>
+    /// Complemento de arrendamiento en fideicomiso (Arrendamientoenfideicomiso 1.0), obligatorio con code 17.
+    /// </summary>
+    [JsonPropertyName("trust_lease")]
+    public Dictionary<string, JsonElement>? TrustLease { get; set; }
+
+    /// <summary>
+    /// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 19.
+    /// </summary>
+    [JsonPropertyName("share_sale")]
+    public Dictionary<string, JsonElement>? ShareSale { get; set; }
+
+    /// <summary>
+    /// Complemento de premios (Premios 1.0), obligatorio con code 20. Sus montos son los de totals.
+    /// </summary>
+    [JsonPropertyName("prize")]
+    public Dictionary<string, JsonElement>? Prize { get; set; }
+
+    /// <summary>
+    /// Complemento de fideicomisos que no realizan actividades empresariales (Fideicomisonoempresarial 1.0), obligatorio con code 21.
+    /// </summary>
+    [JsonPropertyName("trust")]
+    public Dictionary<string, JsonElement>? Trust { get; set; }
+
+    /// <summary>
+    /// Complemento de planes personales de retiro (Planesderetiro 1.1), obligatorio con code 22: lo del año anterior.
+    /// </summary>
+    [JsonPropertyName("retirement_plan")]
+    public Dictionary<string, JsonElement>? RetirementPlan { get; set; }
+
+    /// <summary>
+    /// Complemento de intereses reales deducibles por créditos hipotecarios (Intereseshipotecarios 1.0), obligatorio con code 23.
+    /// </summary>
+    [JsonPropertyName("mortgage_interest")]
+    public Dictionary<string, JsonElement>? MortgageInterest { get; set; }
+
+    /// <summary>
+    /// Complemento de operaciones financieras derivadas de capital (Operacionesconderivados 1.0), obligatorio con code 24.
+    /// </summary>
+    [JsonPropertyName("financial_derivatives")]
+    public Dictionary<string, JsonElement>? FinancialDerivatives { get; set; }
 
     /// <summary>
     /// La cancelación, si se pidió: estado, motivo, sustituto y cuándo.
@@ -15120,13 +15554,13 @@ public sealed partial class TaxStatusCertificate
 public sealed partial class TaxStatusCertificateTaxSystemsItem
 {
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero…
+    /// Clave del régimen fiscal (c_RegimenFiscal): 601, 612, 626…
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
 
     /// <summary>
-    /// Nombre.
+    /// Nombre del régimen fiscal, como lo escribe el SAT.
     /// </summary>
     [JsonPropertyName("name")]
     public string Name { get; set; } = default!;
