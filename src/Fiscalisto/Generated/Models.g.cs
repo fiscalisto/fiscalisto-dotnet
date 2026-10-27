@@ -3749,7 +3749,7 @@ public sealed partial class CreateWebhookEndpointParams
     public required string Url { get; set; }
 
     /// <summary>
-    /// Eventos que quiere recibir, o ["*"] para todos (por omisión). Ver la lista en Webhooks.
+    /// Eventos que quiere recibir, o ["*"] para todos (por omisión). La lista con cuándo llega cada uno: [Tipos de evento](https://fiscalisto.com/docs/api/webhooks#tipos-de-evento).
     /// </summary>
     [JsonPropertyName("events")]
     public List<string>? Events { get; set; }
@@ -3819,13 +3819,19 @@ public sealed partial class CrossCheckCfdi
     public decimal? Declared { get; set; }
 
     /// <summary>
+    /// De declared, lo que la propia declaración dice que no salió de facturas (ingresos nominales adicionales en isr_income, IVA al 16% sobre la precarga del SAT en vat_charged); 0 si no hay.
+    /// </summary>
+    [JsonPropertyName("declared_without_cfdi")]
+    public decimal DeclaredWithoutCfdi { get; set; }
+
+    /// <summary>
     /// Lo que dicen los CFDI del mes: la suma de cfdi más adjustment.
     /// </summary>
     [JsonPropertyName("invoiced")]
     public decimal Invoiced { get; set; }
 
     /// <summary>
-    /// declared menos invoiced; null si declared es null.
+    /// declared menos declared_without_cfdi menos invoiced; null si declared es null.
     /// </summary>
     [JsonPropertyName("difference")]
     public decimal? Difference { get; set; }
@@ -3995,13 +4001,19 @@ public sealed partial class CrossChecksMonthsItemChecksItem
     public decimal? Declared { get; set; }
 
     /// <summary>
+    /// De declared, lo que la propia declaración dice que no salió de facturas: en isr_income los ingresos nominales adicionales (cobrado sin factura, intereses) y en vat_charged el IVA al 16% por encima de la precarga del SAT. Se compara aparte; 0 si no hay.
+    /// </summary>
+    [JsonPropertyName("declared_without_cfdi")]
+    public decimal DeclaredWithoutCfdi { get; set; }
+
+    /// <summary>
     /// Lo que dicen los CFDI del mes, con los mismos cálculos de Impuestos.
     /// </summary>
     [JsonPropertyName("invoiced")]
     public decimal Invoiced { get; set; }
 
     /// <summary>
-    /// declared menos invoiced; null si declared es null.
+    /// declared menos declared_without_cfdi menos invoiced; null si declared es null.
     /// </summary>
     [JsonPropertyName("difference")]
     public decimal? Difference { get; set; }
@@ -16876,7 +16888,7 @@ public sealed partial class UpdateWebhookEndpointParams
     public string? Url { get; set; }
 
     /// <summary>
-    /// Eventos que quiere recibir, o ["*"] para todos (por omisión). Ver la lista en Webhooks.
+    /// Eventos que quiere recibir, o ["*"] para todos (por omisión). La lista con cuándo llega cada uno: [Tipos de evento](https://fiscalisto.com/docs/api/webhooks#tipos-de-evento).
     /// </summary>
     [JsonPropertyName("events")]
     public List<string>? Events { get; set; }
@@ -17112,7 +17124,7 @@ public sealed partial class WebhookEndpoint
     public string? Description { get; set; }
 
     /// <summary>
-    /// Eventos que quiere recibir, o ["*"] para todos (por omisión). Ver la lista en Webhooks.
+    /// Eventos que quiere recibir, o ["*"] para todos (por omisión). La lista con cuándo llega cada uno: [Tipos de evento](https://fiscalisto.com/docs/api/webhooks#tipos-de-evento).
     /// </summary>
     [JsonPropertyName("events")]
     public List<string> Events { get; set; } = default!;
