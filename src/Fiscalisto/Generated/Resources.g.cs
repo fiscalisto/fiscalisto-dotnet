@@ -100,6 +100,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Clientes.</summary>
     public TaxIdsResource TaxIds => _taxIds ??= new TaxIdsResource(this);
 
+    private BranchesResource? _branches;
+
+    /// <summary>Sucursales.</summary>
+    public BranchesResource Branches => _branches ??= new BranchesResource(this);
+
     private CustomersResource? _customers;
 
     /// <summary>Clientes.</summary>
@@ -114,6 +119,31 @@ public sealed partial class FiscalistoClient
 
     /// <summary>Productos.</summary>
     public ProductsResource Products => _products ??= new ProductsResource(this);
+
+    private SatMailboxMessagesResource? _satMailboxMessages;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public SatMailboxMessagesResource SatMailboxMessages => _satMailboxMessages ??= new SatMailboxMessagesResource(this);
+
+    private SatFindingsResource? _satFindings;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public SatFindingsResource SatFindings => _satFindings ??= new SatFindingsResource(this);
+
+    private WarehousesResource? _warehouses;
+
+    /// <summary>Inventario.</summary>
+    public WarehousesResource Warehouses => _warehouses ??= new WarehousesResource(this);
+
+    private StockMovementsResource? _stockMovements;
+
+    /// <summary>Inventario.</summary>
+    public StockMovementsResource StockMovements => _stockMovements ??= new StockMovementsResource(this);
+
+    private StockAdjustmentsResource? _stockAdjustments;
+
+    /// <summary>Inventario.</summary>
+    public StockAdjustmentsResource StockAdjustments => _stockAdjustments ??= new StockAdjustmentsResource(this);
 
     private SatCatalogsResource? _satCatalogs;
 
@@ -534,6 +564,104 @@ public sealed class IssuersResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<IssuerOnboardingLink> CreateOnboardingLinkAsync(string id, CreateIssuerOnboardingLinkParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<IssuerOnboardingLink>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/onboarding_links", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver la opinión de cumplimiento (32-D)
+    /// </summary>
+    /// <remarks>
+    /// La última opinión que trajo del SAT: positiva, negativa (con sus motivos), sin obligaciones o en suspensión. result es null hasta la primera consulta. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/issuers/{id}/compliance_opinion</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-compliance-opinion"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ComplianceOpinion> ComplianceOpinionAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ComplianceOpinion>("GET", $"/v1/issuers/{Uri.EscapeDataString(id)}/compliance_opinion", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Pedir la opinión de cumplimiento al SAT
+    /// </summary>
+    /// <remarks>
+    /// La pide al SAT ahora con la e.firma guardada del emisor (POST /v1/issuers/{id}/efirma con keep_for_downloads: true). 1 timbre en producción, una vez cada 10 minutos; regresa si el SAT no contesta. Si el SAT tarda, contesta status processing y el resultado llega a GET /v1/issuers/{id}/compliance_opinion. En pruebas da una positiva de ejemplo.
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/compliance_opinion/refresh</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/refresh-compliance-opinion"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatRefresh> RefreshComplianceOpinionAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatRefresh>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/compliance_opinion/refresh", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Descargar el PDF de la opinión de cumplimiento
+    /// </summary>
+    /// <remarks>
+    /// El PDF de la última opinión, como lo da el SAT. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/issuers/{id}/compliance_opinion/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-compliance-opinion-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> ComplianceOpinionPdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/issuers/{Uri.EscapeDataString(id)}/compliance_opinion/pdf", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver la constancia de situación fiscal
+    /// </summary>
+    /// <remarks>
+    /// Lo que dice la última constancia generada: razón social, regímenes, código postal, estatus en el padrón e idCIF. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/issuers/{id}/tax_status_certificate</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-tax-status-certificate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TaxStatusCertificate> TaxStatusCertificateAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TaxStatusCertificate>("GET", $"/v1/issuers/{Uri.EscapeDataString(id)}/tax_status_certificate", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Generar la constancia de situación fiscal en el SAT
+    /// </summary>
+    /// <remarks>
+    /// Genera una constancia nueva con la e.firma guardada del emisor. 1 timbre en producción, una vez cada 10 minutos; regresa si el SAT no contesta. En pruebas hace una con los datos del emisor.
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/tax_status_certificate/refresh</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/refresh-tax-status-certificate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatRefresh> RefreshTaxStatusCertificateAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatRefresh>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/tax_status_certificate/refresh", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Descargar el PDF de la constancia
+    /// </summary>
+    /// <remarks>
+    /// El PDF de la última constancia, como lo da el SAT. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/issuers/{id}/tax_status_certificate/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-tax-status-certificate-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> TaxStatusCertificatePdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/issuers/{Uri.EscapeDataString(id)}/tax_status_certificate/pdf", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Revisar el buzón tributario en el SAT
+    /// </summary>
+    /// <remarks>
+    /// Lee los avisos del buzón tributario del emisor ahora, con su e.firma guardada; nunca abre notificaciones (abrirlas firma el acuse y corren los plazos). 1 timbre en producción, una vez cada 10 minutos. En pruebas deja dos avisos de ejemplo.
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/sat_mailbox/refresh</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/refresh-sat-mailbox"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatRefresh> RefreshSatMailboxAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatRefresh>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/sat_mailbox/refresh", null, null, options, true, cancellationToken);
 
     /// <summary>
     /// Ver el portal de autofactura de un emisor
@@ -1271,6 +1399,92 @@ public sealed class TaxIdsResource
 }
 
 /// <summary>
+/// Sucursales: <c>fiscalisto.Branches</c>.
+/// </summary>
+public sealed class BranchesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal BranchesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una sucursal
+    /// </summary>
+    /// <remarks>
+    /// Otro lugar desde donde factura el emisor, con su propio código postal: sus facturas llevan ese CP en LugarExpedicion (y su zona horaria en la Fecha, y el IVA 8 % si es de la franja fronteriza), su dirección en el PDF y, si las da, sus propias series. Un CP que ya tiene otra sucursal contesta branch_exists; el del domicilio fiscal del emisor no es sucursal (es la Matriz). Hasta 200 por emisor.
+    /// <br/>
+    /// <c>POST /v1/branches</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/sucursales/create-branch"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Branch> CreateAsync(CreateBranchParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Branch>("POST", "/v1/branches", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar sucursales
+    /// </summary>
+    /// <remarks>
+    /// Las sucursales del emisor, las más recientes primero. Las archivadas solo con include_archived=true.
+    /// <br/>
+    /// <c>GET /v1/branches</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/sucursales/list-branches"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Branch>> ListAsync(ListBranchesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Branch>("/v1/branches", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar sucursales: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Branch> ListAutoPagingAsync(ListBranchesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Branch>("/v1/branches", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una sucursal
+    /// </summary>
+    /// <remarks>
+    /// Una sucursal del emisor.
+    /// <br/>
+    /// <c>GET /v1/branches/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/sucursales/get-branch"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Branch> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Branch>("GET", $"/v1/branches/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una sucursal
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo los campos que manda; una serie en null vuelve a la del emisor. archived: true la archiva (ya no se factura desde ella y sus facturas la siguen nombrando), false la restaura. El código postal de una sucursal que ya facturó no cambia: si se mudó, archívela y cree otra.
+    /// <br/>
+    /// <c>POST /v1/branches/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/sucursales/update-branch"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Branch> UpdateAsync(string id, UpdateBranchParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Branch>("POST", $"/v1/branches/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una sucursal
+    /// </summary>
+    /// <remarks>
+    /// Solo una que nunca facturó; con facturas contesta branch_has_invoices: archívela con archived: true.
+    /// <br/>
+    /// <c>DELETE /v1/branches/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/sucursales/delete-branch"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/branches/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
 /// Clientes: <c>fiscalisto.Customers</c>.
 /// </summary>
 public sealed class CustomersResource
@@ -1512,6 +1726,248 @@ public sealed class ProductsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/products/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver las existencias de un producto
+    /// </summary>
+    /// <remarks>
+    /// Lo que hay del producto en cada almacén del emisor (también en 0), apartado por cotizaciones y disponible.
+    /// <br/>
+    /// <c>GET /v1/products/{id}/stock</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/get-product-stock"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StockLevelList> StockAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StockLevelList>("GET", $"/v1/products/{Uri.EscapeDataString(id)}/stock", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.SatMailboxMessages</c>.
+/// </summary>
+public sealed class SatMailboxMessagesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatMailboxMessagesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar avisos del buzón tributario
+    /// </summary>
+    /// <remarks>
+    /// Los avisos que trajo del buzón del emisor, los más recientes primero. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_mailbox_messages</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/list-sat-mailbox-messages"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SatMailboxMessage>> ListAsync(ListSatMailboxMessagesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SatMailboxMessage>("/v1/sat_mailbox_messages", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar avisos del buzón tributario: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SatMailboxMessage> ListAutoPagingAsync(ListSatMailboxMessagesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SatMailboxMessage>("/v1/sat_mailbox_messages", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un aviso del buzón tributario
+    /// </summary>
+    /// <remarks>
+    /// Un aviso del buzón, con su urgencia y si pide hacer algo.
+    /// <br/>
+    /// <c>GET /v1/sat_mailbox_messages/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-sat-mailbox-message"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatMailboxMessage> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatMailboxMessage>("GET", $"/v1/sat_mailbox_messages/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.SatFindings</c>.
+/// </summary>
+public sealed class SatFindingsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatFindingsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar hallazgos en los CFDI
+    /// </summary>
+    /// <remarks>
+    /// Lo que Fiscalisto encontró en los CFDI del emisor (los suyos y los descargados del SAT) y nadie ha revisado, por tipo y del más grave al más leve: proveedores en la lista 69-B, CFDI cancelados, pagos en efectivo de más de $2,000, errores de CFDI 4.0. Todos en una página. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_findings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/list-sat-findings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatFindingList> ListAsync(ListSatFindingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatFindingList>("GET", "/v1/sat_findings", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Inventario: <c>fiscalisto.Warehouses</c>.
+/// </summary>
+public sealed class WarehousesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal WarehousesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar almacenes
+    /// </summary>
+    /// <remarks>
+    /// Los almacenes del emisor, los más recientes primero: el de la Matriz y uno por sucursal se crean solos. Todos en una página.
+    /// <br/>
+    /// <c>GET /v1/warehouses</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/list-warehouses"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<WarehouseList> ListAsync(ListWarehousesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<WarehouseList>("GET", "/v1/warehouses", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver un almacén
+    /// </summary>
+    /// <remarks>
+    /// Un almacén del emisor.
+    /// <br/>
+    /// <c>GET /v1/warehouses/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/get-warehouse"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Warehouse> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Warehouse>("GET", $"/v1/warehouses/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver las existencias de un almacén
+    /// </summary>
+    /// <remarks>
+    /// Lo que hay de cada producto en el almacén, el producto más reciente primero. Solo los que tienen existencias, salvo con include_empty=true (todos los que llevan track_stock).
+    /// <br/>
+    /// <c>GET /v1/warehouses/{id}/stock</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/list-warehouse-stock"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<StockLevel>> StockAsync(string id, ListWarehouseStockParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<StockLevel>($"/v1/warehouses/{Uri.EscapeDataString(id)}/stock", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Ver las existencias de un almacén: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<StockLevel> StockAutoPagingAsync(string id, ListWarehouseStockParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<StockLevel>($"/v1/warehouses/{Uri.EscapeDataString(id)}/stock", @params, options, cancellationToken);
+}
+
+/// <summary>
+/// Inventario: <c>fiscalisto.StockMovements</c>.
+/// </summary>
+public sealed class StockMovementsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal StockMovementsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar movimientos (kárdex)
+    /// </summary>
+    /// <remarks>
+    /// Cada entrada y salida de existencias, la más reciente primero: ventas (de sus facturas), compras, ajustes, traspasos y lo que deshizo una cancelación.
+    /// <br/>
+    /// <c>GET /v1/stock_movements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/list-stock-movements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<StockMovement>> ListAsync(ListStockMovementsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<StockMovement>("/v1/stock_movements", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar movimientos (kárdex): todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<StockMovement> ListAutoPagingAsync(ListStockMovementsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<StockMovement>("/v1/stock_movements", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un movimiento
+    /// </summary>
+    /// <remarks>
+    /// Una entrada o salida de existencias, con lo que la causó (source).
+    /// <br/>
+    /// <c>GET /v1/stock_movements/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/get-stock-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StockMovement> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StockMovement>("GET", $"/v1/stock_movements/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Inventario: <c>fiscalisto.StockAdjustments</c>.
+/// </summary>
+public sealed class StockAdjustmentsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal StockAdjustmentsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ajustar existencias
+    /// </summary>
+    /// <remarks>
+    /// Mete o saca existencias de un almacén con su motivo: el inventario inicial, una merma, un robo, un sobrante. Las entradas valen su unit_cost (o el costo promedio), las salidas el costo del emisor (promedio o PEPS). Los productos deben llevar track_stock: true. Se aplica al momento (status applied).
+    /// <br/>
+    /// <c>POST /v1/stock_adjustments</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/create-stock-adjustment"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StockAdjustment> CreateAsync(CreateStockAdjustmentParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StockAdjustment>("POST", "/v1/stock_adjustments", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar ajustes
+    /// </summary>
+    /// <remarks>
+    /// Los ajustes del emisor, los más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/stock_adjustments</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/list-stock-adjustments"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<StockAdjustment>> ListAsync(ListStockAdjustmentsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<StockAdjustment>("/v1/stock_adjustments", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar ajustes: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<StockAdjustment> ListAutoPagingAsync(ListStockAdjustmentsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<StockAdjustment>("/v1/stock_adjustments", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un ajuste
+    /// </summary>
+    /// <remarks>
+    /// Un ajuste de existencias, con sus líneas.
+    /// <br/>
+    /// <c>GET /v1/stock_adjustments/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/get-stock-adjustment"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<StockAdjustment> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<StockAdjustment>("GET", $"/v1/stock_adjustments/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

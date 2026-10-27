@@ -19,7 +19,7 @@ namespace Fiscalisto;
 public sealed partial class Account
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -253,6 +253,18 @@ public sealed partial class ApplyAdvanceParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
 
     /// <summary>
     /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
@@ -599,7 +611,7 @@ public sealed partial class BankImport
 public sealed partial class BankTransaction
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -776,6 +788,192 @@ public sealed partial class BankTransactionSuggestedMatch
 }
 
 /// <summary>
+/// Una sucursal del emisor: otro lugar desde donde factura, con su código postal (LugarExpedicion), su dirección en el PDF y sus series.
+/// </summary>
+public sealed partial class Branch
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor de la sucursal.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo la llama su equipo; va en el PDF.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código postal: el LugarExpedicion de sus CFDI.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string Zip { get; set; } = default!;
+
+    /// <summary>
+    /// Su dirección, en el PDF de sus facturas.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public BranchAddress Address { get; set; } = default!;
+
+    /// <summary>
+    /// Teléfono, en el PDF, o null.
+    /// </summary>
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    /// <summary>
+    /// Correo, en el PDF, o null.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// La serie de cada tipo de CFDI que se timbra desde ella; null usa la del emisor.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public BranchSeries Series { get; set; } = default!;
+
+    /// <summary>
+    /// true si está archivada: ya no se factura desde ella.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool Archived { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// Su dirección, en el PDF de sus facturas.
+/// </summary>
+public sealed partial class BranchAddress
+{
+    /// <summary>
+    /// Calle (Calle).
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string? Street { get; set; }
+
+    /// <summary>
+    /// Número exterior (NumeroExterior).
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior (NumeroInterior).
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Municipio o alcaldía.
+    /// </summary>
+    [JsonPropertyName("city")]
+    public string? City { get; set; }
+
+    /// <summary>
+    /// Estado (Estado): en el extranjero c_Estado para USA y CAN, o texto.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class BranchList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Branch> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// La serie de cada tipo de CFDI que se timbra desde ella; null usa la del emisor.
+/// </summary>
+public sealed partial class BranchSeries
+{
+    /// <summary>
+    /// Serie de sus facturas (tipo I); null, la del emisor.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
+
+    /// <summary>
+    /// Serie de sus notas de crédito (tipo E); null, la del emisor.
+    /// </summary>
+    [JsonPropertyName("credit_note")]
+    public string? CreditNote { get; set; }
+
+    /// <summary>
+    /// Serie de sus complementos de pago (tipo P); null, la del emisor.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public string? Payment { get; set; }
+
+    /// <summary>
+    /// Serie de sus traslados (tipo T); null, la del emisor.
+    /// </summary>
+    [JsonPropertyName("transfer")]
+    public string? Transfer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cancelar una factura».
 /// </summary>
 public sealed partial class CancelInvoiceParams
@@ -845,6 +1043,74 @@ public sealed partial class ClassifyBankTransactionParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// La opinión de cumplimiento de obligaciones fiscales (32-D) más reciente del emisor, como la dio el SAT.
+/// </summary>
+public sealed partial class ComplianceOpinion
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// positive, negative, no_obligations (inscrito sin obligaciones) o suspended (en suspensión de actividades); null si no se ha consultado.
+    /// <br/>
+    /// Valores: positive, negative, no_obligations, suspended.
+    /// </summary>
+    [JsonPropertyName("result")]
+    public string? Result { get; set; }
+
+    /// <summary>
+    /// El día que la emitió el SAT (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// Su folio, o null.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// Si es negativa, lo que el SAT marca como pendiente.
+    /// </summary>
+    [JsonPropertyName("reasons")]
+    public List<string> Reasons { get; set; } = default!;
+
+    /// <summary>
+    /// true si su PDF está en GET /v1/issuers/{id}/compliance_opinion/pdf.
+    /// </summary>
+    [JsonPropertyName("pdf")]
+    public bool Pdf { get; set; }
+
+    /// <summary>
+    /// Cuándo se consultó por última vez, o null.
+    /// </summary>
+    [JsonPropertyName("checked_at")]
+    public string? CheckedAt { get; set; }
+
+    /// <summary>
+    /// Por qué falló la última consulta, o null.
+    /// </summary>
+    [JsonPropertyName("last_error")]
+    public string? LastError { get; set; }
 }
 
 /// <summary>
@@ -1057,6 +1323,126 @@ public sealed partial class CreateBankTransactionsParamsTransactionsItem
     /// </summary>
     [JsonPropertyName("payer_tax_id")]
     public string? PayerTaxId { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear una sucursal».
+/// </summary>
+public sealed partial class CreateBranchParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cómo la llama su equipo, por ejemplo «Sucursal Monterrey». Va en el PDF.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Su código postal (LugarExpedicion de sus CFDI): uno por sucursal, distinto del domicilio fiscal del emisor.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// La dirección que va en el PDF de sus facturas.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public CreateBranchParamsAddress? Address { get; set; }
+
+    /// <summary>
+    /// Teléfono, para el PDF.
+    /// </summary>
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    /// <summary>
+    /// Correo, para el PDF.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public CreateBranchParamsSeries? Series { get; set; }
+}
+
+/// <summary>
+/// La dirección que va en el PDF de sus facturas.
+/// </summary>
+public sealed partial class CreateBranchParamsAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string? Street { get; set; }
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Municipio o alcaldía.
+    /// </summary>
+    [JsonPropertyName("city")]
+    public string? City { get; set; }
+
+    /// <summary>
+    /// Estado; por omisión, el de su código postal.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+}
+
+/// <summary>
+/// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+/// </summary>
+public sealed partial class CreateBranchParamsSeries
+{
+    /// <summary>
+    /// Serie de sus facturas (tipo I); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
+
+    /// <summary>
+    /// Serie de sus notas de crédito (tipo E); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("credit_note")]
+    public string? CreditNote { get; set; }
+
+    /// <summary>
+    /// Serie de sus complementos de pago (tipo P); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public string? Payment { get; set; }
+
+    /// <summary>
+    /// Serie de sus traslados (tipo T); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("transfer")]
+    public string? Transfer { get; set; }
 }
 
 /// <summary>
@@ -1397,6 +1783,18 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
 
     /// <summary>
     /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
@@ -1921,6 +2319,30 @@ public sealed partial class CreateProductParams
     /// </summary>
     [JsonPropertyName("local_taxes")]
     public List<CreateProductParamsLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
+    /// Lleva existencias (Inventario): cada factura que lo vende las saca del almacén de su sucursal, y una cancelada las regresa. Ver GET /v1/products/{id}/stock.
+    /// </summary>
+    [JsonPropertyName("track_stock")]
+    public bool? TrackStock { get; set; }
+
+    /// <summary>
+    /// Su costo por unidad en pesos sin IVA, hasta que sus compras den otro: vale las existencias que entran sin unit_cost.
+    /// </summary>
+    [JsonPropertyName("cost")]
+    public decimal? Cost { get; set; }
+
+    /// <summary>
+    /// Código de barras (EAN, UPC o el suyo). Una factura cuyo concepto lo trae como NoIdentificacion saca existencias de este producto.
+    /// </summary>
+    [JsonPropertyName("barcode")]
+    public string? Barcode { get; set; }
+
+    /// <summary>
+    /// Existencia mínima: por debajo, el aviso de existencias bajas lo incluye.
+    /// </summary>
+    [JsonPropertyName("min_stock")]
+    public decimal? MinStock { get; set; }
 }
 
 /// <summary>
@@ -2389,6 +2811,18 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
 
     /// <summary>
     /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
@@ -3032,6 +3466,80 @@ public sealed partial class CreateSatDownloadParams
 }
 
 /// <summary>
+/// Los campos de «Ajustar existencias».
+/// </summary>
+public sealed partial class CreateStockAdjustmentParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El almacén (whs_…). Por omisión, el de la Matriz.
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
+
+    /// <summary>
+    /// Por qué: shrinkage (merma), theft (robo o extravío), damage (daño), expiration (caducidad), internal_use (uso interno), gift (muestra o regalo), initial (inventario inicial), surplus (sobrante), count (conteo físico) u other.
+    /// <br/>
+    /// Valores: shrinkage, theft, damage, expiration, internal_use, gift, initial, surplus, count, other.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public required string Reason { get; set; }
+
+    /// <summary>
+    /// Una nota, para el kárdex.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Lo que entra o sale de cada producto, hasta 500 líneas.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<CreateStockAdjustmentParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateStockAdjustmentParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateStockAdjustmentParamsLinesItem
+{
+    /// <summary>
+    /// El producto (prd_…), con track_stock: true.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public required string Product { get; set; }
+
+    /// <summary>
+    /// Cuánto entra (positivo) o sale (negativo), en la unidad del producto.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public required decimal Quantity { get; set; }
+
+    /// <summary>
+    /// Lo que costó cada unidad que entra, en pesos sin IVA; sin él, el costo promedio de hoy.
+    /// </summary>
+    [JsonPropertyName("unit_cost")]
+    public decimal? UnitCost { get; set; }
+
+    /// <summary>
+    /// El lote o número de serie, si el producto los lleva.
+    /// </summary>
+    [JsonPropertyName("lot")]
+    public string? Lot { get; set; }
+
+    /// <summary>
+    /// La caducidad de un lote nuevo (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("expires_on")]
+    public string? ExpiresOn { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Conectar una tienda».
 /// </summary>
 public sealed partial class CreateStoreConnectionParams
@@ -3619,7 +4127,7 @@ public sealed partial class CrossChecksVatBalanceInFavorPeriodsItem
 public sealed partial class Customer
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -3709,7 +4217,7 @@ public sealed partial class Customer
 public sealed partial class CustomerDataRequest
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -3929,7 +4437,7 @@ public sealed partial class CustomerList
 public sealed partial class Deleted
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -4137,7 +4645,7 @@ public sealed partial class DiotLinesItemReturns
 public sealed partial class Employee
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -4403,7 +4911,7 @@ public sealed partial class ErrorErrorValue
 public sealed partial class Event
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -5343,7 +5851,7 @@ public sealed partial class ImportStoreOrdersParams
 public sealed partial class Invoice
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -5365,6 +5873,12 @@ public sealed partial class Invoice
     /// </summary>
     [JsonPropertyName("issuer")]
     public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La sucursal (brn_…) desde donde se timbró, o null (el domicilio fiscal del emisor). Sus pagos y notas de crédito la siguen.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
 
     /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
@@ -5629,7 +6143,7 @@ public sealed partial class InvoiceAdvanceApplication
 public sealed partial class InvoiceBatch
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -5829,6 +6343,18 @@ public sealed partial class InvoiceCreate
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
 
     /// <summary>
     /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
@@ -8758,7 +9284,7 @@ public sealed partial class InvoicePayrollDeductionsItem
 public sealed partial class InvoicePayrollEmployee
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -9040,7 +9566,7 @@ public sealed partial class InvoiceTaxes
 public sealed partial class Issuer
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -9556,6 +10082,42 @@ public sealed partial class ListBankTransactionsParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar sucursales».
+/// </summary>
+public sealed partial class ListBranchesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// true para incluir las archivadas.
+    /// </summary>
+    [JsonPropertyName("include_archived")]
+    public bool? IncludeArchived { get; set; }
+
+    /// <summary>
+    /// Solo la de este código postal.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string? Zip { get; set; }
 }
 
 /// <summary>
@@ -10087,6 +10649,38 @@ public sealed partial class ListSatDownloadsParams
 }
 
 /// <summary>
+/// Los campos de «Listar hallazgos en los CFDI».
+/// </summary>
+public sealed partial class ListSatFindingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// issued (emitidos) o received (recibidos); sin él, los dos.
+    /// <br/>
+    /// Valores: issued, received.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string? Direction { get; set; }
+
+    /// <summary>
+    /// CFDI desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// CFDI hasta este día (AAAA-MM-DD, completo).
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLte { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar facturas del SAT».
 /// </summary>
 public sealed partial class ListSatInvoicesParams
@@ -10139,6 +10733,130 @@ public sealed partial class ListSatInvoicesParams
 
     /// <summary>
     /// Con fecha hasta este día (AAAA-MM-DD), incluido.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLte { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar avisos del buzón tributario».
+/// </summary>
+public sealed partial class ListSatMailboxMessagesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// true para solo los no leídos en el SAT, false para los leídos.
+    /// </summary>
+    [JsonPropertyName("unread")]
+    public bool? Unread { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar ajustes».
+/// </summary>
+public sealed partial class ListStockAdjustmentsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo los de este almacén (whs_…).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
+
+    /// <summary>
+    /// applied, pending, rejected o reversed.
+    /// <br/>
+    /// Valores: applied, pending, rejected, reversed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar movimientos (kárdex)».
+/// </summary>
+public sealed partial class ListStockMovementsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo los de este producto (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string? Product { get; set; }
+
+    /// <summary>
+    /// Solo los de este almacén (whs_…).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
+
+    /// <summary>
+    /// Solo los de este tipo.
+    /// <br/>
+    /// Valores: sale, purchase, customer_return, supplier_return, adjustment, count, transfer_out, transfer_in, initial, cost, reversal.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Desde este día (AAAA-MM-DD) u hora (AAAA-MM-DDTHH:MM:SS) de la Ciudad de México.
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// Hasta este día (completo) u hora de la Ciudad de México.
     /// </summary>
     [JsonPropertyName("date_lte")]
     public string? DateLte { get; set; }
@@ -10210,6 +10928,48 @@ public sealed partial class ListTicketsParams
     /// </summary>
     [JsonPropertyName("sold_at_lte")]
     public string? SoldAtLte { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver las existencias de un almacén».
+/// </summary>
+public sealed partial class ListWarehouseStockParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// true para incluir los productos con track_stock que están en 0.
+    /// </summary>
+    [JsonPropertyName("include_empty")]
+    public bool? IncludeEmpty { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar almacenes».
+/// </summary>
+public sealed partial class ListWarehousesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// true para incluir los archivados.
+    /// </summary>
+    [JsonPropertyName("include_archived")]
+    public bool? IncludeArchived { get; set; }
 }
 
 /// <summary>
@@ -10632,7 +11392,7 @@ public sealed partial class PreviewPayrollReceiptParamsPeriod
 public sealed partial class Product
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -10746,6 +11506,30 @@ public sealed partial class Product
     public List<ProductLocalTaxesItem> LocalTaxes { get; set; } = default!;
 
     /// <summary>
+    /// true si lleva existencias (Inventario).
+    /// </summary>
+    [JsonPropertyName("track_stock")]
+    public bool TrackStock { get; set; }
+
+    /// <summary>
+    /// Su costo por unidad en pesos sin IVA, o null.
+    /// </summary>
+    [JsonPropertyName("cost")]
+    public decimal? Cost { get; set; }
+
+    /// <summary>
+    /// Su código de barras, o null.
+    /// </summary>
+    [JsonPropertyName("barcode")]
+    public string? Barcode { get; set; }
+
+    /// <summary>
+    /// Su existencia mínima, o null.
+    /// </summary>
+    [JsonPropertyName("min_stock")]
+    public decimal? MinStock { get; set; }
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -10818,7 +11602,7 @@ public sealed partial class ProductLocalTaxesItem
 public sealed partial class Quote
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -11170,7 +11954,7 @@ public sealed partial class ReceivableList
 public sealed partial class RecurringInvoice
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -11446,7 +12230,7 @@ public sealed partial class ResetTestDataParams
 public sealed partial class Retention
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -11832,7 +12616,7 @@ public sealed partial class RollWebhookSecretParams
 public sealed partial class Sandbox
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -11988,7 +12772,7 @@ public sealed partial class SatCatalogEntryList
 public sealed partial class SatDeclaration
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -12516,7 +13300,7 @@ public sealed partial class SatDeclarationsRefresh
 public sealed partial class SatDownload
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -12643,12 +13427,110 @@ public sealed partial class SatDownloadList
 }
 
 /// <summary>
+/// Un tipo de hallazgo en los CFDI del emisor (un proveedor en la lista 69-B, un CFDI cancelado, un pago en efectivo de más de $2,000…), con cuántos CFDI lo tienen.
+/// </summary>
+public sealed partial class SatFinding
+{
+    /// <summary>
+    /// El código del hallazgo (el mismo que code).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El código del hallazgo, estable (por ejemplo efos_definitivo).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// critical (grave), warning (revisar) o info.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string Severity { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es, en palabras.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué importa y qué hacer, o null.
+    /// </summary>
+    [JsonPropertyName("explanation")]
+    public string? Explanation { get; set; }
+
+    /// <summary>
+    /// Cuántos CFDI lo tienen, sin revisar.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// La suma de sus totales.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatFindingList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatFinding> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Una factura que el SAT tiene del emisor, emitida o recibida, traída con una descarga.
 /// </summary>
 public sealed partial class SatInvoice
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -13031,6 +13913,182 @@ public sealed partial class SatListCheckListsItem
 }
 
 /// <summary>
+/// Un aviso del buzón tributario del SAT del emisor.
+/// </summary>
+public sealed partial class SatMailboxMessage
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su asunto.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string Subject { get; set; } = default!;
+
+    /// <summary>
+    /// Su texto, resumido, o null.
+    /// </summary>
+    [JsonPropertyName("summary")]
+    public string? Summary { get; set; }
+
+    /// <summary>
+    /// mailbox (el buzón del portal) o email (un aviso que el SAT mandó por correo).
+    /// <br/>
+    /// Valores: mailbox, email.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// true si no se ha leído en el SAT.
+    /// </summary>
+    [JsonPropertyName("unread")]
+    public bool Unread { get; set; }
+
+    /// <summary>
+    /// urgent (un requerimiento, un plazo), attention o informational.
+    /// <br/>
+    /// Valores: urgent, attention, informational.
+    /// </summary>
+    [JsonPropertyName("urgency")]
+    public string Urgency { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es: requerimiento, carta invitación, informativo…
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// true si pide hacer algo.
+    /// </summary>
+    [JsonPropertyName("action_required")]
+    public bool ActionRequired { get; set; }
+
+    /// <summary>
+    /// Cuándo llegó, como lo dice el SAT.
+    /// </summary>
+    [JsonPropertyName("received_at")]
+    public string? ReceivedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo lo trajo Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatMailboxMessageList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatMailboxMessage> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una consulta al SAT de un documento del emisor: si ya terminó y dónde leerlo.
+/// </summary>
+public sealed partial class SatRefresh
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Qué se consultó.
+    /// <br/>
+    /// Valores: compliance_opinion, tax_status_certificate, sat_mailbox.
+    /// </summary>
+    [JsonPropertyName("document")]
+    public string Document { get; set; } = default!;
+
+    /// <summary>
+    /// completed (ya está en url) o processing (el SAT tarda; llega a url en unos minutos).
+    /// <br/>
+    /// Valores: completed, processing.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se pidió.
+    /// </summary>
+    [JsonPropertyName("refreshed_at")]
+    public string? RefreshedAt { get; set; }
+
+    /// <summary>
+    /// Desde cuándo se puede pedir otra vez.
+    /// </summary>
+    [JsonPropertyName("next_refresh_at")]
+    public string? NextRefreshAt { get; set; }
+
+    /// <summary>
+    /// Dónde leer lo que trajo.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// El portal de autofactura de un emisor y sus reglas.
 /// </summary>
 public sealed partial class SelfInvoicing
@@ -13173,12 +14231,396 @@ public sealed partial class SignEfirmaParams
 }
 
 /// <summary>
+/// Un ajuste de existencias: lo que entró o salió de un almacén por inventario inicial, merma, robo, conteo…
+/// </summary>
+public sealed partial class StockAdjustment
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El almacén (whs_…).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string Warehouse { get; set; } = default!;
+
+    /// <summary>
+    /// El motivo (ver POST /v1/stock_adjustments).
+    /// <br/>
+    /// Valores: shrinkage, theft, damage, expiration, internal_use, gift, initial, surplus, count, other.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// Su nota, o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// applied (ya movió existencias), pending (espera aprobación en la app), rejected o reversed (se deshizo).
+    /// <br/>
+    /// Valores: applied, pending, rejected, reversed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que vale lo que movió, en pesos sin IVA.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal Value { get; set; }
+
+    /// <summary>
+    /// Lo que entró o salió de cada producto.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<StockAdjustmentLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se hizo.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;StockAdjustmentLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class StockAdjustmentLinesItem
+{
+    /// <summary>
+    /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = default!;
+
+    /// <summary>
+    /// Cantidad (Cantidad). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// El costo por unidad que se dio al ajuste, en pesos sin IVA, o null (el costo promedio).
+    /// </summary>
+    [JsonPropertyName("unit_cost")]
+    public decimal? UnitCost { get; set; }
+
+    /// <summary>
+    /// Lote del medicamento (LoteMedicamento).
+    /// </summary>
+    [JsonPropertyName("lot")]
+    public string? Lot { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class StockAdjustmentList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<StockAdjustment> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que hay de un producto en un almacén, y lo que vale.
+/// </summary>
+public sealed partial class StockLevel
+{
+    /// <summary>
+    /// Su id (stl_…): el producto en ese almacén. Sirve como starting_after.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El producto (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = default!;
+
+    /// <summary>
+    /// El almacén (whs_…).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string Warehouse { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que hay, en la unidad del producto (todos sus lotes).
+    /// </summary>
+    [JsonPropertyName("on_hand")]
+    public decimal OnHand { get; set; }
+
+    /// <summary>
+    /// Lo apartado por cotizaciones aceptadas que no se han facturado.
+    /// </summary>
+    [JsonPropertyName("reserved")]
+    public decimal Reserved { get; set; }
+
+    /// <summary>
+    /// on_hand menos reserved: lo que se puede vender.
+    /// </summary>
+    [JsonPropertyName("available")]
+    public decimal Available { get; set; }
+
+    /// <summary>
+    /// Lo que valen esas existencias a su costo, en pesos sin IVA.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal Value { get; set; }
+
+    /// <summary>
+    /// value / on_hand: el costo por unidad, o null sin existencias.
+    /// </summary>
+    [JsonPropertyName("average_cost")]
+    public decimal? AverageCost { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class StockLevelList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<StockLevel> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una entrada o salida de existencias (el kárdex): una venta, una compra, un ajuste, un traspaso…
+/// </summary>
+public sealed partial class StockMovement
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El producto (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = default!;
+
+    /// <summary>
+    /// El almacén (whs_…).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string Warehouse { get; set; } = default!;
+
+    /// <summary>
+    /// sale (una factura), purchase (una compra), customer_return, supplier_return, adjustment, count (conteo físico), transfer_out, transfer_in, initial, cost (un ajuste de costo) o reversal (deshace otro, como una factura cancelada).
+    /// <br/>
+    /// Valores: sale, purchase, customer_return, supplier_return, adjustment, count, transfer_out, transfer_in, initial, cost, reversal.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Cuánto entró (positivo) o salió (negativo).
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// El costo por unidad con que entró o salió, en pesos sin IVA.
+    /// </summary>
+    [JsonPropertyName("unit_cost")]
+    public decimal UnitCost { get; set; }
+
+    /// <summary>
+    /// quantity × unit_cost: lo que cambió el valor del inventario.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal Value { get; set; }
+
+    /// <summary>
+    /// El lote o número de serie, o null.
+    /// </summary>
+    [JsonPropertyName("lot")]
+    public string? Lot { get; set; }
+
+    /// <summary>
+    /// Lo que lo causó: type invoice (id es el UUID del CFDI), adjustment (adj_…), receipt, transfer, count o ticket.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public StockMovementSource Source { get; set; } = default!;
+
+    /// <summary>
+    /// El motivo de un ajuste, o null.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// Cuándo pasó, hora de la Ciudad de México (la Fecha del CFDI en una venta).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// true si un movimiento posterior lo deshizo.
+    /// </summary>
+    [JsonPropertyName("reversed")]
+    public bool Reversed { get; set; }
+
+    /// <summary>
+    /// Cuándo se registró.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class StockMovementList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<StockMovement> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que lo causó: type invoice (id es el UUID del CFDI), adjustment (adj_…), receipt, transfer, count o ticket.
+/// </summary>
+public sealed partial class StockMovementSource
+{
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+}
+
+/// <summary>
 /// Una tienda de Shopify o Mercado Libre cuyos pedidos pagados se vuelven tickets de autofactura del emisor.
 /// </summary>
 public sealed partial class StoreConnection
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -13583,6 +15025,102 @@ public sealed partial class TaxIdValidationWarningsItem
 }
 
 /// <summary>
+/// La constancia de situación fiscal más reciente del emisor, generada en el SAT con su e.firma.
+/// </summary>
+public sealed partial class TaxStatusCertificate
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El día que la emitió el SAT (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("issued_on")]
+    public string? IssuedOn { get; set; }
+
+    /// <summary>
+    /// Su idCIF, o null.
+    /// </summary>
+    [JsonPropertyName("id_cif")]
+    public string? IdCif { get; set; }
+
+    /// <summary>
+    /// El RFC.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre o razón social como la tiene el SAT, o null.
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+
+    /// <summary>
+    /// Sus regímenes fiscales (clave de c_RegimenFiscal y nombre).
+    /// </summary>
+    [JsonPropertyName("tax_systems")]
+    public List<TaxStatusCertificateTaxSystemsItem> TaxSystems { get; set; } = default!;
+
+    /// <summary>
+    /// El código postal de su domicilio fiscal, o null.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string? Zip { get; set; }
+
+    /// <summary>
+    /// Estatus en el padrón (ACTIVO, SUSPENDIDO…), o null.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// true si su PDF está en GET /v1/issuers/{id}/tax_status_certificate/pdf.
+    /// </summary>
+    [JsonPropertyName("pdf")]
+    public bool Pdf { get; set; }
+
+    /// <summary>
+    /// Cuándo se generó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;TaxStatusCertificateTaxSystemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TaxStatusCertificateTaxSystemsItem
+{
+    /// <summary>
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero…
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+}
+
+/// <summary>
 /// El reloj de prueba de un emisor de pruebas: su «hoy», que solo avanza cuando usted lo adelanta, haciendo día por día lo que toca.
 /// </summary>
 public sealed partial class TestClock
@@ -13748,7 +15286,7 @@ public sealed partial class TestWebhookEndpointParams
 public sealed partial class Ticket
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
@@ -14050,6 +15588,126 @@ public sealed partial class UpdateAccountParams
     /// </summary>
     [JsonPropertyName("api_version")]
     public required string ApiVersion { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar una sucursal».
+/// </summary>
+public sealed partial class UpdateBranchParams
+{
+    /// <summary>
+    /// Cómo la llama su equipo, por ejemplo «Sucursal Monterrey». Va en el PDF.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Su código postal (LugarExpedicion de sus CFDI): uno por sucursal, distinto del domicilio fiscal del emisor.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string? Zip { get; set; }
+
+    /// <summary>
+    /// La dirección que va en el PDF de sus facturas.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public UpdateBranchParamsAddress? Address { get; set; }
+
+    /// <summary>
+    /// Teléfono, para el PDF.
+    /// </summary>
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    /// <summary>
+    /// Correo, para el PDF.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public UpdateBranchParamsSeries? Series { get; set; }
+
+    /// <summary>
+    /// true la archiva: ya no se puede facturar desde ella, y sus facturas la siguen nombrando. false la restaura.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool? Archived { get; set; }
+}
+
+/// <summary>
+/// La dirección que va en el PDF de sus facturas.
+/// </summary>
+public sealed partial class UpdateBranchParamsAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string? Street { get; set; }
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Municipio o alcaldía.
+    /// </summary>
+    [JsonPropertyName("city")]
+    public string? City { get; set; }
+
+    /// <summary>
+    /// Estado; por omisión, el de su código postal.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+}
+
+/// <summary>
+/// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+/// </summary>
+public sealed partial class UpdateBranchParamsSeries
+{
+    /// <summary>
+    /// Serie de sus facturas (tipo I); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
+
+    /// <summary>
+    /// Serie de sus notas de crédito (tipo E); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("credit_note")]
+    public string? CreditNote { get; set; }
+
+    /// <summary>
+    /// Serie de sus complementos de pago (tipo P); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public string? Payment { get; set; }
+
+    /// <summary>
+    /// Serie de sus traslados (tipo T); sin ella, la del emisor.
+    /// </summary>
+    [JsonPropertyName("transfer")]
+    public string? Transfer { get; set; }
 }
 
 /// <summary>
@@ -14394,6 +16052,30 @@ public sealed partial class UpdateProductParams
     /// </summary>
     [JsonPropertyName("local_taxes")]
     public List<UpdateProductParamsLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
+    /// Lleva existencias (Inventario): cada factura que lo vende las saca del almacén de su sucursal, y una cancelada las regresa. Ver GET /v1/products/{id}/stock.
+    /// </summary>
+    [JsonPropertyName("track_stock")]
+    public bool? TrackStock { get; set; }
+
+    /// <summary>
+    /// Su costo por unidad en pesos sin IVA, hasta que sus compras den otro: vale las existencias que entran sin unit_cost.
+    /// </summary>
+    [JsonPropertyName("cost")]
+    public decimal? Cost { get; set; }
+
+    /// <summary>
+    /// Código de barras (EAN, UPC o el suyo). Una factura cuyo concepto lo trae como NoIdentificacion saca existencias de este producto.
+    /// </summary>
+    [JsonPropertyName("barcode")]
+    public string? Barcode { get; set; }
+
+    /// <summary>
+    /// Existencia mínima: por debajo, el aviso de existencias bajas lo incluye.
+    /// </summary>
+    [JsonPropertyName("min_stock")]
+    public decimal? MinStock { get; set; }
 }
 
 /// <summary>
@@ -14852,6 +16534,18 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public string? Issuer { get; set; }
 
     /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
+
+    /// <summary>
     /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
     /// </summary>
     [JsonPropertyName("customer")]
@@ -15273,12 +16967,116 @@ public sealed partial class ValidateTaxIdParams
 }
 
 /// <summary>
+/// Un almacén del emisor: el de la Matriz y uno por sucursal se crean solos; cada factura saca existencias del de su sucursal.
+/// </summary>
+public sealed partial class Warehouse
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor del almacén.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre («Matriz», el de su sucursal, o el que le dieron en la app).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su clave corta, o null.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+
+    /// <summary>
+    /// warehouse (almacén propio) o consignment (mercancía en consignación con un cliente, todavía suya).
+    /// <br/>
+    /// Valores: warehouse, consignment.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Su sucursal (brn_…), o null si es de la Matriz.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// true si es el almacén del que vende y recibe su sucursal.
+    /// </summary>
+    [JsonPropertyName("default")]
+    public bool Default { get; set; }
+
+    /// <summary>
+    /// true si está archivado.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool Archived { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class WarehouseList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Warehouse> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Una dirección de su servidor que recibe eventos.
 /// </summary>
 public sealed partial class WebhookEndpoint
 {
     /// <summary>
-    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, evt_, whe_).
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
     /// </summary>
     [JsonPropertyName("id")]
     public string Id { get; set; } = default!;
