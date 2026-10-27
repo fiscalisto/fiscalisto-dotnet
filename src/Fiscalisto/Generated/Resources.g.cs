@@ -1950,6 +1950,20 @@ public sealed class AccountingResource
         => _client.RequestAsync<CrossChecks>("GET", "/v1/accounting/cross_checks", null, @params, options, false, cancellationToken);
 
     /// <summary>
+    /// Ver los CFDI de una cifra del cruce
+    /// </summary>
+    /// <remarks>
+    /// Los CFDI que forman lo facturado (invoiced) de una cifra del cruce de un mes, con los mismos cálculos de Impuestos: cada factura PUE o nota de crédito en su mes y cada factura PPD por lo que se pagó en el mes, con lo que aporta. La suma de cfdi más adjustment es invoiced. Sirve para ver por qué una cifra differs. Gratis: no consulta al SAT.
+    /// <br/>
+    /// <c>GET /v1/accounting/cross_checks/cfdi</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-cross-check-cfdi"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CrossCheckCfdi> CrossCheckCfdiAsync(GetCrossCheckCfdiParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CrossCheckCfdi>("GET", "/v1/accounting/cross_checks/cfdi", null, @params, options, false, cancellationToken);
+
+    /// <summary>
     /// Ver el catálogo de cuentas
     /// </summary>
     /// <remarks>

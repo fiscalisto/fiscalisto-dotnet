@@ -3260,6 +3260,132 @@ public sealed partial class CreateWebhookEndpointParams
 }
 
 /// <summary>
+/// Los CFDI que forman una cifra del cruce de un mes (invoiced): cada uno con lo que aporta, y el ajuste que Impuestos agrega encima.
+/// </summary>
+public sealed partial class CrossCheckCfdi
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// La cifra: vat_charged (IVA trasladado), vat_creditable (IVA acreditable), vat_withheld (IVA que le retuvieron), isr_income (ingresos para ISR), isr_withheld_salaries (ISR retenido en sus recibos de nómina), isr_withheld_suppliers o vat_withheld_suppliers (ISR o IVA que retuvo a proveedores).
+    /// <br/>
+    /// Valores: vat_charged, vat_creditable, vat_withheld, isr_income, isr_withheld_salaries, isr_withheld_suppliers, vat_withheld_suppliers.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// El cruce de esa cifra, como en GET /v1/accounting/cross_checks: matches, differs, not_filed o unreadable.
+    /// <br/>
+    /// Valores: matches, differs, not_filed, unreadable.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Lo declarado, en pesos; null si no hay declaración o no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("declared")]
+    public decimal? Declared { get; set; }
+
+    /// <summary>
+    /// Lo que dicen los CFDI del mes: la suma de cfdi más adjustment.
+    /// </summary>
+    [JsonPropertyName("invoiced")]
+    public decimal Invoiced { get; set; }
+
+    /// <summary>
+    /// declared menos invoiced; null si declared es null.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal? Difference { get; set; }
+
+    /// <summary>
+    /// El número de operación de la declaración de donde salió la cifra.
+    /// </summary>
+    [JsonPropertyName("operation_number")]
+    public string? OperationNumber { get; set; }
+
+    /// <summary>
+    /// Cada CFDI que suma en el mes, de mayor a menor: los PUE y las notas de crédito en su mes, las facturas PPD por lo que se pagó en el mes.
+    /// </summary>
+    [JsonPropertyName("cfdi")]
+    public List<CrossCheckCfdiCfdiItem> Cfdi { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que Impuestos agrega sobre los CFDI: en vat_creditable, la proporción de gastos comunes, el IVA retenido enterado del mes anterior y las importaciones; 0 en las demás.
+    /// </summary>
+    [JsonPropertyName("adjustment")]
+    public decimal Adjustment { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CrossCheckCfdiCfdiItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossCheckCfdiCfdiItem
+{
+    /// <summary>
+    /// El folio fiscal (UUID) del CFDI; el de la factura PPD en un pago.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// invoice (factura de ingreso, PUE), credit_note (nota de crédito: resta) o payment (lo pagado en el mes de una factura PPD).
+    /// <br/>
+    /// Valores: invoice, credit_note, payment.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha del CFDI, o la del pago (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El RFC de la contraparte: el cliente en lo emitido, el proveedor en lo recibido.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// El nombre de la contraparte, como viene en el CFDI.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Lo que aporta a la cifra, en pesos; negativo en una nota de crédito.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
 /// Lo que el emisor declaró cada mes contra lo que dicen sus CFDI, el IVA a favor y el régimen con que factura.
 /// </summary>
 public sealed partial class CrossChecks
@@ -4903,6 +5029,32 @@ public sealed partial class FinancialStatementsIncomeStatementYearToDateSections
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver los CFDI de una cifra del cruce».
+/// </summary>
+public sealed partial class GetCrossCheckCfdiParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM), cuya declaración ya venció.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// La cifra: vat_charged, vat_creditable, vat_withheld, isr_income, isr_withheld_salaries, isr_withheld_suppliers o vat_withheld_suppliers.
+    /// <br/>
+    /// Valores: vat_charged, vat_creditable, vat_withheld, isr_income, isr_withheld_salaries, isr_withheld_suppliers, vat_withheld_suppliers.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -9502,9 +9654,9 @@ public sealed partial class ListEventsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// Solo de este tipo.
+    /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, recurring_invoice.*, quote.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -9514,6 +9666,12 @@ public sealed partial class ListEventsParams
     /// </summary>
     [JsonPropertyName("object")]
     public string? Object { get; set; }
+
+    /// <summary>
+    /// false: los que algún webhook no recibió (su último intento falló). true: los que recibieron todos los webhooks a los que se mandaron.
+    /// </summary>
+    [JsonPropertyName("delivery_success")]
+    public bool? DeliverySuccess { get; set; }
 }
 
 /// <summary>
