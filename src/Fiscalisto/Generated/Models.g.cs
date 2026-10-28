@@ -2154,6 +2154,254 @@ public sealed partial class CreatePaymentParamsDocumentsItem
 }
 
 /// <summary>
+/// Los campos de «Timbrar una nómina completa (lote)».
+/// </summary>
+public sealed partial class CreatePayrollBatchParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Nombre del lote, para usted (Quincena 20).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// El periodo de pago: primer y último día (FechaInicialPago, FechaFinalPago) y, si no es el último, el día de pago (FechaPago). Va para todos los recibos de receipts que no traen el suyo.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public CreatePayrollBatchParamsPeriod? Period { get; set; }
+
+    /// <summary>
+    /// Mandar a cada empleado su recibo por correo (a los que tienen correo). Solo con receipts.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Los recibos que Fiscalisto calcula: un empleado (emp_…) en cada uno, como en POST /v1/payroll_receipts.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public List<CreatePayrollBatchParamsReceiptsItem>? Receipts { get; set; }
+
+    /// <summary>
+    /// Los recibos que calculó su sistema de nómina, timbrados tal cual. En lugar de receipts.
+    /// </summary>
+    [JsonPropertyName("external_receipts")]
+    public List<CreatePayrollBatchParamsExternalReceiptsItem>? ExternalReceipts { get; set; }
+}
+
+/// <summary>
+/// Un recibo que calculó su sistema: el cuerpo de POST /v1/payroll_receipts/external, sin issuer, metadata ni replaces, con su reference.
+/// </summary>
+public sealed partial class CreatePayrollBatchParamsExternalReceiptsItem
+{
+    /// <summary>
+    /// El emisor (patrón) del recibo; sin él, el único emisor de su cuenta en este modo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// TipoNomina: O ordinaria (periodicidad 01–10) o E extraordinaria (periodicidad 99).
+    /// <br/>
+    /// Valores: O, E.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// PeriodicidadPago (c_PeriodicidadPago).
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public required string Periodicity { get; set; }
+
+    /// <summary>
+    /// FechaInicialPago, FechaFinalPago y FechaPago.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public required ExternalPayrollReceiptCreatePeriod Period { get; set; }
+
+    /// <summary>
+    /// NumDiasPagados: de 0.001 a 36160, hasta 3 decimales.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public required decimal Days { get; set; }
+
+    /// <summary>
+    /// El patrón (Emisor del complemento): registro patronal y CURP si es persona física.
+    /// </summary>
+    [JsonPropertyName("employer")]
+    public ExternalPayrollReceiptCreateEmployer? Employer { get; set; }
+
+    /// <summary>
+    /// El empleado (Receptor y Nomina/Receptor) con los datos de su sistema de nómina; no usa ni cambia los empleados de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required ExternalPayrollReceiptCreateEmployee Employee { get; set; }
+
+    /// <summary>
+    /// Percepciones (Percepcion): sueldo y demás, gravado y exento.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public List<ExternalPayrollReceiptCreatePerceptionsItem>? Perceptions { get; set; }
+
+    /// <summary>
+    /// SeparacionIndemnizacion: con las percepciones 022, 023 o 025.
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public ExternalPayrollReceiptCreateSeparation? Separation { get; set; }
+
+    /// <summary>
+    /// JubilacionPensionRetiro: con las percepciones 039 o 044.
+    /// </summary>
+    [JsonPropertyName("retirement")]
+    public ExternalPayrollReceiptCreateRetirement? Retirement { get; set; }
+
+    /// <summary>
+    /// Deducciones (Deduccion): ISR, cuotas IMSS y demás.
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public List<ExternalPayrollReceiptCreateDeductionsItem>? Deductions { get; set; }
+
+    /// <summary>
+    /// Otros pagos (OtroPago): subsidio para el empleo.
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public List<ExternalPayrollReceiptCreateOtherPaymentsItem>? OtherPayments { get; set; }
+
+    /// <summary>
+    /// Incapacidades: con la percepción 014 o la deducción 006.
+    /// </summary>
+    [JsonPropertyName("disabilities")]
+    public List<ExternalPayrollReceiptCreateDisabilitiesItem>? Disabilities { get; set; }
+
+    /// <summary>
+    /// Los totales que calculó su sistema: Fiscalisto los compara al centavo con las líneas y rechaza el recibo si no cuadran.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public required ExternalPayrollReceiptCreateTotals Totals { get; set; }
+
+    /// <summary>
+    /// Sus ids: el empleado y la corrida de nómina. payroll_run_id es obligatorio en un recibo extraordinario.
+    /// </summary>
+    [JsonPropertyName("references")]
+    public ExternalPayrollReceiptCreateReferences? References { get; set; }
+
+    /// <summary>
+    /// El recibo vigente (inv_… o UUID) que este sustituye: relación 04 y se cancela con motivo 01.
+    /// </summary>
+    [JsonPropertyName("replaces")]
+    public string? Replaces { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Su identificador de este recibo, hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+}
+
+/// <summary>
+/// El periodo de pago: primer y último día (FechaInicialPago, FechaFinalPago) y, si no es el último, el día de pago (FechaPago). Va para todos los recibos de receipts que no traen el suyo.
+/// </summary>
+public sealed partial class CreatePayrollBatchParamsPeriod
+{
+    /// <summary>
+    /// Primer día pagado (FechaInicialPago).
+    /// </summary>
+    [JsonPropertyName("start")]
+    public required string Start { get; set; }
+
+    /// <summary>
+    /// Último día pagado (FechaFinalPago).
+    /// </summary>
+    [JsonPropertyName("end")]
+    public required string End { get; set; }
+
+    /// <summary>
+    /// Día de pago (FechaPago); sin él, el último día del periodo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string? PaymentDate { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreatePayrollBatchParamsReceiptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreatePayrollBatchParamsReceiptsItem
+{
+    /// <summary>
+    /// El empleado (emp_…) del emisor del lote.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// Su periodo de pago (FechaInicialPago, FechaFinalPago y FechaPago), si no es el del lote (period).
+    /// </summary>
+    [JsonPropertyName("period")]
+    public CreatePayrollBatchParamsReceiptsItemPeriod? Period { get; set; }
+
+    /// <summary>
+    /// Días pagados; sin él, todos los días que le tocan del periodo.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal? Days { get; set; }
+
+    /// <summary>
+    /// Mandarle su recibo por correo; sin él, lo que diga send_email del lote. Con true el empleado debe tener correo.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Su identificador de este recibo, hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+}
+
+/// <summary>
+/// Su periodo de pago (FechaInicialPago, FechaFinalPago y FechaPago), si no es el del lote (period).
+/// </summary>
+public sealed partial class CreatePayrollBatchParamsReceiptsItemPeriod
+{
+    /// <summary>
+    /// Primer día pagado (FechaInicialPago).
+    /// </summary>
+    [JsonPropertyName("start")]
+    public required string Start { get; set; }
+
+    /// <summary>
+    /// Último día pagado (FechaFinalPago).
+    /// </summary>
+    [JsonPropertyName("end")]
+    public required string End { get; set; }
+
+    /// <summary>
+    /// Día de pago (FechaPago); sin él, el último día del periodo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string? PaymentDate { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Timbrar un recibo de nómina».
 /// </summary>
 public sealed partial class CreatePayrollReceiptParams
@@ -5333,7 +5581,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low o test_clock.ready.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low o test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -11864,7 +12112,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, recurring_invoice.*, quote.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -12037,6 +12285,30 @@ public sealed partial class ListJournalEntriesParams
 /// </summary>
 public sealed partial class ListLedgerAccountsParams
 {
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar lotes de nómina».
+/// </summary>
+public sealed partial class ListPayrollBatchesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -12646,6 +12918,216 @@ public sealed partial class MatchBankTransactionParams
     /// </summary>
     [JsonPropertyName("invoices")]
     public List<string>? Invoices { get; set; }
+}
+
+/// <summary>
+/// Una nómina completa (hasta 1,000 recibos) timbrada en segundo plano.
+/// </summary>
+public sealed partial class PayrollBatch
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre del lote, para usted.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// fiscalisto: Fiscalisto calculó cada recibo (receipts); external: se timbraron los importes de su sistema (external_receipts).
+    /// <br/>
+    /// Valores: fiscalisto, external.
+    /// </summary>
+    [JsonPropertyName("calculation")]
+    public string Calculation { get; set; } = default!;
+
+    /// <summary>
+    /// processing: timbrando. completed: ya no queda ningún recibo por timbrar.
+    /// <br/>
+    /// Valores: processing, completed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos recibos tiene el lote.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public long Total { get; set; }
+
+    /// <summary>
+    /// Cuántos recibos se timbraron.
+    /// </summary>
+    [JsonPropertyName("stamped")]
+    public long Stamped { get; set; }
+
+    /// <summary>
+    /// Cuántos no se timbraron (cada uno con su error).
+    /// </summary>
+    [JsonPropertyName("failed")]
+    public long Failed { get; set; }
+
+    /// <summary>
+    /// Cuántos faltan por timbrar.
+    /// </summary>
+    [JsonPropertyName("processing")]
+    public long Processing { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo terminó.
+    /// </summary>
+    [JsonPropertyName("completed_at")]
+    public string? CompletedAt { get; set; }
+
+    /// <summary>
+    /// El recibo de cada empleado, en el orden en que los mandó (no viene en listas).
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public List<PayrollBatchReceiptsItem>? Receipts { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class PayrollBatchList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<PayrollBatch> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollBatchReceiptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollBatchReceiptsItem
+{
+    /// <summary>
+    /// Su posición en receipts (o external_receipts), desde 0.
+    /// </summary>
+    [JsonPropertyName("index")]
+    public long Index { get; set; }
+
+    /// <summary>
+    /// Su identificador de esta factura (su número de pedido), hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// El empleado (emp_…), cuando Fiscalisto calculó el recibo.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// El RFC del empleado.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Estado del objeto.
+    /// <br/>
+    /// Valores: processing, valid, failed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El recibo (inv_…, una factura tipo N); también el que el SAT rechazó.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
+
+    /// <summary>
+    /// Folio fiscal que asigna el SAT (UUID del Timbre Fiscal Digital), en mayúsculas.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// El neto del recibo timbrado.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// Por qué no se timbró este recibo: su código y su mensaje.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public PayrollBatchReceiptsItemError? Error { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollBatchReceiptsItemError&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollBatchReceiptsItemError
+{
+    /// <summary>
+    /// payroll_invalid, payroll_period_overlap, payroll_receipt_exists, invoice_rejected, invoice_invalid, insufficient_balance…
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué pasó y cómo corregirlo, para una persona.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
 }
 
 /// <summary>
@@ -17106,7 +17588,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }

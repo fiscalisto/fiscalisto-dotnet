@@ -90,6 +90,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollReceiptsResource PayrollReceipts => _payrollReceipts ??= new PayrollReceiptsResource(this);
 
+    private PayrollBatchesResource? _payrollBatches;
+
+    /// <summary>Nómina.</summary>
+    public PayrollBatchesResource PayrollBatches => _payrollBatches ??= new PayrollBatchesResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -1342,6 +1347,64 @@ public sealed class PayrollReceiptsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<ExternalPayrollReceiptPreview> PreviewExternalAsync(ExternalPayrollReceiptCreate @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<ExternalPayrollReceiptPreview>("POST", "/v1/payroll_receipts/external/preview", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollBatches</c>.
+/// </summary>
+public sealed class PayrollBatchesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollBatchesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Timbrar una nómina completa (lote)
+    /// </summary>
+    /// <remarks>
+    /// Toda una corrida de nómina en una solicitud: hasta 1,000 recibos de un emisor, timbrados en segundo plano uno tras otro, sin el límite de timbres por segundo de una sola solicitud. De una de dos formas, nunca mezcladas: receipts (ids de empleado; Fiscalisto calcula cada recibo con el periodo del lote) o external_receipts (los recibos que calculó su sistema, como en POST /v1/payroll_receipts/external, con reference en lugar de metadata). Todo lo que se puede revisar antes se revisa antes: si algo falla, no se timbra ninguno y el error dice qué recibo (param receipts.3.employee). Lo que solo se sabe al timbrar (un periodo ya pagado, el SAT que rechaza un RFC) queda en ese recibo, con su error. Un recibo por empleado y periodo: mandar la corrida otra vez, aun con otra Idempotency-Key, devuelve los recibos que ya tiene. Responde 202; escuche payroll_batch.completed o consulte el lote.
+    /// <br/>
+    /// <c>POST /v1/payroll_batches</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-payroll-batch"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollBatch> CreateAsync(CreatePayrollBatchParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollBatch>("POST", "/v1/payroll_batches", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar lotes de nómina
+    /// </summary>
+    /// <remarks>
+    /// Los lotes de nómina, los más recientes primero, con cuántos recibos se timbraron y cuántos no.
+    /// <br/>
+    /// <c>GET /v1/payroll_batches</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-payroll-batches"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<PayrollBatch>> ListAsync(ListPayrollBatchesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<PayrollBatch>("/v1/payroll_batches", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar lotes de nómina: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<PayrollBatch> ListAutoPagingAsync(ListPayrollBatchesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<PayrollBatch>("/v1/payroll_batches", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un lote de nómina
+    /// </summary>
+    /// <remarks>
+    /// Con el recibo de cada empleado: timbrado (su factura y UUID) o por qué no (error.code y error.message).
+    /// <br/>
+    /// <c>GET /v1/payroll_batches/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-payroll-batch"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollBatch> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollBatch>("GET", $"/v1/payroll_batches/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

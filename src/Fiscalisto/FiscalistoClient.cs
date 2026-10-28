@@ -88,7 +88,7 @@ public sealed class Page<T>
 public sealed partial class FiscalistoClient : IDisposable
 {
     /// <summary>La versión del SDK.</summary>
-    public const string Version = "0.1.12";
+    public const string Version = "0.1.13";
 
     /// <summary>La versión de la API para la que se hizo este SDK (encabezado Fiscalisto-Version).</summary>
     public const string ApiVersion = "2026-10-24";
