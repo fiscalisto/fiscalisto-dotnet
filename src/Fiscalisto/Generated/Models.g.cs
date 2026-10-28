@@ -2781,7 +2781,7 @@ public sealed partial class CreateRecurringInvoiceParams
     public required CreateRecurringInvoiceParamsSchedule Schedule { get; set; }
 
     /// <summary>
-    /// La factura que se repite: el cuerpo de POST /v1/invoices, sin issuer, folio, date, global ni metadata. En description puede usar {mes}, {mes anterior}, {mes siguiente}, {año}, {año anterior}, {año siguiente} y {periodo}: cada factura los llena con su fecha.
+    /// La factura que se repite: el cuerpo de POST /v1/invoices, sin issuer, folio, date, global ni metadata. En description puede usar {mes}, {mes anterior}, {mes siguiente}, {año}, {año anterior}, {año siguiente} y {periodo}: cada factura los llena con su fecha. Como se escriben es como salen: {mes} «noviembre», {Mes} «Noviembre», {MES} «NOVIEMBRE».
     /// </summary>
     [JsonPropertyName("invoice")]
     public required CreateRecurringInvoiceParamsInvoice Invoice { get; set; }
@@ -2802,7 +2802,7 @@ public sealed partial class CreateRecurringInvoiceParams
 }
 
 /// <summary>
-/// La factura que se repite: el cuerpo de POST /v1/invoices, sin issuer, folio, date, global ni metadata. En description puede usar {mes}, {mes anterior}, {mes siguiente}, {año}, {año anterior}, {año siguiente} y {periodo}: cada factura los llena con su fecha.
+/// La factura que se repite: el cuerpo de POST /v1/invoices, sin issuer, folio, date, global ni metadata. En description puede usar {mes}, {mes anterior}, {mes siguiente}, {año}, {año anterior}, {año siguiente} y {periodo}: cada factura los llena con su fecha. Como se escriben es como salen: {mes} «noviembre», {Mes} «Noviembre», {MES} «NOVIEMBRE».
 /// </summary>
 public sealed partial class CreateRecurringInvoiceParamsInvoice
 {
@@ -14264,12 +14264,18 @@ public sealed partial class SatListCheck
     public bool Listed { get; set; }
 
     /// <summary>
-    /// high: 69-B o 69-B Bis como presunto o definitivo (el SAT dice que simula operaciones; sus facturas no se pueden deducir). medium: una lista del art. 69 (no localizado, créditos firmes o exigibles, cancelados, sentencias, CSD sin efectos). none: no aparece, o ya desvirtuó o tiene sentencia favorable.
+    /// high: 69-B o 69-B Bis como presunto o definitivo (el SAT dice que simula operaciones; sus facturas no se pueden deducir). medium: una lista del art. 69 (no localizado, créditos firmes o exigibles, cancelados, sentencias, CSD sin efectos). none: no aparece en ninguna, con todas las listas al día, o ya desvirtuó o tiene sentencia favorable. unknown: no aparece, pero alguna lista no se pudo actualizar (vea lists_unavailable): no lo dé por limpio.
     /// <br/>
-    /// Valores: high, medium, none.
+    /// Valores: high, medium, none, unknown.
     /// </summary>
     [JsonPropertyName("risk")]
     public string Risk { get; set; } = default!;
+
+    /// <summary>
+    /// true si todas las listas se leyeron con éxito en los últimos dos días. Con false, que no aparezca no significa que esté limpio.
+    /// </summary>
+    [JsonPropertyName("verified")]
+    public bool Verified { get; set; }
 
     /// <summary>
     /// Cada lista en que aparece; vacía si no aparece en ninguna.
@@ -14282,6 +14288,12 @@ public sealed partial class SatListCheck
     /// </summary>
     [JsonPropertyName("lists_updated_at")]
     public string? ListsUpdatedAt { get; set; }
+
+    /// <summary>
+    /// Las listas que no se pudieron confirmar (su última actualización falló, falta o tiene más de dos días). Vacía si todas están al día.
+    /// </summary>
+    [JsonPropertyName("lists_unavailable")]
+    public List<string> ListsUnavailable { get; set; } = default!;
 }
 
 /// <summary>
