@@ -10523,6 +10523,70 @@ public sealed partial class InvoiceEmail
     /// </summary>
     [JsonPropertyName("sent_at")]
     public string? SentAt { get; set; }
+
+    /// <summary>
+    /// Lo que pasó con el último envío: el peor de sus destinatarios (bounced o complained pesan más que opened o delivered). sent hasta que el servidor del cliente conteste.
+    /// <br/>
+    /// Valores: sent, delayed, delivered, opened, bounced, complained.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cada dirección del envío (para y copia), con su entrega.
+    /// </summary>
+    [JsonPropertyName("recipients")]
+    public List<InvoiceEmailRecipientsItem> Recipients { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;InvoiceEmailRecipientsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoiceEmailRecipientsItem
+{
+    /// <summary>
+    /// La dirección de correo del destinatario.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public string Address { get; set; } = default!;
+
+    /// <summary>
+    /// Estado del objeto.
+    /// <br/>
+    /// Valores: sent, delayed, delivered, opened, bounced, complained.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuando el servidor del destinatario lo aceptó.
+    /// </summary>
+    [JsonPropertyName("delivered_at")]
+    public string? DeliveredAt { get; set; }
+
+    /// <summary>
+    /// La primera vez que se abrió (aproximado: algunos correos cargan las imágenes solos o no las cargan).
+    /// </summary>
+    [JsonPropertyName("opened_at")]
+    public string? OpenedAt { get; set; }
+
+    /// <summary>
+    /// Cuando rebotó.
+    /// </summary>
+    [JsonPropertyName("bounced_at")]
+    public string? BouncedAt { get; set; }
+
+    /// <summary>
+    /// Por qué rebotó, en español: «buzón no existe», «buzón lleno»…
+    /// </summary>
+    [JsonPropertyName("bounce_reason")]
+    public string? BounceReason { get; set; }
+
+    /// <summary>
+    /// Cuando el destinatario lo marcó como spam.
+    /// </summary>
+    [JsonPropertyName("complained_at")]
+    public string? ComplainedAt { get; set; }
 }
 
 /// <summary>
@@ -12112,7 +12176,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -17588,7 +17652,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
