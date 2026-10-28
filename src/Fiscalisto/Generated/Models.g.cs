@@ -2187,6 +2187,12 @@ public sealed partial class CreatePayrollReceiptParams
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// El confirmation_token de POST /v1/payroll_receipts/preview: timbra solo si el recibo calculado ahora es exactamente el que revisó (si no, 409 payroll_calculation_changed y no timbra). Sin él, timbra el que calcule en ese momento.
+    /// </summary>
+    [JsonPropertyName("confirmation_token")]
+    public string? ConfirmationToken { get; set; }
 }
 
 /// <summary>
@@ -12654,6 +12660,18 @@ public sealed partial class PayrollReceiptPreview
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Mándelo en POST /v1/payroll_receipts para timbrar exactamente este recibo: si al timbrar se calcula otro, contesta 409 payroll_calculation_changed sin timbrar.
+    /// </summary>
+    [JsonPropertyName("confirmation_token")]
+    public string ConfirmationToken { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que el recibo no incluye o pronto no se podrá calcular; no impide timbrar.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<PayrollReceiptPreviewWarningsItem> Warnings { get; set; } = default!;
+
+    /// <summary>
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
@@ -13066,6 +13084,24 @@ public sealed partial class PayrollReceiptPreviewTotals
     /// </summary>
     [JsonPropertyName("net")]
     public decimal Net { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollReceiptPreviewWarningsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewWarningsItem
+{
+    /// <summary>
+    /// finiquito_not_included: el empleado se fue en el periodo y el recibo no trae su finiquito; payroll_rates_pending: aún no se cargan los valores (ISR, subsidio, salario mínimo, UMA) de una fecha próxima.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué pasó y cómo corregirlo, para una persona.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
 }
 
 /// <summary>
@@ -13960,7 +13996,7 @@ public sealed partial class RefreshSatDeclarationsParams
 public sealed partial class ResetTestDataParams
 {
     /// <summary>
-    /// true (por omisión) para dejarle a cada emisor de pruebas 3 clientes y 3 productos de ejemplo. false para dejarlo vacío.
+    /// true (por omisión) para dejarle a cada emisor de pruebas 2 clientes y 3 productos de ejemplo. false para dejarlo vacío.
     /// </summary>
     [JsonPropertyName("seed")]
     public bool? Seed { get; set; }
