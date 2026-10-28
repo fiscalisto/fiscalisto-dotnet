@@ -127,19 +127,19 @@ public sealed partial class Advance
     public string Date { get; set; } = default!;
 
     /// <summary>
-    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// La serie (Serie) del anticipo, o null.
     /// </summary>
     [JsonPropertyName("series")]
     public string? Series { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// El folio (Folio) del anticipo, o null.
     /// </summary>
     [JsonPropertyName("folio")]
     public string? Folio { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente del anticipo: RFC y nombre.
     /// </summary>
     [JsonPropertyName("customer")]
     public AdvanceCustomer Customer { get; set; } = default!;
@@ -170,7 +170,7 @@ public sealed partial class Advance
 }
 
 /// <summary>
-/// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+/// El cliente del anticipo: RFC y nombre.
 /// </summary>
 public sealed partial class AdvanceCustomer
 {
@@ -765,7 +765,7 @@ public sealed partial class BankTransactionSuggestedMatch
     public Dictionary<string, JsonElement> Amounts { get; set; } = default!;
 
     /// <summary>
-    /// egreso (la factura completa y después una nota de crédito por el anticipo, opción A) o remanente (la factura solo por lo que falta, opción B).
+    /// PUE: facturas por cobrar que quedan pagadas al conciliar; PPD: se pagan con su complemento de pago (POST /v1/payments).
     /// <br/>
     /// Valores: PPD, PUE.
     /// </summary>
@@ -1367,7 +1367,7 @@ public sealed partial class CreateBranchParams
     public string? Email { get; set; }
 
     /// <summary>
-    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// La serie de cada tipo de CFDI que se timbra desde ella (invoice, credit_note, payment, transfer), hasta 25 caracteres cada una; la que no mande usa la del emisor.
     /// </summary>
     [JsonPropertyName("series")]
     public CreateBranchParamsSeries? Series { get; set; }
@@ -1416,7 +1416,7 @@ public sealed partial class CreateBranchParamsAddress
 }
 
 /// <summary>
-/// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+/// La serie de cada tipo de CFDI que se timbra desde ella (invoice, credit_note, payment, transfer), hasta 25 caracteres cada una; la que no mande usa la del emisor.
 /// </summary>
 public sealed partial class CreateBranchParamsSeries
 {
@@ -1475,7 +1475,7 @@ public sealed partial class CreateCreditNoteParams
     public required string PaymentForm { get; set; }
 
     /// <summary>
-    /// Tipo de relación (TipoRelacion): 01 nota de crédito, 03 devolución, 04 sustitución, 07 anticipo…
+    /// Tipo de relación (TipoRelacion) con la factura: 01 nota de crédito (por omisión) o 03 devolución de mercancía.
     /// <br/>
     /// Valores: 01, 03.
     /// </summary>
@@ -2165,7 +2165,7 @@ public sealed partial class CreatePayrollReceiptParams
     public required string Employee { get; set; }
 
     /// <summary>
-    /// Periodo (Periodo): mes inicial, mes final y año.
+    /// El periodo de pago: primer y último día (FechaInicialPago, FechaFinalPago) y, si no es el último, el día de pago (FechaPago).
     /// </summary>
     [JsonPropertyName("period")]
     public required CreatePayrollReceiptParamsPeriod Period { get; set; }
@@ -2190,7 +2190,7 @@ public sealed partial class CreatePayrollReceiptParams
 }
 
 /// <summary>
-/// Periodo (Periodo): mes inicial, mes final y año.
+/// El periodo de pago: primer y último día (FechaInicialPago, FechaFinalPago) y, si no es el último, el día de pago (FechaPago).
 /// </summary>
 public sealed partial class CreatePayrollReceiptParamsPeriod
 {
@@ -5247,14 +5247,14 @@ public sealed partial class EmployeeList
 public sealed partial class Error
 {
     /// <summary>
-    /// Por qué el SAT o el PAC no lo aceptaron: mensaje, código del SAT y texto original.
+    /// El error: type, code, message (en el idioma pedido), param (el campo a corregir), doc_url y request_id.
     /// </summary>
     [JsonPropertyName("error")]
     public ErrorErrorValue ErrorValue { get; set; } = default!;
 }
 
 /// <summary>
-/// Por qué el SAT o el PAC no lo aceptaron: mensaje, código del SAT y texto original.
+/// El error: type, code, message (en el idioma pedido), param (el campo a corregir), doc_url y request_id.
 /// </summary>
 public sealed partial class ErrorErrorValue
 {
@@ -5397,6 +5397,842 @@ public sealed partial class EventList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Un recibo de nómina que calculó su sistema, con todos sus conceptos e importes: se timbra tal cual.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreate
+{
+    /// <summary>
+    /// El emisor (patrón) del recibo; sin él, el único emisor de su cuenta en este modo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// TipoNomina: O ordinaria (periodicidad 01–10) o E extraordinaria (periodicidad 99).
+    /// <br/>
+    /// Valores: O, E.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// PeriodicidadPago (c_PeriodicidadPago).
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public required string Periodicity { get; set; }
+
+    /// <summary>
+    /// FechaInicialPago, FechaFinalPago y FechaPago.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public required ExternalPayrollReceiptCreatePeriod Period { get; set; }
+
+    /// <summary>
+    /// NumDiasPagados: de 0.001 a 36160, hasta 3 decimales.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public required decimal Days { get; set; }
+
+    /// <summary>
+    /// El patrón (Emisor del complemento): registro patronal y CURP si es persona física.
+    /// </summary>
+    [JsonPropertyName("employer")]
+    public ExternalPayrollReceiptCreateEmployer? Employer { get; set; }
+
+    /// <summary>
+    /// El empleado (Receptor y Nomina/Receptor) con los datos de su sistema de nómina; no usa ni cambia los empleados de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required ExternalPayrollReceiptCreateEmployee Employee { get; set; }
+
+    /// <summary>
+    /// Percepciones (Percepcion): sueldo y demás, gravado y exento.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public List<ExternalPayrollReceiptCreatePerceptionsItem>? Perceptions { get; set; }
+
+    /// <summary>
+    /// SeparacionIndemnizacion: con las percepciones 022, 023 o 025.
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public ExternalPayrollReceiptCreateSeparation? Separation { get; set; }
+
+    /// <summary>
+    /// JubilacionPensionRetiro: con las percepciones 039 o 044.
+    /// </summary>
+    [JsonPropertyName("retirement")]
+    public ExternalPayrollReceiptCreateRetirement? Retirement { get; set; }
+
+    /// <summary>
+    /// Deducciones (Deduccion): ISR, cuotas IMSS y demás.
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public List<ExternalPayrollReceiptCreateDeductionsItem>? Deductions { get; set; }
+
+    /// <summary>
+    /// Otros pagos (OtroPago): subsidio para el empleo.
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public List<ExternalPayrollReceiptCreateOtherPaymentsItem>? OtherPayments { get; set; }
+
+    /// <summary>
+    /// Incapacidades: con la percepción 014 o la deducción 006.
+    /// </summary>
+    [JsonPropertyName("disabilities")]
+    public List<ExternalPayrollReceiptCreateDisabilitiesItem>? Disabilities { get; set; }
+
+    /// <summary>
+    /// Los totales que calculó su sistema: Fiscalisto los compara al centavo con las líneas y rechaza el recibo si no cuadran.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public required ExternalPayrollReceiptCreateTotals Totals { get; set; }
+
+    /// <summary>
+    /// Sus ids: el empleado y la corrida de nómina. payroll_run_id es obligatorio en un recibo extraordinario.
+    /// </summary>
+    [JsonPropertyName("references")]
+    public ExternalPayrollReceiptCreateReferences? References { get; set; }
+
+    /// <summary>
+    /// El recibo vigente (inv_… o UUID) que este sustituye: relación 04 y se cancela con motivo 01.
+    /// </summary>
+    [JsonPropertyName("replaces")]
+    public string? Replaces { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExternalPayrollReceiptCreateDeductionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateDeductionsItem
+{
+    /// <summary>
+    /// TipoDeduccion (c_TipoDeduccion): 001 IMSS, 002 ISR, 010 Infonavit…
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// El archivo .key en base64 (puede traer el prefijo data:).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Concepto de los egresos (IntegracEgresos/ConceptoS), hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public required string Concept { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExternalPayrollReceiptCreateDisabilitiesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateDisabilitiesItem
+{
+    /// <summary>
+    /// Días pagados (NumDiasPagados). Por omisión, todos los del periodo que le tocan.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public required decimal Days { get; set; }
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+}
+
+/// <summary>
+/// El empleado (Receptor y Nomina/Receptor) con los datos de su sistema de nómina; no usa ni cambia los empleados de Fiscalisto.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateEmployee
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Código postal del domicilio fiscal, 5 dígitos, como en la constancia de situación fiscal. El de un emisor es el lugar de expedición (LugarExpedicion) de sus comprobantes.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// CURP, 18 caracteres.
+    /// </summary>
+    [JsonPropertyName("curp")]
+    public required string Curp { get; set; }
+
+    /// <summary>
+    /// NumEmpleado.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public required string Number { get; set; }
+
+    /// <summary>
+    /// Para send_email; no va en el XML.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Número de seguridad social (NumSeguridadSocial), 11 dígitos.
+    /// </summary>
+    [JsonPropertyName("social_security_number")]
+    public string? SocialSecurityNumber { get; set; }
+
+    /// <summary>
+    /// FechaInicioRelLaboral.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// Antigüedad (P52W o P1Y2M3D). Sin el campo y con registro patronal: semanas desde start_date hasta el fin del periodo.
+    /// </summary>
+    [JsonPropertyName("seniority")]
+    public string? Seniority { get; set; }
+
+    /// <summary>
+    /// Tipo de contrato (TipoContrato), c_TipoContrato. Por omisión 01, por tiempo indeterminado.
+    /// </summary>
+    [JsonPropertyName("contract_type")]
+    public required string ContractType { get; set; }
+
+    /// <summary>
+    /// Tipo de régimen (TipoRegimen): 02 sueldos y salarios.
+    /// </summary>
+    [JsonPropertyName("regime_type")]
+    public required string RegimeType { get; set; }
+
+    /// <summary>
+    /// true si es sindicalizado (Sindicalizado).
+    /// </summary>
+    [JsonPropertyName("unionized")]
+    public bool? Unionized { get; set; }
+
+    /// <summary>
+    /// Tipo de jornada (TipoJornada), c_TipoJornada. Por omisión 01, diurna.
+    /// </summary>
+    [JsonPropertyName("workday_type")]
+    public string? WorkdayType { get; set; }
+
+    /// <summary>
+    /// Clase de riesgo del puesto ante el IMSS (RiesgoPuesto), 1 a 5. Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("risk_class")]
+    public string? RiskClass { get; set; }
+
+    /// <summary>
+    /// Departamento (Departamento).
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Puesto (Puesto).
+    /// </summary>
+    [JsonPropertyName("position")]
+    public string? Position { get; set; }
+
+    /// <summary>
+    /// SalarioBaseCotApor.
+    /// </summary>
+    [JsonPropertyName("contribution_base_salary")]
+    public decimal? ContributionBaseSalary { get; set; }
+
+    /// <summary>
+    /// SalarioDiarioIntegrado.
+    /// </summary>
+    [JsonPropertyName("integrated_daily_salary")]
+    public decimal? IntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// ClaveEntFed (c_Estado): JAL, CMX, NLE…
+    /// </summary>
+    [JsonPropertyName("state")]
+    public required string State { get; set; }
+
+    /// <summary>
+    /// Banco (c_Banco); no va con una CLABE.
+    /// </summary>
+    [JsonPropertyName("bank")]
+    public string? Bank { get; set; }
+
+    /// <summary>
+    /// CuentaBancaria: CLABE de 18 dígitos, tarjeta o cuenta.
+    /// </summary>
+    [JsonPropertyName("bank_account")]
+    public string? BankAccount { get; set; }
+
+    /// <summary>
+    /// SubContratacion: el porcentaje suma 100.
+    /// </summary>
+    [JsonPropertyName("subcontracting")]
+    public List<ExternalPayrollReceiptCreateEmployeeSubcontractingItem>? Subcontracting { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExternalPayrollReceiptCreateEmployeeSubcontractingItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateEmployeeSubcontractingItem
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// PorcentajeTiempo.
+    /// </summary>
+    [JsonPropertyName("percentage")]
+    public required decimal Percentage { get; set; }
+}
+
+/// <summary>
+/// El patrón (Emisor del complemento): registro patronal y CURP si es persona física.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateEmployer
+{
+    /// <summary>
+    /// Registro patronal. Sin el campo: el del emisor cuando el contrato es 01–08. null: sin registro patronal.
+    /// </summary>
+    [JsonPropertyName("registration")]
+    public string? Registration { get; set; }
+
+    /// <summary>
+    /// CURP del patrón persona física. Sin el campo: la guardada en el emisor.
+    /// </summary>
+    [JsonPropertyName("curp")]
+    public string? Curp { get; set; }
+
+    /// <summary>
+    /// RfcPatronOrigen.
+    /// </summary>
+    [JsonPropertyName("origin_tax_id")]
+    public string? OriginTaxId { get; set; }
+
+    /// <summary>
+    /// EntidadSNCF, solo para entidades adheridas al SNCF.
+    /// </summary>
+    [JsonPropertyName("sncf")]
+    public ExternalPayrollReceiptCreateEmployerSncf? Sncf { get; set; }
+}
+
+/// <summary>
+/// EntidadSNCF, solo para entidades adheridas al SNCF.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateEmployerSncf
+{
+    /// <summary>
+    /// OrigenRecurso: IP, IF o IM.
+    /// </summary>
+    [JsonPropertyName("resource_origin")]
+    public required string ResourceOrigin { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("own_resource_amount")]
+    public decimal? OwnResourceAmount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExternalPayrollReceiptCreateOtherPaymentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateOtherPaymentsItem
+{
+    /// <summary>
+    /// TipoOtroPago (c_TipoOtroPago): 002 subsidio para el empleo…
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// El archivo .key en base64 (puede traer el prefijo data:).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public required string Concept { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// SubsidioCausado: solo con el 002.
+    /// </summary>
+    [JsonPropertyName("subsidy_caused")]
+    public decimal? SubsidyCaused { get; set; }
+
+    /// <summary>
+    /// CompensacionSaldosAFavor: solo con el 004.
+    /// </summary>
+    [JsonPropertyName("balance_compensation")]
+    public ExternalPayrollReceiptCreateOtherPaymentsItemBalanceCompensation? BalanceCompensation { get; set; }
+}
+
+/// <summary>
+/// CompensacionSaldosAFavor: solo con el 004.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateOtherPaymentsItemBalanceCompensation
+{
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public required decimal Balance { get; set; }
+
+    /// <summary>
+    /// Año (Ejercicio).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required decimal Year { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public required decimal Remaining { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExternalPayrollReceiptCreatePerceptionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreatePerceptionsItem
+{
+    /// <summary>
+    /// TipoPercepcion (c_TipoPercepcion): 001 sueldos, 002 aguinaldo…
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Clave del patrón (3 a 15 caracteres).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public required string Concept { get; set; }
+
+    /// <summary>
+    /// ImporteGravado.
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public required decimal Taxed { get; set; }
+
+    /// <summary>
+    /// ImporteExento.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public required decimal Exempt { get; set; }
+
+    /// <summary>
+    /// HorasExtra: solo con la percepción 019.
+    /// </summary>
+    [JsonPropertyName("overtime")]
+    public List<ExternalPayrollReceiptCreatePerceptionsItemOvertimeItem>? Overtime { get; set; }
+
+    /// <summary>
+    /// AccionesOTitulos: solo con la percepción 045.
+    /// </summary>
+    [JsonPropertyName("stock_options")]
+    public ExternalPayrollReceiptCreatePerceptionsItemStockOptions? StockOptions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExternalPayrollReceiptCreatePerceptionsItemOvertimeItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreatePerceptionsItemOvertimeItem
+{
+    /// <summary>
+    /// Días con horas extra (Dias).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public required decimal Days { get; set; }
+
+    /// <summary>
+    /// c_TipoHoras: 01 dobles, 02 triples, 03 simples.
+    /// </summary>
+    [JsonPropertyName("hours_type")]
+    public required string HoursType { get; set; }
+
+    /// <summary>
+    /// Horas extra (HorasExtra).
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public required decimal Hours { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("amount_paid")]
+    public required decimal AmountPaid { get; set; }
+}
+
+/// <summary>
+/// AccionesOTitulos: solo con la percepción 045.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreatePerceptionsItemStockOptions
+{
+    /// <summary>
+    /// Valor de mercado (ValorMercado).
+    /// </summary>
+    [JsonPropertyName("market_value")]
+    public required decimal MarketValue { get; set; }
+
+    /// <summary>
+    /// Precio al otorgarse (PrecioAlOtorgarse).
+    /// </summary>
+    [JsonPropertyName("grant_price")]
+    public required decimal GrantPrice { get; set; }
+}
+
+/// <summary>
+/// FechaInicialPago, FechaFinalPago y FechaPago.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreatePeriod
+{
+    /// <summary>
+    /// Primer día del periodo (FechaInicialPago), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public required string Start { get; set; }
+
+    /// <summary>
+    /// Último día del periodo (FechaFinalPago), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public required string End { get; set; }
+
+    /// <summary>
+    /// Fecha de pago (FechaPago), AAAA-MM-DD. Por omisión el último día del periodo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public required string PaymentDate { get; set; }
+}
+
+/// <summary>
+/// Sus ids: el empleado y la corrida de nómina. payroll_run_id es obligatorio en un recibo extraordinario.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateReferences
+{
+    /// <summary>
+    /// El id del empleado en su sistema.
+    /// </summary>
+    [JsonPropertyName("employee_id")]
+    public string? EmployeeId { get; set; }
+
+    /// <summary>
+    /// El id de la corrida de nómina en su sistema.
+    /// </summary>
+    [JsonPropertyName("payroll_run_id")]
+    public string? PayrollRunId { get; set; }
+}
+
+/// <summary>
+/// JubilacionPensionRetiro: con las percepciones 039 o 044.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateRetirement
+{
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("total_one_payment")]
+    public decimal? TotalOnePayment { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("total_installment")]
+    public decimal? TotalInstallment { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("daily_amount")]
+    public decimal? DailyAmount { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("accumulable_income")]
+    public required decimal AccumulableIncome { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("non_accumulable_income")]
+    public required decimal NonAccumulableIncome { get; set; }
+}
+
+/// <summary>
+/// SeparacionIndemnizacion: con las percepciones 022, 023 o 025.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateSeparation
+{
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("total_paid")]
+    public required decimal TotalPaid { get; set; }
+
+    /// <summary>
+    /// NumAñosServicio.
+    /// </summary>
+    [JsonPropertyName("years_of_service")]
+    public required decimal YearsOfService { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("last_monthly_salary")]
+    public required decimal LastMonthlySalary { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("accumulable_income")]
+    public required decimal AccumulableIncome { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("non_accumulable_income")]
+    public required decimal NonAccumulableIncome { get; set; }
+}
+
+/// <summary>
+/// Los totales que calculó su sistema: Fiscalisto los compara al centavo con las líneas y rechaza el recibo si no cuadran.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptCreateTotals
+{
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public required decimal Perceptions { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public required decimal Deductions { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public required decimal OtherPayments { get; set; }
+
+    /// <summary>
+    /// Neto: percepciones más otros pagos menos deducciones.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public required decimal Net { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("salaries")]
+    public decimal? Salaries { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public decimal? Separation { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("retirement")]
+    public decimal? Retirement { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal? Taxed { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal? Exempt { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("taxes_withheld")]
+    public decimal? TaxesWithheld { get; set; }
+
+    /// <summary>
+    /// Pesos con hasta 2 decimales, como se timbran: Fiscalisto no los redondea.
+    /// </summary>
+    [JsonPropertyName("other_deductions")]
+    public decimal? OtherDeductions { get; set; }
+}
+
+/// <summary>
+/// Un recibo calculado por su sistema, revisado y sin timbrar: lo que se timbraría, tal cual.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptPreview
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// external: los importes son los que calculó su sistema.
+    /// </summary>
+    [JsonPropertyName("calculation")]
+    public string Calculation { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado como receptor del CFDI (Receptor).
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public ExternalPayrollReceiptPreviewCustomer Customer { get; set; } = default!;
+
+    /// <summary>
+    /// El recibo de nómina 1.2: empleado, periodo, percepciones, deducciones y otros pagos.
+    /// </summary>
+    [JsonPropertyName("payroll")]
+    public InvoicePayroll Payroll { get; set; } = default!;
+
+    /// <summary>
+    /// SubTotal: percepciones más otros pagos.
+    /// </summary>
+    [JsonPropertyName("subtotal")]
+    public decimal Subtotal { get; set; }
+
+    /// <summary>
+    /// Descuento: las deducciones.
+    /// </summary>
+    [JsonPropertyName("discount")]
+    public decimal Discount { get; set; }
+
+    /// <summary>
+    /// Total: el neto a pagar.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Lo que el SAT podría observar; no impide timbrar.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<ExternalPayrollReceiptPreviewWarningsItem> Warnings { get; set; } = default!;
+
+    /// <summary>
+    /// El XML que se mandaría al PAC, sin sello ni timbre: sus importes son exactamente los que mandó.
+    /// </summary>
+    [JsonPropertyName("unsigned_xml")]
+    public string UnsignedXml { get; set; } = default!;
+}
+
+/// <summary>
+/// El empleado como receptor del CFDI (Receptor).
+/// </summary>
+public sealed partial class ExternalPayrollReceiptPreviewCustomer
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string LegalName { get; set; } = default!;
+
+    /// <summary>
+    /// Código postal del domicilio fiscal del cliente (DomicilioFiscalReceptor), 5 dígitos.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string Zip { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ExternalPayrollReceiptPreviewWarningsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExternalPayrollReceiptPreviewWarningsItem
+{
+    /// <summary>
+    /// El campo de la solicitud.
+    /// </summary>
+    [JsonPropertyName("param")]
+    public string Param { get; set; } = default!;
+
+    /// <summary>
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) aún no se puede emitir.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué pasó y cómo corregirlo, para una persona.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
 }
 
 /// <summary>
@@ -5759,7 +6595,7 @@ public sealed partial class FinancialStatementsIncomeStatementMonth
 public sealed partial class FinancialStatementsIncomeStatementMonthSectionsItem
 {
     /// <summary>
-    /// El archivo .key en base64 (puede traer el prefijo data:).
+    /// La sección: ingresos, costos, gastos, financiamiento u otros.
     /// <br/>
     /// Valores: ingresos, costos, gastos, financiamiento, otros.
     /// </summary>
@@ -5863,7 +6699,7 @@ public sealed partial class FinancialStatementsIncomeStatementYearToDate
 public sealed partial class FinancialStatementsIncomeStatementYearToDateSectionsItem
 {
     /// <summary>
-    /// El archivo .key en base64 (puede traer el prefijo data:).
+    /// La sección: ingresos, costos, gastos, financiamiento u otros.
     /// <br/>
     /// Valores: ingresos, costos, gastos, financiamiento, otros.
     /// </summary>
@@ -6307,13 +7143,13 @@ public sealed partial class Invoice
     public string? Uuid { get; set; }
 
     /// <summary>
-    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// La serie (Serie) con que se timbró, o null.
     /// </summary>
     [JsonPropertyName("series")]
     public string? Series { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// El folio (Folio) que se le asignó, o null.
     /// </summary>
     [JsonPropertyName("folio")]
     public string? Folio { get; set; }
@@ -6325,7 +7161,7 @@ public sealed partial class Invoice
     public string? Date { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente (Receptor) como quedó en el CFDI: RFC, nombre, régimen fiscal y código postal (y foreign si es extranjero).
     /// </summary>
     [JsonPropertyName("customer")]
     public InvoiceCustomer Customer { get; set; } = default!;
@@ -6379,7 +7215,7 @@ public sealed partial class Invoice
     public decimal? Discount { get; set; }
 
     /// <summary>
-    /// Impuestos del comprobante, por tipo.
+    /// Los impuestos del comprobante sumados por tipo: IVA e IEPS trasladados, IVA e ISR retenidos e impuestos locales; null en un complemento de pago.
     /// </summary>
     [JsonPropertyName("taxes")]
     public InvoiceTaxes? Taxes { get; set; }
@@ -9376,7 +10212,7 @@ public sealed partial class InvoiceCreateRelated
 }
 
 /// <summary>
-/// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+/// El cliente (Receptor) como quedó en el CFDI: RFC, nombre, régimen fiscal y código postal (y foreign si es extranjero).
 /// </summary>
 public sealed partial class InvoiceCustomer
 {
@@ -9599,10 +10435,26 @@ public sealed partial class InvoicePaymentDocumentsItem
 }
 
 /// <summary>
-/// Solo en un recibo de nómina (type N).
+/// El complemento de nómina 1.2 como se timbró: tipo, periodo, patrón, empleado, percepciones, deducciones, otros pagos, sus nodos y los totales.
 /// </summary>
 public sealed partial class InvoicePayroll
 {
+    /// <summary>
+    /// TipoNomina: O ordinaria, E extraordinaria.
+    /// <br/>
+    /// Valores: O, E.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// fiscalisto: lo calculó Fiscalisto (POST /v1/payroll_receipts); external: lo calculó su sistema de nómina y se timbró tal cual (POST /v1/payroll_receipts/external).
+    /// <br/>
+    /// Valores: fiscalisto, external.
+    /// </summary>
+    [JsonPropertyName("calculation")]
+    public string Calculation { get; set; } = default!;
+
     /// <summary>
     /// Periodicidad del pago (PeriodicidadPago): 02 semanal, 03 catorcenal, 04 quincenal (por omisión), 05 mensual.
     /// </summary>
@@ -9610,7 +10462,7 @@ public sealed partial class InvoicePayroll
     public string Periodicity { get; set; } = default!;
 
     /// <summary>
-    /// Periodo (Periodo): mes inicial, mes final y año.
+    /// Periodo pagado: FechaInicialPago, FechaFinalPago y FechaPago.
     /// </summary>
     [JsonPropertyName("period")]
     public InvoicePayrollPeriod Period { get; set; } = default!;
@@ -9622,13 +10474,19 @@ public sealed partial class InvoicePayroll
     public decimal Days { get; set; }
 
     /// <summary>
+    /// Los ids de su sistema de nómina (solo en recibos external).
+    /// </summary>
+    [JsonPropertyName("references")]
+    public InvoicePayrollReferences? References { get; set; }
+
+    /// <summary>
     /// El patrón (Emisor del complemento): registro patronal y CURP si es persona física.
     /// </summary>
     [JsonPropertyName("employer")]
     public InvoicePayrollEmployer Employer { get; set; } = default!;
 
     /// <summary>
-    /// El empleado (emp_…).
+    /// El empleado (Nomina/Receptor), como se timbró.
     /// </summary>
     [JsonPropertyName("employee")]
     public InvoicePayrollEmployee Employee { get; set; } = default!;
@@ -9650,6 +10508,30 @@ public sealed partial class InvoicePayroll
     /// </summary>
     [JsonPropertyName("other_payments")]
     public List<InvoicePayrollOtherPaymentsItem> OtherPayments { get; set; } = default!;
+
+    /// <summary>
+    /// SeparacionIndemnizacion (percepciones 022, 023, 025).
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public InvoicePayrollSeparation? Separation { get; set; }
+
+    /// <summary>
+    /// JubilacionPensionRetiro (percepciones 039, 044).
+    /// </summary>
+    [JsonPropertyName("retirement")]
+    public InvoicePayrollRetirement? Retirement { get; set; }
+
+    /// <summary>
+    /// Incapacidades (percepción 014 o deducción 006).
+    /// </summary>
+    [JsonPropertyName("disabilities")]
+    public List<InvoicePayrollDisabilitiesItem>? Disabilities { get; set; }
+
+    /// <summary>
+    /// Totales: percepciones, deducciones, otros pagos y el neto a pagar.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public InvoicePayrollTotals Totals { get; set; } = default!;
 }
 
 /// <summary>
@@ -9683,7 +10565,31 @@ public sealed partial class InvoicePayrollDeductionsItem
 }
 
 /// <summary>
-/// El empleado (emp_…).
+/// &lt;c&gt;InvoicePayrollDisabilitiesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoicePayrollDisabilitiesItem
+{
+    /// <summary>
+    /// Días pagados (NumDiasPagados). Por omisión, todos los del periodo que le tocan.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long Days { get; set; }
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+}
+
+/// <summary>
+/// El empleado (Nomina/Receptor), como se timbró.
 /// </summary>
 public sealed partial class InvoicePayrollEmployee
 {
@@ -9715,7 +10621,13 @@ public sealed partial class InvoicePayrollEmployee
     /// Fecha de inicio de la relación laboral (FechaInicioRelLaboral), AAAA-MM-DD.
     /// </summary>
     [JsonPropertyName("start_date")]
-    public string StartDate { get; set; } = default!;
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// Antigüedad (P52W, P1Y2M3D).
+    /// </summary>
+    [JsonPropertyName("seniority")]
+    public string? Seniority { get; set; }
 
     /// <summary>
     /// Tipo de contrato (TipoContrato), c_TipoContrato. Por omisión 01, por tiempo indeterminado.
@@ -9727,13 +10639,13 @@ public sealed partial class InvoicePayrollEmployee
     /// true si es sindicalizado (Sindicalizado).
     /// </summary>
     [JsonPropertyName("unionized")]
-    public bool Unionized { get; set; }
+    public bool? Unionized { get; set; }
 
     /// <summary>
     /// Tipo de jornada (TipoJornada), c_TipoJornada. Por omisión 01, diurna.
     /// </summary>
     [JsonPropertyName("workday_type")]
-    public string WorkdayType { get; set; } = default!;
+    public string? WorkdayType { get; set; }
 
     /// <summary>
     /// Tipo de régimen (TipoRegimen): 02 sueldos y salarios.
@@ -9776,6 +10688,42 @@ public sealed partial class InvoicePayrollEmployee
     /// </summary>
     [JsonPropertyName("state")]
     public string State { get; set; } = default!;
+
+    /// <summary>
+    /// Banco (Banco), c_Banco.
+    /// </summary>
+    [JsonPropertyName("bank")]
+    public string? Bank { get; set; }
+
+    /// <summary>
+    /// Cuenta bancaria o CLABE (CuentaBancaria).
+    /// </summary>
+    [JsonPropertyName("bank_account")]
+    public string? BankAccount { get; set; }
+
+    /// <summary>
+    /// Subcontratación (SubContratacion).
+    /// </summary>
+    [JsonPropertyName("subcontracting")]
+    public List<InvoicePayrollEmployeeSubcontractingItem>? Subcontracting { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;InvoicePayrollEmployeeSubcontractingItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoicePayrollEmployeeSubcontractingItem
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Porcentaje de tiempo (PorcentajeTiempo).
+    /// </summary>
+    [JsonPropertyName("percentage")]
+    public decimal Percentage { get; set; }
 }
 
 /// <summary>
@@ -9794,6 +10742,36 @@ public sealed partial class InvoicePayrollEmployer
     /// </summary>
     [JsonPropertyName("curp")]
     public string? Curp { get; set; }
+
+    /// <summary>
+    /// RFC del patrón de origen (RfcPatronOrigen).
+    /// </summary>
+    [JsonPropertyName("origin_tax_id")]
+    public string? OriginTaxId { get; set; }
+
+    /// <summary>
+    /// Entidad del SNCF (EntidadSNCF).
+    /// </summary>
+    [JsonPropertyName("sncf")]
+    public InvoicePayrollEmployerSncf? Sncf { get; set; }
+}
+
+/// <summary>
+/// Entidad del SNCF (EntidadSNCF).
+/// </summary>
+public sealed partial class InvoicePayrollEmployerSncf
+{
+    /// <summary>
+    /// Origen del recurso (OrigenRecurso): IP, IF o IM.
+    /// </summary>
+    [JsonPropertyName("resource_origin")]
+    public string ResourceOrigin { get; set; } = default!;
+
+    /// <summary>
+    /// Monto de recursos propios (MontoRecursoPropio), con IM.
+    /// </summary>
+    [JsonPropertyName("own_resource_amount")]
+    public decimal? OwnResourceAmount { get; set; }
 }
 
 /// <summary>
@@ -9836,6 +10814,36 @@ public sealed partial class InvoicePayrollOtherPaymentsItem
     /// </summary>
     [JsonPropertyName("subsidy_applied")]
     public decimal? SubsidyApplied { get; set; }
+
+    /// <summary>
+    /// Compensación del saldo a favor (CompensacionSaldosAFavor), con el 004.
+    /// </summary>
+    [JsonPropertyName("balance_compensation")]
+    public InvoicePayrollOtherPaymentsItemBalanceCompensation? BalanceCompensation { get; set; }
+}
+
+/// <summary>
+/// Compensación del saldo a favor (CompensacionSaldosAFavor), con el 004.
+/// </summary>
+public sealed partial class InvoicePayrollOtherPaymentsItemBalanceCompensation
+{
+    /// <summary>
+    /// Saldo a favor (SaldoAFavor).
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// Año del saldo a favor (Año).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Remanente del saldo a favor (RemanenteSalFav).
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public decimal Remaining { get; set; }
 }
 
 /// <summary>
@@ -9872,10 +10880,70 @@ public sealed partial class InvoicePayrollPerceptionsItem
     /// </summary>
     [JsonPropertyName("exempt")]
     public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Horas extra (HorasExtra), con la percepción 019.
+    /// </summary>
+    [JsonPropertyName("overtime")]
+    public List<InvoicePayrollPerceptionsItemOvertimeItem>? Overtime { get; set; }
+
+    /// <summary>
+    /// Acciones o títulos (AccionesOTitulos), con la percepción 045.
+    /// </summary>
+    [JsonPropertyName("stock_options")]
+    public InvoicePayrollPerceptionsItemStockOptions? StockOptions { get; set; }
 }
 
 /// <summary>
-/// Periodo (Periodo): mes inicial, mes final y año.
+/// &lt;c&gt;InvoicePayrollPerceptionsItemOvertimeItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoicePayrollPerceptionsItemOvertimeItem
+{
+    /// <summary>
+    /// Días con horas extra (Dias).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long Days { get; set; }
+
+    /// <summary>
+    /// c_TipoHoras: 01 dobles, 02 triples, 03 simples.
+    /// </summary>
+    [JsonPropertyName("hours_type")]
+    public string HoursType { get; set; } = default!;
+
+    /// <summary>
+    /// Horas extra (HorasExtra).
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public long Hours { get; set; }
+
+    /// <summary>
+    /// Importe pagado (ImportePagado).
+    /// </summary>
+    [JsonPropertyName("amount_paid")]
+    public decimal AmountPaid { get; set; }
+}
+
+/// <summary>
+/// Acciones o títulos (AccionesOTitulos), con la percepción 045.
+/// </summary>
+public sealed partial class InvoicePayrollPerceptionsItemStockOptions
+{
+    /// <summary>
+    /// Valor de mercado (ValorMercado).
+    /// </summary>
+    [JsonPropertyName("market_value")]
+    public decimal MarketValue { get; set; }
+
+    /// <summary>
+    /// Precio al otorgarse (PrecioAlOtorgarse).
+    /// </summary>
+    [JsonPropertyName("grant_price")]
+    public decimal GrantPrice { get; set; }
+}
+
+/// <summary>
+/// Periodo pagado: FechaInicialPago, FechaFinalPago y FechaPago.
 /// </summary>
 public sealed partial class InvoicePayrollPeriod
 {
@@ -9896,6 +10964,174 @@ public sealed partial class InvoicePayrollPeriod
     /// </summary>
     [JsonPropertyName("payment_date")]
     public string PaymentDate { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;InvoicePayrollReferences&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoicePayrollReferences
+{
+    /// <summary>
+    /// El id del empleado en su sistema de nómina.
+    /// </summary>
+    [JsonPropertyName("employee_id")]
+    public string? EmployeeId { get; set; }
+
+    /// <summary>
+    /// El id de la corrida de nómina en su sistema.
+    /// </summary>
+    [JsonPropertyName("payroll_run_id")]
+    public string? PayrollRunId { get; set; }
+}
+
+/// <summary>
+/// JubilacionPensionRetiro (percepciones 039, 044).
+/// </summary>
+public sealed partial class InvoicePayrollRetirement
+{
+    /// <summary>
+    /// Total en una exhibición (TotalUnaExhibicion).
+    /// </summary>
+    [JsonPropertyName("total_one_payment")]
+    public decimal? TotalOnePayment { get; set; }
+
+    /// <summary>
+    /// Total en parcialidades (TotalParcialidad).
+    /// </summary>
+    [JsonPropertyName("total_installment")]
+    public decimal? TotalInstallment { get; set; }
+
+    /// <summary>
+    /// Monto diario (MontoDiario).
+    /// </summary>
+    [JsonPropertyName("daily_amount")]
+    public decimal? DailyAmount { get; set; }
+
+    /// <summary>
+    /// Ingreso acumulable (IngresoAcumulable).
+    /// </summary>
+    [JsonPropertyName("accumulable_income")]
+    public decimal AccumulableIncome { get; set; }
+
+    /// <summary>
+    /// Ingreso no acumulable (IngresoNoAcumulable).
+    /// </summary>
+    [JsonPropertyName("non_accumulable_income")]
+    public decimal NonAccumulableIncome { get; set; }
+}
+
+/// <summary>
+/// SeparacionIndemnizacion (percepciones 022, 023, 025).
+/// </summary>
+public sealed partial class InvoicePayrollSeparation
+{
+    /// <summary>
+    /// Total pagado (TotalPagado).
+    /// </summary>
+    [JsonPropertyName("total_paid")]
+    public decimal TotalPaid { get; set; }
+
+    /// <summary>
+    /// Años de servicio (NumAñosServicio).
+    /// </summary>
+    [JsonPropertyName("years_of_service")]
+    public long YearsOfService { get; set; }
+
+    /// <summary>
+    /// Último sueldo mensual ordinario (UltimoSueldoMensOrd).
+    /// </summary>
+    [JsonPropertyName("last_monthly_salary")]
+    public decimal LastMonthlySalary { get; set; }
+
+    /// <summary>
+    /// Ingreso acumulable (IngresoAcumulable).
+    /// </summary>
+    [JsonPropertyName("accumulable_income")]
+    public decimal AccumulableIncome { get; set; }
+
+    /// <summary>
+    /// Ingreso no acumulable (IngresoNoAcumulable).
+    /// </summary>
+    [JsonPropertyName("non_accumulable_income")]
+    public decimal NonAccumulableIncome { get; set; }
+}
+
+/// <summary>
+/// Totales: percepciones, deducciones, otros pagos y el neto a pagar.
+/// </summary>
+public sealed partial class InvoicePayrollTotals
+{
+    /// <summary>
+    /// Total de sueldos, salarios y asimilados (TotalSueldos).
+    /// </summary>
+    [JsonPropertyName("salaries")]
+    public decimal Salaries { get; set; }
+
+    /// <summary>
+    /// Total gravado (TotalGravado).
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal Taxed { get; set; }
+
+    /// <summary>
+    /// Total exento (TotalExento).
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Total de separación e indemnización (TotalSeparacionIndemnizacion).
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public decimal Separation { get; set; }
+
+    /// <summary>
+    /// Total de jubilación, pensión o retiro (TotalJubilacionPensionRetiro).
+    /// </summary>
+    [JsonPropertyName("retirement")]
+    public decimal Retirement { get; set; }
+
+    /// <summary>
+    /// Total de percepciones (TotalPercepciones).
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public decimal Perceptions { get; set; }
+
+    /// <summary>
+    /// Otras deducciones (TotalOtrasDeducciones).
+    /// </summary>
+    [JsonPropertyName("other_deductions")]
+    public decimal OtherDeductions { get; set; }
+
+    /// <summary>
+    /// Impuestos retenidos (TotalImpuestosRetenidos).
+    /// </summary>
+    [JsonPropertyName("taxes_withheld")]
+    public decimal TaxesWithheld { get; set; }
+
+    /// <summary>
+    /// Total de deducciones (TotalDeducciones).
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public decimal Deductions { get; set; }
+
+    /// <summary>
+    /// Total de otros pagos (TotalOtrosPagos).
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public decimal OtherPayments { get; set; }
+
+    /// <summary>
+    /// Subtotal del comprobante: percepciones más otros pagos.
+    /// </summary>
+    [JsonPropertyName("subtotal")]
+    public decimal Subtotal { get; set; }
+
+    /// <summary>
+    /// Neto a pagar al empleado.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public decimal Net { get; set; }
 }
 
 /// <summary>
@@ -11430,7 +12666,7 @@ public sealed partial class PayrollReceiptPreview
     public string Periodicity { get; set; } = default!;
 
     /// <summary>
-    /// Periodo (Periodo): mes inicial, mes final y año.
+    /// El periodo de pago: primer y último día y el día de pago (FechaInicialPago, FechaFinalPago y FechaPago).
     /// </summary>
     [JsonPropertyName("period")]
     public PayrollReceiptPreviewPeriod Period { get; set; } = default!;
@@ -11550,13 +12786,13 @@ public sealed partial class PayrollReceiptPreviewIsr
 public sealed partial class PayrollReceiptPreviewIsrAdjustment
 {
     /// <summary>
-    /// Subsidio causado antes en el mes que se revierte.
+    /// El subsidio para el empleo que se revierte en el ajuste.
     /// </summary>
     [JsonPropertyName("reversed")]
     public decimal Reversed { get; set; }
 
     /// <summary>
-    /// El cálculo del ISR del periodo: base, tarifa, subsidio y resultado.
+    /// El ISR que se retiene después del ajuste.
     /// </summary>
     [JsonPropertyName("isr")]
     public decimal Isr { get; set; }
@@ -11602,6 +12838,36 @@ public sealed partial class PayrollReceiptPreviewOtherPaymentsItem
     /// </summary>
     [JsonPropertyName("subsidy_applied")]
     public decimal? SubsidyApplied { get; set; }
+
+    /// <summary>
+    /// Compensación del saldo a favor (CompensacionSaldosAFavor), con el 004.
+    /// </summary>
+    [JsonPropertyName("balance_compensation")]
+    public PayrollReceiptPreviewOtherPaymentsItemBalanceCompensation? BalanceCompensation { get; set; }
+}
+
+/// <summary>
+/// Compensación del saldo a favor (CompensacionSaldosAFavor), con el 004.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewOtherPaymentsItemBalanceCompensation
+{
+    /// <summary>
+    /// Saldo a favor (SaldoAFavor).
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// Año del saldo a favor (Año).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Remanente del saldo a favor (RemanenteSalFav).
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public decimal Remaining { get; set; }
 }
 
 /// <summary>
@@ -11638,10 +12904,70 @@ public sealed partial class PayrollReceiptPreviewPerceptionsItem
     /// </summary>
     [JsonPropertyName("exempt")]
     public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Horas extra (HorasExtra), con la percepción 019.
+    /// </summary>
+    [JsonPropertyName("overtime")]
+    public List<PayrollReceiptPreviewPerceptionsItemOvertimeItem>? Overtime { get; set; }
+
+    /// <summary>
+    /// Acciones o títulos (AccionesOTitulos), con la percepción 045.
+    /// </summary>
+    [JsonPropertyName("stock_options")]
+    public PayrollReceiptPreviewPerceptionsItemStockOptions? StockOptions { get; set; }
 }
 
 /// <summary>
-/// Periodo (Periodo): mes inicial, mes final y año.
+/// &lt;c&gt;PayrollReceiptPreviewPerceptionsItemOvertimeItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewPerceptionsItemOvertimeItem
+{
+    /// <summary>
+    /// Días con horas extra (Dias).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long Days { get; set; }
+
+    /// <summary>
+    /// c_TipoHoras: 01 dobles, 02 triples, 03 simples.
+    /// </summary>
+    [JsonPropertyName("hours_type")]
+    public string HoursType { get; set; } = default!;
+
+    /// <summary>
+    /// Horas extra (HorasExtra).
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public long Hours { get; set; }
+
+    /// <summary>
+    /// Importe pagado (ImportePagado).
+    /// </summary>
+    [JsonPropertyName("amount_paid")]
+    public decimal AmountPaid { get; set; }
+}
+
+/// <summary>
+/// Acciones o títulos (AccionesOTitulos), con la percepción 045.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewPerceptionsItemStockOptions
+{
+    /// <summary>
+    /// Valor de mercado (ValorMercado).
+    /// </summary>
+    [JsonPropertyName("market_value")]
+    public decimal MarketValue { get; set; }
+
+    /// <summary>
+    /// Precio al otorgarse (PrecioAlOtorgarse).
+    /// </summary>
+    [JsonPropertyName("grant_price")]
+    public decimal GrantPrice { get; set; }
+}
+
+/// <summary>
+/// El periodo de pago: primer y último día y el día de pago (FechaInicialPago, FechaFinalPago y FechaPago).
 /// </summary>
 public sealed partial class PayrollReceiptPreviewPeriod
 {
@@ -11686,6 +13012,18 @@ public sealed partial class PayrollReceiptPreviewTotals
     /// </summary>
     [JsonPropertyName("exempt")]
     public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Total de separación e indemnización (TotalSeparacionIndemnizacion).
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public decimal Separation { get; set; }
+
+    /// <summary>
+    /// Total de jubilación, pensión o retiro (TotalJubilacionPensionRetiro).
+    /// </summary>
+    [JsonPropertyName("retirement")]
+    public decimal Retirement { get; set; }
 
     /// <summary>
     /// Total de percepciones (TotalPercepciones).
@@ -11742,7 +13080,7 @@ public sealed partial class PreviewPayrollReceiptParams
     public required string Employee { get; set; }
 
     /// <summary>
-    /// Periodo (Periodo): mes inicial, mes final y año.
+    /// El periodo de pago: primer y último día (FechaInicialPago, FechaFinalPago) y, si no es el último, el día de pago (FechaPago).
     /// </summary>
     [JsonPropertyName("period")]
     public required PreviewPayrollReceiptParamsPeriod Period { get; set; }
@@ -11767,7 +13105,7 @@ public sealed partial class PreviewPayrollReceiptParams
 }
 
 /// <summary>
-/// Periodo (Periodo): mes inicial, mes final y año.
+/// El periodo de pago: primer y último día (FechaInicialPago, FechaFinalPago) y, si no es el último, el día de pago (FechaPago).
 /// </summary>
 public sealed partial class PreviewPayrollReceiptParamsPeriod
 {
@@ -12672,7 +14010,7 @@ public sealed partial class Retention
     public string? Uuid { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// El número de la constancia en la serie del emisor (internal_folio es el que se imprime, RET1…).
     /// </summary>
     [JsonPropertyName("folio")]
     public long? Folio { get; set; }
@@ -13550,7 +14888,7 @@ public sealed partial class SatDeclarationReceipt
 public sealed partial class SatDeclarationReceiptConceptsItem
 {
     /// <summary>
-    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// El concepto de la línea de captura (ISR, IVA…) como lo da el SAT.
     /// </summary>
     [JsonPropertyName("concept")]
     public string Concept { get; set; } = default!;
@@ -13604,7 +14942,7 @@ public sealed partial class SatDeclarationSectionsItemFieldsItem
     public string Label { get; set; } = default!;
 
     /// <summary>
-    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// El valor del renglón como lo trae la declaración (número o texto).
     /// </summary>
     [JsonPropertyName("value")]
     public JsonElement? Value { get; set; }
@@ -15060,7 +16398,7 @@ public sealed partial class StockMovementList
 public sealed partial class StockMovementSource
 {
     /// <summary>
-    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// Qué lo movió: invoice (una factura; id es su UUID), adjustment (un ajuste, adj_…), count (un conteo) u otro origen.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -16084,7 +17422,7 @@ public sealed partial class UpdateBranchParams
     public string? Email { get; set; }
 
     /// <summary>
-    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// La serie de cada tipo de CFDI que se timbra desde ella (invoice, credit_note, payment, transfer), hasta 25 caracteres cada una; la que no mande usa la del emisor.
     /// </summary>
     [JsonPropertyName("series")]
     public UpdateBranchParamsSeries? Series { get; set; }
@@ -16139,7 +17477,7 @@ public sealed partial class UpdateBranchParamsAddress
 }
 
 /// <summary>
-/// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+/// La serie de cada tipo de CFDI que se timbra desde ella (invoice, credit_note, payment, transfer), hasta 25 caracteres cada una; la que no mande usa la del emisor.
 /// </summary>
 public sealed partial class UpdateBranchParamsSeries
 {

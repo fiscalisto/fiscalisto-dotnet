@@ -30,6 +30,9 @@ public static class ErrorCode
     /// <summary>La API se llama desde su servidor, nunca desde el navegador: la llave secreta quedaría expuesta.</summary>
     public const string BrowserNotSupported = "browser_not_supported";
 
+    /// <summary>Mezcló las dos formas de emitir un recibo de nómina: POST /v1/payroll_receipts calcula el recibo con los datos del empleado (emp_…); POST /v1/payroll_receipts/external timbra los importes que calculó su sistema. Use el endpoint que corresponde.</summary>
+    public const string CalculationModeAmbiguous = "calculation_mode_ambiguous";
+
     /// <summary>El SAT no aceptó la solicitud de cancelación; message dice por qué.</summary>
     public const string CancellationFailed = "cancellation_failed";
 
@@ -63,7 +66,7 @@ public static class ErrorCode
     /// <summary>Para pedirle al SAT las facturas de un emisor en producción, guarde antes su e.firma: POST /v1/issuers/{id}/efirma con keep_for_downloads: true. También si la guardada venció.</summary>
     public const string EfirmaRequired = "efirma_required";
 
-    /// <summary>No se pudo mandar el correo; el comprobante sí está timbrado.</summary>
+    /// <summary>No se pudo mandar el correo; lo demás sí se hizo: el comprobante está timbrado o la cotización quedó enviada (su url funciona). Repita el envío con su ruta /send.</summary>
     public const string EmailFailed = "email_failed";
 
     /// <summary>Ya hay un webhook con esa dirección en este modo; el mensaje dice cuál. Cámbielo en vez de crear otro.</summary>
@@ -159,8 +162,17 @@ public static class ErrorCode
     /// <summary>Mandó un campo o un parámetro de la URL que no existe (casi siempre un nombre mal escrito, como legalName en vez de legal_name, o ?statuss= en vez de ?status=). Nunca se ignora en silencio.</summary>
     public const string ParameterUnknown = "parameter_unknown";
 
-    /// <summary>El recibo de nómina no se puede calcular o timbrar con esos datos (periodo, días, registro patronal del emisor…).</summary>
+    /// <summary>El recibo de nómina no se puede calcular o timbrar con esos datos (periodo, días, registro patronal del emisor…). En un recibo calculado por su sistema (/v1/payroll_receipts/external), errors trae todos los problemas, cada uno con su param, code (missing, not_allowed, invalid, catalog, totals_mismatch, rule) y message. No se usó ningún timbre.</summary>
     public const string PayrollInvalid = "payroll_invalid";
+
+    /// <summary>El empleado ya tiene un recibo ordinario cuyo periodo se cruza con este (invoice). Un pago adicional del periodo va como recibo extraordinario (type E); para corregir aquel, use replaces.</summary>
+    public const string PayrollPeriodOverlap = "payroll_period_overlap";
+
+    /// <summary>El empleado ya tiene un recibo vigente de ese periodo (ordinario) o de esa corrida (payroll_run_id, extraordinario) con otros importes. invoice es ese recibo: corríjalo con replaces o cancélelo antes. Con los mismos importes se devuelve el mismo recibo, sin error.</summary>
+    public const string PayrollReceiptExists = "payroll_receipt_exists";
+
+    /// <summary>replaces no es un recibo de nómina vigente del mismo emisor y del mismo empleado.</summary>
+    public const string PayrollReplacementInvalid = "payroll_replacement_invalid";
 
     /// <summary>La cotización no tiene los datos fiscales del cliente: agrégueselos con POST /v1/quotes/{id} (customer) o mándela con auto_invoice para que los dé al aceptarla.</summary>
     public const string QuoteCustomerMissing = "quote_customer_missing";
@@ -237,7 +249,7 @@ public static class ErrorCode
     /// <summary>Esa plataforma aún no está disponible en Fiscalisto.</summary>
     public const string StorePlatformUnavailable = "store_platform_unavailable";
 
-    /// <summary>Los complementos de pago y las notas de crédito no se sustituyen: se cancelan y se emite otro.</summary>
+    /// <summary>Los complementos de pago y las notas de crédito no se sustituyen: se cancelan y se emite otro. Un recibo de nómina se sustituye con POST /v1/payroll_receipts/external y replaces.</summary>
     public const string SubstitutionUnsupported = "substitution_unsupported";
 
     /// <summary>El reloj se está adelantando en otra solicitud (409, con Retry-After). Espere a test_clock.ready y repita.</summary>

@@ -1314,6 +1314,34 @@ public sealed class PayrollReceiptsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollReceiptPreview> PreviewAsync(PreviewPayrollReceiptParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollReceiptPreview>("POST", "/v1/payroll_receipts/preview", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Timbrar un recibo calculado por su sistema
+    /// </summary>
+    /// <remarks>
+    /// Para un sistema de nómina que ya calculó el recibo: timbra exactamente sus percepciones (gravado y exento), deducciones, otros pagos, horas extra, incapacidades, separación o jubilación, ordinario (type O) o extraordinario (type E: aguinaldo, PTU, finiquito). Fiscalisto no recalcula ni redondea nada: revisa el XSD, los catálogos del SAT, la Matriz de errores y que sus totales cuadren, y si algo falla responde payroll_invalid con todos los problemas en errors[] (cada uno con su param). Un recibo ordinario por empleado (RFC) y periodo; uno extraordinario por empleado y payroll_run_id. Repetirlo con los mismos importes devuelve el mismo recibo; con otros importes, 409 payroll_receipt_exists (corríjalo con replaces). Queda como factura tipo N.
+    /// <br/>
+    /// <c>POST /v1/payroll_receipts/external</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-external-payroll-receipt"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> CreateExternalAsync(ExternalPayrollReceiptCreate @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", "/v1/payroll_receipts/external", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Revisar un recibo calculado por su sistema, sin timbrar
+    /// </summary>
+    /// <remarks>
+    /// Las mismas revisiones que al timbrar, sin timbrar ni usar timbres: devuelve el recibo como se timbraría, los avisos y el XML sin sellar (unsigned_xml), con sus importes tal cual. Si algo falla, payroll_invalid con errors[].
+    /// <br/>
+    /// <c>POST /v1/payroll_receipts/external/preview</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/preview-external-payroll-receipt"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExternalPayrollReceiptPreview> PreviewExternalAsync(ExternalPayrollReceiptCreate @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExternalPayrollReceiptPreview>("POST", "/v1/payroll_receipts/external/preview", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
