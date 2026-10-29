@@ -9,7 +9,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>Fiscalisto</RootNamespace>
     <PackageId>Fiscalisto</PackageId>
-    <Version>0.1.14</Version>
+    <Version>0.1.15</Version>
     <Authors>Fiscalisto</Authors>
     <Description>El SDK de la API de facturación de Fiscalisto: timbre CFDI 4.0 (facturas, pagos, notas de crédito, nómina, retenciones y lotes) desde .NET.</Description>
     <PackageTags>cfdi;facturacion;sat;mexico;factura-electronica;fiscalisto</PackageTags>

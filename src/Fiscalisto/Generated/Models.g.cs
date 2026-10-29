@@ -4327,10 +4327,10 @@ public sealed partial class CreateTicketParams
     public required string Folio { get; set; }
 
     /// <summary>
-    /// Lo que se cobró, impuestos incluidos y sin propina.
+    /// Lo que se cobró, impuestos incluidos y sin propina. Con `lines` puede omitirlo (es su suma); si lo manda, debe ser igual.
     /// </summary>
     [JsonPropertyName("total")]
-    public required decimal Total { get; set; }
+    public decimal? Total { get; set; }
 
     /// <summary>
     /// Propina: no va en la factura. El cliente puede escribir el total con ella o sin ella.
@@ -4381,6 +4381,62 @@ public sealed partial class CreateTicketParams
     /// </summary>
     [JsonPropertyName("iva")]
     public string? Iva { get; set; }
+
+    /// <summary>
+    /// Una venta de varios conceptos (el folio de un hotel: noches, desayunos, lavandería), cada uno con su producto o sus claves, sus impuestos y lo que se cobró por él; hasta 200. En lugar de `product`, `description`, `product_key`, `unit_key` e `iva`. La factura del cliente lleva un concepto por línea; la factura global, uno por cada combinación de impuestos del ticket.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<CreateTicketParamsLinesItem>? Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateTicketParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateTicketParamsLinesItem
+{
+    /// <summary>
+    /// Un producto (prd_…) de su catálogo: sus claves, IVA e impuestos locales.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string? Product { get; set; }
+
+    /// <summary>
+    /// El concepto. Con `product`, reemplaza su descripción; sin él, va con `product_key`.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// c_ClaveProdServ (8 dígitos), si no usa `product`.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// c_ClaveUnidad. Por omisión, la de la clave del producto.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Tasa de IVA incluida en su total. Por omisión 0.16.
+    /// <br/>
+    /// Valores: 0, 0.16, 0.08, exento.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public string? Iva { get; set; }
+
+    /// <summary>
+    /// Unidades (noches, piezas). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal? Quantity { get; set; }
+
+    /// <summary>
+    /// Lo que se cobró por este concepto, impuestos incluidos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public required decimal Total { get; set; }
 }
 
 /// <summary>
@@ -16516,6 +16572,30 @@ public sealed partial class SelfInvoicing
     /// </summary>
     [JsonPropertyName("global_periodicity")]
     public string GlobalPeriodicity { get; set; } = default!;
+
+    /// <summary>
+    /// Si el portal pide el total para encontrar el ticket (true) o solo su código (false).
+    /// </summary>
+    [JsonPropertyName("ask_total")]
+    public bool AskTotal { get; set; }
+
+    /// <summary>
+    /// El título del portal, o null para «Facture su ticket».
+    /// </summary>
+    [JsonPropertyName("portal_title")]
+    public string? PortalTitle { get; set; }
+
+    /// <summary>
+    /// El mensaje bajo el título, o null.
+    /// </summary>
+    [JsonPropertyName("portal_message")]
+    public string? PortalMessage { get; set; }
+
+    /// <summary>
+    /// Dónde encuentra el comprador su código, bajo el campo; null para el texto de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("code_hint")]
+    public string? CodeHint { get; set; }
 }
 
 /// <summary>
@@ -17732,16 +17812,22 @@ public sealed partial class Ticket
     public string PaymentForm { get; set; } = default!;
 
     /// <summary>
-    /// El concepto de la factura.
+    /// El concepto de la factura (el primero, si lleva varios).
     /// </summary>
     [JsonPropertyName("description")]
     public string Description { get; set; } = default!;
 
     /// <summary>
-    /// c_ClaveProdServ del concepto.
+    /// c_ClaveProdServ del concepto (el primero, si lleva varios).
     /// </summary>
     [JsonPropertyName("product_key")]
     public string ProductKey { get; set; } = default!;
+
+    /// <summary>
+    /// Sus conceptos, en orden: uno solo si se registró sin lines. Cada uno con su producto (prd_… o null), descripción, claves del SAT, IVA (null si no es objeto de impuesto), unidades y lo que se cobró por él, impuestos incluidos.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<TicketLinesItem> Lines { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se vendió.
@@ -17796,6 +17882,54 @@ public sealed partial class TicketCustomer
     /// </summary>
     [JsonPropertyName("legal_name")]
     public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;TicketLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TicketLinesItem
+{
+    /// <summary>
+    /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string? Product { get; set; }
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Clave del producto o servicio (ClaveProdServ), 8 dígitos de c_ClaveProdServ. Búsquela con GET /v1/sat_catalogs/product_keys?q=…
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string ProductKey { get; set; } = default!;
+
+    /// <summary>
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string UnitKey { get; set; } = default!;
+
+    /// <summary>
+    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public string? Iva { get; set; }
+
+    /// <summary>
+    /// Cantidad (Cantidad). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
 }
 
 /// <summary>
@@ -19172,6 +19306,30 @@ public sealed partial class UpdateSelfInvoicingParams
     /// </summary>
     [JsonPropertyName("global_periodicity")]
     public string? GlobalPeriodicity { get; set; }
+
+    /// <summary>
+    /// `true` (por omisión): el comprador busca su ticket con el código y el total. `false`: solo con el código (sus 4 caracteres al azar; cada ticket se bloquea tras varios intentos fallidos).
+    /// </summary>
+    [JsonPropertyName("ask_total")]
+    public bool? AskTotal { get; set; }
+
+    /// <summary>
+    /// El título del portal, en lugar de «Facture su ticket». `null` lo quita.
+    /// </summary>
+    [JsonPropertyName("portal_title")]
+    public string? PortalTitle { get; set; }
+
+    /// <summary>
+    /// Un mensaje bajo el título (instrucciones, horario, a quién escribir). `null` lo quita.
+    /// </summary>
+    [JsonPropertyName("portal_message")]
+    public string? PortalMessage { get; set; }
+
+    /// <summary>
+    /// Dónde encuentra el comprador su código, bajo el campo («Viene en su correo de salida»). `null` pone el de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("code_hint")]
+    public string? CodeHint { get; set; }
 }
 
 /// <summary>
