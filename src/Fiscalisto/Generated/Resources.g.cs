@@ -135,6 +135,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Cumplimiento SAT.</summary>
     public SatFindingsResource SatFindings => _satFindings ??= new SatFindingsResource(this);
 
+    private SatFindingCounterpartiesResource? _satFindingCounterparties;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public SatFindingCounterpartiesResource SatFindingCounterparties => _satFindingCounterparties ??= new SatFindingCounterpartiesResource(this);
+
     private WarehousesResource? _warehouses;
 
     /// <summary>Inventario.</summary>
@@ -1899,6 +1904,36 @@ public sealed class SatFindingsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SatFindingList> ListAsync(ListSatFindingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<SatFindingList>("GET", "/v1/sat_findings", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.SatFindingCounterparties</c>.
+/// </summary>
+public sealed class SatFindingCounterpartiesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatFindingCounterpartiesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar proveedores y clientes con hallazgos
+    /// </summary>
+    /// <remarks>
+    /// Los proveedores (en recibidos) y clientes (en emitidos) con hallazgos sin revisar en los CFDI del emisor, del más grave al más leve y después por cuántos CFDI, cada uno con sus tipos de hallazgo. Con code, quién tiene ese hallazgo. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_finding_counterparties</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/list-sat-finding-counterparties"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SatFindingCounterparty>> ListAsync(ListSatFindingCounterpartiesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SatFindingCounterparty>("/v1/sat_finding_counterparties", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar proveedores y clientes con hallazgos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SatFindingCounterparty> ListAutoPagingAsync(ListSatFindingCounterpartiesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SatFindingCounterparty>("/v1/sat_finding_counterparties", @params, options, cancellationToken);
 }
 
 /// <summary>

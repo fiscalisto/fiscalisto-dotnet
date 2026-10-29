@@ -12687,6 +12687,64 @@ public sealed partial class ListSatDownloadsParams
 }
 
 /// <summary>
+/// Los campos de «Listar proveedores y clientes con hallazgos».
+/// </summary>
+public sealed partial class ListSatFindingCounterpartiesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// issued (emitidos: clientes) o received (recibidos: proveedores); sin él, los dos.
+    /// <br/>
+    /// Valores: issued, received.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string? Direction { get; set; }
+
+    /// <summary>
+    /// CFDI desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// CFDI hasta este día (AAAA-MM-DD, completo).
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Solo los de esta gravedad: critical, warning o info.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string? Severity { get; set; }
+
+    /// <summary>
+    /// Solo quienes tienen este hallazgo (efos_definitivo, cancelado, regla_12…; el code de GET /v1/sat_findings).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar hallazgos en los CFDI».
 /// </summary>
 public sealed partial class ListSatFindingsParams
@@ -12716,6 +12774,20 @@ public sealed partial class ListSatFindingsParams
     /// </summary>
     [JsonPropertyName("date_lte")]
     public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Solo los de esta gravedad: critical, warning o info.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string? Severity { get; set; }
+
+    /// <summary>
+    /// Solo los CFDI de este proveedor o cliente (su RFC): qué hallazgos tiene.
+    /// </summary>
+    [JsonPropertyName("counterparty")]
+    public string? Counterparty { get; set; }
 }
 
 /// <summary>
@@ -15934,10 +16006,158 @@ public sealed partial class SatFinding
     public long Invoices { get; set; }
 
     /// <summary>
-    /// La suma de sus totales.
+    /// De cuántos proveedores o clientes son esos CFDI.
+    /// </summary>
+    [JsonPropertyName("counterparties")]
+    public long Counterparties { get; set; }
+
+    /// <summary>
+    /// La suma de sus totales, en pesos (los de otra moneda, a su tipo de cambio).
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// La fecha del CFDI más reciente que lo tiene (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("last_date")]
+    public string? LastDate { get; set; }
+}
+
+/// <summary>
+/// Un proveedor o cliente con hallazgos sin revisar en los CFDI del emisor: cuántos CFDI, cuánto suman y qué tipos de hallazgo tiene.
+/// </summary>
+public sealed partial class SatFindingCounterparty
+{
+    /// <summary>
+    /// Su RFC (el mismo que rfc). Sirve como starting_after.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del proveedor (en recibidos) o del cliente (en emitidos).
+    /// </summary>
+    [JsonPropertyName("rfc")]
+    public string Rfc { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre como viene en el CFDI, o null.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Su hallazgo más grave: critical, warning o info.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string Severity { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos de sus CFDI tienen algún hallazgo sin revisar.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// La suma de los totales de esos CFDI, en pesos, cada uno una vez aunque tenga varios hallazgos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// La fecha del más reciente de esos CFDI (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("last_date")]
+    public string? LastDate { get; set; }
+
+    /// <summary>
+    /// Sus tipos de hallazgo, del más grave al más leve.
+    /// </summary>
+    [JsonPropertyName("findings")]
+    public List<SatFindingCounterpartyFindingsItem> Findings { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatFindingCounterpartyFindingsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatFindingCounterpartyFindingsItem
+{
+    /// <summary>
+    /// El código del hallazgo (el code de GET /v1/sat_findings).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// critical (grave), warning (revisar) o info.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string Severity { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es, en palabras.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// En cuántos de sus CFDI está, sin revisar.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatFindingCounterpartyList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatFindingCounterparty> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
