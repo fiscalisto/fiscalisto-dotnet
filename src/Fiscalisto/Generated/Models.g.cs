@@ -5637,7 +5637,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low o test_clock.ready.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, issuer.ready, balance.low o test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -12232,7 +12232,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -12498,7 +12498,7 @@ public sealed partial class ListQuotesParams
     /// <summary>
     /// Solo las que estén en este estado.
     /// <br/>
-    /// Valores: draft, sent, viewed, accepted, rejected, expired, invoiced.
+    /// Valores: draft, sent, viewed, accepted, rejected, withdrawn, expired, invoiced.
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
@@ -14018,9 +14018,9 @@ public sealed partial class Quote
     public long Version { get; set; }
 
     /// <summary>
-    /// draft, sent, viewed (el cliente abrió la liga), accepted, rejected, expired (pasó valid_until) o invoiced.
+    /// draft, sent, viewed (el cliente abrió la liga), accepted, rejected, withdrawn (usted la retiró), expired (pasó valid_until) o invoiced.
     /// <br/>
-    /// Valores: draft, sent, viewed, accepted, rejected, expired, invoiced.
+    /// Valores: draft, sent, viewed, accepted, rejected, withdrawn, expired, invoiced.
     /// </summary>
     [JsonPropertyName("status")]
     public string Status { get; set; } = default!;
@@ -14080,7 +14080,19 @@ public sealed partial class Quote
     public bool AutoInvoice { get; set; }
 
     /// <summary>
-    /// Lo que escribió el cliente al pedir cambios o al rechazarla, o null.
+    /// Si se le manda un recordatorio por correo 3 días antes de su último día mientras no responda (remind en POST /v1/quotes/{id}/send).
+    /// </summary>
+    [JsonPropertyName("remind")]
+    public bool Remind { get; set; }
+
+    /// <summary>
+    /// Cuándo se mandó el recordatorio, o null.
+    /// </summary>
+    [JsonPropertyName("reminded_at")]
+    public string? RemindedAt { get; set; }
+
+    /// <summary>
+    /// Lo que escribió el cliente al pedir cambios o al rechazarla, la nota de usted al retirarla o marcarla rechazada, o null.
     /// </summary>
     [JsonPropertyName("customer_comment")]
     public string? CustomerComment { get; set; }
@@ -14098,13 +14110,13 @@ public sealed partial class Quote
     public string? ViewedAt { get; set; }
 
     /// <summary>
-    /// Cuándo se aceptó o rechazó.
+    /// Cuándo se aceptó, se rechazó o se retiró.
     /// </summary>
     [JsonPropertyName("decided_at")]
     public string? DecidedAt { get; set; }
 
     /// <summary>
-    /// customer (en su liga) o user (usted, con POST /v1/quotes/{id}/accept o desde la app).
+    /// customer (en su liga) o user (usted: POST /v1/quotes/{id}/accept, /reject o /withdraw, o desde la app).
     /// <br/>
     /// Valores: customer, user.
     /// </summary>
@@ -14590,6 +14602,18 @@ public sealed partial class RefreshSatDeclarationsParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Marcar rechazada».
+/// </summary>
+public sealed partial class RejectQuoteParams
+{
+    /// <summary>
+    /// Por qué (queda en customer_comment; el cliente no la ve).
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }
 
 /// <summary>
@@ -16644,6 +16668,12 @@ public sealed partial class SendQuoteParams
     /// </summary>
     [JsonPropertyName("auto_invoice")]
     public bool? AutoInvoice { get; set; }
+
+    /// <summary>
+    /// Recordarle por correo, a los mismos destinatarios, 3 días antes de su último día si no ha respondido (una vez). Solo al mandarla por correo; por omisión false.
+    /// </summary>
+    [JsonPropertyName("remind")]
+    public bool? Remind { get; set; }
 }
 
 /// <summary>
@@ -17732,7 +17762,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, issuer.ready, balance.low, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -17788,7 +17818,7 @@ public sealed partial class Ticket
     public string Status { get; set; } = default!;
 
     /// <summary>
-    /// La página del portal con el código ya escrito: el comprador pone el total y sus datos. Puede incrustarla con fiscalisto.js. null si ya no está pendiente.
+    /// La página del portal con el código (c) y el total (t) del ticket: el portal lo encuentra solo y el comprador solo da sus datos. Quien tenga la liga puede facturar el ticket: désela solo al comprador (como el ticket impreso). Puede incrustarla con fiscalisto.js. null si ya no está pendiente.
     /// </summary>
     [JsonPropertyName("url")]
     public string? Url { get; set; }
@@ -19786,4 +19816,16 @@ public sealed partial class WebhookTestDelivery
     /// </summary>
     [JsonPropertyName("duration_ms")]
     public long DurationMs { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Retirar una cotización».
+/// </summary>
+public sealed partial class WithdrawQuoteParams
+{
+    /// <summary>
+    /// Por qué (queda en customer_comment; el cliente no la ve).
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }

@@ -2842,7 +2842,7 @@ public sealed class QuotesResource
     /// Cambiar una cotización
     /// </summary>
     /// <remarks>
-    /// Solo lo que mande cambia. Un borrador cambia ahí mismo; una que ya se envió se vuelve una versión nueva en borrador (mismo número, version + 1) que el cliente ve al mandarla; mientras, su liga muestra la anterior. Una aceptada, rechazada o facturada ya no cambia.
+    /// Solo lo que mande cambia. Un borrador cambia ahí mismo; una que ya se envió (también si venció, se rechazó o se retiró) se vuelve una versión nueva en borrador (mismo número, version + 1) que el cliente ve al mandarla; mientras, su liga muestra la anterior. Una aceptada o facturada ya no cambia.
     /// <br/>
     /// <c>POST /v1/quotes/{id}</c>
     /// <br/>
@@ -2856,7 +2856,7 @@ public sealed class QuotesResource
     /// Borrar una cotización
     /// </summary>
     /// <remarks>
-    /// Solo una que nunca se envió; si no, 400 quote_not_draft.
+    /// Borra la cotización con todas sus versiones; si ya se envió, su url deja de funcionar. Una aceptada o facturada no se borra: 400 quote_not_deletable. Para cerrarla sin borrarla, POST /v1/quotes/{id}/withdraw.
     /// <br/>
     /// <c>DELETE /v1/quotes/{id}</c>
     /// <br/>
@@ -2893,6 +2893,34 @@ public sealed class QuotesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Quote> AcceptAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/accept", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Retirar una cotización
+    /// </summary>
+    /// <remarks>
+    /// Usted ya no la ofrece: su liga dice que se retiró y el cliente ya no la puede aceptar (status withdrawn, decided_by user). Llega quote.withdrawn. Para ofrecerla de nuevo, cámbiela con POST /v1/quotes/{id} (una versión nueva) y mándela. Una que nunca se envió se borra: 400 quote_not_sent.
+    /// <br/>
+    /// <c>POST /v1/quotes/{id}/withdraw</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/withdraw-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Quote> WithdrawAsync(string id, WithdrawQuoteParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/withdraw", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Marcar rechazada
+    /// </summary>
+    /// <remarks>
+    /// El cliente le dijo que no por teléfono, en persona… (status rejected, decided_by user; su nota en customer_comment). Llega quote.rejected. También para una vencida que ya no va a seguir.
+    /// <br/>
+    /// <c>POST /v1/quotes/{id}/reject</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cotizaciones/reject-quote"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Quote> RejectAsync(string id, RejectQuoteParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Quote>("POST", $"/v1/quotes/{Uri.EscapeDataString(id)}/reject", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Facturar una cotización
