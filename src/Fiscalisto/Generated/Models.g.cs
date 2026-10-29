@@ -16598,6 +16598,14 @@ public sealed partial class SelfInvoicing
     public string GlobalPeriodicity { get; set; } = default!;
 
     /// <summary>
+    /// auto: los tickets que nadie facturó van solos a la factura global de su periodo. off: Fiscalisto no hace factura global de estos tickets (la hace usted en otro lado).
+    /// <br/>
+    /// Valores: auto, off.
+    /// </summary>
+    [JsonPropertyName("global_invoice")]
+    public string GlobalInvoice { get; set; } = default!;
+
+    /// <summary>
     /// Si el portal pide el total para encontrar el ticket (true) o solo su código (false).
     /// </summary>
     [JsonPropertyName("ask_total")]
@@ -19336,6 +19344,14 @@ public sealed partial class UpdateSelfInvoicingParams
     /// </summary>
     [JsonPropertyName("global_periodicity")]
     public string? GlobalPeriodicity { get; set; }
+
+    /// <summary>
+    /// `auto` (por omisión): los tickets que nadie facturó van solos a la factura global al terminar su periodo. `off`: Fiscalisto no hace factura global de los tickets (por ejemplo, porque su punto de venta ya la hace); quedan pendientes y usted responde por ellos ante el SAT.
+    /// <br/>
+    /// Valores: auto, off.
+    /// </summary>
+    [JsonPropertyName("global_invoice")]
+    public string? GlobalInvoice { get; set; }
 
     /// <summary>
     /// `true` (por omisión): el comprador busca su ticket con el código y el total. `false`: solo con el código (sus 4 caracteres al azar; cada ticket se bloquea tras varios intentos fallidos).
