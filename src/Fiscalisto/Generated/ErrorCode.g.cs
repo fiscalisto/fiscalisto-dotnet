@@ -180,6 +180,9 @@ public static class ErrorCode
     /// <summary>replaces no es un recibo de nómina vigente del mismo emisor y del mismo empleado.</summary>
     public const string PayrollReplacementInvalid = "payroll_replacement_invalid";
 
+    /// <summary>No se pudo dibujar el PDF de ese CFDI (su XML trae algo que el generador no lee). Descargue el XML: es el documento válido ante el SAT.</summary>
+    public const string PdfUnavailable = "pdf_unavailable";
+
     /// <summary>La cotización no tiene los datos fiscales del cliente: agrégueselos con POST /v1/quotes/{id} (customer) o mándela con auto_invoice para que los dé al aceptarla.</summary>
     public const string QuoteCustomerMissing = "quote_customer_missing";
 

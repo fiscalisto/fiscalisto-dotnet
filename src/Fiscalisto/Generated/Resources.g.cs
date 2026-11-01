@@ -2272,6 +2272,20 @@ public sealed class SatInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> XmlAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/xml", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar el PDF de una factura del SAT
+    /// </summary>
+    /// <remarks>
+    /// El CFDI en PDF, como lo ofrece Facturas: si se timbró en Fiscalisto, el mismo que recibió el cliente; si no, dibujado con el diseño de PDF del emisor (el de un proveedor, con su estilo y color, nunca con su logo). El XML es el documento válido ante el SAT.
+    /// <br/>
+    /// <c>GET /v1/sat_invoices/{id}/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-invoice-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
