@@ -2624,6 +2624,130 @@ public sealed partial class CreateProductParamsLocalTaxesItem
 }
 
 /// <summary>
+/// Los campos de «Guardar un ticket de compra».
+/// </summary>
+public sealed partial class CreatePurchaseReceiptParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La foto (JPG, PNG o WebP) o el PDF, en base64; hasta 8 MB.
+    /// </summary>
+    [JsonPropertyName("file")]
+    public required string File { get; set; }
+
+    /// <summary>
+    /// image/jpeg, image/png, image/webp o application/pdf.
+    /// <br/>
+    /// Valores: image/jpeg, image/png, image/webp, application/pdf.
+    /// </summary>
+    [JsonPropertyName("file_type")]
+    public required string FileType { get; set; }
+
+    /// <summary>
+    /// Lo que dice el código QR del ticket, si ya lo leyó (suele ser la liga del portal).
+    /// </summary>
+    [JsonPropertyName("qr_text")]
+    public string? QrText { get; set; }
+
+    /// <summary>
+    /// false para no leerlo con IA y mandar los datos usted. Por omisión se lee y se llena lo que no mandó.
+    /// </summary>
+    [JsonPropertyName("read")]
+    public bool? Read { get; set; }
+
+    /// <summary>
+    /// El nombre de la tienda.
+    /// </summary>
+    [JsonPropertyName("store_name")]
+    public string? StoreName { get; set; }
+
+    /// <summary>
+    /// El RFC de la tienda (el que factura).
+    /// </summary>
+    [JsonPropertyName("store_tax_id")]
+    public string? StoreTaxId { get; set; }
+
+    /// <summary>
+    /// El día de la compra (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El total pagado, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// efectivo, tarjeta u otro.
+    /// <br/>
+    /// Valores: efectivo, tarjeta, otro.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// El folio o número de ticket.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// Otros datos que pide el portal de la tienda (Web ID, sucursal, caja…), hasta 8.
+    /// </summary>
+    [JsonPropertyName("fields")]
+    public List<CreatePurchaseReceiptParamsFieldsItem>? Fields { get; set; }
+
+    /// <summary>
+    /// La dirección del portal de facturación de la tienda (o la liga de autofactura de su QR).
+    /// </summary>
+    [JsonPropertyName("portal_url")]
+    public string? PortalUrl { get; set; }
+
+    /// <summary>
+    /// El correo de facturación de la tienda.
+    /// </summary>
+    [JsonPropertyName("store_email")]
+    public string? StoreEmail { get; set; }
+
+    /// <summary>
+    /// El uso de la factura (G03, I01…). Por omisión G03 si el régimen del emisor lo permite.
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Una nota para su equipo.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreatePurchaseReceiptParamsFieldsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreatePurchaseReceiptParamsFieldsItem
+{
+    /// <summary>
+    /// Cómo lo llama el ticket (Web ID, Sucursal…).
+    /// </summary>
+    [JsonPropertyName("label")]
+    public required string Label { get; set; }
+
+    /// <summary>
+    /// Lo que dice el ticket en ese dato.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public required string Value { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear una cotización».
 /// </summary>
 public sealed partial class CreateQuoteParams
@@ -4197,9 +4321,9 @@ public sealed partial class CreateStoreConnectionParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// shopify o mercadolibre.
+    /// shopify, woocommerce, mercadolibre, tiendanube o amazon.
     /// <br/>
-    /// Valores: shopify, mercadolibre.
+    /// Valores: shopify, mercadolibre, amazon, tiendanube, woocommerce.
     /// </summary>
     [JsonPropertyName("platform")]
     public required string Platform { get; set; }
@@ -4229,7 +4353,25 @@ public sealed partial class CreateStoreConnectionParams
     public string? AccessToken { get; set; }
 
     /// <summary>
-    /// Mercado Libre: a dónde volver después de autorizar (se agregan store_connection y status).
+    /// WooCommerce: la dirección de la tienda (https://mitienda.com).
+    /// </summary>
+    [JsonPropertyName("site")]
+    public string? Site { get; set; }
+
+    /// <summary>
+    /// WooCommerce: la Clave de cliente (ck_…) de una llave de la API REST con permisos de Lectura/Escritura.
+    /// </summary>
+    [JsonPropertyName("consumer_key")]
+    public string? ConsumerKey { get; set; }
+
+    /// <summary>
+    /// WooCommerce: la Clave secreta de cliente (cs_…) de esa llave. Se guarda cifrada y nunca se muestra.
+    /// </summary>
+    [JsonPropertyName("consumer_secret")]
+    public string? ConsumerSecret { get; set; }
+
+    /// <summary>
+    /// Mercado Libre, Tiendanube y Amazon: a dónde volver después de autorizar (se agregan store_connection y status).
     /// </summary>
     [JsonPropertyName("return_url")]
     public string? ReturnUrl { get; set; }
@@ -4295,6 +4437,12 @@ public sealed partial class CreateStoreConnectionParamsSettings
     /// </summary>
     [JsonPropertyName("auto_invoice")]
     public bool? AutoInvoice { get; set; }
+
+    /// <summary>
+    /// WooCommerce y Tiendanube: mandar al comprador el enlace para facturar (WooCommerce, como nota al cliente del pedido; Tiendanube, por correo). Por omisión true.
+    /// </summary>
+    [JsonPropertyName("notify_buyer")]
+    public bool? NotifyBuyer { get; set; }
 }
 
 /// <summary>
@@ -12473,6 +12621,38 @@ public sealed partial class ListProductsParams
 }
 
 /// <summary>
+/// Los campos de «Listar tickets de compra».
+/// </summary>
+public sealed partial class ListPurchaseReceiptsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// pending, requested, invoiced o non_deductible.
+    /// <br/>
+    /// Valores: pending, requested, invoiced, non_deductible.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar cotizaciones».
 /// </summary>
 public sealed partial class ListQuotesParams
@@ -13098,6 +13278,18 @@ public sealed partial class ListWebhookEndpointsParams
     /// </summary>
     [JsonPropertyName("starting_after")]
     public string? StartingAfter { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ya llegó la factura».
+/// </summary>
+public sealed partial class MarkPurchaseReceiptInvoicedParams
+{
+    /// <summary>
+    /// La factura recibida que lo cubre: su id (sat_…) o su folio fiscal (UUID). Sin ella, solo se marca facturado.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
 }
 
 /// <summary>
@@ -14049,6 +14241,270 @@ public sealed partial class ProductLocalTaxesItem
 }
 
 /// <summary>
+/// Un ticket de compra del emisor sin factura: lo que se leyó de su foto y si ya se pidió, llegó o no es deducible.
+/// </summary>
+public sealed partial class PurchaseReceipt
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (el que compró).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// pending (por pedir), requested (pedida a la tienda), invoiced (ya tiene factura) o non_deductible (no hubo factura).
+    /// <br/>
+    /// Valores: pending, requested, invoiced, non_deductible.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// La tienda: name, tax_id (su RFC), email, portal_url (su portal o la liga del QR) y on_fiscalisto (factura con Fiscalisto: method fiscalisto la timbra al momento).
+    /// </summary>
+    [JsonPropertyName("store")]
+    public PurchaseReceiptStore Store { get; set; } = default!;
+
+    /// <summary>
+    /// El día de la compra (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El total pagado, en pesos, o null.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// efectivo, tarjeta u otro, o null.
+    /// <br/>
+    /// Valores: efectivo, tarjeta, otro.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// El folio o número de ticket, o null.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// Otros datos que pide el portal de la tienda para facturar (Web ID, sucursal, caja…).
+    /// </summary>
+    [JsonPropertyName("fields")]
+    public List<PurchaseReceiptFieldsItem> Fields { get; set; } = default!;
+
+    /// <summary>
+    /// El uso de la factura que se pide, o null: G03 si el régimen del emisor lo permite, si no S01.
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Una nota, o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// ai (lo leyó la IA), manual (se mandaron los datos) o null.
+    /// <br/>
+    /// Valores: ai, manual.
+    /// </summary>
+    [JsonPropertyName("read_by")]
+    public string? ReadBy { get; set; }
+
+    /// <summary>
+    /// Por qué no se leyó o qué revisar (foto borrosa, no parece un ticket…), o null.
+    /// </summary>
+    [JsonPropertyName("read_note")]
+    public string? ReadNote { get; set; }
+
+    /// <summary>
+    /// El tipo del archivo guardado (image/jpeg, application/pdf…).
+    /// </summary>
+    [JsonPropertyName("file_type")]
+    public string? FileType { get; set; }
+
+    /// <summary>
+    /// true si se pagó en efectivo más de $2,000: aunque tenga factura, no es deducible (LISR art. 27 fr. III).
+    /// </summary>
+    [JsonPropertyName("cash_over_limit")]
+    public bool CashOverLimit { get; set; }
+
+    /// <summary>
+    /// Por pedir: los días que le quedan al mes de la compra, en hora de México (muchas tiendas solo facturan dentro del mes); si no, null.
+    /// </summary>
+    [JsonPropertyName("days_left_in_month")]
+    public long? DaysLeftInMonth { get; set; }
+
+    /// <summary>
+    /// Cuándo y cómo se pidió (method: fiscalisto, email, portal o manual; to: la tienda o su correo), o null.
+    /// </summary>
+    [JsonPropertyName("requested")]
+    public PurchaseReceiptRequested? Requested { get; set; }
+
+    /// <summary>
+    /// El folio fiscal de la factura que lo cubre, o null.
+    /// </summary>
+    [JsonPropertyName("invoice_uuid")]
+    public string? InvoiceUuid { get; set; }
+
+    /// <summary>
+    /// La factura recibida (sat_…) que lo cubre, si ya llegó con las descargas del SAT, o null.
+    /// </summary>
+    [JsonPropertyName("invoice")]
+    public string? Invoice { get; set; }
+
+    /// <summary>
+    /// Cuándo quedó facturado, o null.
+    /// </summary>
+    [JsonPropertyName("invoiced_at")]
+    public string? InvoicedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se marcó no deducible, o null.
+    /// </summary>
+    [JsonPropertyName("non_deductible_at")]
+    public string? NonDeductibleAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se guardó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PurchaseReceiptFieldsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PurchaseReceiptFieldsItem
+{
+    /// <summary>
+    /// Cómo lo llama el ticket (Web ID, Sucursal…).
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que dice el ticket en ese dato.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public string Value { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class PurchaseReceiptList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<PurchaseReceipt> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PurchaseReceiptRequested&lt;/c&gt;.
+/// </summary>
+public sealed partial class PurchaseReceiptRequested
+{
+    /// <summary>
+    /// egreso (la factura completa y después una nota de crédito por el anticipo, opción A) o remanente (la factura solo por lo que falta, opción B).
+    /// </summary>
+    [JsonPropertyName("method")]
+    public string? Method { get; set; }
+
+    /// <summary>
+    /// A quién (correos separados por comas).
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// Cuándo se pidió.
+    /// </summary>
+    [JsonPropertyName("at")]
+    public string? At { get; set; }
+}
+
+/// <summary>
+/// La tienda: name, tax_id (su RFC), email, portal_url (su portal o la liga del QR) y on_fiscalisto (factura con Fiscalisto: method fiscalisto la timbra al momento).
+/// </summary>
+public sealed partial class PurchaseReceiptStore
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Correo a donde se envía (varios separados por comas). Solo se usa si se pide enviarlo.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Su portal de facturación o la liga del QR, o null.
+    /// </summary>
+    [JsonPropertyName("portal_url")]
+    public string? PortalUrl { get; set; }
+
+    /// <summary>
+    /// true si factura con Fiscalisto: method fiscalisto timbra la factura al momento.
+    /// </summary>
+    [JsonPropertyName("on_fiscalisto")]
+    public bool OnFiscalisto { get; set; }
+}
+
+/// <summary>
 /// Una cotización: su cliente la ve en una liga, la acepta, pide cambios o la rechaza, y se factura.
 /// </summary>
 public sealed partial class Quote
@@ -14686,6 +15142,38 @@ public sealed partial class RejectQuoteParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Pedir la factura a la tienda».
+/// </summary>
+public sealed partial class RequestPurchaseReceiptInvoiceParams
+{
+    /// <summary>
+    /// fiscalisto (la tienda factura con Fiscalisto: se timbra al momento), email (le mandamos a la tienda sus datos y la foto), portal o manual (usted la pidió; solo se marca pedida).
+    /// <br/>
+    /// Valores: fiscalisto, email, portal, manual.
+    /// </summary>
+    [JsonPropertyName("method")]
+    public required string Method { get; set; }
+
+    /// <summary>
+    /// email: el correo de la tienda. Por omisión, store_email.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// email: unas líneas para la tienda.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// email y fiscalisto: el correo al que la tienda manda la factura. Por omisión, el correo de respuesta del emisor.
+    /// </summary>
+    [JsonPropertyName("reply_to")]
+    public string? ReplyTo { get; set; }
 }
 
 /// <summary>
@@ -17331,7 +17819,7 @@ public sealed partial class StockMovementSource
 }
 
 /// <summary>
-/// Una tienda de Shopify o Mercado Libre cuyos pedidos pagados se vuelven tickets de autofactura del emisor.
+/// Una tienda de Shopify, WooCommerce, Tiendanube, Mercado Libre o Amazon cuyos pedidos pagados se vuelven tickets de autofactura del emisor.
 /// </summary>
 public sealed partial class StoreConnection
 {
@@ -17360,21 +17848,27 @@ public sealed partial class StoreConnection
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// shopify o mercadolibre.
+    /// shopify, woocommerce, tiendanube, mercadolibre o amazon.
     /// <br/>
-    /// Valores: shopify, mercadolibre.
+    /// Valores: shopify, mercadolibre, amazon, tiendanube, woocommerce.
     /// </summary>
     [JsonPropertyName("platform")]
     public string Platform { get; set; } = default!;
 
     /// <summary>
-    /// El dominio de la tienda de Shopify, o el id del vendedor en Mercado Libre (al autorizar).
+    /// El dominio de la tienda (Shopify, WooCommerce), o el id de la tienda en Tiendanube o del vendedor en Mercado Libre y Amazon (al autorizar).
     /// </summary>
     [JsonPropertyName("shop")]
     public string? Shop { get; set; }
 
     /// <summary>
-    /// pending (Mercado Libre espera que el vendedor autorice en authorize_url), active o disconnected.
+    /// El nombre de la tienda según su plataforma, o null.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// pending (Mercado Libre, Tiendanube o Amazon esperan que se autorice en authorize_url), active o disconnected.
     /// <br/>
     /// Valores: pending, active, disconnected.
     /// </summary>
@@ -17382,7 +17876,7 @@ public sealed partial class StoreConnection
     public string Status { get; set; } = default!;
 
     /// <summary>
-    /// Si está pending: la página de Mercado Libre donde el vendedor autoriza (vale un día; cada consulta da una nueva). Si no, null.
+    /// Si está pending: la página de la plataforma donde el vendedor autoriza (vale un día; cada consulta da una nueva). Si no, null.
     /// </summary>
     [JsonPropertyName("authorize_url")]
     public string? AuthorizeUrl { get; set; }
@@ -17516,10 +18010,16 @@ public sealed partial class StoreConnectionSettings
     public Dictionary<string, string> PaymentForms { get; set; } = default!;
 
     /// <summary>
-    /// Mercado Libre: si se timbra al momento con los datos fiscales del comprador; null en Shopify.
+    /// Mercado Libre: si se timbra al momento con los datos fiscales del comprador; null en las demás plataformas.
     /// </summary>
     [JsonPropertyName("auto_invoice")]
     public bool? AutoInvoice { get; set; }
+
+    /// <summary>
+    /// WooCommerce y Tiendanube: si el comprador recibe su enlace para facturar (nota del pedido o correo); null en las demás plataformas.
+    /// </summary>
+    [JsonPropertyName("notify_buyer")]
+    public bool? NotifyBuyer { get; set; }
 }
 
 /// <summary>
@@ -18873,6 +19373,98 @@ public sealed partial class UpdateProductParamsLocalTaxesItem
 }
 
 /// <summary>
+/// Los campos de «Corregir un ticket de compra».
+/// </summary>
+public sealed partial class UpdatePurchaseReceiptParams
+{
+    /// <summary>
+    /// El nombre de la tienda.
+    /// </summary>
+    [JsonPropertyName("store_name")]
+    public string? StoreName { get; set; }
+
+    /// <summary>
+    /// El RFC de la tienda (el que factura).
+    /// </summary>
+    [JsonPropertyName("store_tax_id")]
+    public string? StoreTaxId { get; set; }
+
+    /// <summary>
+    /// El día de la compra (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El total pagado, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// efectivo, tarjeta u otro.
+    /// <br/>
+    /// Valores: efectivo, tarjeta, otro.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// El folio o número de ticket.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// Otros datos que pide el portal de la tienda (Web ID, sucursal, caja…), hasta 8.
+    /// </summary>
+    [JsonPropertyName("fields")]
+    public List<UpdatePurchaseReceiptParamsFieldsItem>? Fields { get; set; }
+
+    /// <summary>
+    /// La dirección del portal de facturación de la tienda (o la liga de autofactura de su QR).
+    /// </summary>
+    [JsonPropertyName("portal_url")]
+    public string? PortalUrl { get; set; }
+
+    /// <summary>
+    /// El correo de facturación de la tienda.
+    /// </summary>
+    [JsonPropertyName("store_email")]
+    public string? StoreEmail { get; set; }
+
+    /// <summary>
+    /// El uso de la factura (G03, I01…). Por omisión G03 si el régimen del emisor lo permite.
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Una nota para su equipo.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdatePurchaseReceiptParamsFieldsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdatePurchaseReceiptParamsFieldsItem
+{
+    /// <summary>
+    /// Cómo lo llama el ticket (Web ID, Sucursal…).
+    /// </summary>
+    [JsonPropertyName("label")]
+    public required string Label { get; set; }
+
+    /// <summary>
+    /// Lo que dice el ticket en ese dato.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public required string Value { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cambiar una cotización».
 /// </summary>
 public sealed partial class UpdateQuoteParams
@@ -19664,6 +20256,12 @@ public sealed partial class UpdateStoreConnectionParamsSettings
     /// </summary>
     [JsonPropertyName("auto_invoice")]
     public bool? AutoInvoice { get; set; }
+
+    /// <summary>
+    /// WooCommerce y Tiendanube: mandar al comprador el enlace para facturar (WooCommerce, como nota al cliente del pedido; Tiendanube, por correo). Por omisión true.
+    /// </summary>
+    [JsonPropertyName("notify_buyer")]
+    public bool? NotifyBuyer { get; set; }
 }
 
 /// <summary>
