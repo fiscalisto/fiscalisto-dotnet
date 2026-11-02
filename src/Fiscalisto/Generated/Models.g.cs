@@ -18404,6 +18404,26 @@ public sealed partial class SelfInvoicing
     /// </summary>
     [JsonPropertyName("code_hint")]
     public string? CodeHint { get; set; }
+
+    /// <summary>
+    /// auto: el tema del dispositivo del comprador, que puede cambiarlo. light o dark: siempre ese, en la página del portal, sus QR y dentro de su sitio.
+    /// <br/>
+    /// Valores: auto, light, dark.
+    /// </summary>
+    [JsonPropertyName("portal_theme")]
+    public string PortalTheme { get; set; } = default!;
+
+    /// <summary>
+    /// El color de los botones del portal («#rrggbb»), o null para el de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("portal_accent")]
+    public string? PortalAccent { get; set; }
+
+    /// <summary>
+    /// Las esquinas del portal en píxeles (0 a 24), o null para las de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("portal_radius")]
+    public long? PortalRadius { get; set; }
 }
 
 /// <summary>
@@ -21406,6 +21426,26 @@ public sealed partial class UpdateSelfInvoicingParams
     /// </summary>
     [JsonPropertyName("code_hint")]
     public string? CodeHint { get; set; }
+
+    /// <summary>
+    /// El tema del portal: `auto` (por omisión), el del dispositivo del comprador, que puede cambiarlo; `light` o `dark`, siempre ese. Vale en su página, sus QR y dentro de su sitio (salvo que el código para incrustarlo elija otro).
+    /// <br/>
+    /// Valores: auto, light, dark.
+    /// </summary>
+    [JsonPropertyName("portal_theme")]
+    public string? PortalTheme { get; set; }
+
+    /// <summary>
+    /// El color de los botones del portal, como `#0b7c77`. `null` pone el de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("portal_accent")]
+    public string? PortalAccent { get; set; }
+
+    /// <summary>
+    /// Lo redondo de las esquinas del portal, en píxeles (0 a 24). `null` pone el de Fiscalisto (10).
+    /// </summary>
+    [JsonPropertyName("portal_radius")]
+    public long? PortalRadius { get; set; }
 }
 
 /// <summary>
