@@ -2971,12 +2971,6 @@ public sealed partial class CreatePurchaseReceiptParams
     public string? QrText { get; set; }
 
     /// <summary>
-    /// false para no leerlo con IA y mandar los datos usted. Por omisión se lee y se llena lo que no mandó.
-    /// </summary>
-    [JsonPropertyName("read")]
-    public bool? Read { get; set; }
-
-    /// <summary>
     /// El nombre de la tienda.
     /// </summary>
     [JsonPropertyName("store_name")]
@@ -15378,20 +15372,6 @@ public sealed partial class PurchaseReceipt
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
-
-    /// <summary>
-    /// ai (lo leyó la IA), manual (se mandaron los datos) o null.
-    /// <br/>
-    /// Valores: ai, manual.
-    /// </summary>
-    [JsonPropertyName("read_by")]
-    public string? ReadBy { get; set; }
-
-    /// <summary>
-    /// Por qué no se leyó o qué revisar (foto borrosa, no parece un ticket…), o null.
-    /// </summary>
-    [JsonPropertyName("read_note")]
-    public string? ReadNote { get; set; }
 
     /// <summary>
     /// El tipo del archivo guardado (image/jpeg, application/pdf…).

@@ -1040,7 +1040,7 @@ public sealed class PurchaseReceiptsResource
     /// Guardar un ticket de compra
     /// </summary>
     /// <remarks>
-    /// La foto o el PDF de un ticket que el emisor pagó sin factura, en base64. La IA lee la tienda, su RFC, la fecha, el total, la forma de pago, el folio, los datos que pide su portal y la liga de facturación; lo que usted mande gana a lo que se lea. El mismo archivo dos veces devuelve el ticket que ya estaba, sin leerlo otra vez. Si llega una factura de esa tienda por el mismo total con las descargas del SAT, el ticket queda invoiced solo.
+    /// La foto o el PDF de un ticket que el emisor pagó sin factura, en base64, con los datos que usted tenga: la tienda, su RFC, la fecha, el total, la forma de pago, el folio, los datos que pide su portal y la liga de facturación. Si qr_text es la liga de una tienda que factura con Fiscalisto, el folio y el total se llenan solos. El mismo archivo dos veces devuelve el ticket que ya estaba. Si llega una factura de esa tienda por el mismo total con las descargas del SAT, el ticket queda invoiced solo.
     /// <br/>
     /// <c>POST /v1/purchase_receipts</c>
     /// <br/>
@@ -1111,20 +1111,6 @@ public sealed class PurchaseReceiptsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/purchase_receipts/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
-
-    /// <summary>
-    /// Leer el ticket de nuevo
-    /// </summary>
-    /// <remarks>
-    /// La IA vuelve a leer el archivo y llena solo los datos que siguen vacíos. Cuenta en el límite diario de tickets de compra.
-    /// <br/>
-    /// <c>POST /v1/purchase_receipts/{id}/read</c>
-    /// <br/>
-    /// <see href="https://fiscalisto.com/docs/api/referencia/tickets-de-compra/read-purchase-receipt"/>
-    /// </remarks>
-    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<PurchaseReceipt> ReadAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<PurchaseReceipt>("POST", $"/v1/purchase_receipts/{Uri.EscapeDataString(id)}/read", null, null, options, true, cancellationToken);
 
     /// <summary>
     /// Pedir la factura a la tienda
