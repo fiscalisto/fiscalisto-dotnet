@@ -3437,7 +3437,7 @@ public sealed partial class CreateRetentionParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) aún no se puede emitir.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
     /// </summary>
     [JsonPropertyName("code")]
     public required string Code { get; set; }
@@ -3464,13 +3464,19 @@ public sealed partial class CreateRetentionParams
     /// Totales (Totales).
     /// </summary>
     [JsonPropertyName("totals")]
-    public required CreateRetentionParamsTotals Totals { get; set; }
+    public CreateRetentionParamsTotals? Totals { get; set; }
 
     /// <summary>
     /// Impuestos del comprobante, por tipo.
     /// </summary>
     [JsonPropertyName("taxes")]
-    public required List<CreateRetentionParamsTaxesItem> Taxes { get; set; }
+    public List<CreateRetentionParamsTaxesItem>? Taxes { get; set; }
+
+    /// <summary>
+    /// Complemento de servicios de plataformas tecnológicas (ServiciosPlataformasTecnologicas 1.0), obligatorio con code 26: una constancia por mes, receptor y tipo de servicio. totals y taxes se calculan de services con las tasas del SAT (ISR de LISR 113-A y LIF 2026 art. 25; IVA 50% o 100%; IEPS en apuestas); si los manda, deben coincidir.
+    /// </summary>
+    [JsonPropertyName("platform")]
+    public CreateRetentionParamsPlatform? Platform { get; set; }
 
     /// <summary>
     /// Complemento de dividendos.
@@ -3795,6 +3801,132 @@ public sealed partial class CreateRetentionParamsPeriod
     /// </summary>
     [JsonPropertyName("to_month")]
     public long? ToMonth { get; set; }
+}
+
+/// <summary>
+/// Complemento de servicios de plataformas tecnológicas (ServiciosPlataformasTecnologicas 1.0), obligatorio con code 26: una constancia por mes, receptor y tipo de servicio. totals y taxes se calculan de services con las tasas del SAT (ISR de LISR 113-A y LIF 2026 art. 25; IVA 50% o 100%; IEPS en apuestas); si los manda, deben coincidir.
+/// </summary>
+public sealed partial class CreateRetentionParamsPlatform
+{
+    /// <summary>
+    /// Tipo de servicio (TipoDeServ), c_TipoDeServ: 01 transporte de pasajeros, 02 entrega de alimentos, 03 entrega de bienes, 04 hospedaje, 05 comercio de bienes, 06 otros servicios, 07 a 09 servicios digitales de extranjeros, 11 apuestas y sorteos (desde 2026).
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Cada cuánto paga la plataforma (Periodicidad): 01 semanal, 02 mensual (por omisión), 03 diaria, 04 quincenal, 05 otra.
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public string? Periodicity { get; set; }
+
+    /// <summary>
+    /// true si la persona física optó por que el ISR retenido sea pago definitivo (LISR 113-B): TipoPagoRet 03 en lugar de 04.
+    /// </summary>
+    [JsonPropertyName("isr_definitive")]
+    public bool? IsrDefinitive { get; set; }
+
+    /// <summary>
+    /// true si se le deposita en una cuenta en el extranjero: se retiene el 100% del IVA (LIF 2026 art. 25-IX-c).
+    /// </summary>
+    [JsonPropertyName("foreign_account")]
+    public bool? ForeignAccount { get; set; }
+
+    /// <summary>
+    /// Cada operación (DetallesDelServicio), hasta 5,000. Lo pagado en efectivo (payment_form 01) va en la constancia pero no en las bases.
+    /// </summary>
+    [JsonPropertyName("services")]
+    public required List<CreateRetentionParamsPlatformServicesItem> Services { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRetentionParamsPlatformServicesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRetentionParamsPlatformServicesItem
+{
+    /// <summary>
+    /// Fecha en que el cliente pagó (FechaServ), AAAA-MM-DD, dentro del mes del periodo.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// Forma de pago de la operación (FormaPagoServ), c_FormaPagoServ: 01 efectivo, 02 transferencia, 03 tarjeta de crédito, 04 monedero, 05 dinero electrónico, 06 débito, 07 tarjeta de servicios, 08 intermediario de pagos, 09 premios o bonificaciones.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public required string PaymentForm { get; set; }
+
+    /// <summary>
+    /// Precio sin IVA (PrecioServSinIVA).
+    /// </summary>
+    [JsonPropertyName("price")]
+    public required decimal Price { get; set; }
+
+    /// <summary>
+    /// Tasa del impuesto trasladado (TasaCuota): 0.16 (por omisión), 0.08 o 0 de IVA; 0.5 de IEPS solo con type 11, donde cada jugada va dos veces: una operación con su IVA y otra con su IEPS (el SAT pide un impuesto por operación). Sin tasa en premios (09), que desde 2026 no suman en totals.
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public JsonElement? Rate { get; set; }
+
+    /// <summary>
+    /// Subtipo (SubTipServ), c_SubTipoServ: con type 01, 01 personal (por omisión), 02 compartido, 03 plus o 04 cancelación; con type 11, 08 apuestas (por omisión) o 09 sorteos.
+    /// </summary>
+    [JsonPropertyName("subtype")]
+    public string? Subtype { get; set; }
+
+    /// <summary>
+    /// RFC (persona física) del tercero autorizado que prestó el servicio (RFCTerceroAutorizado).
+    /// </summary>
+    [JsonPropertyName("authorized_tax_id")]
+    public string? AuthorizedTaxId { get; set; }
+
+    /// <summary>
+    /// Comisión de la plataforma por la operación (ComisionDelServicio): amount mayor que cero y percent opcional (0.001 a 1). Obligatoria en cada operación con IVA; no va en premios ni en las de IEPS.
+    /// </summary>
+    [JsonPropertyName("commission")]
+    public CreateRetentionParamsPlatformServicesItemCommission? Commission { get; set; }
+
+    /// <summary>
+    /// Contribución gubernamental pagada, como el impuesto sobre hospedaje (ContribucionGubernamental): amount de al menos 1.00 y state (01 a 32).
+    /// </summary>
+    [JsonPropertyName("contribution")]
+    public CreateRetentionParamsPlatformServicesItemContribution? Contribution { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRetentionParamsPlatformServicesItemCommission&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRetentionParamsPlatformServicesItemCommission
+{
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// El porcentaje de la comisión sobre el precio, de 0.001 a 1 (0.25 es 25%). Opcional.
+    /// </summary>
+    [JsonPropertyName("percent")]
+    public decimal? Percent { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRetentionParamsPlatformServicesItemContribution&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRetentionParamsPlatformServicesItemContribution
+{
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Entidad federativa donde trabaja (ClaveEntFed): JAL, CMX, NLE…
+    /// </summary>
+    [JsonPropertyName("state")]
+    public required string State { get; set; }
 }
 
 /// <summary>
@@ -6681,7 +6813,7 @@ public sealed partial class ExternalPayrollReceiptPreviewWarningsItem
     public string Param { get; set; } = default!;
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) aún no se puede emitir.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -15250,7 +15382,7 @@ public sealed partial class Retention
     public string? Date { get; set; }
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) aún no se puede emitir.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -15344,6 +15476,12 @@ public sealed partial class Retention
     /// </summary>
     [JsonPropertyName("financial_derivatives")]
     public Dictionary<string, JsonElement>? FinancialDerivatives { get; set; }
+
+    /// <summary>
+    /// Complemento de servicios de plataformas tecnológicas (ServiciosPlataformasTecnologicas 1.0), obligatorio con code 26: una constancia por mes, receptor y tipo de servicio. totals y taxes se calculan de services con las tasas del SAT (ISR de LISR 113-A y LIF 2026 art. 25; IVA 50% o 100%; IEPS en apuestas); si los manda, deben coincidir.
+    /// </summary>
+    [JsonPropertyName("platform")]
+    public Dictionary<string, JsonElement>? Platform { get; set; }
 
     /// <summary>
     /// La cancelación, si se pidió: estado, motivo, sustituto y cuándo.
