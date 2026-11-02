@@ -100,6 +100,21 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollBatchesResource PayrollBatches => _payrollBatches ??= new PayrollBatchesResource(this);
 
+    private PayrollBankFilesResource? _payrollBankFiles;
+
+    /// <summary>Nómina.</summary>
+    public PayrollBankFilesResource PayrollBankFiles => _payrollBankFiles ??= new PayrollBankFilesResource(this);
+
+    private ImssMovementsResource? _imssMovements;
+
+    /// <summary>Nómina.</summary>
+    public ImssMovementsResource ImssMovements => _imssMovements ??= new ImssMovementsResource(this);
+
+    private ImssFilesResource? _imssFiles;
+
+    /// <summary>Nómina.</summary>
+    public ImssFilesResource ImssFiles => _imssFiles ??= new ImssFilesResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -1571,6 +1586,154 @@ public sealed class PayrollBatchesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollBatch> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollBatch>("GET", $"/v1/payroll_batches/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollBankFiles</c>.
+/// </summary>
+public sealed class PayrollBankFilesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollBankFilesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Archivo para pagar la nómina en el banco
+    /// </summary>
+    /// <remarks>
+    /// El archivo de dispersión que paga el neto de cada empleado desde el portal de su banco: BBVA (Net Cash), Banamex (BancaNet, layout D), Banorte (Banorte en su Empresa), Santander (Enlace) o un CSV de SPEI para cualquier banco. Toma los recibos de nómina timbrados (y no cancelados) con esa fecha de pago, los suma por empleado y le paga a la CLABE de su ficha (clabe en el empleado): a la misma institución por cuenta, a otra por SPEI. No cobra ni mueve dinero: usted lo sube al banco y lo autoriza ahí. Quien no se puede pagar (sin CLABE, otro banco en Santander) va en excluded con su razón. Suba el primero como prueba: cada portal lo valida antes de cargar nada.
+    /// <br/>
+    /// <c>POST /v1/payroll_bank_files</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-payroll-bank-file"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollBankFile> CreateAsync(CreatePayrollBankFileParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollBankFile>("POST", "/v1/payroll_bank_files", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.ImssMovements</c>.
+/// </summary>
+public sealed class ImssMovementsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ImssMovementsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Agregar un movimiento del IMSS
+    /// </summary>
+    /// <remarks>
+    /// Un movimiento afiliatorio a mano. Casi nunca hace falta: al crear un empleado se registra su alta, al cambiar su integrated_daily_salary la modificación (con fecha de hoy), al ponerle end_date su baja y al volver a contratarlo su reingreso. Queda pendiente de presentar.
+    /// <br/>
+    /// <c>POST /v1/imss_movements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-imss-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ImssMovement> CreateAsync(CreateImssMovementParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ImssMovement>("POST", "/v1/imss_movements", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar movimientos del IMSS
+    /// </summary>
+    /// <remarks>
+    /// Los movimientos del emisor por presentar (status=pending, por omisión: todos, del más antiguo al más reciente, como van en los archivos) o ya presentados (status=reported: los 500 más recientes).
+    /// <br/>
+    /// <c>GET /v1/imss_movements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-imss-movements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ImssMovement>> ListAsync(ListImssMovementsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ImssMovement>("/v1/imss_movements", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar movimientos del IMSS: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ImssMovement> ListAutoPagingAsync(ListImssMovementsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ImssMovement>("/v1/imss_movements", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Marcar movimientos como presentados
+    /// </summary>
+    /// <remarks>
+    /// Cuando el IMSS ya los recibió (el acuse de IDSE o la importación en SUA): pasan a reported y ya no cambian ni se borran. Con reported false vuelven a pendientes. Devuelve los movimientos como quedaron.
+    /// <br/>
+    /// <c>POST /v1/imss_movements/report</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/report-imss-movements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ImssMovementList> ReportAsync(ReportImssMovementsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ImssMovementList>("POST", "/v1/imss_movements/report", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver un movimiento del IMSS
+    /// </summary>
+    /// <remarks>
+    /// El movimiento con lo que el IMSS rechazaría en problems.
+    /// <br/>
+    /// <c>GET /v1/imss_movements/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-imss-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ImssMovement> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ImssMovement>("GET", $"/v1/imss_movements/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un movimiento del IMSS
+    /// </summary>
+    /// <remarks>
+    /// Solo uno pendiente: uno ya presentado se queda como lo tiene el IMSS.
+    /// <br/>
+    /// <c>POST /v1/imss_movements/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-imss-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ImssMovement> UpdateAsync(string id, UpdateImssMovementParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ImssMovement>("POST", $"/v1/imss_movements/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un movimiento del IMSS
+    /// </summary>
+    /// <remarks>
+    /// Solo uno pendiente (por ejemplo, un alta registrada por error).
+    /// <br/>
+    /// <c>DELETE /v1/imss_movements/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-imss-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/imss_movements/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.ImssFiles</c>.
+/// </summary>
+public sealed class ImssFilesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ImssFilesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Archivos para IDSE o SUA
+    /// </summary>
+    /// <remarks>
+    /// Los archivos de los movimientos pendientes: para IDSE (formato de 168 posiciones, un archivo por tipo: reingresos, modificaciones de salario y bajas; necesita la guía de su subdelegación) o para importar en SUA (ASEG.TXT con las altas y MOVT.TXT con los demás). El salario se declara topado a 25 UMA y nunca abajo del mínimo. El emisor necesita employer_registration. Los que el IMSS rechazaría van en refused con su razón. No los marca como presentados: hágalo con POST /v1/imss_movements/report cuando el IMSS los reciba.
+    /// <br/>
+    /// <c>POST /v1/imss_files</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-imss-files"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ImssFiles> CreateAsync(CreateImssFilesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ImssFiles>("POST", "/v1/imss_files", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

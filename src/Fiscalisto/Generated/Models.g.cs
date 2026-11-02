@@ -1747,6 +1747,140 @@ public sealed partial class CreateEmployeeParams
     /// </summary>
     [JsonPropertyName("position")]
     public string? Position { get; set; }
+
+    /// <summary>
+    /// CLABE de 18 dígitos de la cuenta del empleado: a donde le paga el archivo para el banco (POST /v1/payroll_bank_files).
+    /// </summary>
+    [JsonPropertyName("clabe")]
+    public string? Clabe { get; set; }
+
+    /// <summary>
+    /// Nombre(s), como en su CURP. Con first_surname y second_surname, los archivos del IMSS (IDSE y SUA) escriben el nombre en sus tres partes; sin ellos, Fiscalisto lo separa con la CURP.
+    /// </summary>
+    [JsonPropertyName("given_names")]
+    public string? GivenNames { get; set; }
+
+    /// <summary>
+    /// Primer apellido, como en su CURP.
+    /// </summary>
+    [JsonPropertyName("first_surname")]
+    public string? FirstSurname { get; set; }
+
+    /// <summary>
+    /// Segundo apellido (vacío si tiene uno).
+    /// </summary>
+    [JsonPropertyName("second_surname")]
+    public string? SecondSurname { get; set; }
+
+    /// <summary>
+    /// Tipo de trabajador del IMSS: 1 permanente, 2 eventual de la ciudad, 3 eventual de la construcción, 4 eventual del campo. Por omisión 1.
+    /// <br/>
+    /// Valores: 1, 2, 3, 4.
+    /// </summary>
+    [JsonPropertyName("imss_worker_type")]
+    public string? ImssWorkerType { get; set; }
+
+    /// <summary>
+    /// Tipo de salario del IMSS: 0 fijo, 1 variable, 2 mixto. Por omisión 0.
+    /// <br/>
+    /// Valores: 0, 1, 2.
+    /// </summary>
+    [JsonPropertyName("imss_salary_type")]
+    public string? ImssSalaryType { get; set; }
+
+    /// <summary>
+    /// Semana o jornada reducida: 0 normal, 1 a 5 los días que trabaja a la semana, 6 jornada de menos de 8 horas. Por omisión 0.
+    /// <br/>
+    /// Valores: 0, 1, 2, 3, 4, 5, 6.
+    /// </summary>
+    [JsonPropertyName("imss_reduced_week")]
+    public string? ImssReducedWeek { get; set; }
+
+    /// <summary>
+    /// Unidad de medicina familiar (UMF) del IMSS, opcional.
+    /// </summary>
+    [JsonPropertyName("family_medicine_unit")]
+    public string? FamilyMedicineUnit { get; set; }
+
+    /// <summary>
+    /// Causa de la baja ante el IMSS, con end_date: 1 término de contrato, 2 separación voluntaria (la usual), 3 abandono, 4 defunción, 5 clausura, 6 otras, 7 ausentismo, 8 rescisión, 9 jubilación, A pensión.
+    /// <br/>
+    /// Valores: 1, 2, 3, 4, 5, 6, 7, 8, 9, A.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Archivos para IDSE o SUA».
+/// </summary>
+public sealed partial class CreateImssFilesParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// idse: los archivos de IDSE (uno por tipo: reingresos, modificaciones, bajas); sua: ASEG.TXT (altas) y MOVT.TXT (los demás) para importar en SUA.
+    /// <br/>
+    /// Valores: idse, sua.
+    /// </summary>
+    [JsonPropertyName("format")]
+    public required string Format { get; set; }
+
+    /// <summary>
+    /// Los movimientos (imv_…) pendientes que van en los archivos. Por omisión, todos los pendientes.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public List<string>? Movements { get; set; }
+
+    /// <summary>
+    /// IDSE: la guía de 5 dígitos de su subdelegación. Por omisión, la que se guardó en la app.
+    /// </summary>
+    [JsonPropertyName("guide")]
+    public string? Guide { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar un movimiento del IMSS».
+/// </summary>
+public sealed partial class CreateImssMovementParams
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// alta (o reingreso): tipo 08; modificacion: cambio de salario, tipo 07; baja: tipo 02.
+    /// <br/>
+    /// Valores: alta, reingreso, modificacion, baja.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// El día en que surte efecto (AAAA-MM-DD, hora de México). El IMSS no acepta más de unos días de anticipación.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// El salario diario integrado que se declara (en altas, reingresos y modificaciones). El archivo lo topa a 25 UMA y nunca baja del salario mínimo.
+    /// </summary>
+    [JsonPropertyName("integrated_daily_salary")]
+    public decimal? IntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// Solo en bajas: 1 término de contrato, 2 separación voluntaria, 3 abandono, 4 defunción, 5 clausura, 6 otras, 7 ausentismo, 8 rescisión, 9 jubilación, A pensión.
+    /// <br/>
+    /// Valores: 1, 2, 3, 4, 5, 6, 7, 8, 9, A.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
 }
 
 /// <summary>
@@ -2151,6 +2285,56 @@ public sealed partial class CreatePaymentParamsDocumentsItem
     /// </summary>
     [JsonPropertyName("received")]
     public decimal? Received { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Archivo para pagar la nómina en el banco».
+/// </summary>
+public sealed partial class CreatePayrollBankFileParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La fecha de pago de los recibos (FechaPago): se pagan los recibos de nómina timbrados con esa fecha, sumados por empleado. También es el día en que el banco aplica el archivo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public required string PaymentDate { get; set; }
+
+    /// <summary>
+    /// El formato del banco: bbva (Net Cash), banamex (BancaNet, layout D), banorte (Banorte en su Empresa), santander (Enlace, solo cuentas Santander) o spei (CSV para cualquier banco). Por omisión, el del banco de account.
+    /// <br/>
+    /// Valores: bbva, banamex, banorte, santander, spei.
+    /// </summary>
+    [JsonPropertyName("layout")]
+    public string? Layout { get; set; }
+
+    /// <summary>
+    /// La CLABE de la cuenta de cargo del emisor. Por omisión, la que se usó la última vez en la app, o su primera cuenta bancaria.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// El archivo del día (1 a 99): un segundo archivo el mismo día lleva otro número. Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("sequence")]
+    public long? Sequence { get; set; }
+
+    /// <summary>
+    /// Banamex: su número de cliente de BancaNet (12 dígitos).
+    /// </summary>
+    [JsonPropertyName("client_number")]
+    public string? ClientNumber { get; set; }
+
+    /// <summary>
+    /// Banorte: su número de emisora (5 dígitos).
+    /// </summary>
+    [JsonPropertyName("issuer_number")]
+    public string? IssuerNumber { get; set; }
 }
 
 /// <summary>
@@ -5789,6 +5973,60 @@ public sealed partial class Employee
     public string? Position { get; set; }
 
     /// <summary>
+    /// CLABE de su cuenta, a donde le paga el archivo para el banco, o null.
+    /// </summary>
+    [JsonPropertyName("clabe")]
+    public string? Clabe { get; set; }
+
+    /// <summary>
+    /// Nombre(s) como en su CURP, o null (los archivos del IMSS lo separan con la CURP).
+    /// </summary>
+    [JsonPropertyName("given_names")]
+    public string? GivenNames { get; set; }
+
+    /// <summary>
+    /// Primer apellido como en su CURP, o null.
+    /// </summary>
+    [JsonPropertyName("first_surname")]
+    public string? FirstSurname { get; set; }
+
+    /// <summary>
+    /// Segundo apellido, o null.
+    /// </summary>
+    [JsonPropertyName("second_surname")]
+    public string? SecondSurname { get; set; }
+
+    /// <summary>
+    /// Tipo de trabajador del IMSS: 1 permanente, 2 eventual de la ciudad, 3 eventual de la construcción, 4 eventual del campo.
+    /// </summary>
+    [JsonPropertyName("imss_worker_type")]
+    public string ImssWorkerType { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de salario del IMSS: 0 fijo, 1 variable, 2 mixto.
+    /// </summary>
+    [JsonPropertyName("imss_salary_type")]
+    public string ImssSalaryType { get; set; } = default!;
+
+    /// <summary>
+    /// Semana o jornada reducida: 0 normal, 1 a 5 días a la semana, 6 jornada de menos de 8 horas.
+    /// </summary>
+    [JsonPropertyName("imss_reduced_week")]
+    public string ImssReducedWeek { get; set; } = default!;
+
+    /// <summary>
+    /// Unidad de medicina familiar del IMSS, o null.
+    /// </summary>
+    [JsonPropertyName("family_medicine_unit")]
+    public string? FamilyMedicineUnit { get; set; }
+
+    /// <summary>
+    /// Causa de la baja ante el IMSS cuando tiene end_date (2 separación voluntaria por omisión), o null.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
+
+    /// <summary>
     /// Lo que el SAT podría observar de sus datos, antes de timbrar.
     /// </summary>
     [JsonPropertyName("warnings")]
@@ -7673,6 +7911,262 @@ public sealed partial class ImportStoreOrdersParams
     /// </summary>
     [JsonPropertyName("since")]
     public string? Since { get; set; }
+}
+
+/// <summary>
+/// Los archivos para presentar movimientos en IDSE o importarlos en SUA.
+/// </summary>
+public sealed partial class ImssFiles
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// idse o sua.
+    /// <br/>
+    /// Valores: idse, sua.
+    /// </summary>
+    [JsonPropertyName("format")]
+    public string Format { get; set; } = default!;
+
+    /// <summary>
+    /// Los archivos: en IDSE uno por tipo de movimiento; en SUA ASEG.TXT y MOVT.TXT.
+    /// </summary>
+    [JsonPropertyName("files")]
+    public List<ImssFilesFilesItem> Files { get; set; } = default!;
+
+    /// <summary>
+    /// Los movimientos que van en los archivos.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public List<string> Movements { get; set; } = default!;
+
+    /// <summary>
+    /// Los que se quedaron fuera y por qué (un NSS inválido…).
+    /// </summary>
+    [JsonPropertyName("refused")]
+    public List<ImssFilesRefusedItem> Refused { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ImssFilesFilesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ImssFilesFilesItem
+{
+    /// <summary>
+    /// El nombre del archivo.
+    /// </summary>
+    [JsonPropertyName("file_name")]
+    public string FileName { get; set; } = default!;
+
+    /// <summary>
+    /// Qué lleva, en palabras.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos movimientos lleva.
+    /// </summary>
+    [JsonPropertyName("count")]
+    public long Count { get; set; }
+
+    /// <summary>
+    /// El archivo como texto, renglones terminados en CR LF.
+    /// </summary>
+    [JsonPropertyName("content")]
+    public string Content { get; set; } = default!;
+
+    /// <summary>
+    /// El archivo en Windows-1252 (ANSI, como lo leen IDSE y SUA), en base64.
+    /// </summary>
+    [JsonPropertyName("content_base64")]
+    public string ContentBase64 { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ImssFilesRefusedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ImssFilesRefusedItem
+{
+    /// <summary>
+    /// El movimiento (imv_…).
+    /// </summary>
+    [JsonPropertyName("movement")]
+    public string Movement { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del empleado.
+    /// </summary>
+    [JsonPropertyName("employee_name")]
+    public string EmployeeName { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que el IMSS rechazaría en su renglón.
+    /// </summary>
+    [JsonPropertyName("problems")]
+    public List<string> Problems { get; set; } = default!;
+}
+
+/// <summary>
+/// Un movimiento afiliatorio del IMSS de un empleado: alta, modificación de salario, baja o reingreso.
+/// </summary>
+public sealed partial class ImssMovement
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de empleado.
+    /// </summary>
+    [JsonPropertyName("employee_number")]
+    public string EmployeeNumber { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre completo.
+    /// </summary>
+    [JsonPropertyName("employee_name")]
+    public string EmployeeName { get; set; } = default!;
+
+    /// <summary>
+    /// Número de seguridad social (NumSeguridadSocial), 11 dígitos.
+    /// </summary>
+    [JsonPropertyName("social_security_number")]
+    public string SocialSecurityNumber { get; set; } = default!;
+
+    /// <summary>
+    /// alta, reingreso, modificacion (de salario) o baja.
+    /// <br/>
+    /// Valores: alta, reingreso, modificacion, baja.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de movimiento del IMSS: 08 alta o reingreso, 07 modificación, 02 baja.
+    /// <br/>
+    /// Valores: 08, 07, 02.
+    /// </summary>
+    [JsonPropertyName("movement_type")]
+    public string MovementType { get; set; } = default!;
+
+    /// <summary>
+    /// Fecha de emisión (Fecha), hora de la Ciudad de México.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Salario diario integrado (SalarioDiarioIntegrado): no menor al salario diario.
+    /// </summary>
+    [JsonPropertyName("integrated_daily_salary")]
+    public decimal? IntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// En bajas, la causa (1 a 9 o A); null en los demás.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
+
+    /// <summary>
+    /// automatic: lo registró el alta o el cambio del empleado; manual: se agregó a mano.
+    /// <br/>
+    /// Valores: automatic, manual.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// pending: falta presentarlo al IMSS; reported: ya se presentó (ya no cambia).
+    /// <br/>
+    /// Valores: pending, reported.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se marcó como presentado, o null.
+    /// </summary>
+    [JsonPropertyName("reported_at")]
+    public string? ReportedAt { get; set; }
+
+    /// <summary>
+    /// Lo que el IMSS rechazaría en su renglón (vacío: listo para el archivo).
+    /// </summary>
+    [JsonPropertyName("problems")]
+    public List<string> Problems { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ImssMovementList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ImssMovement> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -12531,6 +13025,38 @@ public sealed partial class ListEventsParams
 }
 
 /// <summary>
+/// Los campos de «Listar movimientos del IMSS».
+/// </summary>
+public sealed partial class ListImssMovementsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// pending (por omisión) o reported.
+    /// <br/>
+    /// Valores: pending, reported.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar lotes».
 /// </summary>
 public sealed partial class ListInvoiceBatchesParams
@@ -13434,6 +13960,196 @@ public sealed partial class MatchBankTransactionParams
     /// </summary>
     [JsonPropertyName("invoices")]
     public List<string>? Invoices { get; set; }
+}
+
+/// <summary>
+/// El archivo para pagar la nómina desde el portal del banco (no cobra nada).
+/// </summary>
+public sealed partial class PayrollBankFile
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El formato del banco: bbva, banamex, banorte, santander o spei (CSV).
+    /// <br/>
+    /// Valores: bbva, banamex, banorte, santander, spei.
+    /// </summary>
+    [JsonPropertyName("layout")]
+    public string Layout { get; set; } = default!;
+
+    /// <summary>
+    /// Fecha de pago (FechaPago), AAAA-MM-DD. Por omisión el último día del periodo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string PaymentDate { get; set; } = default!;
+
+    /// <summary>
+    /// La CLABE de la cuenta de cargo.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// El nombre con que el portal del banco lo espera.
+    /// </summary>
+    [JsonPropertyName("file_name")]
+    public string FileName { get; set; } = default!;
+
+    /// <summary>
+    /// text/plain para los portales de los bancos, text/csv para spei.
+    /// <br/>
+    /// Valores: text/plain, text/csv.
+    /// </summary>
+    [JsonPropertyName("content_type")]
+    public string ContentType { get; set; } = default!;
+
+    /// <summary>
+    /// El archivo como texto, con renglones terminados en CR LF.
+    /// </summary>
+    [JsonPropertyName("content")]
+    public string Content { get; set; } = default!;
+
+    /// <summary>
+    /// El mismo archivo en Windows-1252 (ANSI), en base64: guárdelo tal cual para subirlo.
+    /// </summary>
+    [JsonPropertyName("content_base64")]
+    public string ContentBase64 { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Cuántos pagos lleva.
+    /// </summary>
+    [JsonPropertyName("count")]
+    public long Count { get; set; }
+
+    /// <summary>
+    /// Cada pago del archivo, en el orden en que va.
+    /// </summary>
+    [JsonPropertyName("payments")]
+    public List<PayrollBankFilePaymentsItem> Payments { get; set; } = default!;
+
+    /// <summary>
+    /// Quién no va en el archivo y por qué (sin CLABE, otro banco…).
+    /// </summary>
+    [JsonPropertyName("excluded")]
+    public List<PayrollBankFileExcludedItem> Excluded { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollBankFileExcludedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollBankFileExcludedItem
+{
+    /// <summary>
+    /// El empleado (emp_…); null si el recibo lo timbró otro sistema y no hay empleado con ese RFC.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// El neto a pagar: la suma de sus recibos con esa fecha de pago.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Por qué no va en el archivo.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollBankFilePaymentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollBankFilePaymentsItem
+{
+    /// <summary>
+    /// El empleado (emp_…); null si el recibo lo timbró otro sistema y no hay empleado con ese RFC.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// El neto a pagar: la suma de sus recibos con esa fecha de pago.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// La CLABE a donde se paga.
+    /// </summary>
+    [JsonPropertyName("clabe")]
+    public string Clabe { get; set; } = default!;
+
+    /// <summary>
+    /// true: a otro banco por SPEI; false: a una cuenta del mismo banco.
+    /// </summary>
+    [JsonPropertyName("spei")]
+    public bool Spei { get; set; }
+
+    /// <summary>
+    /// Serie y folio de los recibos que paga.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public List<string> Receipts { get; set; } = default!;
 }
 
 /// <summary>
@@ -15274,6 +15990,30 @@ public sealed partial class RejectQuoteParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Marcar movimientos como presentados».
+/// </summary>
+public sealed partial class ReportImssMovementsParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Los movimientos (imv_…) que el IMSS ya recibió, hasta 1,000.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public required List<string> Movements { get; set; }
+
+    /// <summary>
+    /// true (por omisión): marcarlos como presentados; false: devolverlos a pendientes (si los marcó por error).
+    /// </summary>
+    [JsonPropertyName("reported")]
+    public bool? Reported { get; set; }
 }
 
 /// <summary>
@@ -19316,6 +20056,102 @@ public sealed partial class UpdateEmployeeParams
     /// </summary>
     [JsonPropertyName("position")]
     public string? Position { get; set; }
+
+    /// <summary>
+    /// CLABE de 18 dígitos de la cuenta del empleado: a donde le paga el archivo para el banco (POST /v1/payroll_bank_files).
+    /// </summary>
+    [JsonPropertyName("clabe")]
+    public string? Clabe { get; set; }
+
+    /// <summary>
+    /// Nombre(s), como en su CURP. Con first_surname y second_surname, los archivos del IMSS (IDSE y SUA) escriben el nombre en sus tres partes; sin ellos, Fiscalisto lo separa con la CURP.
+    /// </summary>
+    [JsonPropertyName("given_names")]
+    public string? GivenNames { get; set; }
+
+    /// <summary>
+    /// Primer apellido, como en su CURP.
+    /// </summary>
+    [JsonPropertyName("first_surname")]
+    public string? FirstSurname { get; set; }
+
+    /// <summary>
+    /// Segundo apellido (vacío si tiene uno).
+    /// </summary>
+    [JsonPropertyName("second_surname")]
+    public string? SecondSurname { get; set; }
+
+    /// <summary>
+    /// Tipo de trabajador del IMSS: 1 permanente, 2 eventual de la ciudad, 3 eventual de la construcción, 4 eventual del campo. Por omisión 1.
+    /// <br/>
+    /// Valores: 1, 2, 3, 4.
+    /// </summary>
+    [JsonPropertyName("imss_worker_type")]
+    public string? ImssWorkerType { get; set; }
+
+    /// <summary>
+    /// Tipo de salario del IMSS: 0 fijo, 1 variable, 2 mixto. Por omisión 0.
+    /// <br/>
+    /// Valores: 0, 1, 2.
+    /// </summary>
+    [JsonPropertyName("imss_salary_type")]
+    public string? ImssSalaryType { get; set; }
+
+    /// <summary>
+    /// Semana o jornada reducida: 0 normal, 1 a 5 los días que trabaja a la semana, 6 jornada de menos de 8 horas. Por omisión 0.
+    /// <br/>
+    /// Valores: 0, 1, 2, 3, 4, 5, 6.
+    /// </summary>
+    [JsonPropertyName("imss_reduced_week")]
+    public string? ImssReducedWeek { get; set; }
+
+    /// <summary>
+    /// Unidad de medicina familiar (UMF) del IMSS, opcional.
+    /// </summary>
+    [JsonPropertyName("family_medicine_unit")]
+    public string? FamilyMedicineUnit { get; set; }
+
+    /// <summary>
+    /// Causa de la baja ante el IMSS, con end_date: 1 término de contrato, 2 separación voluntaria (la usual), 3 abandono, 4 defunción, 5 clausura, 6 otras, 7 ausentismo, 8 rescisión, 9 jubilación, A pensión.
+    /// <br/>
+    /// Valores: 1, 2, 3, 4, 5, 6, 7, 8, 9, A.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un movimiento del IMSS».
+/// </summary>
+public sealed partial class UpdateImssMovementParams
+{
+    /// <summary>
+    /// alta (o reingreso): tipo 08; modificacion: cambio de salario, tipo 07; baja: tipo 02.
+    /// <br/>
+    /// Valores: alta, reingreso, modificacion, baja.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// El día en que surte efecto (AAAA-MM-DD, hora de México). El IMSS no acepta más de unos días de anticipación.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El salario diario integrado que se declara (en altas, reingresos y modificaciones). El archivo lo topa a 25 UMA y nunca baja del salario mínimo.
+    /// </summary>
+    [JsonPropertyName("integrated_daily_salary")]
+    public decimal? IntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// Solo en bajas: 1 término de contrato, 2 separación voluntaria, 3 abandono, 4 defunción, 5 clausura, 6 otras, 7 ausentismo, 8 rescisión, 9 jubilación, A pensión.
+    /// <br/>
+    /// Valores: 1, 2, 3, 4, 5, 6, 7, 8, 9, A.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
 }
 
 /// <summary>
