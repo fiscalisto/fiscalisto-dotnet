@@ -261,6 +261,12 @@ public sealed partial class ApplyAdvanceParams
     public string? Branch { get; set; }
 
     /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
     /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
     /// </summary>
     [JsonPropertyName("warehouse")]
@@ -1114,6 +1120,102 @@ public sealed partial class ComplianceOpinion
 }
 
 /// <summary>
+/// Un centro de costo del emisor: una obra, proyecto, sucursal o área por la que separa sus ingresos y gastos.
+/// </summary>
+public sealed partial class CostCenter
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor del centro de costo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo lo llama su equipo, por ejemplo «Obra Norte».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su clave (por ejemplo «CC-01»), o null.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+
+    /// <summary>
+    /// true si está archivado: ya no se ponen facturas en él, pero las suyas lo conservan.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool Archived { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas tiene, emitidas y recibidas.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class CostCenterList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<CostCenter> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Timbrar un anticipo».
 /// </summary>
 public sealed partial class CreateAdvanceParams
@@ -1443,6 +1545,30 @@ public sealed partial class CreateBranchParamsSeries
     /// </summary>
     [JsonPropertyName("transfer")]
     public string? Transfer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear un centro de costo».
+/// </summary>
+public sealed partial class CreateCostCenterParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cómo lo llama su equipo, por ejemplo «Obra Norte». No se repite en el emisor (sin importar mayúsculas).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Su clave, si su contabilidad usa claves (por ejemplo «CC-01»).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
 }
 
 /// <summary>
@@ -1923,6 +2049,12 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     /// </summary>
     [JsonPropertyName("branch")]
     public string? Branch { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 
     /// <summary>
     /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
@@ -3379,6 +3511,12 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("branch")]
     public string? Branch { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 
     /// <summary>
     /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
@@ -5607,6 +5745,18 @@ public sealed partial class CustomerList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Los campos de «Borrar un centro de costo».
+/// </summary>
+public sealed partial class DeleteCostCenterParams
+{
+    /// <summary>
+    /// Otro centro de costo (ccn_…) que se queda con sus facturas.
+    /// </summary>
+    [JsonPropertyName("move_to")]
+    public string? MoveTo { get; set; }
 }
 
 /// <summary>
@@ -8205,6 +8355,12 @@ public sealed partial class Invoice
     public string? Branch { get; set; }
 
     /// <summary>
+    /// Su centro de costo (ccn_…), o null. El que mandó al crearla, o el que le puso o cambió después con POST /v1/invoices/{id}.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
     /// <br/>
     /// Valores: I, E, P, T, N.
@@ -8673,6 +8829,12 @@ public sealed partial class InvoiceCreate
     /// </summary>
     [JsonPropertyName("branch")]
     public string? Branch { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 
     /// <summary>
     /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
@@ -12909,6 +13071,36 @@ public sealed partial class ListBranchesParams
 }
 
 /// <summary>
+/// Los campos de «Listar centros de costo».
+/// </summary>
+public sealed partial class ListCostCentersParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// true para incluir los archivados.
+    /// </summary>
+    [JsonPropertyName("include_archived")]
+    public bool? IncludeArchived { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar solicitudes de datos».
 /// </summary>
 public sealed partial class ListCustomerDataRequestsParams
@@ -13144,6 +13336,12 @@ public sealed partial class ListInvoicesParams
     /// </summary>
     [JsonPropertyName("created_lte")]
     public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Solo las de este centro de costo (ccn_…), o none para las que no tienen.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>
@@ -13684,6 +13882,12 @@ public sealed partial class ListSatInvoicesParams
     /// </summary>
     [JsonPropertyName("date_lte")]
     public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Solo las de este centro de costo (ccn_…), o none para las que no tienen.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>
@@ -17694,6 +17898,12 @@ public sealed partial class SatInvoice
     public string? SatStatus { get; set; }
 
     /// <summary>
+    /// Su centro de costo (ccn_…), o null. Póngalo o cámbielo con POST /v1/sat_invoices/{id}.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
     /// La descarga (sdl_…) que la trajo, o null.
     /// </summary>
     [JsonPropertyName("sat_download")]
@@ -19859,6 +20069,30 @@ public sealed partial class UpdateBranchParamsSeries
 }
 
 /// <summary>
+/// Los campos de «Actualizar un centro de costo».
+/// </summary>
+public sealed partial class UpdateCostCenterParams
+{
+    /// <summary>
+    /// Cómo lo llama su equipo, por ejemplo «Obra Norte». No se repite en el emisor (sin importar mayúsculas).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Su clave, si su contabilidad usa claves (por ejemplo «CC-01»).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+
+    /// <summary>
+    /// true lo archiva: ya no se pueden poner facturas en él, pero las suyas lo conservan. false lo restaura.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool? Archived { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar un cliente».
 /// </summary>
 public sealed partial class UpdateCustomerParams
@@ -20152,6 +20386,18 @@ public sealed partial class UpdateImssMovementParams
     /// </summary>
     [JsonPropertyName("exit_reason")]
     public string? ExitReason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar una factura».
+/// </summary>
+public sealed partial class UpdateInvoiceParams
+{
+    /// <summary>
+    /// Su centro de costo (ccn_…), o null para quitárselo. Solo facturas, notas de crédito y recibos de nómina timbrados.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>
@@ -20876,6 +21122,12 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public string? Branch { get; set; }
 
     /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
     /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
     /// </summary>
     [JsonPropertyName("warehouse")]
@@ -21102,6 +21354,18 @@ public sealed partial class UpdateRecurringInvoiceParamsSchedule
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string? TimeZone { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar una factura del SAT».
+/// </summary>
+public sealed partial class UpdateSatInvoiceParams
+{
+    /// <summary>
+    /// Su centro de costo (ccn_…), o null para quitárselo. Los complementos de pago y los traslados no llevan.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>

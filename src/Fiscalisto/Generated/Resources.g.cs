@@ -130,6 +130,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Sucursales.</summary>
     public BranchesResource Branches => _branches ??= new BranchesResource(this);
 
+    private CostCentersResource? _costCenters;
+
+    /// <summary>Centros de costo.</summary>
+    public CostCentersResource CostCenters => _costCenters ??= new CostCentersResource(this);
+
     private CustomersResource? _customers;
 
     /// <summary>Clientes.</summary>
@@ -778,6 +783,20 @@ public sealed class InvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> GetAsync(string id, GetInvoiceParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Invoice>("GET", $"/v1/invoices/{Uri.EscapeDataString(id)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una factura
+    /// </summary>
+    /// <remarks>
+    /// Lo que se puede cambiar de una factura timbrada sin tocar el CFDI: su centro de costo (cost_center, o null para quitárselo). Los complementos de pago y los traslados no llevan.
+    /// <br/>
+    /// <c>POST /v1/invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas/update-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> UpdateAsync(string id, UpdateInvoiceParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Descargar el PDF
@@ -1905,6 +1924,92 @@ public sealed class BranchesResource
 }
 
 /// <summary>
+/// Centros de costo: <c>fiscalisto.CostCenters</c>.
+/// </summary>
+public sealed class CostCentersResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CostCentersResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear un centro de costo
+    /// </summary>
+    /// <remarks>
+    /// Una parte del negocio del emisor que quiere ver por separado: una obra, un proyecto, una sucursal, un área. Sus facturas lo toman con cost_center al crearlas, o después con POST /v1/invoices/{id} y POST /v1/sat_invoices/{id}. Un nombre que ya existe contesta cost_center_exists. Hasta 500 por emisor.
+    /// <br/>
+    /// <c>POST /v1/cost_centers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/centros-de-costo/create-cost-center"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CostCenter> CreateAsync(CreateCostCenterParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CostCenter>("POST", "/v1/cost_centers", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar centros de costo
+    /// </summary>
+    /// <remarks>
+    /// Los centros de costo del emisor, los más recientes primero, con cuántas facturas tiene cada uno. Los archivados solo con include_archived=true.
+    /// <br/>
+    /// <c>GET /v1/cost_centers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/centros-de-costo/list-cost-centers"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<CostCenter>> ListAsync(ListCostCentersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<CostCenter>("/v1/cost_centers", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar centros de costo: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<CostCenter> ListAutoPagingAsync(ListCostCentersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<CostCenter>("/v1/cost_centers", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un centro de costo
+    /// </summary>
+    /// <remarks>
+    /// Un centro de costo del emisor.
+    /// <br/>
+    /// <c>GET /v1/cost_centers/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/centros-de-costo/get-cost-center"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CostCenter> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CostCenter>("GET", $"/v1/cost_centers/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar un centro de costo
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda. archived: true lo archiva (ya no se ponen facturas en él y las suyas lo conservan), false lo restaura.
+    /// <br/>
+    /// <c>POST /v1/cost_centers/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/centros-de-costo/update-cost-center"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CostCenter> UpdateAsync(string id, UpdateCostCenterParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CostCenter>("POST", $"/v1/cost_centers/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un centro de costo
+    /// </summary>
+    /// <remarks>
+    /// Sus facturas pasan a move_to (así junta dos en uno) o se quedan sin centro de costo. No se puede deshacer; para dejar de usarlo sin tocar sus facturas, archívelo.
+    /// <br/>
+    /// <c>DELETE /v1/cost_centers/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/centros-de-costo/delete-cost-center"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, DeleteCostCenterParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/cost_centers/{Uri.EscapeDataString(id)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
 /// Clientes: <c>fiscalisto.Customers</c>.
 /// </summary>
 public sealed class CustomersResource
@@ -2582,6 +2687,20 @@ public sealed class SatInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SatInvoice> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<SatInvoice>("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una factura del SAT
+    /// </summary>
+    /// <remarks>
+    /// Lo que se puede cambiar de un CFDI del SAT sin tocarlo: su centro de costo (cost_center, o null para quitárselo), para ver sus gastos por obra, proyecto o área.
+    /// <br/>
+    /// <c>POST /v1/sat_invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/update-sat-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatInvoice> UpdateAsync(string id, UpdateSatInvoiceParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatInvoice>("POST", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Descargar el XML de una factura del SAT

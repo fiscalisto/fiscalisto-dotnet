@@ -48,6 +48,12 @@ public static class ErrorCode
     /// <summary>No se pudo conectar con la API (connection_error).</summary>
     public const string ConnectionFailed = "connection_failed";
 
+    /// <summary>El emisor ya tiene un centro de costo con ese nombre (sin importar mayúsculas). Si está archivado, restáurelo con archived: false.</summary>
+    public const string CostCenterExists = "cost_center_exists";
+
+    /// <summary>El emisor llegó a 500 centros de costo: archive o borre los que ya no use.</summary>
+    public const string CostCenterLimit = "cost_center_limit";
+
     /// <summary>Ya hay un cliente con ese RFC en el catálogo del emisor (o un producto con ese SKU).</summary>
     public const string CustomerExists = "customer_exists";
 
