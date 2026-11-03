@@ -126,7 +126,7 @@ public static class ErrorCode
     /// <summary>El emisor está archivado: ya no timbra. Sus comprobantes se pueden consultar y cancelar.</summary>
     public const string IssuerArchived = "issuer_archived";
 
-    /// <summary>Se crearon 500 emisores en 24 horas. Escríbanos si necesita más.</summary>
+    /// <summary>Se crearon 500 emisores en 24 horas. Mañana puede crear más.</summary>
     public const string IssuerCreationLimit = "issuer_creation_limit";
 
     /// <summary>Ese RFC ya es un emisor de la cuenta en este modo.</summary>
