@@ -794,7 +794,7 @@ public sealed partial class BankTransactionSuggestedMatch
 }
 
 /// <summary>
-/// Una sucursal del emisor: otro lugar desde donde factura, con su código postal (LugarExpedicion), su dirección en el PDF y sus series.
+/// Una sucursal del emisor: otro lugar desde donde factura, con su código postal (LugarExpedicion), su dirección en el PDF, sus series y, si quiere, su propia marca (nombre comercial, logo, color y estilo del PDF).
 /// </summary>
 public sealed partial class Branch
 {
@@ -857,6 +857,32 @@ public sealed partial class Branch
     /// </summary>
     [JsonPropertyName("series")]
     public BranchSeries Series { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre comercial propio (PDF, correo y página de la factura); null: el del emisor.
+    /// </summary>
+    [JsonPropertyName("trade_name")]
+    public string? TradeName { get; set; }
+
+    /// <summary>
+    /// Su logo propio, para el PDF (se sube en Ajustes › Sucursales); null: el del emisor.
+    /// </summary>
+    [JsonPropertyName("logo_url")]
+    public string? LogoUrl { get; set; }
+
+    /// <summary>
+    /// Color de su PDF, como #2563EB; null: el del emisor.
+    /// </summary>
+    [JsonPropertyName("pdf_color")]
+    public string? PdfColor { get; set; }
+
+    /// <summary>
+    /// Estilo de su PDF; null: el del emisor.
+    /// <br/>
+    /// Valores: clasico, moderno, compacto, minimalista.
+    /// </summary>
+    [JsonPropertyName("pdf_style")]
+    public string? PdfStyle { get; set; }
 
     /// <summary>
     /// true si está archivada: ya no se factura desde ella.
@@ -1473,6 +1499,26 @@ public sealed partial class CreateBranchParams
     /// </summary>
     [JsonPropertyName("series")]
     public CreateBranchParamsSeries? Series { get; set; }
+
+    /// <summary>
+    /// Su nombre comercial, si se presenta con otra marca: va en grande en el PDF de lo que se factura desde ella, en el correo y en la página de la factura. null toma el del emisor.
+    /// </summary>
+    [JsonPropertyName("trade_name")]
+    public string? TradeName { get; set; }
+
+    /// <summary>
+    /// Color del PDF de sus facturas, como #2563EB. null toma el del emisor.
+    /// </summary>
+    [JsonPropertyName("pdf_color")]
+    public string? PdfColor { get; set; }
+
+    /// <summary>
+    /// Estilo del PDF de sus facturas: clasico, moderno, compacto o minimalista. null toma el del emisor.
+    /// <br/>
+    /// Valores: clasico, moderno, compacto, minimalista.
+    /// </summary>
+    [JsonPropertyName("pdf_style")]
+    public string? PdfStyle { get; set; }
 }
 
 /// <summary>
@@ -19988,6 +20034,26 @@ public sealed partial class UpdateBranchParams
     /// </summary>
     [JsonPropertyName("series")]
     public UpdateBranchParamsSeries? Series { get; set; }
+
+    /// <summary>
+    /// Su nombre comercial, si se presenta con otra marca: va en grande en el PDF de lo que se factura desde ella, en el correo y en la página de la factura. null toma el del emisor.
+    /// </summary>
+    [JsonPropertyName("trade_name")]
+    public string? TradeName { get; set; }
+
+    /// <summary>
+    /// Color del PDF de sus facturas, como #2563EB. null toma el del emisor.
+    /// </summary>
+    [JsonPropertyName("pdf_color")]
+    public string? PdfColor { get; set; }
+
+    /// <summary>
+    /// Estilo del PDF de sus facturas: clasico, moderno, compacto o minimalista. null toma el del emisor.
+    /// <br/>
+    /// Valores: clasico, moderno, compacto, minimalista.
+    /// </summary>
+    [JsonPropertyName("pdf_style")]
+    public string? PdfStyle { get; set; }
 
     /// <summary>
     /// true la archiva: ya no se puede facturar desde ella, y sus facturas la siguen nombrando. false la restaura.
