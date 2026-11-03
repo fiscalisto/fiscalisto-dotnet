@@ -1471,7 +1471,7 @@ public sealed partial class CreateBranchParams
     public required string Name { get; set; }
 
     /// <summary>
-    /// Su código postal (LugarExpedicion de sus CFDI): uno por sucursal, distinto del domicilio fiscal del emisor.
+    /// Su código postal (LugarExpedicion de sus CFDI). Varias sucursales pueden compartirlo, y también el del domicilio fiscal del emisor.
     /// </summary>
     [JsonPropertyName("zip")]
     public required string Zip { get; set; }
@@ -20006,7 +20006,7 @@ public sealed partial class UpdateBranchParams
     public string? Name { get; set; }
 
     /// <summary>
-    /// Su código postal (LugarExpedicion de sus CFDI): uno por sucursal, distinto del domicilio fiscal del emisor.
+    /// Su código postal (LugarExpedicion de sus CFDI). Varias sucursales pueden compartirlo, y también el del domicilio fiscal del emisor.
     /// </summary>
     [JsonPropertyName("zip")]
     public string? Zip { get; set; }

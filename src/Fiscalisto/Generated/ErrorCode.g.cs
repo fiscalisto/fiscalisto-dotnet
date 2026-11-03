@@ -21,9 +21,6 @@ public static class ErrorCode
     /// <summary>El cuerpo pasa de 10 MB. Divida el trabajo en varios lotes.</summary>
     public const string BodyTooLarge = "body_too_large";
 
-    /// <summary>El emisor ya tiene una sucursal con ese código postal (cada una lleva el suyo); el mensaje dice cuál. Si está archivada, restáurela con archived: false.</summary>
-    public const string BranchExists = "branch_exists";
-
     /// <summary>La sucursal ya facturó, así que no se borra: archívela con archived: true y sus facturas la siguen nombrando.</summary>
     public const string BranchHasInvoices = "branch_has_invoices";
 
