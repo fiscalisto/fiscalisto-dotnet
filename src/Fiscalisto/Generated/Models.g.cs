@@ -10733,16 +10733,16 @@ public sealed partial class InvoiceCreateComercioExteriorGoodsItem
     public string? Id { get; set; }
 
     /// <summary>
-    /// Fracción arancelaria (FraccionArancelaria), 10 dígitos. Transporte internacional.
+    /// Fracción arancelaria (FraccionArancelaria), 10 dígitos con el NICO, vigente en c_FraccionArancelaria (búsquela en `GET /v1/sat_catalogs/customs_tariffs`); una que no lo esté se rechaza antes de timbrar.
     /// </summary>
     [JsonPropertyName("tariff")]
     public string? Tariff { get; set; }
 
     /// <summary>
-    /// Unidad aduana (UnidadAduana), c_UnidadAduana.
+    /// Unidad aduana (UnidadAduana), c_UnidadAduana; 99 en un servicio. Con `tariff` puede omitirse: va la UMT de la fracción en el catálogo del SAT (otra la rechaza el SAT con CCE161).
     /// </summary>
     [JsonPropertyName("unit")]
-    public required string Unit { get; set; }
+    public string? Unit { get; set; }
 
     /// <summary>
     /// Cantidad en la unidad aduana (CantidadAduana).
