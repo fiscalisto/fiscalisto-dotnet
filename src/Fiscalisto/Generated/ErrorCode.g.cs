@@ -33,6 +33,9 @@ public static class ErrorCode
     /// <summary>El SAT no aceptó la solicitud de cancelación; message dice por qué.</summary>
     public const string CancellationFailed = "cancellation_failed";
 
+    /// <summary>El SAT todavía no registra el comprobante: tarda unos minutos después de timbrarlo (en pruebas, hasta 5). No se canceló ni costó nada: repita la misma solicitud después de Retry-After.</summary>
+    public const string CancellationTooEarly = "cancellation_too_early";
+
     /// <summary>El catálogo del SAT no respondió (503). Reintente en unos segundos.</summary>
     public const string CatalogUnavailable = "catalog_unavailable";
 
@@ -51,7 +54,7 @@ public static class ErrorCode
     /// <summary>El emisor llegó a 500 centros de costo: archive o borre los que ya no use.</summary>
     public const string CostCenterLimit = "cost_center_limit";
 
-    /// <summary>Ya hay un cliente con ese RFC en el catálogo del emisor (o un producto con ese SKU).</summary>
+    /// <summary>Ya hay un cliente con ese RFC en el catálogo del emisor (o un producto con ese SKU). Para un cliente, customer es su id (cus_…): úselo, o cámbielo con POST /v1/customers/{id}.</summary>
     public const string CustomerExists = "customer_exists";
 
     /// <summary>Llegó al tope del día de algo que no se paga con timbres: comprobantes en pruebas (1,000), RFC revisados en las listas del SAT o constancias consultadas. Retry-After dice cuántos segundos faltan para la medianoche de la Ciudad de México.</summary>

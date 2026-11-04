@@ -1623,6 +1623,12 @@ public sealed partial class CreateCostCenterParams
 public sealed partial class CreateCreditNoteParams
 {
     /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
     /// La factura (inv_… o su UUID).
     /// </summary>
     [JsonPropertyName("invoice")]
