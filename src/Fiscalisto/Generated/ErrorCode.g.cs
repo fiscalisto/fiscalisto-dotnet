@@ -249,6 +249,15 @@ public static class ErrorCode
     /// <summary>No existe esa ruta. Revise la dirección y la versión (/v1).</summary>
     public const string RouteNotFound = "route_not_found";
 
+    /// <summary>El pedido está en borrador: confírmelo primero con POST /v1/sales_orders/{id}/confirm.</summary>
+    public const string SalesOrderDraft = "sales_order_draft";
+
+    /// <summary>El pedido no se pudo guardar o no se puede hacer eso en su estado (por ejemplo, ya no queda nada por entregar o facturar, o está cancelado). El mensaje dice por qué.</summary>
+    public const string SalesOrderInvalid = "sales_order_invalid";
+
+    /// <summary>Solo se borra un pedido en borrador; uno confirmado se cancela con POST /v1/sales_orders/{id}/cancel.</summary>
+    public const string SalesOrderNotDeletable = "sales_order_not_deletable";
+
     /// <summary>No se pudo crear el entorno de prueba: falta su nombre o la cuenta ya tiene 25 (borre uno que ya no use).</summary>
     public const string SandboxInvalid = "sandbox_invalid";
 

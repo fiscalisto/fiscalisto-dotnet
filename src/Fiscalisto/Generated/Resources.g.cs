@@ -245,6 +245,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Cotizaciones.</summary>
     public QuotesResource Quotes => _quotes ??= new QuotesResource(this);
 
+    private SalesOrdersResource? _salesOrders;
+
+    /// <summary>Pedidos.</summary>
+    public SalesOrdersResource SalesOrders => _salesOrders ??= new SalesOrdersResource(this);
+
     private WebhookEndpointsResource? _webhookEndpoints;
 
     /// <summary>Webhooks.</summary>
@@ -3820,6 +3825,232 @@ public sealed class QuotesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestBytesAsync("GET", $"/v1/quotes/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Pedidos: <c>fiscalisto.SalesOrders</c>.
+/// </summary>
+public sealed class SalesOrdersResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SalesOrdersResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear un pedido
+    /// </summary>
+    /// <remarks>
+    /// Lo que su cliente le pidió, con los conceptos y las condiciones de pago de una factura (se revisan con las mismas reglas, así que cada factura que sale de él timbra). customer es un cliente de su catálogo o uno con sus datos fiscales (se agrega a sus clientes). Con quote (quo_…) lo hace de una cotización. Queda en draft, o confirmado con confirm: true (llega sales_order.confirmed y se aparta lo pedido en el almacén).
+    /// <br/>
+    /// <c>POST /v1/sales_orders</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/create-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> CreateAsync(CreateSalesOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", "/v1/sales_orders", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar pedidos
+    /// </summary>
+    /// <remarks>
+    /// Los más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/sales_orders</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/list-sales-orders"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SalesOrder>> ListAsync(ListSalesOrdersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SalesOrder>("/v1/sales_orders", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar pedidos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SalesOrder> ListAutoPagingAsync(ListSalesOrdersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SalesOrder>("/v1/sales_orders", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un pedido
+    /// </summary>
+    /// <remarks>
+    /// Con sus entregas, sus facturas y lo que se ha pagado de ellas.
+    /// <br/>
+    /// <c>GET /v1/sales_orders/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/get-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("GET", $"/v1/sales_orders/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un pedido
+    /// </summary>
+    /// <remarks>
+    /// Solo lo que mande cambia. Los conceptos cambian mientras no tengan entregas ni facturas; si no, 400 sales_order_invalid.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/update-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> UpdateAsync(string id, UpdateSalesOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un pedido
+    /// </summary>
+    /// <remarks>
+    /// Solo un borrador. Uno confirmado se cancela con POST /v1/sales_orders/{id}/cancel: 400 sales_order_not_deletable.
+    /// <br/>
+    /// <c>DELETE /v1/sales_orders/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/delete-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/sales_orders/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Confirmar un pedido
+    /// </summary>
+    /// <remarks>
+    /// Es un pedido en firme: se aparta lo pedido en el almacén y ya se puede entregar y facturar. Llega sales_order.confirmed.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/confirm</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/confirm-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> ConfirmAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/confirm", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Registrar una entrega
+    /// </summary>
+    /// <remarks>
+    /// Lo que salió, con su remisión (REM-1, REM-2…): la mercancía sale del almacén con la entrega, no con la factura. Por omisión, todo lo que falta. Si el emisor no vende sin existencias, no sale más de lo que hay (400 sales_order_invalid). Cuando ya salió todo llega sales_order.delivered.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/deliveries</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/create-sales-order-delivery"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> DeliverAsync(string id, CreateSalesOrderDeliveryParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/deliveries", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cancelar una entrega
+    /// </summary>
+    /// <remarks>
+    /// La mercancía regresa al almacén y lo entregado vuelve a quedar pendiente.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/deliveries/{delivery}/cancel</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/cancel-sales-order-delivery"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> CancelDeliveryAsync(string id, string delivery, CancelSalesOrderDeliveryParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/deliveries/{Uri.EscapeDataString(delivery)}/cancel", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Facturar un pedido
+    /// </summary>
+    /// <remarks>
+    /// Timbra una factura con lo entregado y no facturado (o lo que diga items; con invoice_policy ordered, lo pedido), con los datos fiscales del cliente de hoy y la nota «Pedido PED-…» con su orden de compra. Se factura en varias partes: cada llamada, con su Idempotency-Key, timbra la que sigue. Si no queda nada, 400 sales_order_invalid. Cuando sus facturas se pagan llega sales_order.paid.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/invoice</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/invoice-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> InvoiceAsync(string id, InvoiceSalesOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/invoice", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Mandar un pedido
+    /// </summary>
+    /// <remarks>
+    /// Por correo, con su PDF y la liga donde su cliente lo confirma (llega sales_order.customer_confirmed), firma cada entrega y abre sus facturas. Con send_email: false solo contesta url. En borrador, 400 sales_order_draft.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/send</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/send-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> SendAsync(string id, SendSalesOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/send", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ya no entregar lo pendiente
+    /// </summary>
+    /// <remarks>
+    /// El pedido se queda con lo ya entregado (lo demás pasa a canceled en cada concepto) y se libera lo apartado.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/cancel_remaining</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/cancel-sales-order-remaining"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> CancelRemainingAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/cancel_remaining", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cerrar un pedido
+    /// </summary>
+    /// <remarks>
+    /// Lo da por terminado aunque quede algo pendiente, y libera lo apartado.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/close</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/close-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> CloseAsync(string id, CloseSalesOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/close", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cancelar un pedido
+    /// </summary>
+    /// <remarks>
+    /// Solo sin entregas ni facturas timbradas (cancele primero las entregas, y las facturas con POST /v1/invoices/{id}/cancel). Borra sus facturas en borrador y libera lo apartado. Llega sales_order.canceled.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/cancel</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/cancel-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> CancelAsync(string id, CancelSalesOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/cancel", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Reabrir un pedido
+    /// </summary>
+    /// <remarks>
+    /// Uno cerrado o cancelado vuelve a estar abierto.
+    /// <br/>
+    /// <c>POST /v1/sales_orders/{id}/reopen</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/reopen-sales-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SalesOrder> ReopenAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SalesOrder>("POST", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/reopen", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Descargar el PDF
+    /// </summary>
+    /// <remarks>
+    /// El PDF del pedido, con el diseño de PDF del emisor.
+    /// <br/>
+    /// <c>GET /v1/sales_orders/{id}/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pedidos/get-sales-order-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/sales_orders/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
