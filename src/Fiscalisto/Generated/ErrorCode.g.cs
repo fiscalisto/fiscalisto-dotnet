@@ -57,6 +57,9 @@ public static class ErrorCode
     /// <summary>Ya hay un cliente con ese RFC en el catálogo del emisor (o un producto con ese SKU). Para un cliente, customer es su id (cus_…): úselo, o cámbielo con POST /v1/customers/{id}.</summary>
     public const string CustomerExists = "customer_exists";
 
+    /// <summary>Público en general (XAXX010101000) y extranjeros (XEXX010101000) comparten RFC: GET /v1/customers/{id}/payment_behavior no aplica a ellos.</summary>
+    public const string CustomerGenericTaxId = "customer_generic_tax_id";
+
     /// <summary>Llegó al tope del día de algo que no se paga con timbres: comprobantes en pruebas (1,000), RFC revisados en las listas del SAT o constancias consultadas. Retry-After dice cuántos segundos faltan para la medianoche de la Ciudad de México.</summary>
     public const string DailyLimit = "daily_limit";
 
@@ -84,6 +87,9 @@ public static class ErrorCode
     /// <summary>Un campo de expand[] no existe en la respuesta, no es el id de otro objeto, o se pidieron demasiados (hasta 10 campos, 4 niveles). Vea Expandir objetos.</summary>
     public const string ExpandInvalid = "expand_invalid";
 
+    /// <summary>Viáticos y gastos no lo permite en ese momento: el mensaje dice por qué (un gasto con errores al enviarla, un reembolso antes de aprobarla, aprobar lo que usted mismo envió).</summary>
+    public const string ExpenseReportInvalid = "expense_report_invalid";
+
     /// <summary>Idempotency-Key es de 1 a 255 caracteres ASCII, sin acentos ni ñ: el id de su pedido o un UUID.</summary>
     public const string IdempotencyKeyInvalid = "idempotency_key_invalid";
 
@@ -93,7 +99,7 @@ public static class ErrorCode
     /// <summary>Esa Idempotency-Key ya se usó en las últimas 24 horas con otra solicitud (otra ruta u otro cuerpo). Use una nueva para cada operación distinta.</summary>
     public const string IdempotencyKeyReused = "idempotency_key_reused";
 
-    /// <summary>La cuenta no tiene timbres de producción: para timbrar, revisar RFC en las listas, consultar constancias o pedir descargas al SAT. Compre un paquete en Desarrolladores › Timbres. En pruebas nunca pasa. Para enterarse antes, escuche balance.low o active la recarga automática.</summary>
+    /// <summary>La cuenta no tiene timbres de producción: para timbrar, revisar RFC en las listas, consultar constancias, pedir descargas o traer declaraciones, opinión o buzón del SAT. Compre un paquete en Desarrolladores › Timbres. En pruebas nunca pasa. Para enterarse antes, escuche balance.low o active la recarga automática.</summary>
     public const string InsufficientBalance = "insufficient_balance";
 
     /// <summary>Algo falló de nuestro lado. Repita la solicitud con la misma Idempotency-Key: nunca se timbra dos veces. Si sigue, escríbanos con el request_id.</summary>
@@ -137,6 +143,9 @@ public static class ErrorCode
 
     /// <summary>La llave no puede usar ese emisor.</summary>
     public const string IssuerNotAllowed = "issuer_not_allowed";
+
+    /// <summary>Al emisor le falta su RFC (sus datos fiscales): regístrelos antes, con el CSD o la e.firma.</summary>
+    public const string IssuerNotReady = "issuer_not_ready";
 
     /// <summary>La cuenta tiene varios emisores y la solicitud no dice cuál: mande issuer (iss_…).</summary>
     public const string IssuerRequired = "issuer_required";

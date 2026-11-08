@@ -468,6 +468,18 @@ public sealed partial class ApplyAdvanceParamsRemainder
 }
 
 /// <summary>
+/// Los campos de «Aprobar una comprobación».
+/// </summary>
+public sealed partial class ApproveExpenseReportParams
+{
+    /// <summary>
+    /// Una nota para la persona.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Timbres de producción de la cuenta, por paquete, el que vence antes primero.
 /// </summary>
 public sealed partial class Balance
@@ -1987,6 +1999,254 @@ public sealed partial class CreateEmployeeParams
     /// </summary>
     [JsonPropertyName("exit_reason")]
     public string? ExitReason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar un gasto».
+/// </summary>
+public sealed partial class CreateExpenseItemParams
+{
+    /// <summary>
+    /// El UUID de una factura recibida del emisor (GET /v1/sat_invoices): la fecha, el monto, el proveedor y la forma de pago salen de ella.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// De qué es: hospedaje, alimentos, avion, transporte, auto, combustible (gasolina, casetas y estacionamiento), comidas (en restaurante, fuera de viaje), papeleria, mensajeria, software u otros.
+    /// <br/>
+    /// Valores: hospedaje, alimentos, avion, transporte, auto, combustible, comidas, papeleria, mensajeria, software, otros.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public required string Category { get; set; }
+
+    /// <summary>
+    /// Cuándo se gastó. Con uuid, la fecha de la factura.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// Qué fue (el proveedor). Con uuid, su emisor.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// En pesos. Con uuid, el total de la factura.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// En su moneda, si fue en otra.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// La moneda (USD, EUR…).
+    /// </summary>
+    [JsonPropertyName("foreign_currency")]
+    public string? ForeignCurrency { get; set; }
+
+    /// <summary>
+    /// En alimentos, cuántas personas comieron: el tope es por persona.
+    /// </summary>
+    [JsonPropertyName("people")]
+    public long? People { get; set; }
+
+    /// <summary>
+    /// Cómo se pagó: tarjeta_empresa (no se le reembolsa), tarjeta_propia, efectivo, transferencia u otro.
+    /// <br/>
+    /// Valores: tarjeta_empresa, tarjeta_propia, efectivo, transferencia, otro.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public string? Payment { get; set; }
+
+    /// <summary>
+    /// Su comprobante: cfdi, extranjero, ticket o ninguno. Con uuid, cfdi.
+    /// <br/>
+    /// Valores: cfdi, extranjero, ticket, ninguno.
+    /// </summary>
+    [JsonPropertyName("receipt")]
+    public string? Receipt { get; set; }
+
+    /// <summary>
+    /// Por qué, si pasa la política (la política puede pedirla).
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Registrar dinero dado o devuelto».
+/// </summary>
+public sealed partial class CreateExpenseMovementParams
+{
+    /// <summary>
+    /// anticipo (dinero que se le da antes o durante; hasta que se aprueba), reembolso (lo que la empresa le debe, ya aprobada) o devolucion (lo que le sobró, ya aprobada).
+    /// <br/>
+    /// Valores: anticipo, reembolso, devolucion.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// En pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Cuándo se pagó.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// transferencia (por omisión), efectivo, tarjeta o nomina (en el siguiente recibo de nómina del empleado; solo si está en Nómina).
+    /// <br/>
+    /// Valores: transferencia, efectivo, tarjeta, nomina.
+    /// </summary>
+    [JsonPropertyName("method")]
+    public string? Method { get; set; }
+
+    /// <summary>
+    /// Su referencia (folio de la transferencia).
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Dar su enlace a una persona».
+/// </summary>
+public sealed partial class CreateExpensePersonLinkParams
+{
+    /// <summary>
+    /// true le da un enlace nuevo: el anterior deja de funcionar en ese momento (por ejemplo, si se compartió por error).
+    /// </summary>
+    [JsonPropertyName("renew")]
+    public bool? Renew { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar a una persona».
+/// </summary>
+public sealed partial class CreateExpensePersonParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// empleado (sus viáticos van en su recibo de nómina; sus facturas pueden ir a su nombre en un viaje) o honorarios (sus facturas deben ir a nombre del emisor).
+    /// <br/>
+    /// Valores: empleado, honorarios.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// Un empleado de Nómina (emp_…): su nombre, RFC y correo se toman de ahí y sus viáticos van en su recibo. Solo con kind empleado.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Su nombre. Obligatorio sin employee.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Su RFC.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Su correo: para mandarle su enlace y avisarle cuando se aprueba o se le paga.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Dónde trabaja (por ejemplo «Guadalajara, Jal.»): un viaje a menos de 50 km no es deducible como viáticos.
+    /// </summary>
+    [JsonPropertyName("base_city")]
+    public string? BaseCity { get; set; }
+
+    /// <summary>
+    /// Su área.
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Abrir una comprobación».
+/// </summary>
+public sealed partial class CreateExpenseReportParams
+{
+    /// <summary>
+    /// La persona (exp_…).
+    /// </summary>
+    [JsonPropertyName("person")]
+    public required string Person { get; set; }
+
+    /// <summary>
+    /// viaje (por omisión) o gastos (gastos de oficina de un periodo que la empresa reembolsa).
+    /// <br/>
+    /// Valores: viaje, gastos.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// Su nombre. Por omisión, «Viaje a {destination}» o el periodo.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// Para qué fue: el SAT pide que el viaje sea por el negocio.
+    /// </summary>
+    [JsonPropertyName("purpose")]
+    public string? Purpose { get; set; }
+
+    /// <summary>
+    /// A dónde.
+    /// </summary>
+    [JsonPropertyName("destination")]
+    public string? Destination { get; set; }
+
+    /// <summary>
+    /// Al extranjero: cambian los topes de alimentos y hospedaje.
+    /// </summary>
+    [JsonPropertyName("abroad")]
+    public bool? Abroad { get; set; }
+
+    /// <summary>
+    /// A más de 50 km de donde trabaja la persona (por omisión, true). Más cerca, no son viáticos deducibles.
+    /// </summary>
+    [JsonPropertyName("far")]
+    public bool? Far { get; set; }
+
+    /// <summary>
+    /// La salida (o el inicio del periodo).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// El regreso (o el fin del periodo).
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
 }
 
 /// <summary>
@@ -5794,6 +6054,282 @@ public sealed partial class CustomerList
 }
 
 /// <summary>
+/// Cómo paga un cliente: de sus facturas a crédito (PPD) de los últimos 12 meses y sus complementos de pago, en pesos.
+/// </summary>
+public sealed partial class CustomerPaymentBehavior
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El cliente (cus_…).
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public string Customer { get; set; } = default!;
+
+    /// <summary>
+    /// Su RFC.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Sus días de crédito: los suyos (Clientes) o los de la empresa (Ajustes › Cobranza automática). Contra ellos se mide el atraso.
+    /// </summary>
+    [JsonPropertyName("credit_days")]
+    public long CreditDays { get; set; }
+
+    /// <summary>
+    /// on_time (80 % o más llega a tiempo y atraso promedio de 5 días o menos), sometimes_late (hasta 15 días), late (hasta 45), very_late (más) o no_history (menos de 2 facturas pagadas y nada vencido).
+    /// <br/>
+    /// Valores: on_time, sometimes_late, late, very_late, no_history.
+    /// </summary>
+    [JsonPropertyName("rating")]
+    public string Rating { get; set; } = default!;
+
+    /// <summary>
+    /// Facturas PPD con un pago en los últimos 12 meses.
+    /// </summary>
+    [JsonPropertyName("paid_invoices")]
+    public long PaidInvoices { get; set; }
+
+    /// <summary>
+    /// Días de la factura a su pago, en promedio por monto; null sin pagos.
+    /// </summary>
+    [JsonPropertyName("average_days_to_pay")]
+    public decimal? AverageDaysToPay { get; set; }
+
+    /// <summary>
+    /// La factura típica: la mitad se pagó en estos días o menos.
+    /// </summary>
+    [JsonPropertyName("median_days_to_pay")]
+    public long? MedianDaysToPay { get; set; }
+
+    /// <summary>
+    /// 3 de cada 4 facturas se pagaron en estos días o menos.
+    /// </summary>
+    [JsonPropertyName("p75_days_to_pay")]
+    public long? P75DaysToPay { get; set; }
+
+    /// <summary>
+    /// La parte (0 a 1) de lo pagado que llegó antes de vencer; lo vencido sin pagar cuenta como tarde.
+    /// </summary>
+    [JsonPropertyName("on_time_share")]
+    public decimal? OnTimeShare { get; set; }
+
+    /// <summary>
+    /// Días después del vencimiento, en promedio por monto; lo vencido sin pagar cuenta con sus días de atraso hasta hoy.
+    /// </summary>
+    [JsonPropertyName("average_days_late")]
+    public decimal? AverageDaysLate { get; set; }
+
+    /// <summary>
+    /// Los últimos 3 meses contra los 9 anteriores; null con menos de 2 facturas pagadas en cada lado.
+    /// </summary>
+    [JsonPropertyName("trend")]
+    public CustomerPaymentBehaviorTrend? Trend { get; set; }
+
+    /// <summary>
+    /// Lo que debe ya vencido, en pesos.
+    /// </summary>
+    [JsonPropertyName("overdue_amount")]
+    public decimal OverdueAmount { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas tiene vencidas.
+    /// </summary>
+    [JsonPropertyName("overdue_invoices")]
+    public long OverdueInvoices { get; set; }
+
+    /// <summary>
+    /// Cómo le pagó, la mayor primero.
+    /// </summary>
+    [JsonPropertyName("payment_forms")]
+    public List<CustomerPaymentBehaviorPaymentFormsItem> PaymentForms { get; set; } = default!;
+
+    /// <summary>
+    /// Cada uno de los últimos 12 meses, el más antiguo primero.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public List<CustomerPaymentBehaviorMonthsItem> Months { get; set; } = default!;
+
+    /// <summary>
+    /// Su último pago; null sin pagos en 12 meses.
+    /// </summary>
+    [JsonPropertyName("last_payment")]
+    public CustomerPaymentBehaviorLastPayment? LastPayment { get; set; }
+
+    /// <summary>
+    /// Facturas de contado (PUE) de los últimos 12 meses: se pagan al emitirse y no cuentan en lo demás.
+    /// </summary>
+    [JsonPropertyName("cash_invoices")]
+    public long CashInvoices { get; set; }
+
+    /// <summary>
+    /// Lo que debe ahora, la factura más antigua primero.
+    /// </summary>
+    [JsonPropertyName("open_invoices")]
+    public List<CustomerPaymentBehaviorOpenInvoicesItem> OpenInvoices { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CustomerPaymentBehaviorLastPayment&lt;/c&gt;.
+/// </summary>
+public sealed partial class CustomerPaymentBehaviorLastPayment
+{
+    /// <summary>
+    /// El día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Lo pagado ese día, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CustomerPaymentBehaviorMonthsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CustomerPaymentBehaviorMonthsItem
+{
+    /// <summary>
+    /// El mes de los pagos (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Días promedio (por monto) de los pagos de ese mes; null sin pagos.
+    /// </summary>
+    [JsonPropertyName("average_days_to_pay")]
+    public decimal? AverageDaysToPay { get; set; }
+
+    /// <summary>
+    /// Lo pagado ese mes, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Facturas con un pago ese mes.
+    /// </summary>
+    [JsonPropertyName("paid_invoices")]
+    public long PaidInvoices { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CustomerPaymentBehaviorOpenInvoicesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CustomerPaymentBehaviorOpenInvoicesItem
+{
+    /// <summary>
+    /// El UUID (folio fiscal) de la factura.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// Su fecha (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// PPD a crédito; PUE que le pagan este mes.
+    /// <br/>
+    /// Valores: PPD, PUE.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string PaymentMethod { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que falta, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount_due")]
+    public decimal AmountDue { get; set; }
+
+    /// <summary>
+    /// Cuándo vence: su fecha más los días de crédito (una PUE, al fin de su mes).
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string DueDate { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo le llegaría: su fecha más lo que el cliente suele tardar (sin historial, el vencimiento).
+    /// </summary>
+    [JsonPropertyName("expected_payment_date")]
+    public string ExpectedPaymentDate { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CustomerPaymentBehaviorPaymentFormsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CustomerPaymentBehaviorPaymentFormsItem
+{
+    /// <summary>
+    /// Clave de forma de pago del SAT (c_FormaPago): 03 transferencia, 02 cheque…
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string PaymentForm { get; set; } = default!;
+
+    /// <summary>
+    /// Lo pagado así, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Su parte de lo pagado (0 a 1).
+    /// </summary>
+    [JsonPropertyName("share")]
+    public decimal Share { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CustomerPaymentBehaviorTrend&lt;/c&gt;.
+/// </summary>
+public sealed partial class CustomerPaymentBehaviorTrend
+{
+    /// <summary>
+    /// slower: tarda 7 días o más que antes; faster: 7 o más menos.
+    /// <br/>
+    /// Valores: slower, faster, steady.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// Días promedio para pagar de los últimos 3 meses.
+    /// </summary>
+    [JsonPropertyName("recent_days")]
+    public decimal RecentDays { get; set; }
+
+    /// <summary>
+    /// Días promedio de los 9 meses anteriores.
+    /// </summary>
+    [JsonPropertyName("earlier_days")]
+    public decimal EarlierDays { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Borrar un centro de costo».
 /// </summary>
 public sealed partial class DeleteCostCenterParams
@@ -6421,6 +6957,764 @@ public sealed partial class EventList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Un gasto de una comprobación.
+/// </summary>
+public sealed partial class ExpenseItem
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se gastó (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// De qué es: hospedaje, alimentos, avion, transporte, auto, combustible, comidas, papeleria, mensajeria, software u otros.
+    /// <br/>
+    /// Valores: hospedaje, alimentos, avion, transporte, auto, combustible, comidas, papeleria, mensajeria, software, otros.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string Category { get; set; } = default!;
+
+    /// <summary>
+    /// Qué fue (el proveedor), o null.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// En pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// En su moneda, o null.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// Su moneda (USD, EUR…), o null.
+    /// </summary>
+    [JsonPropertyName("foreign_currency")]
+    public string? ForeignCurrency { get; set; }
+
+    /// <summary>
+    /// Cuántas personas comieron (en alimentos el tope es por persona).
+    /// </summary>
+    [JsonPropertyName("people")]
+    public long People { get; set; }
+
+    /// <summary>
+    /// Cómo se pagó: tarjeta_empresa, tarjeta_propia, efectivo, transferencia u otro, o null.
+    /// <br/>
+    /// Valores: tarjeta_empresa, tarjeta_propia, efectivo, transferencia, otro.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public string? Payment { get; set; }
+
+    /// <summary>
+    /// Su comprobante: cfdi, extranjero, ticket o ninguno.
+    /// <br/>
+    /// Valores: cfdi, extranjero, ticket, ninguno.
+    /// </summary>
+    [JsonPropertyName("receipt")]
+    public string Receipt { get; set; } = default!;
+
+    /// <summary>
+    /// El UUID de su factura, o null.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// La nota de la persona, o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// true si quien aprueba lo rechazó.
+    /// </summary>
+    [JsonPropertyName("rejected")]
+    public bool Rejected { get; set; }
+
+    /// <summary>
+    /// Por qué se rechazó, o null.
+    /// </summary>
+    [JsonPropertyName("reject_reason")]
+    public string? RejectReason { get; set; }
+
+    /// <summary>
+    /// Lo que se deduce de este gasto.
+    /// </summary>
+    [JsonPropertyName("deductible")]
+    public decimal Deductible { get; set; }
+
+    /// <summary>
+    /// Lo que no se deduce.
+    /// </summary>
+    [JsonPropertyName("non_deductible")]
+    public decimal NonDeductible { get; set; }
+
+    /// <summary>
+    /// true si pasa un tope de la política.
+    /// </summary>
+    [JsonPropertyName("over_policy")]
+    public bool OverPolicy { get; set; }
+
+    /// <summary>
+    /// Sus avisos contra la ley y la política.
+    /// </summary>
+    [JsonPropertyName("issues")]
+    public List<ExpenseItemIssuesItem> Issues { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se agregó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExpenseItemIssuesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExpenseItemIssuesItem
+{
+    /// <summary>
+    /// error (impide enviarla), warning, policy (pasa la política) o info.
+    /// <br/>
+    /// Valores: error, warning, policy, info.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string Level { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es, como código estable.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es, en palabras.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Dinero que se le dio a la persona (anticipo, reembolso) o que devolvió.
+/// </summary>
+public sealed partial class ExpenseMovement
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// anticipo, reembolso o devolucion.
+    /// <br/>
+    /// Valores: anticipo, reembolso, devolucion.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// En pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Cuándo se pagó (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// transferencia, efectivo, tarjeta o nomina (en su recibo de nómina).
+    /// <br/>
+    /// Valores: transferencia, efectivo, tarjeta, nomina.
+    /// </summary>
+    [JsonPropertyName("method")]
+    public string Method { get; set; } = default!;
+
+    /// <summary>
+    /// Su referencia, o null.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// true si ya se pagó en un recibo de nómina.
+    /// </summary>
+    [JsonPropertyName("in_payroll")]
+    public bool InPayroll { get; set; }
+
+    /// <summary>
+    /// Cuándo se registró.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Alguien que viaja o gasta por el emisor: un empleado (de Nómina) o alguien por honorarios. Tiene un enlace propio para subir sus facturas sin cuenta.
+/// </summary>
+public sealed partial class ExpensePerson
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor por el que gasta.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// empleado (sueldos y salarios: viáticos exentos en su recibo de nómina) o honorarios.
+    /// <br/>
+    /// Valores: empleado, honorarios.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Su empleado de Nómina (emp_…), o null si es por honorarios.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su RFC, o null.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Su correo, a donde se le manda su enlace y los avisos, o null.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Dónde trabaja: un viaje a más de 50 km de ahí es de viáticos.
+    /// </summary>
+    [JsonPropertyName("base_city")]
+    public string? BaseCity { get; set; }
+
+    /// <summary>
+    /// Su área, o null.
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// true si tiene un enlace que funciona para subir sus facturas.
+    /// </summary>
+    [JsonPropertyName("link_active")]
+    public bool LinkActive { get; set; }
+
+    /// <summary>
+    /// true si está archivada.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool Archived { get; set; }
+
+    /// <summary>
+    /// Cuándo se agregó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// El enlace de una persona: ahí ve solo sus comprobaciones y sube sus facturas desde el teléfono, sin cuenta.
+/// </summary>
+public sealed partial class ExpensePersonLink
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// La persona (exp_…).
+    /// </summary>
+    [JsonPropertyName("person")]
+    public string Person { get; set; } = default!;
+
+    /// <summary>
+    /// Su enlace, o null si está apagado.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ExpensePersonList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ExpensePerson> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// La política de viáticos y gastos del emisor: topes por categoría, hasta cuánto sin factura y en cuántos días se comprueba.
+/// </summary>
+public sealed partial class ExpensePolicy
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Topes por categoría (hospedaje, alimentos…): las que no están no tienen tope.
+    /// </summary>
+    [JsonPropertyName("limits")]
+    public Dictionary<string, JsonElement> Limits { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuánto se acepta un gasto sin factura; 0: todos la piden.
+    /// </summary>
+    [JsonPropertyName("ticket_limit")]
+    public decimal TicketLimit { get; set; }
+
+    /// <summary>
+    /// Días después del regreso para comprobar.
+    /// </summary>
+    [JsonPropertyName("due_days")]
+    public long DueDays { get; set; }
+
+    /// <summary>
+    /// true si pide una nota en cada gasto que pase un tope.
+    /// </summary>
+    [JsonPropertyName("note_over_limit")]
+    public bool NoteOverLimit { get; set; }
+
+    /// <summary>
+    /// true si avisa por correo a quien aprueba.
+    /// </summary>
+    [JsonPropertyName("notify_approvers")]
+    public bool NotifyApprovers { get; set; }
+
+    /// <summary>
+    /// true si avisa a la persona cuando se aprueba, se devuelve o se le paga.
+    /// </summary>
+    [JsonPropertyName("notify_people")]
+    public bool NotifyPeople { get; set; }
+}
+
+/// <summary>
+/// Una comprobación de viáticos (un viaje) o de gastos de un periodo: sus gastos revisados contra la ley y la política, y el dinero dado o devuelto. Al aprobarla sus facturas se deducen y entra en las pólizas por 107.01.
+/// </summary>
+public sealed partial class ExpenseReport
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su número, consecutivo por emisor.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public long Number { get; set; }
+
+    /// <summary>
+    /// Cómo se muestra, por ejemplo «VIA-0012».
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Quién la comprueba (exp_…).
+    /// </summary>
+    [JsonPropertyName("person")]
+    public string Person { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de esa persona.
+    /// </summary>
+    [JsonPropertyName("person_name")]
+    public string PersonName { get; set; } = default!;
+
+    /// <summary>
+    /// viaje o gastos (de oficina, de un periodo).
+    /// <br/>
+    /// Valores: viaje, gastos.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// Para qué fue, o null.
+    /// </summary>
+    [JsonPropertyName("purpose")]
+    public string? Purpose { get; set; }
+
+    /// <summary>
+    /// A dónde, o null.
+    /// </summary>
+    [JsonPropertyName("destination")]
+    public string? Destination { get; set; }
+
+    /// <summary>
+    /// true si fue al extranjero.
+    /// </summary>
+    [JsonPropertyName("abroad")]
+    public bool Abroad { get; set; }
+
+    /// <summary>
+    /// true si fue a más de 50 km de donde trabaja la persona.
+    /// </summary>
+    [JsonPropertyName("far")]
+    public bool Far { get; set; }
+
+    /// <summary>
+    /// La salida o el inicio del periodo (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// El regreso o el fin del periodo (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+
+    /// <summary>
+    /// draft (abierta), submitted (por aprobar), rejected (devuelta para corregir), approved (por liquidar) o closed (cerrada, con el saldo en cero).
+    /// <br/>
+    /// Valores: draft, submitted, rejected, approved, closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuándo hay para comprobarla (la política), o null.
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string? DueDate { get; set; }
+
+    /// <summary>
+    /// Cuándo se envió a aprobar, o null.
+    /// </summary>
+    [JsonPropertyName("submitted_at")]
+    public string? SubmittedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se aprobó o se devolvió, o null.
+    /// </summary>
+    [JsonPropertyName("decided_at")]
+    public string? DecidedAt { get; set; }
+
+    /// <summary>
+    /// La nota de quien la aprobó o la devolvió, o null.
+    /// </summary>
+    [JsonPropertyName("decision_note")]
+    public string? DecisionNote { get; set; }
+
+    /// <summary>
+    /// Cuándo se cerró, o null.
+    /// </summary>
+    [JsonPropertyName("closed_at")]
+    public string? ClosedAt { get; set; }
+
+    /// <summary>
+    /// true si ya se reportó en un recibo de nómina (viáticos 050 y 081).
+    /// </summary>
+    [JsonPropertyName("in_payroll")]
+    public bool InPayroll { get; set; }
+
+    /// <summary>
+    /// Lo gastado, sin los gastos rechazados.
+    /// </summary>
+    [JsonPropertyName("spent")]
+    public decimal Spent { get; set; }
+
+    /// <summary>
+    /// Lo de los gastos rechazados.
+    /// </summary>
+    [JsonPropertyName("rejected")]
+    public decimal Rejected { get; set; }
+
+    /// <summary>
+    /// Lo comprobado con factura o comprobante del extranjero.
+    /// </summary>
+    [JsonPropertyName("proven")]
+    public decimal Proven { get; set; }
+
+    /// <summary>
+    /// Lo que se deduce, con los topes de la ley.
+    /// </summary>
+    [JsonPropertyName("deductible")]
+    public decimal Deductible { get; set; }
+
+    /// <summary>
+    /// Lo que no se deduce (pasa los topes o no tiene comprobante).
+    /// </summary>
+    [JsonPropertyName("non_deductible")]
+    public decimal NonDeductible { get; set; }
+
+    /// <summary>
+    /// Lo que se le dio en anticipos.
+    /// </summary>
+    [JsonPropertyName("advances")]
+    public decimal Advances { get; set; }
+
+    /// <summary>
+    /// Lo que se le reembolsó.
+    /// </summary>
+    [JsonPropertyName("reimbursed")]
+    public decimal Reimbursed { get; set; }
+
+    /// <summary>
+    /// Lo que devolvió.
+    /// </summary>
+    [JsonPropertyName("returned")]
+    public decimal Returned { get; set; }
+
+    /// <summary>
+    /// Positivo, lo que la persona debe devolver; negativo, lo que la empresa le debe reembolsar; 0, liquidada. Lo pagado con la tarjeta de la empresa no cuenta.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// true si se puede enviar o aprobar: ningún gasto tiene errores.
+    /// </summary>
+    [JsonPropertyName("ready")]
+    public bool Ready { get; set; }
+
+    /// <summary>
+    /// Avisos de la comprobación entera.
+    /// </summary>
+    [JsonPropertyName("issues")]
+    public List<ExpenseReportIssuesItem> Issues { get; set; } = default!;
+
+    /// <summary>
+    /// Para un empleado, cómo irá en su recibo de nómina (o null).
+    /// </summary>
+    [JsonPropertyName("payroll")]
+    public ExpenseReportPayroll? Payroll { get; set; }
+
+    /// <summary>
+    /// Sus gastos.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<ExpenseItem> Items { get; set; } = default!;
+
+    /// <summary>
+    /// El dinero que se le dio o devolvió.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public List<ExpenseMovement> Movements { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se abrió.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExpenseReportIssuesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExpenseReportIssuesItem
+{
+    /// <summary>
+    /// error (impide enviarla), warning, policy (pasa la política) o info.
+    /// <br/>
+    /// Valores: error, warning, policy, info.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string Level { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es, como código estable.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es, en palabras.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ExpenseReportList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ExpenseReport> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ExpenseReportPayroll&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExpenseReportPayroll
+{
+    /// <summary>
+    /// Viáticos exentos comprobados (OtroPago/Percepción 050, ImporteExento).
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Lo que grava como sueldo (050, ImporteGravado): lo gastado sin comprobar.
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal Taxed { get; set; }
+
+    /// <summary>
+    /// Lo que se descuenta (deducción 081) por lo que ya se le dio y sobró.
+    /// </summary>
+    [JsonPropertyName("adjustment")]
+    public decimal Adjustment { get; set; }
+
+    /// <summary>
+    /// Lo que neto cobra o paga en el recibo por esta comprobación.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public decimal Net { get; set; }
 }
 
 /// <summary>
@@ -7942,6 +9236,18 @@ public sealed partial class GetElectronicAccountingParams
 }
 
 /// <summary>
+/// Los campos de «Ver la política».
+/// </summary>
+public sealed partial class GetExpensePolicyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver los estados financieros».
 /// </summary>
 public sealed partial class GetFinancialStatementsParams
@@ -8089,6 +9395,24 @@ public sealed partial class GetTrialBalanceParams
     /// </summary>
     [JsonPropertyName("month")]
     public required string Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver el IVA a favor y preparar su devolución».
+/// </summary>
+public sealed partial class GetVatRefundParams
+{
+    /// <summary>
+    /// El mes del saldo a revisar (AAAA-MM). Sin él, solo los saldos.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string? Month { get; set; }
 
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
@@ -12834,9 +14158,9 @@ public sealed partial class JournalEntry
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina) o depreciation (la depreciación del mes de los activos fijos).
+    /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina), employee_expenses (un anticipo, reembolso, devolución o comprobación de viáticos, contra 107.01 «Funcionarios y empleados») o depreciation (la depreciación del mes de los activos fijos).
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, depreciation.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -13260,6 +14584,72 @@ public sealed partial class ListEventsParams
     /// </summary>
     [JsonPropertyName("delivery_success")]
     public bool? DeliverySuccess { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar personas».
+/// </summary>
+public sealed partial class ListExpensePeopleParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// true para incluir las archivadas.
+    /// </summary>
+    [JsonPropertyName("include_archived")]
+    public bool? IncludeArchived { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar comprobaciones».
+/// </summary>
+public sealed partial class ListExpenseReportsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de un estado: draft, submitted, rejected, approved o closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Solo las de una persona (exp_…).
+    /// </summary>
+    [JsonPropertyName("person")]
+    public string? Person { get; set; }
 }
 
 /// <summary>
@@ -16716,6 +18106,18 @@ public sealed partial class RetentionTotals
     /// </summary>
     [JsonPropertyName("withheld")]
     public decimal? Withheld { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Devolver para corregir».
+/// </summary>
+public sealed partial class ReturnExpenseReportParams
+{
+    /// <summary>
+    /// Qué debe corregir: se le manda a la persona.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public required string Note { get; set; }
 }
 
 /// <summary>
@@ -20427,6 +21829,242 @@ public sealed partial class UpdateEmployeeParams
 }
 
 /// <summary>
+/// Los campos de «Actualizar un gasto».
+/// </summary>
+public sealed partial class UpdateExpenseItemParams
+{
+    /// <summary>
+    /// De qué es: hospedaje, alimentos, avion, transporte, auto, combustible (gasolina, casetas y estacionamiento), comidas (en restaurante, fuera de viaje), papeleria, mensajeria, software u otros.
+    /// <br/>
+    /// Valores: hospedaje, alimentos, avion, transporte, auto, combustible, comidas, papeleria, mensajeria, software, otros.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// Cuándo se gastó. Con uuid, la fecha de la factura.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// Qué fue (el proveedor). Con uuid, su emisor.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// En pesos. Con uuid, el total de la factura.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// En su moneda, si fue en otra.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// La moneda (USD, EUR…).
+    /// </summary>
+    [JsonPropertyName("foreign_currency")]
+    public string? ForeignCurrency { get; set; }
+
+    /// <summary>
+    /// En alimentos, cuántas personas comieron: el tope es por persona.
+    /// </summary>
+    [JsonPropertyName("people")]
+    public long? People { get; set; }
+
+    /// <summary>
+    /// Cómo se pagó: tarjeta_empresa (no se le reembolsa), tarjeta_propia, efectivo, transferencia u otro.
+    /// <br/>
+    /// Valores: tarjeta_empresa, tarjeta_propia, efectivo, transferencia, otro.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public string? Payment { get; set; }
+
+    /// <summary>
+    /// Su comprobante: cfdi, extranjero, ticket o ninguno. Con uuid, cfdi.
+    /// <br/>
+    /// Valores: cfdi, extranjero, ticket, ninguno.
+    /// </summary>
+    [JsonPropertyName("receipt")]
+    public string? Receipt { get; set; }
+
+    /// <summary>
+    /// Por qué, si pasa la política (la política puede pedirla).
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Al aprobar: true lo rechaza (no se paga ni se deduce), false lo vuelve a incluir. Solo en una comprobación enviada.
+    /// </summary>
+    [JsonPropertyName("rejected")]
+    public bool? Rejected { get; set; }
+
+    /// <summary>
+    /// Por qué se rechaza.
+    /// </summary>
+    [JsonPropertyName("reject_reason")]
+    public string? RejectReason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar una persona».
+/// </summary>
+public sealed partial class UpdateExpensePersonParams
+{
+    /// <summary>
+    /// empleado (sus viáticos van en su recibo de nómina; sus facturas pueden ir a su nombre en un viaje) o honorarios (sus facturas deben ir a nombre del emisor).
+    /// <br/>
+    /// Valores: empleado, honorarios.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// Un empleado de Nómina (emp_…): su nombre, RFC y correo se toman de ahí y sus viáticos van en su recibo. Solo con kind empleado.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Su nombre. Obligatorio sin employee.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Su RFC.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Su correo: para mandarle su enlace y avisarle cuando se aprueba o se le paga.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Dónde trabaja (por ejemplo «Guadalajara, Jal.»): un viaje a menos de 50 km no es deducible como viáticos.
+    /// </summary>
+    [JsonPropertyName("base_city")]
+    public string? BaseCity { get; set; }
+
+    /// <summary>
+    /// Su área.
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// true la archiva (y apaga su enlace): ya no se le abren comprobaciones. false la restaura.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool? Archived { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar la política».
+/// </summary>
+public sealed partial class UpdateExpensePolicyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Topes por categoría. Una categoría con null deja de tener tope; las que no manda no cambian. Un gasto que pase un tope no se rechaza: se marca para quien aprueba.
+    /// </summary>
+    [JsonPropertyName("limits")]
+    public Dictionary<string, JsonElement>? Limits { get; set; }
+
+    /// <summary>
+    /// Hasta cuánto se acepta un gasto sin factura; 0: todos la piden.
+    /// </summary>
+    [JsonPropertyName("ticket_limit")]
+    public decimal? TicketLimit { get; set; }
+
+    /// <summary>
+    /// Días después del regreso para comprobar.
+    /// </summary>
+    [JsonPropertyName("due_days")]
+    public long? DueDays { get; set; }
+
+    /// <summary>
+    /// Pedir una nota en cada gasto que pase un tope.
+    /// </summary>
+    [JsonPropertyName("note_over_limit")]
+    public bool? NoteOverLimit { get; set; }
+
+    /// <summary>
+    /// Avisar por correo a quien aprueba cuando le envían una comprobación.
+    /// </summary>
+    [JsonPropertyName("notify_approvers")]
+    public bool? NotifyApprovers { get; set; }
+
+    /// <summary>
+    /// Avisar a la persona cuando se aprueba, se devuelve o se le paga.
+    /// </summary>
+    [JsonPropertyName("notify_people")]
+    public bool? NotifyPeople { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar una comprobación».
+/// </summary>
+public sealed partial class UpdateExpenseReportParams
+{
+    /// <summary>
+    /// Su nombre. Por omisión, «Viaje a {destination}» o el periodo.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// Para qué fue: el SAT pide que el viaje sea por el negocio.
+    /// </summary>
+    [JsonPropertyName("purpose")]
+    public string? Purpose { get; set; }
+
+    /// <summary>
+    /// A dónde.
+    /// </summary>
+    [JsonPropertyName("destination")]
+    public string? Destination { get; set; }
+
+    /// <summary>
+    /// Al extranjero: cambian los topes de alimentos y hospedaje.
+    /// </summary>
+    [JsonPropertyName("abroad")]
+    public bool? Abroad { get; set; }
+
+    /// <summary>
+    /// A más de 50 km de donde trabaja la persona (por omisión, true). Más cerca, no son viáticos deducibles.
+    /// </summary>
+    [JsonPropertyName("far")]
+    public bool? Far { get; set; }
+
+    /// <summary>
+    /// La salida (o el inicio del periodo).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// El regreso (o el fin del periodo).
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cambiar un movimiento del IMSS».
 /// </summary>
 public sealed partial class UpdateImssMovementParams
@@ -21694,6 +23332,282 @@ public sealed partial class ValidateTaxIdParams
     /// </summary>
     [JsonPropertyName("cif_id")]
     public string? CifId { get; set; }
+}
+
+/// <summary>
+/// El IVA a favor del emisor mes por mes, qué pasó con cada saldo y, con un mes, la revisión antes de pedir su devolución.
+/// </summary>
+public sealed partial class VatRefund
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El IVA a favor que todavía puede pedir de vuelta: lo que queda de cada saldo sin acreditar, sin solicitud y sin prescribir.
+    /// </summary>
+    [JsonPropertyName("available")]
+    public decimal Available { get; set; }
+
+    /// <summary>
+    /// Lo pedido en solicitudes que siguen en trámite o ya se resolvieron sin depósito.
+    /// </summary>
+    [JsonPropertyName("in_refund")]
+    public decimal InRefund { get; set; }
+
+    /// <summary>
+    /// Lo que el SAT ya depositó.
+    /// </summary>
+    [JsonPropertyName("refunded")]
+    public decimal Refunded { get; set; }
+
+    /// <summary>
+    /// true si algún mes sale de sus CFDI porque su declaración no se ha leído (POST /v1/sat_declarations/refresh).
+    /// </summary>
+    [JsonPropertyName("estimated")]
+    public bool Estimated { get; set; }
+
+    /// <summary>
+    /// Cada mes con IVA a favor en los últimos cinco años, del más reciente al más antiguo.
+    /// </summary>
+    [JsonPropertyName("balances")]
+    public List<VatRefundBalancesItem> Balances { get; set; } = default!;
+
+    /// <summary>
+    /// Con month, la revisión de ese mes antes de pedirlo; null sin month.
+    /// </summary>
+    [JsonPropertyName("review")]
+    public VatRefundReview? Review { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;VatRefundBalancesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class VatRefundBalancesItem
+{
+    /// <summary>
+    /// El mes del saldo (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// declaration si sale de la declaración leída; cfdi si se calculó con sus CFDI.
+    /// <br/>
+    /// Valores: declaration, cfdi.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo a favor del mes.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El número de operación de la declaración, o null.
+    /// </summary>
+    [JsonPropertyName("operation_number")]
+    public string? OperationNumber { get; set; }
+
+    /// <summary>
+    /// Lo que de este saldo se acreditó en meses posteriores, del saldo más antiguo primero.
+    /// </summary>
+    [JsonPropertyName("credited")]
+    public decimal Credited { get; set; }
+
+    /// <summary>
+    /// En qué mes se acreditó cada parte y cuánto.
+    /// </summary>
+    [JsonPropertyName("credited_in")]
+    public List<VatRefundBalancesItemCreditedInItem> CreditedIn { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que queda de este saldo para pedir de vuelta.
+    /// </summary>
+    [JsonPropertyName("available")]
+    public decimal Available { get; set; }
+
+    /// <summary>
+    /// available (se puede pedir), credited (ya se acreditó), in_refund (con solicitud), refunded (depositado), denied (negado) o prescribed (pasaron cinco años).
+    /// <br/>
+    /// Valores: available, credited, in_refund, refunded, denied, prescribed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo prescribe el derecho a pedirlo: cinco años desde su declaración (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("prescribes_on")]
+    public string PrescribesOn { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;VatRefundBalancesItemCreditedInItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class VatRefundBalancesItemCreditedInItem
+{
+    /// <summary>
+    /// El mes en que se acreditó esa parte (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Lo acreditado ese mes.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;VatRefundReview&lt;/c&gt;.
+/// </summary>
+public sealed partial class VatRefundReview
+{
+    /// <summary>
+    /// El mes revisado (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que conviene pedir, en pesos sin centavos como lo pide el SAT.
+    /// </summary>
+    [JsonPropertyName("amount_to_request")]
+    public decimal AmountToRequest { get; set; }
+
+    /// <summary>
+    /// true si ya acreditó parte del saldo y lo que pide es el remanente.
+    /// </summary>
+    [JsonPropertyName("remainder")]
+    public bool Remainder { get; set; }
+
+    /// <summary>
+    /// true si ninguna revisión bloquea la solicitud.
+    /// </summary>
+    [JsonPropertyName("ready")]
+    public bool Ready { get; set; }
+
+    /// <summary>
+    /// Cada revisión, de la más grave a la que está bien.
+    /// </summary>
+    [JsonPropertyName("checks")]
+    public List<VatRefundReviewChecksItem> Checks { get; set; } = default!;
+
+    /// <summary>
+    /// Los proveedores del mes, para la relación que pide el SAT.
+    /// </summary>
+    [JsonPropertyName("suppliers")]
+    public VatRefundReviewSuppliers Suppliers { get; set; } = default!;
+
+    /// <summary>
+    /// Los clientes del mes.
+    /// </summary>
+    [JsonPropertyName("customers")]
+    public VatRefundReviewCustomers Customers { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;VatRefundReviewChecksItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class VatRefundReviewChecksItem
+{
+    /// <summary>
+    /// Qué se revisó, estable para su código.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// ok, warning (conviene revisar), blocking (el SAT la rechazaría) o pending (falta un dato).
+    /// <br/>
+    /// Valores: ok, warning, blocking, pending.
+    /// </summary>
+    [JsonPropertyName("result")]
+    public string Result { get; set; } = default!;
+
+    /// <summary>
+    /// La revisión, en una línea.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// Qué encontró y qué hacer.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string Detail { get; set; } = default!;
+
+    /// <summary>
+    /// Los pesos que toca, como el IVA en riesgo, o null.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+}
+
+/// <summary>
+/// Los clientes del mes.
+/// </summary>
+public sealed partial class VatRefundReviewCustomers
+{
+    /// <summary>
+    /// Cuántos clientes tuvo en el mes.
+    /// </summary>
+    [JsonPropertyName("count")]
+    public long Count { get; set; }
+
+    /// <summary>
+    /// Cuántos CFDI emitidos suman al IVA cobrado.
+    /// </summary>
+    [JsonPropertyName("cfdi")]
+    public long Cfdi { get; set; }
+}
+
+/// <summary>
+/// Los proveedores del mes, para la relación que pide el SAT.
+/// </summary>
+public sealed partial class VatRefundReviewSuppliers
+{
+    /// <summary>
+    /// Cuántos proveedores tuvo en el mes.
+    /// </summary>
+    [JsonPropertyName("count")]
+    public long Count { get; set; }
+
+    /// <summary>
+    /// Cuántos CFDI recibidos suman al IVA acreditable.
+    /// </summary>
+    [JsonPropertyName("cfdi")]
+    public long Cfdi { get; set; }
+
+    /// <summary>
+    /// Cuántos proveedores juntan el 80% del IVA acreditable.
+    /// </summary>
+    [JsonPropertyName("main")]
+    public long Main { get; set; }
+
+    /// <summary>
+    /// El IVA de CFDI de proveedores que el SAT no reconocería: cancelados, de EFOS o con otros hallazgos.
+    /// </summary>
+    [JsonPropertyName("vat_at_risk")]
+    public decimal VatAtRisk { get; set; }
 }
 
 /// <summary>

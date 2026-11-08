@@ -55,6 +55,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Cuentas por cobrar.</summary>
     public ReceivablesResource Receivables => _receivables ??= new ReceivablesResource(this);
 
+    private CustomersResource? _customers;
+
+    /// <summary>Cuentas por cobrar.</summary>
+    public CustomersResource Customers => _customers ??= new CustomersResource(this);
+
     private BankTransactionsResource? _bankTransactions;
 
     /// <summary>Conciliación bancaria.</summary>
@@ -135,10 +140,20 @@ public sealed partial class FiscalistoClient
     /// <summary>Centros de costo.</summary>
     public CostCentersResource CostCenters => _costCenters ??= new CostCentersResource(this);
 
-    private CustomersResource? _customers;
+    private ExpensePeopleResource? _expensePeople;
 
-    /// <summary>Clientes.</summary>
-    public CustomersResource Customers => _customers ??= new CustomersResource(this);
+    /// <summary>Viáticos y gastos.</summary>
+    public ExpensePeopleResource ExpensePeople => _expensePeople ??= new ExpensePeopleResource(this);
+
+    private ExpenseReportsResource? _expenseReports;
+
+    /// <summary>Viáticos y gastos.</summary>
+    public ExpenseReportsResource ExpenseReports => _expenseReports ??= new ExpenseReportsResource(this);
+
+    private ExpensePolicyResource? _expensePolicy;
+
+    /// <summary>Viáticos y gastos.</summary>
+    public ExpensePolicyResource ExpensePolicy => _expensePolicy ??= new ExpensePolicyResource(this);
 
     private CustomerDataRequestsResource? _customerDataRequests;
 
@@ -925,6 +940,106 @@ public sealed class ReceivablesResource
     /// </summary>
     public IAsyncEnumerable<Receivable> ListAutoPagingAsync(ListReceivablesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<Receivable>("/v1/receivables", @params, options, cancellationToken);
+}
+
+/// <summary>
+/// Cuentas por cobrar: <c>fiscalisto.Customers</c>.
+/// </summary>
+public sealed class CustomersResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CustomersResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver cómo paga un cliente
+    /// </summary>
+    /// <remarks>
+    /// Cuántos días tarda en pagar, qué parte llega a tiempo con sus días de crédito, si paga más lento que antes, cómo le paga y cuándo le llegaría lo que debe. De sus facturas a crédito (PPD) de los últimos 12 meses y sus complementos de pago, como «Cómo paga» en la app. No aplica a XAXX010101000 ni XEXX010101000.
+    /// <br/>
+    /// <c>GET /v1/customers/{id}/payment_behavior</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cuentas-por-cobrar/get-customer-payment-behavior"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CustomerPaymentBehavior> PaymentBehaviorAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CustomerPaymentBehavior>("GET", $"/v1/customers/{Uri.EscapeDataString(id)}/payment_behavior", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Crear un cliente
+    /// </summary>
+    /// <remarks>
+    /// Un cliente del catálogo del emisor, con sus datos fiscales como vienen en su constancia. Un RFC que ya está en el catálogo contesta customer_exists.
+    /// <br/>
+    /// <c>POST /v1/customers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/create-customer"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Customer> CreateAsync(CreateCustomerParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Customer>("POST", "/v1/customers", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar clientes
+    /// </summary>
+    /// <remarks>
+    /// Los clientes del emisor, los más recientes primero. Con tax_id, el de ese RFC.
+    /// <br/>
+    /// <c>GET /v1/customers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/list-customers"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Customer>> ListAsync(ListCustomersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Customer>("/v1/customers", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar clientes: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Customer> ListAutoPagingAsync(ListCustomersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Customer>("/v1/customers", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un cliente
+    /// </summary>
+    /// <remarks>
+    /// Un cliente del catálogo.
+    /// <br/>
+    /// <c>GET /v1/customers/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/get-customer"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Customer> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Customer>("GET", $"/v1/customers/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar un cliente
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo los campos que manda. Las facturas ya timbradas no cambian.
+    /// <br/>
+    /// <c>POST /v1/customers/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/update-customer"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Customer> UpdateAsync(string id, UpdateCustomerParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Customer>("POST", $"/v1/customers/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un cliente
+    /// </summary>
+    /// <remarks>
+    /// Lo quita del catálogo. Sus facturas timbradas siguen igual.
+    /// <br/>
+    /// <c>DELETE /v1/customers/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/delete-customer"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/customers/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
@@ -1996,89 +2111,353 @@ public sealed class CostCentersResource
 }
 
 /// <summary>
-/// Clientes: <c>fiscalisto.Customers</c>.
+/// Viáticos y gastos: <c>fiscalisto.ExpensePeople</c>.
 /// </summary>
-public sealed class CustomersResource
+public sealed class ExpensePeopleResource
 {
     private readonly FiscalistoClient _client;
 
-    internal CustomersResource(FiscalistoClient client) => _client = client;
+    internal ExpensePeopleResource(FiscalistoClient client) => _client = client;
 
     /// <summary>
-    /// Crear un cliente
+    /// Agregar a una persona
     /// </summary>
     /// <remarks>
-    /// Un cliente del catálogo del emisor, con sus datos fiscales como vienen en su constancia. Un RFC que ya está en el catálogo contesta customer_exists.
+    /// Alguien que viaja o gasta por el emisor: un empleado (employee, emp_…: sus anticipos y reembolsos «En la nómina» van en su siguiente recibo) o alguien por honorarios (name y tax_id). Con email, Fiscalisto le puede mandar su enlace.
     /// <br/>
-    /// <c>POST /v1/customers</c>
+    /// <c>POST /v1/expense_people</c>
     /// <br/>
-    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/create-customer"/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/create-expense-person"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<Customer> CreateAsync(CreateCustomerParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Customer>("POST", "/v1/customers", @params, null, options, true, cancellationToken);
+    public Task<ExpensePerson> CreateAsync(CreateExpensePersonParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpensePerson>("POST", "/v1/expense_people", @params, null, options, true, cancellationToken);
 
     /// <summary>
-    /// Listar clientes
+    /// Listar personas
     /// </summary>
     /// <remarks>
-    /// Los clientes del emisor, los más recientes primero. Con tax_id, el de ese RFC.
+    /// Las personas que comprueban gastos del emisor, las más recientes primero. Las archivadas solo con include_archived=true.
     /// <br/>
-    /// <c>GET /v1/customers</c>
+    /// <c>GET /v1/expense_people</c>
     /// <br/>
-    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/list-customers"/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/list-expense-people"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<Page<Customer>> ListAsync(ListCustomersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.ListAsync<Customer>("/v1/customers", @params, null, options, cancellationToken);
+    public Task<Page<ExpensePerson>> ListAsync(ListExpensePeopleParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ExpensePerson>("/v1/expense_people", @params, null, options, cancellationToken);
 
     /// <summary>
-    /// Listar clientes: todos, página por página, con await foreach.
+    /// Listar personas: todos, página por página, con await foreach.
     /// </summary>
-    public IAsyncEnumerable<Customer> ListAutoPagingAsync(ListCustomersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.ListAllAsync<Customer>("/v1/customers", @params, options, cancellationToken);
+    public IAsyncEnumerable<ExpensePerson> ListAutoPagingAsync(ListExpensePeopleParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ExpensePerson>("/v1/expense_people", @params, options, cancellationToken);
 
     /// <summary>
-    /// Ver un cliente
+    /// Ver una persona
     /// </summary>
     /// <remarks>
-    /// Un cliente del catálogo.
+    /// Una persona que comprueba gastos del emisor.
     /// <br/>
-    /// <c>GET /v1/customers/{id}</c>
+    /// <c>GET /v1/expense_people/{id}</c>
     /// <br/>
-    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/get-customer"/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/get-expense-person"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<Customer> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Customer>("GET", $"/v1/customers/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+    public Task<ExpensePerson> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpensePerson>("GET", $"/v1/expense_people/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 
     /// <summary>
-    /// Actualizar un cliente
+    /// Actualizar una persona
     /// </summary>
     /// <remarks>
-    /// Cambia solo los campos que manda. Las facturas ya timbradas no cambian.
+    /// Cambia solo lo que manda. archived: true la archiva (ya no se le abren comprobaciones y su enlace deja de funcionar), false la restaura.
     /// <br/>
-    /// <c>POST /v1/customers/{id}</c>
+    /// <c>POST /v1/expense_people/{id}</c>
     /// <br/>
-    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/update-customer"/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/update-expense-person"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<Customer> UpdateAsync(string id, UpdateCustomerParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Customer>("POST", $"/v1/customers/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+    public Task<ExpensePerson> UpdateAsync(string id, UpdateExpensePersonParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpensePerson>("POST", $"/v1/expense_people/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
-    /// Borrar un cliente
+    /// Dar su enlace a una persona
     /// </summary>
     /// <remarks>
-    /// Lo quita del catálogo. Sus facturas timbradas siguen igual.
+    /// El enlace donde la persona ve solo sus comprobaciones y sube sus facturas desde el teléfono, sin cuenta. Con renew: true le da uno nuevo y el anterior deja de funcionar.
     /// <br/>
-    /// <c>DELETE /v1/customers/{id}</c>
+    /// <c>POST /v1/expense_people/{id}/link</c>
     /// <br/>
-    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/delete-customer"/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/create-expense-person-link"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpensePersonLink> CreateLinkAsync(string id, CreateExpensePersonLinkParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpensePersonLink>("POST", $"/v1/expense_people/{Uri.EscapeDataString(id)}/link", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Apagar el enlace de una persona
+    /// </summary>
+    /// <remarks>
+    /// Su enlace deja de funcionar (url: null). Puede darle uno nuevo después con POST /v1/expense_people/{id}/link.
+    /// <br/>
+    /// <c>DELETE /v1/expense_people/{id}/link</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/delete-expense-person-link"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpensePersonLink> DeleteLinkAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpensePersonLink>("DELETE", $"/v1/expense_people/{Uri.EscapeDataString(id)}/link", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Viáticos y gastos: <c>fiscalisto.ExpenseReports</c>.
+/// </summary>
+public sealed class ExpenseReportsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ExpenseReportsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Abrir una comprobación
+    /// </summary>
+    /// <remarks>
+    /// Una por viaje (kind viaje) o una por periodo de gastos de oficina que la empresa reembolsa (kind gastos). Queda abierta (draft): se le agregan gastos y anticipos, y se envía con POST /v1/expense_reports/{id}/submit.
+    /// <br/>
+    /// <c>POST /v1/expense_reports</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/create-expense-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> CreateAsync(CreateExpenseReportParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", "/v1/expense_reports", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar comprobaciones
+    /// </summary>
+    /// <remarks>
+    /// Las comprobaciones del emisor, las más recientes primero, con sus gastos y movimientos.
+    /// <br/>
+    /// <c>GET /v1/expense_reports</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/list-expense-reports"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ExpenseReport>> ListAsync(ListExpenseReportsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ExpenseReport>("/v1/expense_reports", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar comprobaciones: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ExpenseReport> ListAutoPagingAsync(ListExpenseReportsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ExpenseReport>("/v1/expense_reports", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una comprobación
+    /// </summary>
+    /// <remarks>
+    /// Una comprobación con sus gastos, lo deducible de cada uno, sus avisos (issues) contra la ley y la política, y su saldo.
+    /// <br/>
+    /// <c>GET /v1/expense_reports/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/get-expense-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("GET", $"/v1/expense_reports/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una comprobación
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda: su nombre, el propósito, el destino y las fechas. Mientras no esté aprobada.
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/update-expense-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> UpdateAsync(string id, UpdateExpenseReportParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una comprobación
+    /// </summary>
+    /// <remarks>
+    /// Una que no esté aprobada y no tenga anticipos ni pagos (quítelos antes). No se puede deshacer.
+    /// <br/>
+    /// <c>DELETE /v1/expense_reports/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/delete-expense-report"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Deleted>("DELETE", $"/v1/customers/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/expense_reports/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Enviar a aprobar
+    /// </summary>
+    /// <remarks>
+    /// La persona termina: pasa a submitted (por aprobar). Contesta expense_report_invalid si un gasto tiene un error (issues con level error).
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}/submit</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/submit-expense-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> SubmitAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/submit", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Aprobar una comprobación
+    /// </summary>
+    /// <remarks>
+    /// Pasa a approved (por liquidar): sus facturas se deducen en los impuestos del emisor y entra en las pólizas contra 107.01 Funcionarios y empleados. Con el saldo en cero se cierra sola; si no, liquide con un reembolso o una devolución.
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}/approve</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/approve-expense-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> ApproveAsync(string id, ApproveExpenseReportParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/approve", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Devolver para corregir
+    /// </summary>
+    /// <remarks>
+    /// Regresa a la persona (rejected, «Devuelta») con una nota de qué corregir. La corrige y la vuelve a enviar.
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}/return</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/return-expense-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> SendBackAsync(string id, ReturnExpenseReportParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/return", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Reabrir una comprobación
+    /// </summary>
+    /// <remarks>
+    /// Una aprobada vuelve a abierta: sus facturas dejan de deducirse y sale de las pólizas. No si ya se reportó en la nómina.
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}/reopen</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/reopen-expense-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> ReopenAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/reopen", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Agregar un gasto
+    /// </summary>
+    /// <remarks>
+    /// Con uuid, una factura recibida del emisor (GET /v1/sat_invoices): la fecha, el monto y el proveedor salen de ella. Sin uuid, un gasto con su category, date y amount (un ticket, un comprobante del extranjero). Contesta la comprobación revisada.
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}/items</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/create-expense-item"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> CreateItemAsync(string id, CreateExpenseItemParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/items", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Actualizar un gasto
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda. Al revisarla, rejected: true con reject_reason rechaza el gasto (no se paga ni se deduce) y false lo vuelve a incluir.
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}/items/{item}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/update-expense-item"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> UpdateItemAsync(string id, string item, UpdateExpenseItemParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/items/{Uri.EscapeDataString(item)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar un gasto
+    /// </summary>
+    /// <remarks>
+    /// Lo quita de la comprobación mientras no esté aprobada. Contesta la comprobación.
+    /// <br/>
+    /// <c>DELETE /v1/expense_reports/{id}/items/{item}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/delete-expense-item"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> DeleteItemAsync(string id, string item, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("DELETE", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/items/{Uri.EscapeDataString(item)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Registrar dinero dado o devuelto
+    /// </summary>
+    /// <remarks>
+    /// Un anticipo (antes de aprobarla), un reembolso o una devolución (ya aprobada). Con method nomina va en el siguiente recibo de nómina del empleado. Con el saldo en cero, una aprobada se cierra.
+    /// <br/>
+    /// <c>POST /v1/expense_reports/{id}/movements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/create-expense-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> CreateMovementAsync(string id, CreateExpenseMovementParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("POST", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/movements", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Deshacer un movimiento
+    /// </summary>
+    /// <remarks>
+    /// Lo quita (una cerrada vuelve a por liquidar). No uno que ya se pagó en la nómina.
+    /// <br/>
+    /// <c>DELETE /v1/expense_reports/{id}/movements/{movement}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/delete-expense-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpenseReport> DeleteMovementAsync(string id, string movement, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpenseReport>("DELETE", $"/v1/expense_reports/{Uri.EscapeDataString(id)}/movements/{Uri.EscapeDataString(movement)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Viáticos y gastos: <c>fiscalisto.ExpensePolicy</c>.
+/// </summary>
+public sealed class ExpensePolicyResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ExpensePolicyResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver la política
+    /// </summary>
+    /// <remarks>
+    /// La política de viáticos y gastos del emisor: topes por categoría, hasta cuánto sin factura y los días para comprobar.
+    /// <br/>
+    /// <c>GET /v1/expense_policy</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/get-expense-policy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpensePolicy> GetAsync(GetExpensePolicyParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpensePolicy>("GET", "/v1/expense_policy", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar la política
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda; en limits, una categoría con null deja de tener tope. Un gasto que pasa un tope no se rechaza: se marca para quien aprueba.
+    /// <br/>
+    /// <c>POST /v1/expense_policy</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/viaticos-y-gastos/update-expense-policy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExpensePolicy> UpdateAsync(UpdateExpensePolicyParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExpensePolicy>("POST", "/v1/expense_policy", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -2973,6 +3352,20 @@ public sealed class AccountingResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<CrossChecks> CrossChecksAsync(GetCrossChecksParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<CrossChecks>("GET", "/v1/accounting/cross_checks", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver el IVA a favor y preparar su devolución
+    /// </summary>
+    /// <remarks>
+    /// El IVA a favor de cada mes de los últimos cinco años (de las declaraciones leídas con POST /v1/sat_declarations/refresh o, sin ellas, de sus CFDI, con estimated en true), cuánto se acreditó después (del saldo más antiguo primero), cuánto queda, qué está en devolución y cuándo prescribe. Con `month`, la revisión de ese mes antes de pedirlo en el SAT: declaración, cruce con CFDI, DIOT, opinión de cumplimiento, Buzón Tributario, e.firma, listas del SAT, CFDI de proveedores con hallazgos y CLABE, con el monto a pedir. No presenta nada en el SAT. Gratis.
+    /// <br/>
+    /// <c>GET /v1/accounting/vat_refund</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-vat-refund"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<VatRefund> VatRefundAsync(GetVatRefundParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<VatRefund>("GET", "/v1/accounting/vat_refund", null, @params, options, false, cancellationToken);
 
     /// <summary>
     /// Ver los CFDI de una cifra del cruce
