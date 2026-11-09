@@ -6079,10 +6079,34 @@ public sealed partial class CreateTicketParams
     public string? Iva { get; set; }
 
     /// <summary>
+    /// Quién pagó, para reconocer la venta en Tickets. No es el receptor de la factura (eso lo escribe el comprador en el portal) y no se le manda nada.
+    /// </summary>
+    [JsonPropertyName("buyer")]
+    public CreateTicketParamsBuyer? Buyer { get; set; }
+
+    /// <summary>
     /// Una venta de varios conceptos (el folio de un hotel: noches, desayunos, lavandería), cada uno con su producto o sus claves, sus impuestos y lo que se cobró por él; hasta 200. En lugar de `product`, `description`, `product_key`, `unit_key` e `iva`. La factura del cliente lleva un concepto por línea; la factura global, uno por cada combinación de impuestos del ticket.
     /// </summary>
     [JsonPropertyName("lines")]
     public List<CreateTicketParamsLinesItem>? Lines { get; set; }
+}
+
+/// <summary>
+/// Quién pagó, para reconocer la venta en Tickets. No es el receptor de la factura (eso lo escribe el comprador en el portal) y no se le manda nada.
+/// </summary>
+public sealed partial class CreateTicketParamsBuyer
+{
+    /// <summary>
+    /// Su nombre o el de su empresa, como lo conoce su sistema.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Su correo.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
 }
 
 /// <summary>
@@ -23080,10 +23104,34 @@ public sealed partial class Ticket
     public TicketCustomer? Customer { get; set; }
 
     /// <summary>
+    /// Quién pagó, como lo conoce el origen de la venta (el `buyer` que mandó, o el cliente de un pago de Stripe). No es el receptor de la factura (`customer`).
+    /// </summary>
+    [JsonPropertyName("buyer")]
+    public TicketBuyer? Buyer { get; set; }
+
+    /// <summary>
     /// Cuándo se registró.
     /// </summary>
     [JsonPropertyName("created_at")]
     public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;TicketBuyer&lt;/c&gt;.
+/// </summary>
+public sealed partial class TicketBuyer
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Correo a donde se envía (varios separados por comas). Solo se usa si se pide enviarlo.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
 }
 
 /// <summary>
