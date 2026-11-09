@@ -1764,6 +1764,62 @@ public sealed partial class CreateCustomerDataRequestParams
 }
 
 /// <summary>
+/// Los campos de «Crear un grupo de clientes».
+/// </summary>
+public sealed partial class CreateCustomerGroupParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Color de su etiqueta en la app: info, warning, positive, critical o muted.
+    /// <br/>
+    /// Valores: info, warning, positive, critical, muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+
+    /// <summary>
+    /// Su lista (prl_…); null: la que aplica a todos.
+    /// </summary>
+    [JsonPropertyName("price_list")]
+    public string? PriceList { get; set; }
+
+    /// <summary>
+    /// Un descuento en cada concepto, como descuento del CFDI.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
+
+    /// <summary>
+    /// Días de crédito que se le dan, de 0 a 365, o null para no cambiar los del cliente.
+    /// </summary>
+    [JsonPropertyName("credit_days")]
+    public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// El pedido mínimo antes de IVA desde el Portal del cliente.
+    /// </summary>
+    [JsonPropertyName("min_order")]
+    public decimal? MinOrder { get; set; }
+
+    /// <summary>
+    /// Sus clientes pueden hacer pedidos desde su Portal del cliente (true por omisión).
+    /// </summary>
+    [JsonPropertyName("portal_ordering")]
+    public bool? PortalOrdering { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear un cliente».
 /// </summary>
 public sealed partial class CreateCustomerParams
@@ -1815,6 +1871,24 @@ public sealed partial class CreateCustomerParams
     /// </summary>
     [JsonPropertyName("foreign")]
     public CreateCustomerParamsForeign? Foreign { get; set; }
+
+    /// <summary>
+    /// Su grupo de clientes (cgr_…), o null para ninguno.
+    /// </summary>
+    [JsonPropertyName("group")]
+    public string? Group { get; set; }
+
+    /// <summary>
+    /// Su propia lista de precios (prl_…), que gana sobre la de su grupo; null: la de su grupo o la de todos.
+    /// </summary>
+    [JsonPropertyName("price_list")]
+    public string? PriceList { get; set; }
+
+    /// <summary>
+    /// Su propio descuento en cada concepto, en %; null: el de su grupo.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
 
     /// <summary>
     /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
@@ -3132,6 +3206,108 @@ public sealed partial class CreatePayrollReceiptParamsPeriod
 }
 
 /// <summary>
+/// Los campos de «Crear una lista de precios».
+/// </summary>
+public sealed partial class CreatePriceListParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Mayoreo, Distribuidor, Buen Fin…
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Otra lista (prl_…) de la que parte; null o sin ella: el precio del catálogo.
+    /// </summary>
+    [JsonPropertyName("base_list")]
+    public string? BaseList { get; set; }
+
+    /// <summary>
+    /// Cuánto mueve el precio del que parte: −10 lo baja 10 %, 5 lo sube 5 %.
+    /// </summary>
+    [JsonPropertyName("adjust_percent")]
+    public decimal? AdjustPercent { get; set; }
+
+    /// <summary>
+    /// Redondea a: 0.5, 1, 5, 10… (null: a centavos).
+    /// </summary>
+    [JsonPropertyName("round_to")]
+    public decimal? RoundTo { get; set; }
+
+    /// <summary>
+    /// Desde qué día vale (YYYY-MM-DD, Ciudad de México), o null desde siempre.
+    /// </summary>
+    [JsonPropertyName("starts_on")]
+    public string? StartsOn { get; set; }
+
+    /// <summary>
+    /// Hasta qué día vale, ese día incluido (YYYY-MM-DD), o null sin fin.
+    /// </summary>
+    [JsonPropertyName("ends_on")]
+    public string? EndsOn { get; set; }
+
+    /// <summary>
+    /// La tienen los clientes sin otra lista (ni ellos ni su grupo). Solo una lo es.
+    /// </summary>
+    [JsonPropertyName("is_default")]
+    public bool? IsDefault { get; set; }
+
+    /// <summary>
+    /// Sus precios propios; al mandarlos reemplazan a los que tenía.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<CreatePriceListParamsItemsItem>? Items { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreatePriceListParamsItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreatePriceListParamsItemsItem
+{
+    /// <summary>
+    /// El producto (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public required string Product { get; set; }
+
+    /// <summary>
+    /// Una presentación del producto (su id de unidad, un entero de GET /v1/products/{id}/units), por ejemplo una caja de 12; null o sin él: su propia unidad.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// Desde cuántas aplica (1 por omisión): varios renglones del mismo producto son sus escalones de mayoreo.
+    /// </summary>
+    [JsonPropertyName("min_quantity")]
+    public decimal? MinQuantity { get; set; }
+
+    /// <summary>
+    /// Su precio por unidad sin IVA. Mande este o discount_percent.
+    /// </summary>
+    [JsonPropertyName("unit_price")]
+    public decimal? UnitPrice { get; set; }
+
+    /// <summary>
+    /// Un descuento sobre el precio de la lista. Mande este o unit_price.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear un producto».
 /// </summary>
 public sealed partial class CreateProductParams
@@ -3261,6 +3437,24 @@ public sealed partial class CreateProductParams
     /// </summary>
     [JsonPropertyName("min_stock")]
     public decimal? MinStock { get; set; }
+
+    /// <summary>
+    /// Se vende en el Portal del cliente: sus clientes lo piden desde ahí, a sus precios (listas de precios), y el pedido llega por confirmar.
+    /// </summary>
+    [JsonPropertyName("portal_visible")]
+    public bool? PortalVisible { get; set; }
+
+    /// <summary>
+    /// Lo menos que se le pide desde el portal, en su unidad.
+    /// </summary>
+    [JsonPropertyName("min_order_qty")]
+    public decimal? MinOrderQty { get; set; }
+
+    /// <summary>
+    /// Se pide de tantos en tantos desde el portal (12: de 12 en 12).
+    /// </summary>
+    [JsonPropertyName("order_step")]
+    public decimal? OrderStep { get; set; }
 }
 
 /// <summary>
@@ -6415,6 +6609,24 @@ public sealed partial class Customer
     public bool IepsTaxpayer { get; set; }
 
     /// <summary>
+    /// Su grupo de clientes (cgr_…), o null si no está en ninguno.
+    /// </summary>
+    [JsonPropertyName("group")]
+    public string? Group { get; set; }
+
+    /// <summary>
+    /// Lista de precios (prl_…). En un cliente, la suya propia, que gana a la de su grupo; null para usar la de su grupo o la de todos.
+    /// </summary>
+    [JsonPropertyName("price_list")]
+    public string? PriceList { get; set; }
+
+    /// <summary>
+    /// Porcentaje de descuento sobre el precio, de 0 a 100; en el CFDI va como Descuento de cada concepto.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -6615,6 +6827,120 @@ public sealed partial class CustomerForeign
     /// </summary>
     [JsonPropertyName("tax_id")]
     public string? TaxId { get; set; }
+}
+
+/// <summary>
+/// Un grupo de clientes: su lista de precios, descuento, días de crédito, pedido mínimo y si piden desde su Portal del cliente.
+/// </summary>
+public sealed partial class CustomerGroup
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Color de su etiqueta en la app: info, warning, positive, critical o muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string Color { get; set; } = default!;
+
+    /// <summary>
+    /// Lista de precios (prl_…). En un cliente, la suya propia, que gana a la de su grupo; null para usar la de su grupo o la de todos.
+    /// </summary>
+    [JsonPropertyName("price_list")]
+    public string? PriceList { get; set; }
+
+    /// <summary>
+    /// Porcentaje de descuento sobre el precio, de 0 a 100; en el CFDI va como Descuento de cada concepto.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal DiscountPercent { get; set; }
+
+    /// <summary>
+    /// Días de crédito que se le dan, de 0 a 365, o null para no cambiar los del cliente.
+    /// </summary>
+    [JsonPropertyName("credit_days")]
+    public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// Pedido mínimo, sin IVA, para pedir desde el Portal del cliente, o null sin mínimo.
+    /// </summary>
+    [JsonPropertyName("min_order")]
+    public decimal? MinOrder { get; set; }
+
+    /// <summary>
+    /// true si sus clientes pueden hacer pedidos desde su Portal del cliente.
+    /// </summary>
+    [JsonPropertyName("portal_ordering")]
+    public bool PortalOrdering { get; set; }
+
+    /// <summary>
+    /// Cuántos clientes hay en el grupo.
+    /// </summary>
+    [JsonPropertyName("customers")]
+    public long Customers { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class CustomerGroupList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<CustomerGroup> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -15131,6 +15457,30 @@ public sealed partial class ListCustomerDataRequestsParams
 }
 
 /// <summary>
+/// Los campos de «Listar grupos de clientes».
+/// </summary>
+public sealed partial class ListCustomerGroupsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar clientes».
 /// </summary>
 public sealed partial class ListCustomersParams
@@ -15492,6 +15842,30 @@ public sealed partial class ListLedgerAccountsParams
 /// Los campos de «Listar lotes de nómina».
 /// </summary>
 public sealed partial class ListPayrollBatchesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar listas de precios».
+/// </summary>
+public sealed partial class ListPriceListsParams
 {
     /// <summary>
     /// Cuántos por página, de 1 a 100. Por omisión 10.
@@ -17193,6 +17567,288 @@ public sealed partial class PreviewPayrollReceiptParamsPeriod
 }
 
 /// <summary>
+/// Una lista de precios: parte del precio del catálogo (o de otra lista), lo mueve un porcentaje y lo redondea, con precios propios por producto, presentación y desde cierta cantidad (escalones de mayoreo). items solo viene al ver una lista.
+/// </summary>
+public sealed partial class PriceList
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// La lista (prl_…) de la que parte; null parte del precio del catálogo de cada producto.
+    /// </summary>
+    [JsonPropertyName("base_list")]
+    public string? BaseList { get; set; }
+
+    /// <summary>
+    /// Cuánto sube (positivo) o baja (negativo) el precio del que parte, en porcentaje.
+    /// </summary>
+    [JsonPropertyName("adjust_percent")]
+    public decimal AdjustPercent { get; set; }
+
+    /// <summary>
+    /// A cuánto redondea los precios que calcula (0.5, 1, 10…), o null sin redondear.
+    /// </summary>
+    [JsonPropertyName("round_to")]
+    public decimal? RoundTo { get; set; }
+
+    /// <summary>
+    /// Desde qué día vale (YYYY-MM-DD, Ciudad de México), o null desde siempre.
+    /// </summary>
+    [JsonPropertyName("starts_on")]
+    public string? StartsOn { get; set; }
+
+    /// <summary>
+    /// Hasta qué día vale, ese día incluido (YYYY-MM-DD), o null sin fin.
+    /// </summary>
+    [JsonPropertyName("ends_on")]
+    public string? EndsOn { get; set; }
+
+    /// <summary>
+    /// true si es la lista de todos los clientes que no tienen otra (solo puede haber una).
+    /// </summary>
+    [JsonPropertyName("is_default")]
+    public bool IsDefault { get; set; }
+
+    /// <summary>
+    /// false la pausa; true la reanuda desde hoy.
+    /// </summary>
+    [JsonPropertyName("active")]
+    public bool Active { get; set; }
+
+    /// <summary>
+    /// Cuántos grupos de clientes la usan.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public long Groups { get; set; }
+
+    /// <summary>
+    /// Cuántos clientes la tienen como suya.
+    /// </summary>
+    [JsonPropertyName("customers")]
+    public long Customers { get; set; }
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<PriceListItemsItem>? Items { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez, ISO 8601 (-06:00).
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PriceListItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PriceListItemsItem
+{
+    /// <summary>
+    /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = default!;
+
+    /// <summary>
+    /// Unidad aduana (UnidadAduana), c_UnidadAduana.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// Desde cuántas unidades (de su presentación) vale este precio: un escalón de mayoreo. 1 por omisión.
+    /// </summary>
+    [JsonPropertyName("min_quantity")]
+    public decimal MinQuantity { get; set; }
+
+    /// <summary>
+    /// Precio unitario antes de impuestos (ValorUnitario).
+    /// </summary>
+    [JsonPropertyName("unit_price")]
+    public decimal? UnitPrice { get; set; }
+
+    /// <summary>
+    /// Porcentaje que baja el precio de la lista para este producto, en vez de un precio fijo.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class PriceListList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<PriceList> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que un cliente paga por unos productos a una cantidad: su precio por unidad sin IVA (de su lista), su descuento y el siguiente escalón de mayoreo.
+/// </summary>
+public sealed partial class PriceQuote
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El cliente (cus_…) cuyos precios se calcularon.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public string Customer { get; set; } = default!;
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<PriceQuoteItemsItem> Items { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PriceQuoteItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PriceQuoteItemsItem
+{
+    /// <summary>
+    /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = default!;
+
+    /// <summary>
+    /// Cantidad (Cantidad). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// Unidad aduana (UnidadAduana), c_UnidadAduana.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// Precio unitario antes de impuestos (ValorUnitario).
+    /// </summary>
+    [JsonPropertyName("unit_price")]
+    public decimal UnitPrice { get; set; }
+
+    /// <summary>
+    /// Su precio del catálogo, por unidad y sin IVA, antes de su lista.
+    /// </summary>
+    [JsonPropertyName("catalog_price")]
+    public decimal CatalogPrice { get; set; }
+
+    /// <summary>
+    /// El descuento del cliente (el suyo, o el de su grupo) sobre ese precio; va como Descuento en el CFDI.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal DiscountPercent { get; set; }
+
+    /// <summary>
+    /// La lista (prl_…) de donde sale el precio, o null si es el del catálogo.
+    /// </summary>
+    [JsonPropertyName("price_list")]
+    public string? PriceList { get; set; }
+
+    /// <summary>
+    /// El siguiente escalón de mayoreo: desde qué cantidad y a qué precio. null si no hay.
+    /// </summary>
+    [JsonPropertyName("next_step")]
+    public PriceQuoteItemsItemNextStep? NextStep { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PriceQuoteItemsItemNextStep&lt;/c&gt;.
+/// </summary>
+public sealed partial class PriceQuoteItemsItemNextStep
+{
+    /// <summary>
+    /// Desde cuántas unidades (de su presentación) vale este precio: un escalón de mayoreo. 1 por omisión.
+    /// </summary>
+    [JsonPropertyName("min_quantity")]
+    public decimal MinQuantity { get; set; }
+
+    /// <summary>
+    /// Precio unitario antes de impuestos (ValorUnitario).
+    /// </summary>
+    [JsonPropertyName("unit_price")]
+    public decimal UnitPrice { get; set; }
+}
+
+/// <summary>
 /// Un producto o servicio del catálogo de un emisor.
 /// </summary>
 public sealed partial class Product
@@ -17334,6 +17990,24 @@ public sealed partial class Product
     /// </summary>
     [JsonPropertyName("min_stock")]
     public decimal? MinStock { get; set; }
+
+    /// <summary>
+    /// true si se ofrece en el Portal del cliente para hacer pedidos.
+    /// </summary>
+    [JsonPropertyName("portal_visible")]
+    public bool PortalVisible { get; set; }
+
+    /// <summary>
+    /// Lo mínimo que se pide de él en el Portal del cliente, o null sin mínimo.
+    /// </summary>
+    [JsonPropertyName("min_order_qty")]
+    public decimal? MinOrderQty { get; set; }
+
+    /// <summary>
+    /// De cuántos en cuántos se pide en el Portal del cliente (6 para pedir 6, 12, 18…), o null de uno en uno.
+    /// </summary>
+    [JsonPropertyName("order_step")]
+    public decimal? OrderStep { get; set; }
 
     /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
@@ -17906,6 +18580,54 @@ public sealed partial class QuoteList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Los campos de «Ver los precios de un cliente».
+/// </summary>
+public sealed partial class QuotePricesParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El cliente (cus_…) o su RFC.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public required string Customer { get; set; }
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public required List<QuotePricesParamsItemsItem> Items { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;QuotePricesParamsItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class QuotePricesParamsItemsItem
+{
+    /// <summary>
+    /// El producto (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public required string Product { get; set; }
+
+    /// <summary>
+    /// Cantidad (Cantidad). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal? Quantity { get; set; }
+
+    /// <summary>
+    /// Unidad aduana (UnidadAduana), c_UnidadAduana.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
 }
 
 /// <summary>
@@ -22765,6 +23487,56 @@ public sealed partial class UpdateCostCenterParams
 }
 
 /// <summary>
+/// Los campos de «Actualizar un grupo de clientes».
+/// </summary>
+public sealed partial class UpdateCustomerGroupParams
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Color de su etiqueta en la app: info, warning, positive, critical o muted.
+    /// <br/>
+    /// Valores: info, warning, positive, critical, muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+
+    /// <summary>
+    /// Su lista (prl_…); null: la que aplica a todos.
+    /// </summary>
+    [JsonPropertyName("price_list")]
+    public string? PriceList { get; set; }
+
+    /// <summary>
+    /// Un descuento en cada concepto, como descuento del CFDI.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
+
+    /// <summary>
+    /// Días de crédito que se le dan, de 0 a 365, o null para no cambiar los del cliente.
+    /// </summary>
+    [JsonPropertyName("credit_days")]
+    public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// El pedido mínimo antes de IVA desde el Portal del cliente.
+    /// </summary>
+    [JsonPropertyName("min_order")]
+    public decimal? MinOrder { get; set; }
+
+    /// <summary>
+    /// Sus clientes pueden hacer pedidos desde su Portal del cliente (true por omisión).
+    /// </summary>
+    [JsonPropertyName("portal_ordering")]
+    public bool? PortalOrdering { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar un cliente».
 /// </summary>
 public sealed partial class UpdateCustomerParams
@@ -22810,6 +23582,24 @@ public sealed partial class UpdateCustomerParams
     /// </summary>
     [JsonPropertyName("foreign")]
     public UpdateCustomerParamsForeign? Foreign { get; set; }
+
+    /// <summary>
+    /// Su grupo de clientes (cgr_…), o null para ninguno.
+    /// </summary>
+    [JsonPropertyName("group")]
+    public string? Group { get; set; }
+
+    /// <summary>
+    /// Su propia lista de precios (prl_…), que gana sobre la de su grupo; null: la de su grupo o la de todos.
+    /// </summary>
+    [JsonPropertyName("price_list")]
+    public string? PriceList { get; set; }
+
+    /// <summary>
+    /// Su propio descuento en cada concepto, en %; null: el de su grupo.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
 
     /// <summary>
     /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
@@ -23351,6 +24141,102 @@ public sealed partial class UpdateIssuerParams
 }
 
 /// <summary>
+/// Los campos de «Actualizar una lista de precios».
+/// </summary>
+public sealed partial class UpdatePriceListParams
+{
+    /// <summary>
+    /// Mayoreo, Distribuidor, Buen Fin…
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Otra lista (prl_…) de la que parte; null o sin ella: el precio del catálogo.
+    /// </summary>
+    [JsonPropertyName("base_list")]
+    public string? BaseList { get; set; }
+
+    /// <summary>
+    /// Cuánto mueve el precio del que parte: −10 lo baja 10 %, 5 lo sube 5 %.
+    /// </summary>
+    [JsonPropertyName("adjust_percent")]
+    public decimal? AdjustPercent { get; set; }
+
+    /// <summary>
+    /// Redondea a: 0.5, 1, 5, 10… (null: a centavos).
+    /// </summary>
+    [JsonPropertyName("round_to")]
+    public decimal? RoundTo { get; set; }
+
+    /// <summary>
+    /// Desde qué día vale (YYYY-MM-DD, Ciudad de México), o null desde siempre.
+    /// </summary>
+    [JsonPropertyName("starts_on")]
+    public string? StartsOn { get; set; }
+
+    /// <summary>
+    /// Hasta qué día vale, ese día incluido (YYYY-MM-DD), o null sin fin.
+    /// </summary>
+    [JsonPropertyName("ends_on")]
+    public string? EndsOn { get; set; }
+
+    /// <summary>
+    /// La tienen los clientes sin otra lista (ni ellos ni su grupo). Solo una lo es.
+    /// </summary>
+    [JsonPropertyName("is_default")]
+    public bool? IsDefault { get; set; }
+
+    /// <summary>
+    /// Sus precios propios; al mandarlos reemplazan a los que tenía.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<UpdatePriceListParamsItemsItem>? Items { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdatePriceListParamsItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdatePriceListParamsItemsItem
+{
+    /// <summary>
+    /// El producto (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public required string Product { get; set; }
+
+    /// <summary>
+    /// Una presentación del producto (su id de unidad, un entero de GET /v1/products/{id}/units), por ejemplo una caja de 12; null o sin él: su propia unidad.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// Desde cuántas aplica (1 por omisión): varios renglones del mismo producto son sus escalones de mayoreo.
+    /// </summary>
+    [JsonPropertyName("min_quantity")]
+    public decimal? MinQuantity { get; set; }
+
+    /// <summary>
+    /// Su precio por unidad sin IVA. Mande este o discount_percent.
+    /// </summary>
+    [JsonPropertyName("unit_price")]
+    public decimal? UnitPrice { get; set; }
+
+    /// <summary>
+    /// Un descuento sobre el precio de la lista. Mande este o unit_price.
+    /// </summary>
+    [JsonPropertyName("discount_percent")]
+    public decimal? DiscountPercent { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar un producto».
 /// </summary>
 public sealed partial class UpdateProductParams
@@ -23474,6 +24360,24 @@ public sealed partial class UpdateProductParams
     /// </summary>
     [JsonPropertyName("min_stock")]
     public decimal? MinStock { get; set; }
+
+    /// <summary>
+    /// Se vende en el Portal del cliente: sus clientes lo piden desde ahí, a sus precios (listas de precios), y el pedido llega por confirmar.
+    /// </summary>
+    [JsonPropertyName("portal_visible")]
+    public bool? PortalVisible { get; set; }
+
+    /// <summary>
+    /// Lo menos que se le pide desde el portal, en su unidad.
+    /// </summary>
+    [JsonPropertyName("min_order_qty")]
+    public decimal? MinOrderQty { get; set; }
+
+    /// <summary>
+    /// Se pide de tantos en tantos desde el portal (12: de 12 en 12).
+    /// </summary>
+    [JsonPropertyName("order_step")]
+    public decimal? OrderStep { get; set; }
 }
 
 /// <summary>

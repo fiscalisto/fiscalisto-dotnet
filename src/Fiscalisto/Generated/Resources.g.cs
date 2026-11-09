@@ -140,6 +140,21 @@ public sealed partial class FiscalistoClient
     /// <summary>Centros de costo.</summary>
     public CostCentersResource CostCenters => _costCenters ??= new CostCentersResource(this);
 
+    private PriceListsResource? _priceLists;
+
+    /// <summary>Listas de precios.</summary>
+    public PriceListsResource PriceLists => _priceLists ??= new PriceListsResource(this);
+
+    private CustomerGroupsResource? _customerGroups;
+
+    /// <summary>Listas de precios.</summary>
+    public CustomerGroupsResource CustomerGroups => _customerGroups ??= new CustomerGroupsResource(this);
+
+    private PricesResource? _prices;
+
+    /// <summary>Listas de precios.</summary>
+    public PricesResource Prices => _prices ??= new PricesResource(this);
+
     private ExpensePeopleResource? _expensePeople;
 
     /// <summary>Viáticos y gastos.</summary>
@@ -2113,6 +2128,202 @@ public sealed class CostCentersResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, DeleteCostCenterParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/cost_centers/{Uri.EscapeDataString(id)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Listas de precios: <c>fiscalisto.PriceLists</c>.
+/// </summary>
+public sealed class PriceListsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PriceListsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una lista de precios
+    /// </summary>
+    /// <remarks>
+    /// Parte del precio del catálogo (o de base_list, otra lista), lo mueve adjust_percent y lo redondea a round_to; con starts_on y ends_on es una promoción. items le pone precios propios por producto, por presentación (unit, una caja) y desde min_quantity (escalones de mayoreo), cada uno con unit_price o discount_percent. is_default: la tienen los clientes sin otra. Hasta 100.
+    /// <br/>
+    /// <c>POST /v1/price_lists</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/create-price-list"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PriceList> CreateAsync(CreatePriceListParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PriceList>("POST", "/v1/price_lists", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar listas de precios
+    /// </summary>
+    /// <remarks>
+    /// Las listas de precios en el orden de la app, con cuántos grupos y clientes la tienen. items viene al ver una.
+    /// <br/>
+    /// <c>GET /v1/price_lists</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/list-price-lists"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<PriceList>> ListAsync(ListPriceListsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<PriceList>("/v1/price_lists", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar listas de precios: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<PriceList> ListAutoPagingAsync(ListPriceListsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<PriceList>("/v1/price_lists", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una lista de precios
+    /// </summary>
+    /// <remarks>
+    /// Una lista de precios con sus precios propios (items).
+    /// <br/>
+    /// <c>GET /v1/price_lists/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/get-price-list"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PriceList> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PriceList>("GET", $"/v1/price_lists/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una lista de precios
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda; items reemplaza todos sus precios propios. Las facturas, cotizaciones y pedidos ya hechos no cambian.
+    /// <br/>
+    /// <c>POST /v1/price_lists/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/update-price-list"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PriceList> UpdateAsync(string id, UpdatePriceListParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PriceList>("POST", $"/v1/price_lists/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar una lista de precios
+    /// </summary>
+    /// <remarks>
+    /// La archiva: sus grupos y clientes pasan a la lista que aplica a todos (o al precio del catálogo).
+    /// <br/>
+    /// <c>DELETE /v1/price_lists/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/delete-price-list"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/price_lists/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Listas de precios: <c>fiscalisto.CustomerGroups</c>.
+/// </summary>
+public sealed class CustomerGroupsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CustomerGroupsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear un grupo de clientes
+    /// </summary>
+    /// <remarks>
+    /// Lo que tienen todos sus clientes: price_list, discount_percent (el descuento de cada concepto en el CFDI), credit_days, min_order (antes de IVA, desde el portal) y portal_ordering. Un cliente entra con group en POST /v1/customers/{id}.
+    /// <br/>
+    /// <c>POST /v1/customer_groups</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/create-customer-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CustomerGroup> CreateAsync(CreateCustomerGroupParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CustomerGroup>("POST", "/v1/customer_groups", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar grupos de clientes
+    /// </summary>
+    /// <remarks>
+    /// Los grupos de clientes, con cuántos clientes tiene cada uno.
+    /// <br/>
+    /// <c>GET /v1/customer_groups</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/list-customer-groups"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<CustomerGroup>> ListAsync(ListCustomerGroupsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<CustomerGroup>("/v1/customer_groups", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar grupos de clientes: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<CustomerGroup> ListAutoPagingAsync(ListCustomerGroupsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<CustomerGroup>("/v1/customer_groups", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un grupo de clientes
+    /// </summary>
+    /// <remarks>
+    /// Un grupo de clientes.
+    /// <br/>
+    /// <c>GET /v1/customer_groups/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/get-customer-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CustomerGroup> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CustomerGroup>("GET", $"/v1/customer_groups/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar un grupo de clientes
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda.
+    /// <br/>
+    /// <c>POST /v1/customer_groups/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/update-customer-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CustomerGroup> UpdateAsync(string id, UpdateCustomerGroupParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CustomerGroup>("POST", $"/v1/customer_groups/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar un grupo de clientes
+    /// </summary>
+    /// <remarks>
+    /// Sus clientes se quedan sin grupo.
+    /// <br/>
+    /// <c>DELETE /v1/customer_groups/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/delete-customer-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/customer_groups/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Listas de precios: <c>fiscalisto.Prices</c>.
+/// </summary>
+public sealed class PricesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PricesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver los precios de un cliente
+    /// </summary>
+    /// <remarks>
+    /// Lo que un cliente paga por unos productos a una cantidad: el precio por unidad sin IVA de su lista (la suya, la de su grupo o la de todos), su descuento y el siguiente escalón de mayoreo. No guarda nada.
+    /// <br/>
+    /// <c>POST /v1/prices</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/listas-de-precios/quote-prices"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PriceQuote> QuoteAsync(QuotePricesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PriceQuote>("POST", "/v1/prices", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
