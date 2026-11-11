@@ -16429,6 +16429,70 @@ public sealed partial class ListSatMailboxMessagesParams
 }
 
 /// <summary>
+/// Los campos de «Listar constancias de retenciones».
+/// </summary>
+public sealed partial class ListSatRetentionsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// received (por omisión) o issued.
+    /// <br/>
+    /// Valores: received, issued.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string? Direction { get; set; }
+
+    /// <summary>
+    /// active o canceled. Sin él, las dos.
+    /// <br/>
+    /// Valores: active, canceled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// El RFC de quien retuvo (recibidas) o a quien le retuvo (emitidas).
+    /// </summary>
+    [JsonPropertyName("counterparty_tax_id")]
+    public string? CounterpartyTaxId { get; set; }
+
+    /// <summary>
+    /// Clave de la retención (CveRetenc) de dos dígitos, como 16 o 26.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+
+    /// <summary>
+    /// Solo las de un ejercicio, como 2025.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// Solo las que cubren este mes (1 a 12): una anual de enero a diciembre cubre todos.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public long? Month { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar ajustes».
 /// </summary>
 public sealed partial class ListStockAdjustmentsParams
@@ -21694,6 +21758,274 @@ public sealed partial class SatRefresh
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Un CFDI de retenciones e información de pagos del emisor, recibido (la constancia que le dio un banco, una plataforma o quien le pagó) o emitido, como lo muestra Facturas › Retenciones.
+/// </summary>
+public sealed partial class SatRetention
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor de su cuenta (iss_…) a quien pertenece esta constancia.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El folio fiscal (UUID del timbre).
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// received (se la dieron al emisor: un banco, una plataforma, quien le pagó) o issued (la emitió).
+    /// <br/>
+    /// Valores: received, issued.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha de expedición (FechaExp).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Folio interno (FolioInt), o null.
+    /// </summary>
+    [JsonPropertyName("internal_folio")]
+    public string? InternalFolio { get; set; }
+
+    /// <summary>
+    /// Clave de la retención (CveRetenc), como 14 dividendos, 16 intereses o 26 plataformas.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+
+    /// <summary>
+    /// Descripción de la retención (DescRetenc), o null.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Quien retuvo (Emisor).
+    /// </summary>
+    [JsonPropertyName("issued_by")]
+    public SatRetentionIssuedBy IssuedBy { get; set; } = default!;
+
+    /// <summary>
+    /// A quien le retuvieron (Receptor).
+    /// </summary>
+    [JsonPropertyName("issued_to")]
+    public SatRetentionIssuedTo IssuedTo { get; set; } = default!;
+
+    /// <summary>
+    /// Los meses y el ejercicio que cubre (Periodo), o null si no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public SatRetentionPeriod? Period { get; set; }
+
+    /// <summary>
+    /// Los montos de Totales.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public SatRetentionTotals Totals { get; set; } = default!;
+
+    /// <summary>
+    /// Cada impuesto retenido (ImpRetenidos).
+    /// </summary>
+    [JsonPropertyName("withheld_taxes")]
+    public List<SatRetentionWithheldTaxesItem> WithheldTaxes { get; set; } = default!;
+
+    /// <summary>
+    /// active o canceled: la canceló el emisor en Fiscalisto, o el SAT la reporta cancelada (se revisa cada mes). Una cancelada ya no es impuesto retenido.
+    /// <br/>
+    /// Valores: active, canceled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Si su XML no se pudo leer, por qué; sus campos quedan en null. Si no, null.
+    /// </summary>
+    [JsonPropertyName("read_error")]
+    public string? ReadError { get; set; }
+
+    /// <summary>
+    /// Cuándo llegó a Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("downloaded_at")]
+    public string? DownloadedAt { get; set; }
+}
+
+/// <summary>
+/// Quien retuvo (Emisor).
+/// </summary>
+public sealed partial class SatRetentionIssuedBy
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// A quien le retuvieron (Receptor).
+/// </summary>
+public sealed partial class SatRetentionIssuedTo
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatRetentionList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatRetention> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatRetentionPeriod&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatRetentionPeriod
+{
+    /// <summary>
+    /// Ejercicio (Ejercicio).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Mes inicial (MesIni), 1 a 12.
+    /// </summary>
+    [JsonPropertyName("month_start")]
+    public long MonthStart { get; set; }
+
+    /// <summary>
+    /// Mes final (MesFin), 1 a 12.
+    /// </summary>
+    [JsonPropertyName("month_end")]
+    public long MonthEnd { get; set; }
+}
+
+/// <summary>
+/// Los montos de Totales.
+/// </summary>
+public sealed partial class SatRetentionTotals
+{
+    /// <summary>
+    /// Monto total de la operación (MontoTotOperacion).
+    /// </summary>
+    [JsonPropertyName("operation")]
+    public decimal? Operation { get; set; }
+
+    /// <summary>
+    /// Monto gravado (MontoTotGrav). Por omisión, operation menos exempt.
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal? Taxed { get; set; }
+
+    /// <summary>
+    /// Monto exento (MontoTotExent). Por omisión 0.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal? Exempt { get; set; }
+
+    /// <summary>
+    /// Total retenido (MontoTotRet).
+    /// </summary>
+    [JsonPropertyName("withheld")]
+    public decimal? Withheld { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatRetentionWithheldTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatRetentionWithheldTaxesItem
+{
+    /// <summary>
+    /// Base del impuesto retenido (BaseRet).
+    /// </summary>
+    [JsonPropertyName("base")]
+    public decimal? Base { get; set; }
+
+    /// <summary>
+    /// Impuesto: isr, iva o ieps (ImpuestoRet 001, 002, 003).
+    /// </summary>
+    [JsonPropertyName("tax")]
+    public string? Tax { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Tipo de pago de la retención (TipoPagoRet): 01 definitivo IVA, 02 definitivo IEPS, 03 definitivo ISR, 04 provisional ISR. Por omisión el usual de cada impuesto.
+    /// </summary>
+    [JsonPropertyName("payment_type")]
+    public string? PaymentType { get; set; }
 }
 
 /// <summary>

@@ -230,6 +230,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Descargas del SAT.</summary>
     public SatInvoicesResource SatInvoices => _satInvoices ??= new SatInvoicesResource(this);
 
+    private SatRetentionsResource? _satRetentions;
+
+    /// <summary>Descargas del SAT.</summary>
+    public SatRetentionsResource SatRetentions => _satRetentions ??= new SatRetentionsResource(this);
+
     private SatDeclarationsResource? _satDeclarations;
 
     /// <summary>Declaraciones del SAT.</summary>
@@ -3310,6 +3315,78 @@ public sealed class SatInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestBytesAsync("GET", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Descargas del SAT: <c>fiscalisto.SatRetentions</c>.
+/// </summary>
+public sealed class SatRetentionsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatRetentionsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar constancias de retenciones
+    /// </summary>
+    /// <remarks>
+    /// Los CFDI de retenciones e información de pagos del emisor, como los muestra Facturas › Retenciones: los que recibió (descargados del SAT o subidos) o los que emitió, del más reciente al más antiguo, con las canceladas marcadas. Las que emite por la API también están en GET /v1/retentions.
+    /// <br/>
+    /// <c>GET /v1/sat_retentions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/list-sat-retentions"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SatRetention>> ListAsync(ListSatRetentionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SatRetention>("/v1/sat_retentions", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar constancias de retenciones: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SatRetention> ListAutoPagingAsync(ListSatRetentionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SatRetention>("/v1/sat_retentions", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una constancia de retenciones
+    /// </summary>
+    /// <remarks>
+    /// Una constancia de retenciones del emisor, con sus montos, impuestos y estado.
+    /// <br/>
+    /// <c>GET /v1/sat_retentions/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-retention"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatRetention> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatRetention>("GET", $"/v1/sat_retentions/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar el XML de una constancia de retenciones
+    /// </summary>
+    /// <remarks>
+    /// El CFDI de retenciones tal como llegó.
+    /// <br/>
+    /// <c>GET /v1/sat_retentions/{id}/xml</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-retention-xml"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> XmlAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", $"/v1/sat_retentions/{Uri.EscapeDataString(id)}/xml", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar el PDF de una constancia de retenciones
+    /// </summary>
+    /// <remarks>
+    /// La constancia en PDF, como la ofrece Facturas › Retenciones. El XML es el documento válido ante el SAT.
+    /// <br/>
+    /// <c>GET /v1/sat_retentions/{id}/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/get-sat-retention-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/sat_retentions/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
