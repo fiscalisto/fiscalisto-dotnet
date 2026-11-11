@@ -9,7 +9,7 @@ namespace Fiscalisto;
 /// </summary>
 public static class ErrorCode
 {
-    /// <summary>Suspendimos la cuenta API (todas sus llaves, o solo las de producción) por un uso que rompe los términos del servicio. El mensaje dice por qué; escríbanos a soporte@fiscalisto.com para reactivarla.</summary>
+    /// <summary>Suspendimos la API de la empresa (todas sus llaves, o solo las de producción) por un uso que rompe los términos del servicio. El mensaje dice por qué; escríbanos a soporte@fiscalisto.com para reactivarla.</summary>
     public const string AccountSuspended = "account_suspended";
 
     /// <summary>No existe esa versión de la API (en Fiscalisto-Version o api_version). El mensaje dice cuáles hay; vea Versiones.</summary>

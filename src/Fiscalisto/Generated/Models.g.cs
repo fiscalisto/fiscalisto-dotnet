@@ -10807,6 +10807,12 @@ public sealed partial class Invoice
     public decimal? AmountPaid { get; set; }
 
     /// <summary>
+    /// Una PUE que estuvo por cobrar (paid_later o mark_unpaid): el día en que el cliente pagó (AAAA-MM-DD), el que dijo POST /v1/invoices/{id}/mark_paid o el del depósito conciliado con ella. null si no hay fecha de pago registrada (una PUE pagada al timbrarse), si no se ha pagado o si es PPD (sus pagos están en sus complementos).
+    /// </summary>
+    [JsonPropertyName("paid_on")]
+    public string? PaidOn { get; set; }
+
+    /// <summary>
     /// CFDI relacionados (CfdiRelacionados): tipo de relación de c_TipoRelacion y los UUID.
     /// </summary>
     [JsonPropertyName("related")]
@@ -16822,6 +16828,18 @@ public sealed partial class ListWebhookEndpointsParams
     /// </summary>
     [JsonPropertyName("starting_after")]
     public string? StartingAfter { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Marcar pagada».
+/// </summary>
+public sealed partial class MarkInvoicePaidParams
+{
+    /// <summary>
+    /// El día en que el cliente pagó (AAAA-MM-DD, no antes de la factura ni después de hoy); hoy si no se indica. Queda en paid_on.
+    /// </summary>
+    [JsonPropertyName("paid_on")]
+    public string? PaidOn { get; set; }
 }
 
 /// <summary>

@@ -922,15 +922,15 @@ public sealed class InvoicesResource
     /// Marcar pagada
     /// </summary>
     /// <remarks>
-    /// Una factura PUE timbrada con paid_later (o marcada por cobrar) ya se pagó: queda paid y llega invoice.paid. Una PPD se paga con su complemento de pago (POST /v1/payments).
+    /// Una factura PUE timbrada con paid_later (o marcada por cobrar) ya se pagó: queda paid, con paid_on el día que indique (hoy si no), y llega invoice.paid. Una PPD se paga con su complemento de pago (POST /v1/payments).
     /// <br/>
     /// <c>POST /v1/invoices/{id}/mark_paid</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/cuentas-por-cobrar/mark-invoice-paid"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<Invoice> MarkPaidAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_paid", null, null, options, true, cancellationToken);
+    public Task<Invoice> MarkPaidAsync(string id, MarkInvoicePaidParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/mark_paid", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Marcar por cobrar
