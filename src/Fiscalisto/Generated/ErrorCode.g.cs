@@ -93,6 +93,9 @@ public static class ErrorCode
     /// <summary>Viáticos y gastos no lo permite en ese momento: el mensaje dice por qué (un gasto con errores al enviarla, un reembolso antes de aprobarla, aprobar lo que usted mismo envió).</summary>
     public const string ExpenseReportInvalid = "expense_report_invalid";
 
+    /// <summary>En producción, inventario avanzado, portal de proveedores, pedidos de venta y comprobación de gastos siguen el plan de la empresa, como en la app: vienen del plan Negocio en adelante. En modo de pruebas están todos.</summary>
+    public const string FeatureNotInPlan = "feature_not_in_plan";
+
     /// <summary>Idempotency-Key es de 1 a 255 caracteres ASCII, sin acentos ni ñ: el id de su pedido o un UUID.</summary>
     public const string IdempotencyKeyInvalid = "idempotency_key_invalid";
 
@@ -153,6 +156,9 @@ public static class ErrorCode
     /// <summary>Al emisor le falta su RFC (sus datos fiscales): regístrelos antes, con el CSD o la e.firma.</summary>
     public const string IssuerNotReady = "issuer_not_ready";
 
+    /// <summary>El emisor es un RFC de la propia empresa (Desarrolladores de la empresa): es emisor mientras la empresa lo tenga y no se archiva.</summary>
+    public const string IssuerOwnRfc = "issuer_own_rfc";
+
     /// <summary>La cuenta tiene varios emisores y la solicitud no dice cuál: mande issuer (iss_…).</summary>
     public const string IssuerRequired = "issuer_required";
 
@@ -173,6 +179,9 @@ public static class ErrorCode
 
     /// <summary>Falta el encabezado Authorization: Bearer fk_test_… o fk_live_….</summary>
     public const string MissingApiKey = "missing_api_key";
+
+    /// <summary>En el plan Gratis, la API ya hizo sus solicitudes de producción de los últimos 30 días: 10,000 más 500 por cada timbre que usó. Con un plan de paga son 100,000 más 500 por timbre, y al pasarlas la API solo va más despacio (10 solicitudes cada 10 segundos, rate_limit). Use webhooks en vez de consultar seguido; para más, escriba a soporte@fiscalisto.com.</summary>
+    public const string MonthlyAllowance = "monthly_allowance";
 
     /// <summary>Un campo tiene un valor que no se acepta (formato, catálogo del SAT, rango). param dice cuál y message cómo corregirlo.</summary>
     public const string ParameterInvalid = "parameter_invalid";
