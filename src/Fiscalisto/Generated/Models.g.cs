@@ -14890,6 +14890,14 @@ public sealed partial class Issuer
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// api si lo creó con la API o en Desarrolladores; empresa si es una empresa de la app conectada a su cuenta (Desarrolladores › Emisores › Conectar una empresa): con ella solo se usa su Portal de proveedores, y status siempre es active.
+    /// <br/>
+    /// Valores: api, empresa.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
     /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
     /// </summary>
     [JsonPropertyName("tax_id")]

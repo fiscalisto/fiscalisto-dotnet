@@ -141,6 +141,9 @@ public static class ErrorCode
     /// <summary>Ese RFC ya es un emisor de la cuenta en este modo.</summary>
     public const string IssuerExists = "issuer_exists";
 
+    /// <summary>El emisor es una empresa de la app conectada a la cuenta (source empresa): con la API solo se usa su Portal de proveedores.</summary>
+    public const string IssuerLinkedEmpresa = "issuer_linked_empresa";
+
     /// <summary>No existe ese emisor en la cuenta (o es del otro modo).</summary>
     public const string IssuerMissing = "issuer_missing";
 
