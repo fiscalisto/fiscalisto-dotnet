@@ -294,6 +294,9 @@ public static class ErrorCode
     /// <summary>Los complementos de pago y las notas de crédito no se sustituyen: se cancelan y se emite otro. Un recibo de nómina se sustituye con POST /v1/payroll_receipts/external y replaces.</summary>
     public const string SubstitutionUnsupported = "substitution_unsupported";
 
+    /// <summary>La factura del proveedor no admite eso en su estado (por ejemplo, programar una que no está aprobada, una fecha de pago pasada o marcar pagada una ya pagada), o el SAT la reporta cancelada. El mensaje dice por qué.</summary>
+    public const string SupplierInvoiceInvalid = "supplier_invoice_invalid";
+
     /// <summary>El reloj se está adelantando en otra solicitud (409, con Retry-After). Espere a test_clock.ready y repita.</summary>
     public const string TestClockAdvancing = "test_clock_advancing";
 

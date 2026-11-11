@@ -7831,7 +7831,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, issuer.ready, balance.low o test_clock.ready.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low o test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -15578,7 +15578,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, test_clock.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -15884,6 +15884,44 @@ public sealed partial class ListPayrollBatchesParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar proveedores del portal».
+/// </summary>
+public sealed partial class ListPortalSuppliersParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo los que estén en este estado.
+    /// <br/>
+    /// Valores: invited, onboarding, in_review, approved, rejected, suspended.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Solo el de este RFC.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
 }
 
 /// <summary>
@@ -16611,6 +16649,50 @@ public sealed partial class ListStoreConnectionsParams
 }
 
 /// <summary>
+/// Los campos de «Listar facturas de proveedores».
+/// </summary>
+public sealed partial class ListSupplierInvoicesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las que estén en este estado.
+    /// <br/>
+    /// Valores: received, approved, scheduled, paid, rejected.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Solo las de este proveedor (sup_…).
+    /// </summary>
+    [JsonPropertyName("supplier")]
+    public string? Supplier { get; set; }
+
+    /// <summary>
+    /// Solo las que llegaron desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("received_since")]
+    public string? ReceivedSince { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar tickets».
 /// </summary>
 public sealed partial class ListTicketsParams
@@ -16724,6 +16806,24 @@ public sealed partial class MarkPurchaseReceiptInvoicedParams
     /// </summary>
     [JsonPropertyName("invoice")]
     public string? Invoice { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Marcar pagada una factura de proveedor».
+/// </summary>
+public sealed partial class MarkSupplierInvoicePaidParams
+{
+    /// <summary>
+    /// El día en que la pagó (AAAA-MM-DD, hoy o antes).
+    /// </summary>
+    [JsonPropertyName("paid_on")]
+    public required string PaidOn { get; set; }
+
+    /// <summary>
+    /// La referencia del pago (la de la transferencia o del ERP), o null.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
 }
 
 /// <summary>
@@ -17592,6 +17692,272 @@ public sealed partial class PayrollReceiptPreviewWarningsItem
     /// </summary>
     [JsonPropertyName("message")]
     public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Un proveedor del Portal de proveedores del emisor: su alta, sus documentos, la cuenta a la que se le paga y su calificación.
+/// </summary>
+public sealed partial class PortalSupplier
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor de su cuenta (iss_…) cuyo portal es.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del proveedor.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre o razón social, o null si aún no lo da.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Los correos a los que le escribimos.
+    /// </summary>
+    [JsonPropertyName("emails")]
+    public List<string> Emails { get; set; } = default!;
+
+    /// <summary>
+    /// Su teléfono, o null.
+    /// </summary>
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    /// <summary>
+    /// invited (invitado), onboarding (dando su alta), in_review (alta por revisar), approved (puede mandar facturas), rejected o suspended.
+    /// <br/>
+    /// Valores: invited, onboarding, in_review, approved, rejected, suspended.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// true si da servicios especializados (REPSE).
+    /// </summary>
+    [JsonPropertyName("repse")]
+    public bool Repse { get; set; }
+
+    /// <summary>
+    /// Su alta: complete cuando todo lo obligatorio está aprobado y vigente, y cuántos documentos faltan, esperan revisión, vencieron o están por vencer.
+    /// </summary>
+    [JsonPropertyName("documents")]
+    public PortalSupplierDocuments Documents { get; set; } = default!;
+
+    /// <summary>
+    /// La cuenta a la que se le paga, o null. Una nueva queda pending hasta que se aprueba en la app; mientras, se le paga a previous_clabe.
+    /// </summary>
+    [JsonPropertyName("bank_account")]
+    public PortalSupplierBankAccount? BankAccount { get; set; }
+
+    /// <summary>
+    /// Su calificación de 0 a 100 de los últimos 12 meses (value, null sin datos; level excellent, good, fair o poor) y cada parte: invoices (facturas a la primera), deliveries (entregas a tiempo), prices (precio y cantidad de la orden), documents (documentos al día) y complements (complementos de pago), con good de total casos.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public PortalSupplierScore Score { get; set; } = default!;
+
+    /// <summary>
+    /// La última vez que entró a su portal, o null.
+    /// </summary>
+    [JsonPropertyName("last_seen_at")]
+    public string? LastSeenAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se invitó o se registró.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PortalSupplierBankAccount&lt;/c&gt;.
+/// </summary>
+public sealed partial class PortalSupplierBankAccount
+{
+    /// <summary>
+    /// La CLABE de 18 dígitos.
+    /// </summary>
+    [JsonPropertyName("clabe")]
+    public string Clabe { get; set; } = default!;
+
+    /// <summary>
+    /// El banco, o null.
+    /// </summary>
+    [JsonPropertyName("bank")]
+    public string? Bank { get; set; }
+
+    /// <summary>
+    /// El titular de la cuenta, o null.
+    /// </summary>
+    [JsonPropertyName("holder")]
+    public string? Holder { get; set; }
+
+    /// <summary>
+    /// Estado del objeto.
+    /// <br/>
+    /// Valores: pending, approved, rejected.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Mientras una CLABE nueva está pending, la anterior, a la que se le sigue pagando; si no, null.
+    /// </summary>
+    [JsonPropertyName("previous_clabe")]
+    public string? PreviousClabe { get; set; }
+}
+
+/// <summary>
+/// Su alta: complete cuando todo lo obligatorio está aprobado y vigente, y cuántos documentos faltan, esperan revisión, vencieron o están por vencer.
+/// </summary>
+public sealed partial class PortalSupplierDocuments
+{
+    /// <summary>
+    /// true cuando todo lo obligatorio de su alta está aprobado y vigente.
+    /// </summary>
+    [JsonPropertyName("complete")]
+    public bool Complete { get; set; }
+
+    /// <summary>
+    /// Cuántos documentos obligatorios no ha subido.
+    /// </summary>
+    [JsonPropertyName("missing")]
+    public long Missing { get; set; }
+
+    /// <summary>
+    /// Cuántos esperan revisión.
+    /// </summary>
+    [JsonPropertyName("pending")]
+    public long Pending { get; set; }
+
+    /// <summary>
+    /// Cuántos vencieron.
+    /// </summary>
+    [JsonPropertyName("expired")]
+    public long Expired { get; set; }
+
+    /// <summary>
+    /// Cuántos vencen en los próximos 7 días.
+    /// </summary>
+    [JsonPropertyName("expiring")]
+    public long Expiring { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class PortalSupplierList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<PortalSupplier> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Su calificación de 0 a 100 de los últimos 12 meses (value, null sin datos; level excellent, good, fair o poor) y cada parte: invoices (facturas a la primera), deliveries (entregas a tiempo), prices (precio y cantidad de la orden), documents (documentos al día) y complements (complementos de pago), con good de total casos.
+/// </summary>
+public sealed partial class PortalSupplierScore
+{
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public long? Value { get; set; }
+
+    /// <summary>
+    /// Nivel educativo (nivelEducativo).
+    /// <br/>
+    /// Valores: excellent, good, fair, poor.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string? Level { get; set; }
+
+    /// <summary>
+    /// Partes del transporte que posee o arrienda (ParteTransporte), c_ParteTransporte.
+    /// </summary>
+    [JsonPropertyName("parts")]
+    public List<PortalSupplierScorePartsItem> Parts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PortalSupplierScorePartsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PortalSupplierScorePartsItem
+{
+    /// <summary>
+    /// invoices (facturas a la primera), deliveries (entregas a tiempo), prices (precio y cantidad de la orden), documents (documentos al día) o complements (complementos de pago).
+    /// <br/>
+    /// Valores: invoices, deliveries, prices, documents, complements.
+    /// </summary>
+    [JsonPropertyName("part")]
+    public string Part { get; set; } = default!;
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public long? Value { get; set; }
+
+    /// <summary>
+    /// En cuántos de los total casos lo hizo bien.
+    /// </summary>
+    [JsonPropertyName("good")]
+    public long Good { get; set; }
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public long Total { get; set; }
 }
 
 /// <summary>
@@ -22029,6 +22395,18 @@ public sealed partial class SatRetentionWithheldTaxesItem
 }
 
 /// <summary>
+/// Los campos de «Programar el pago de una factura de proveedor».
+/// </summary>
+public sealed partial class ScheduleSupplierInvoiceParams
+{
+    /// <summary>
+    /// El día en que la pagará (AAAA-MM-DD, hoy o después). El proveedor lo ve.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public required string PayOn { get; set; }
+}
+
+/// <summary>
 /// El portal de autofactura de un emisor y sus reglas.
 /// </summary>
 public sealed partial class SelfInvoicing
@@ -22907,6 +23285,238 @@ public sealed partial class StoreImportSkippedItem
 }
 
 /// <summary>
+/// Una factura que un proveedor le mandó al emisor por su Portal de proveedores, con lo que se revisó, su orden de compra, su contrarecibo y sus fechas de pago.
+/// </summary>
+public sealed partial class SupplierInvoice
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor de su cuenta (iss_…) que la recibió.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El proveedor (sup_…) que la mandó.
+    /// </summary>
+    [JsonPropertyName("supplier")]
+    public string Supplier { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del proveedor.
+    /// </summary>
+    [JsonPropertyName("supplier_tax_id")]
+    public string SupplierTaxId { get; set; } = default!;
+
+    /// <summary>
+    /// El folio fiscal (UUID del timbre).
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// La misma factura en sus facturas recibidas (sat_…), para su XML y su PDF, o null.
+    /// </summary>
+    [JsonPropertyName("sat_invoice")]
+    public string? SatInvoice { get; set; }
+
+    /// <summary>
+    /// Su serie, o null.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public string? Series { get; set; }
+
+    /// <summary>
+    /// Su folio, o null.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// income (factura de ingreso) o credit_note (nota de crédito).
+    /// <br/>
+    /// Valores: income, credit_note.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha de la factura.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// La moneda.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// El total de la factura.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Lo que se le paga: el total sin las diferencias con su orden ni el descuento de pronto pago aceptado.
+    /// </summary>
+    [JsonPropertyName("payable")]
+    public decimal Payable { get; set; }
+
+    /// <summary>
+    /// PUE o PPD.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// received (por revisar), approved, scheduled (con fecha de pago), paid o rejected.
+    /// <br/>
+    /// Valores: received, approved, scheduled, paid, rejected.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// La orden de compra que factura (OC-12), o null.
+    /// </summary>
+    [JsonPropertyName("purchase_order")]
+    public string? PurchaseOrder { get; set; }
+
+    /// <summary>
+    /// true si cuadró con su orden, false si tuvo diferencias, null sin orden.
+    /// </summary>
+    [JsonPropertyName("matches_purchase_order")]
+    public bool? MatchesPurchaseOrder { get; set; }
+
+    /// <summary>
+    /// El folio de su contrarecibo, o null.
+    /// </summary>
+    [JsonPropertyName("contrarecibo")]
+    public string? Contrarecibo { get; set; }
+
+    /// <summary>
+    /// El día en que vence por sus fechas de pago, o null.
+    /// </summary>
+    [JsonPropertyName("due_on")]
+    public string? DueOn { get; set; }
+
+    /// <summary>
+    /// El día programado para pagarla, o null.
+    /// </summary>
+    [JsonPropertyName("scheduled_on")]
+    public string? ScheduledOn { get; set; }
+
+    /// <summary>
+    /// El día en que se pagó, o null.
+    /// </summary>
+    [JsonPropertyName("paid_on")]
+    public string? PaidOn { get; set; }
+
+    /// <summary>
+    /// Lo que se pagó, o null.
+    /// </summary>
+    [JsonPropertyName("paid_amount")]
+    public decimal? PaidAmount { get; set; }
+
+    /// <summary>
+    /// La referencia del pago, o null.
+    /// </summary>
+    [JsonPropertyName("payment_reference")]
+    public string? PaymentReference { get; set; }
+
+    /// <summary>
+    /// Por qué se rechazó, o null.
+    /// </summary>
+    [JsonPropertyName("rejection_reason")]
+    public string? RejectionReason { get; set; }
+
+    /// <summary>
+    /// Lo que se revisó y quedó como aviso (code y message), para que su equipo lo vea.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<SupplierInvoiceWarningsItem> Warnings { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo llegó.
+    /// </summary>
+    [JsonPropertyName("received_at")]
+    public string? ReceivedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se aprobó, o null.
+    /// </summary>
+    [JsonPropertyName("approved_at")]
+    public string? ApprovedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SupplierInvoiceList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SupplierInvoice> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SupplierInvoiceWarningsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SupplierInvoiceWarningsItem
+{
+    /// <summary>
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué pasó y cómo corregirlo, para una persona.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
+}
+
+/// <summary>
 /// Si los datos fiscales de un cliente van a pasar el SAT.
 /// </summary>
 public sealed partial class TaxIdValidation
@@ -23308,7 +23918,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, issuer.ready, balance.low, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }

@@ -235,6 +235,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Descargas del SAT.</summary>
     public SatRetentionsResource SatRetentions => _satRetentions ??= new SatRetentionsResource(this);
 
+    private PortalSuppliersResource? _portalSuppliers;
+
+    /// <summary>Portal de proveedores.</summary>
+    public PortalSuppliersResource PortalSuppliers => _portalSuppliers ??= new PortalSuppliersResource(this);
+
+    private SupplierInvoicesResource? _supplierInvoices;
+
+    /// <summary>Portal de proveedores.</summary>
+    public SupplierInvoicesResource SupplierInvoices => _supplierInvoices ??= new SupplierInvoicesResource(this);
+
     private SatDeclarationsResource? _satDeclarations;
 
     /// <summary>Declaraciones del SAT.</summary>
@@ -3387,6 +3397,122 @@ public sealed class SatRetentionsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<byte[]> PdfAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestBytesAsync("GET", $"/v1/sat_retentions/{Uri.EscapeDataString(id)}/pdf", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Portal de proveedores: <c>fiscalisto.PortalSuppliers</c>.
+/// </summary>
+public sealed class PortalSuppliersResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PortalSuppliersResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar proveedores del portal
+    /// </summary>
+    /// <remarks>
+    /// Los proveedores invitados o registrados en el Portal de proveedores del emisor, los más recientes primero: su alta, sus documentos, la cuenta a la que se le paga y su calificación.
+    /// <br/>
+    /// <c>GET /v1/portal_suppliers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/portal-de-proveedores/list-portal-suppliers"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<PortalSupplier>> ListAsync(ListPortalSuppliersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<PortalSupplier>("/v1/portal_suppliers", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar proveedores del portal: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<PortalSupplier> ListAutoPagingAsync(ListPortalSuppliersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<PortalSupplier>("/v1/portal_suppliers", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un proveedor del portal
+    /// </summary>
+    /// <remarks>
+    /// Su alta, sus documentos, su cuenta bancaria y su calificación por partes.
+    /// <br/>
+    /// <c>GET /v1/portal_suppliers/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/portal-de-proveedores/get-portal-supplier"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PortalSupplier> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PortalSupplier>("GET", $"/v1/portal_suppliers/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Portal de proveedores: <c>fiscalisto.SupplierInvoices</c>.
+/// </summary>
+public sealed class SupplierInvoicesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SupplierInvoicesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar facturas de proveedores
+    /// </summary>
+    /// <remarks>
+    /// Las facturas que mandaron sus proveedores por el portal, las más recientes primero. Para llevar a su ERP lo aprobado: status=approved, o escuche supplier_invoice.approved.
+    /// <br/>
+    /// <c>GET /v1/supplier_invoices</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/portal-de-proveedores/list-supplier-invoices"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SupplierInvoice>> ListAsync(ListSupplierInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SupplierInvoice>("/v1/supplier_invoices", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar facturas de proveedores: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SupplierInvoice> ListAutoPagingAsync(ListSupplierInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SupplierInvoice>("/v1/supplier_invoices", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una factura de proveedor
+    /// </summary>
+    /// <remarks>
+    /// Con su estado, su orden de compra, su contrarecibo y sus fechas de pago. Su XML y su PDF: GET /v1/sat_invoices/{sat_invoice}/xml y /pdf.
+    /// <br/>
+    /// <c>GET /v1/supplier_invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/portal-de-proveedores/get-supplier-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SupplierInvoice> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SupplierInvoice>("GET", $"/v1/supplier_invoices/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Programar el pago de una factura de proveedor
+    /// </summary>
+    /// <remarks>
+    /// El día en que la pagará, como «Programar pago» en la app: el proveedor lo ve en su portal y llega supplier_invoice.scheduled. Solo una aprobada o ya programada; si el SAT la reporta cancelada, 400 supplier_invoice_invalid.
+    /// <br/>
+    /// <c>POST /v1/supplier_invoices/{id}/schedule</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/portal-de-proveedores/schedule-supplier-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SupplierInvoice> ScheduleAsync(string id, ScheduleSupplierInvoiceParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SupplierInvoice>("POST", $"/v1/supplier_invoices/{Uri.EscapeDataString(id)}/schedule", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Marcar pagada una factura de proveedor
+    /// </summary>
+    /// <remarks>
+    /// El pago que hizo su ERP o su banco, como «Marcar pagada» en la app: el proveedor lo ve, y si es PPD le pedimos su complemento de pago. Llega supplier_invoice.paid.
+    /// <br/>
+    /// <c>POST /v1/supplier_invoices/{id}/mark_paid</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/portal-de-proveedores/mark-supplier-invoice-paid"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SupplierInvoice> MarkPaidAsync(string id, MarkSupplierInvoicePaidParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SupplierInvoice>("POST", $"/v1/supplier_invoices/{Uri.EscapeDataString(id)}/mark_paid", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
