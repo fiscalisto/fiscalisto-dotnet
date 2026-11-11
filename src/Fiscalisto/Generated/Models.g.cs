@@ -3455,6 +3455,12 @@ public sealed partial class CreateProductParams
     /// </summary>
     [JsonPropertyName("order_step")]
     public decimal? OrderStep { get; set; }
+
+    /// <summary>
+    /// Su categoría, con las de arriba separadas por › (también &gt; o /): «Ferretería › Tornillos». Si no existe, se crea. null la quita.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
 }
 
 /// <summary>
@@ -15990,6 +15996,12 @@ public sealed partial class ListProductsParams
     /// </summary>
     [JsonPropertyName("product_key")]
     public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// Solo los de esta categoría y sus subcategorías: «Ferretería» o «Ferretería › Tornillos».
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
 }
 
 /// <summary>
@@ -18374,6 +18386,12 @@ public sealed partial class Product
     /// </summary>
     [JsonPropertyName("sku")]
     public string? Sku { get; set; }
+
+    /// <summary>
+    /// Su categoría, con las de arriba separadas por › («Ferretería › Tornillos»), o null si no tiene.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
 
     /// <summary>
     /// Precio unitario antes de impuestos (ValorUnitario).
@@ -25376,6 +25394,12 @@ public sealed partial class UpdateProductParams
     /// </summary>
     [JsonPropertyName("order_step")]
     public decimal? OrderStep { get; set; }
+
+    /// <summary>
+    /// Su categoría, con las de arriba separadas por › (también &gt; o /): «Ferretería › Tornillos». Si no existe, se crea. null la quita.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
 }
 
 /// <summary>

@@ -2790,7 +2790,7 @@ public sealed class ProductsResource
     /// Listar productos
     /// </summary>
     /// <remarks>
-    /// Los productos del emisor, los más recientes primero. Filtre por sku o product_key.
+    /// Los productos del emisor, los más recientes primero. Filtre por sku, product_key o category.
     /// <br/>
     /// <c>GET /v1/products</c>
     /// <br/>
