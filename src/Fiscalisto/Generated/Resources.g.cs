@@ -612,7 +612,7 @@ public sealed class IssuersResource
     /// Firmar el contrato con el PAC
     /// </summary>
     /// <remarks>
-    /// Una sola vez por RFC antes de timbrar en producción: firma el contrato de servicio del PAC con la e.firma del emisor. La e.firma se usa en memoria para esa firma y no se guarda, salvo que mande keep_for_downloads: true para pedirle al SAT las facturas del emisor (POST /v1/sat_downloads); entonces se guarda cifrada y puede borrarla con DELETE.
+    /// Una sola vez por RFC antes de timbrar en producción: firma el contrato de servicio del PAC con la e.firma del emisor. La e.firma se usa en memoria para esa firma y no se guarda, salvo que mande keep_for_downloads: true para pedirle al SAT las facturas del emisor (POST /v1/sat_downloads); entonces se guarda cifrada y puede borrarla con DELETE. En pruebas no firma nada ni se guarda: con keep_for_downloads se revisa igual y queda su vencimiento en sat_downloads.efirma_expires_at.
     /// <br/>
     /// <c>POST /v1/issuers/{id}/efirma</c>
     /// <br/>

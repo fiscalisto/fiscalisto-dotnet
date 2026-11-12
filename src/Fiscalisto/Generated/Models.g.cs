@@ -15000,7 +15000,7 @@ public sealed partial class Issuer
     public IssuerCertificate? Certificate { get; set; }
 
     /// <summary>
-    /// Si puede pedirle al SAT sus facturas (POST /v1/sat_downloads): available es true en pruebas, y en producción mientras su e.firma guardada esté vigente (efirma_expires_at); un RFC de su empresa (type own) usa la que la empresa guardó en la app.
+    /// Si puede pedirle al SAT sus facturas (POST /v1/sat_downloads): available es true en pruebas, y en producción mientras su e.firma guardada esté vigente (efirma_expires_at); un RFC de su empresa (type own) usa la que la empresa guardó en la app. En pruebas, efirma_expires_at muestra la del mismo RFC en producción, o la que mande en pruebas.
     /// </summary>
     [JsonPropertyName("sat_downloads")]
     public IssuerSatDownloads SatDownloads { get; set; } = default!;
@@ -15175,7 +15175,7 @@ public sealed partial class IssuerOnboardingLink
 }
 
 /// <summary>
-/// Si puede pedirle al SAT sus facturas (POST /v1/sat_downloads): available es true en pruebas, y en producción mientras su e.firma guardada esté vigente (efirma_expires_at); un RFC de su empresa (type own) usa la que la empresa guardó en la app.
+/// Si puede pedirle al SAT sus facturas (POST /v1/sat_downloads): available es true en pruebas, y en producción mientras su e.firma guardada esté vigente (efirma_expires_at); un RFC de su empresa (type own) usa la que la empresa guardó en la app. En pruebas, efirma_expires_at muestra la del mismo RFC en producción, o la que mande en pruebas.
 /// </summary>
 public sealed partial class IssuerSatDownloads
 {
@@ -15186,7 +15186,7 @@ public sealed partial class IssuerSatDownloads
     public bool Available { get; set; }
 
     /// <summary>
-    /// Cuándo vence la e.firma guardada para las descargas, o null si no hay una.
+    /// Cuándo vence la e.firma guardada para las descargas, o null si no hay una. En pruebas, la que mandó en pruebas o, si no, la que guarda en producción para el mismo RFC.
     /// </summary>
     [JsonPropertyName("efirma_expires_at")]
     public string? EfirmaExpiresAt { get; set; }
