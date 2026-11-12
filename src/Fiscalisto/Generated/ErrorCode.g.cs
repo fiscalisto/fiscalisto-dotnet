@@ -246,7 +246,7 @@ public static class ErrorCode
     /// <summary>La factura recurrente está en pausa: reanúdela con active: true para timbrarla.</summary>
     public const string RecurringPaused = "recurring_paused";
 
-    /// <summary>Otra solicitud con la misma Idempotency-Key sigue en proceso, o otra solicitud está cambiando el mismo objeto (dos actualizaciones del mismo cliente a la vez esperan su turno hasta 15 segundos) (409, con Retry-After). Repítala en un momento con la misma llave: contestará lo mismo.</summary>
+    /// <summary>Otra solicitud con la misma Idempotency-Key sigue en proceso, otra solicitud está cambiando el mismo objeto (dos actualizaciones del mismo cliente a la vez esperan su turno hasta 15 segundos), u otro comprobante que se timbra a la vez no terminó en unos segundos (otro recibo de nómina del mismo empleado, otro pago de la misma factura) (409, con Retry-After). Repítala en un momento con la misma llave: contestará lo mismo.</summary>
     public const string RequestInProgress = "request_in_progress";
 
     /// <summary>No existe un objeto con ese id (o es de otro emisor o del otro modo).</summary>

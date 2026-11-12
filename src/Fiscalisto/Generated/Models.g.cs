@@ -311,7 +311,7 @@ public sealed partial class ApplyAdvanceParams
     public List<InvoiceCreateLeyendasItem>? Leyendas { get; set; }
 
     /// <summary>
-    /// Complemento de donatarias.
+    /// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
     /// </summary>
     [JsonPropertyName("donation")]
     public InvoiceCreateDonation? Donation { get; set; }
@@ -2523,7 +2523,7 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     public List<InvoiceCreateLeyendasItem>? Leyendas { get; set; }
 
     /// <summary>
-    /// Complemento de donatarias.
+    /// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
     /// </summary>
     [JsonPropertyName("donation")]
     public InvoiceCreateDonation? Donation { get; set; }
@@ -2727,10 +2727,34 @@ public sealed partial class CreateIssuerParams
     public string? Curp { get; set; }
 
     /// <summary>
+    /// Donataria autorizada (régimen 603): el oficio del SAT que la autoriza a recibir donativos deducibles (o su renovación). Va en cada recibo de donativo (`donation` de POST /v1/invoices); null lo quita. El emisor debe tener tax_system 603. En pruebas sirve cualquier número y una fecha pasada.
+    /// </summary>
+    [JsonPropertyName("donation_authorization")]
+    public CreateIssuerParamsDonationAuthorization? DonationAuthorization { get; set; }
+
+    /// <summary>
     /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateIssuerParamsDonationAuthorization&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateIssuerParamsDonationAuthorization
+{
+    /// <summary>
+    /// Número del oficio de autorización, hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public required string Number { get; set; }
+
+    /// <summary>
+    /// Fecha del oficio, AAAA-MM-DD; no puede ser futura.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
 }
 
 /// <summary>
@@ -3575,7 +3599,7 @@ public sealed partial class CreatePurchaseReceiptParams
     public string? StoreEmail { get; set; }
 
     /// <summary>
-    /// El uso de la factura (G03, I01…). Por omisión G03 si el régimen del emisor lo permite.
+    /// El uso del CFDI (G03, I01…). Por omisión G03 si el régimen del emisor lo permite.
     /// </summary>
     [JsonPropertyName("use")]
     public string? Use { get; set; }
@@ -4105,7 +4129,7 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     public List<InvoiceCreateLeyendasItem>? Leyendas { get; set; }
 
     /// <summary>
-    /// Complemento de donatarias.
+    /// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
     /// </summary>
     [JsonPropertyName("donation")]
     public InvoiceCreateDonation? Donation { get; set; }
@@ -11207,7 +11231,7 @@ public sealed partial class InvoiceCreate
     public List<InvoiceCreateLeyendasItem>? Leyendas { get; set; }
 
     /// <summary>
-    /// Complemento de donatarias.
+    /// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
     /// </summary>
     [JsonPropertyName("donation")]
     public InvoiceCreateDonation? Donation { get; set; }
@@ -13302,18 +13326,18 @@ public sealed partial class InvoiceCreateCustomerForeign
 }
 
 /// <summary>
-/// Complemento de donatarias.
+/// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
 /// </summary>
 public sealed partial class InvoiceCreateDonation
 {
     /// <summary>
-    /// true si el donativo es en especie (va sin forma de pago en efectivo).
+    /// true si el donativo es en especie (bienes): va con forma de pago 12 (dación en pago) y un concepto por cada tipo de bien.
     /// </summary>
     [JsonPropertyName("in_kind")]
     public bool? InKind { get; set; }
 
     /// <summary>
-    /// true si el donativo es deducible para quien lo da.
+    /// true si el donante ya había deducido los bienes que dona: el recibo dice que el donativo no es deducible.
     /// </summary>
     [JsonPropertyName("deducted")]
     public bool? Deducted { get; set; }
@@ -14980,7 +15004,13 @@ public sealed partial class Issuer
     public string? Curp { get; set; }
 
     /// <summary>
-    /// RFC con el que se timbra: el del emisor en producción y el de pruebas del SAT (EKU9003173C9) en pruebas.
+    /// Donataria autorizada (régimen 603): el oficio del SAT que la autoriza a recibir donativos deducibles (o su renovación). Va en cada recibo de donativo (`donation` de POST /v1/invoices); null lo quita. El emisor debe tener tax_system 603. En pruebas sirve cualquier número y una fecha pasada.
+    /// </summary>
+    [JsonPropertyName("donation_authorization")]
+    public IssuerDonationAuthorization? DonationAuthorization { get; set; }
+
+    /// <summary>
+    /// RFC con el que se timbra: el del emisor en producción y el de pruebas del SAT (EKU9003173C9) en pruebas, con régimen 601 o, si el emisor es donataria (tax_system 603), 603.
     /// </summary>
     [JsonPropertyName("stamps_as")]
     public string StampsAs { get; set; } = default!;
@@ -15032,6 +15062,24 @@ public sealed partial class IssuerCertificate
     /// </summary>
     [JsonPropertyName("expires_at")]
     public string? ExpiresAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;IssuerDonationAuthorization&lt;/c&gt;.
+/// </summary>
+public sealed partial class IssuerDonationAuthorization
+{
+    /// <summary>
+    /// Número del oficio de autorización, hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Fecha del oficio, AAAA-MM-DD; no puede ser futura.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
 }
 
 /// <summary>
@@ -18658,7 +18706,7 @@ public sealed partial class PurchaseReceipt
     public List<PurchaseReceiptFieldsItem> Fields { get; set; } = default!;
 
     /// <summary>
-    /// El uso de la factura que se pide, o null: G03 si el régimen del emisor lo permite, si no S01.
+    /// El uso del CFDI que se pide, o null: G03 si el régimen del emisor lo permite, si no S01.
     /// </summary>
     [JsonPropertyName("use")]
     public string? Use { get; set; }
@@ -25176,10 +25224,34 @@ public sealed partial class UpdateIssuerParams
     public string? Curp { get; set; }
 
     /// <summary>
+    /// Donataria autorizada (régimen 603): el oficio del SAT que la autoriza a recibir donativos deducibles (o su renovación). Va en cada recibo de donativo (`donation` de POST /v1/invoices); null lo quita. El emisor debe tener tax_system 603. En pruebas sirve cualquier número y una fecha pasada.
+    /// </summary>
+    [JsonPropertyName("donation_authorization")]
+    public UpdateIssuerParamsDonationAuthorization? DonationAuthorization { get; set; }
+
+    /// <summary>
     /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateIssuerParamsDonationAuthorization&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateIssuerParamsDonationAuthorization
+{
+    /// <summary>
+    /// Número del oficio de autorización, hasta 100 caracteres.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public required string Number { get; set; }
+
+    /// <summary>
+    /// Fecha del oficio, AAAA-MM-DD; no puede ser futura.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
 }
 
 /// <summary>
@@ -25514,7 +25586,7 @@ public sealed partial class UpdatePurchaseReceiptParams
     public string? StoreEmail { get; set; }
 
     /// <summary>
-    /// El uso de la factura (G03, I01…). Por omisión G03 si el régimen del emisor lo permite.
+    /// El uso del CFDI (G03, I01…). Por omisión G03 si el régimen del emisor lo permite.
     /// </summary>
     [JsonPropertyName("use")]
     public string? Use { get; set; }
@@ -26032,7 +26104,7 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public List<InvoiceCreateLeyendasItem>? Leyendas { get; set; }
 
     /// <summary>
-    /// Complemento de donatarias.
+    /// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
     /// </summary>
     [JsonPropertyName("donation")]
     public InvoiceCreateDonation? Donation { get; set; }
