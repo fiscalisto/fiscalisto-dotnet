@@ -273,10 +273,10 @@ public sealed partial class ApplyAdvanceParams
     public string? Warehouse { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos. Obligatorio salvo en un traslado (type T), cuyo receptor es el propio emisor.
     /// </summary>
     [JsonPropertyName("customer")]
-    public required StringOr<InvoiceCreateCustomer> Customer { get; set; }
+    public StringOr<InvoiceCreateCustomer>? Customer { get; set; }
 
     /// <summary>
     /// Conceptos (Conceptos), al menos uno.
@@ -1301,7 +1301,7 @@ public sealed partial class CreateAdvanceParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos. Obligatorio salvo en un traslado (type T), cuyo receptor es el propio emisor.
     /// </summary>
     [JsonPropertyName("customer")]
     public required StringOr<CreateAdvanceParamsCustomer> Customer { get; set; }
@@ -2485,10 +2485,10 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     public string? Warehouse { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos. Obligatorio salvo en un traslado (type T), cuyo receptor es el propio emisor.
     /// </summary>
     [JsonPropertyName("customer")]
-    public required StringOr<InvoiceCreateCustomer> Customer { get; set; }
+    public StringOr<InvoiceCreateCustomer>? Customer { get; set; }
 
     /// <summary>
     /// Conceptos (Conceptos), al menos uno.
@@ -4091,10 +4091,10 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     public string? Warehouse { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos. Obligatorio salvo en un traslado (type T), cuyo receptor es el propio emisor.
     /// </summary>
     [JsonPropertyName("customer")]
-    public required StringOr<InvoiceCreateCustomer> Customer { get; set; }
+    public StringOr<InvoiceCreateCustomer>? Customer { get; set; }
 
     /// <summary>
     /// Conceptos (Conceptos), al menos uno.
@@ -11193,10 +11193,10 @@ public sealed partial class InvoiceCreate
     public string? Warehouse { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos. Obligatorio salvo en un traslado (type T), cuyo receptor es el propio emisor.
     /// </summary>
     [JsonPropertyName("customer")]
-    public required StringOr<InvoiceCreateCustomer> Customer { get; set; }
+    public StringOr<InvoiceCreateCustomer>? Customer { get; set; }
 
     /// <summary>
     /// Conceptos (Conceptos), al menos uno.
@@ -15010,7 +15010,7 @@ public sealed partial class Issuer
     public IssuerDonationAuthorization? DonationAuthorization { get; set; }
 
     /// <summary>
-    /// RFC con el que se timbra: el del emisor en producción y el de pruebas del SAT (EKU9003173C9) en pruebas, con régimen 601 o, si el emisor es donataria (tax_system 603), 603.
+    /// RFC con el que se timbra: el del emisor en producción y, en pruebas, el contribuyente de pruebas del SAT de su tipo: EKU9003173C9 para una persona moral, CACX7605101P8 para una persona física (con su CURP en la nómina). Se timbra con el régimen y el código postal del emisor.
     /// </summary>
     [JsonPropertyName("stamps_as")]
     public string StampsAs { get; set; } = default!;
@@ -26066,10 +26066,10 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public string? Warehouse { get; set; }
 
     /// <summary>
-    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// El cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos. Obligatorio salvo en un traslado (type T), cuyo receptor es el propio emisor.
     /// </summary>
     [JsonPropertyName("customer")]
-    public required StringOr<InvoiceCreateCustomer> Customer { get; set; }
+    public StringOr<InvoiceCreateCustomer>? Customer { get; set; }
 
     /// <summary>
     /// Conceptos (Conceptos), al menos uno.
