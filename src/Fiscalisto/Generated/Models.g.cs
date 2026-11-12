@@ -521,6 +521,12 @@ public sealed partial class Balance
     public BalanceAutoRecharge? AutoRecharge { get; set; }
 
     /// <summary>
+    /// true si, al acabarse `available`, la API sigue timbrando con los timbres del plan de la empresa (Desarrolladores › Timbres › Si se acaban, usar los timbres de la empresa). false: responde 402 insufficient_balance.
+    /// </summary>
+    [JsonPropertyName("use_plan_timbres")]
+    public bool UsePlanTimbres { get; set; }
+
+    /// <summary>
     /// Los paquetes con timbres, el que vence antes primero (en ese orden se usan).
     /// </summary>
     [JsonPropertyName("packs")]
@@ -556,6 +562,14 @@ public sealed partial class BalanceAutoRecharge
 /// </summary>
 public sealed partial class BalancePacksItem
 {
+    /// <summary>
+    /// welcome: los timbres de bienvenida (no vencen); purchase: un paquete comprado o una recarga automática; referral: los de una recomendación.
+    /// <br/>
+    /// Valores: welcome, purchase, referral.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
     /// <summary>
     /// Timbres del paquete.
     /// </summary>

@@ -153,7 +153,7 @@ public static class ErrorCode
     /// <summary>La llave no puede usar ese emisor.</summary>
     public const string IssuerNotAllowed = "issuer_not_allowed";
 
-    /// <summary>Al emisor le falta su RFC (sus datos fiscales): regístrelos antes, con el CSD o la e.firma.</summary>
+    /// <summary>El emisor aún no puede hacer eso: el mensaje dice qué le falta (su sello digital, CSD, o uno vigente al timbrar; su RFC con sus datos fiscales en viáticos). Súbalo y repita la solicitud con la misma Idempotency-Key.</summary>
     public const string IssuerNotReady = "issuer_not_ready";
 
     /// <summary>El emisor es un RFC de la propia empresa (Desarrolladores de la empresa): es emisor mientras la empresa lo tenga y no se archiva.</summary>
