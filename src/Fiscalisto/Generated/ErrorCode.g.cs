@@ -93,7 +93,7 @@ public static class ErrorCode
     /// <summary>Viáticos y gastos no lo permite en ese momento: el mensaje dice por qué (un gasto con errores al enviarla, un reembolso antes de aprobarla, aprobar lo que usted mismo envió).</summary>
     public const string ExpenseReportInvalid = "expense_report_invalid";
 
-    /// <summary>En producción, inventario avanzado, portal de proveedores, pedidos de venta y comprobación de gastos siguen el plan de la empresa, como en la app: vienen del plan Negocio en adelante. En modo de pruebas están todos.</summary>
+    /// <summary>En producción, inventario avanzado, portal de proveedores, pedidos de venta y comprobación de gastos siguen el plan de la empresa, como en la app: vienen con Operaciones (se agrega a Negocio; incluida en Corporativo). En modo de pruebas están todos.</summary>
     public const string FeatureNotInPlan = "feature_not_in_plan";
 
     /// <summary>Idempotency-Key es de 1 a 255 caracteres ASCII, sin acentos ni ñ: el id de su pedido o un UUID.</summary>
