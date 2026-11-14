@@ -13379,6 +13379,12 @@ public sealed partial class InvoiceCreateGlobal
     /// </summary>
     [JsonPropertyName("year")]
     public required long Year { get; set; }
+
+    /// <summary>
+    /// Solo emisores con régimen 603 (donatarias y asociaciones): true conserva la descripción, claves, unidad y cantidad de cada concepto en vez de «Venta», 01010101, ACT.
+    /// </summary>
+    [JsonPropertyName("keep_concepts")]
+    public bool? KeepConcepts { get; set; }
 }
 
 /// <summary>
