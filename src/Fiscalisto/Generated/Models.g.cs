@@ -1096,6 +1096,136 @@ public sealed partial class CancelSalesOrderParams
 }
 
 /// <summary>
+/// Si los sellos del XML son auténticos, como los revisa el SAT: el Sello del emisor contra la cadena original y su certificado, y el SelloSAT del timbre contra el certificado del SAT.
+/// </summary>
+public sealed partial class CfdiSeals
+{
+    /// <summary>
+    /// true si no hay ningún problema: el Sello corresponde a los datos y al certificado del emisor (un CSD de su RFC, vigente en la fecha de emisión) y el timbre es de este comprobante y del SAT.
+    /// </summary>
+    [JsonPropertyName("valid")]
+    public bool Valid { get; set; }
+
+    /// <summary>
+    /// Si el Sello del emisor firma la cadena original de este XML con la llave del certificado que trae. false si alguien cambió un monto, un nombre o una fecha después de sellar.
+    /// </summary>
+    [JsonPropertyName("issuer_seal_valid")]
+    public bool IssuerSealValid { get; set; }
+
+    /// <summary>
+    /// El certificado del emisor que trae el XML (Certificado): número, RFC, nombre, si es CSD o e.firma y su vigencia. null si no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("certificate")]
+    public CfdiSealsCertificate? Certificate { get; set; }
+
+    /// <summary>
+    /// El timbre (TimbreFiscalDigital): si su SelloSAT es del SAT, con qué certificado del SAT y qué PAC lo timbró. null si el XML no está timbrado.
+    /// </summary>
+    [JsonPropertyName("stamp")]
+    public CfdiSealsStamp? Stamp { get; set; }
+
+    /// <summary>
+    /// Cada problema, con su código y qué significa. Vacía si valid es true.
+    /// </summary>
+    [JsonPropertyName("problems")]
+    public List<CfdiSealsProblemsItem> Problems { get; set; } = default!;
+
+    /// <summary>
+    /// La cadena original del comprobante, como la arma el SAT con sus XSLT. null si el XML no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("original_string")]
+    public string? OriginalString { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CfdiSealsCertificate&lt;/c&gt;.
+/// </summary>
+public sealed partial class CfdiSealsCertificate
+{
+    /// <summary>
+    /// El número del certificado (20 dígitos), como lo da el SAT.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC dueño del certificado.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// El nombre o razón social en el certificado.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// csd si es un sello digital; fiel si es una e.firma (no se debe sellar con ella).
+    /// <br/>
+    /// Valores: csd, fiel.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo vale el certificado.
+    /// </summary>
+    [JsonPropertyName("valid_from")]
+    public string ValidFrom { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuándo vale el certificado.
+    /// </summary>
+    [JsonPropertyName("valid_to")]
+    public string ValidTo { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CfdiSealsProblemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CfdiSealsProblemsItem
+{
+    /// <summary>
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// <br/>
+    /// Valores: malformed_xml, missing_seal, certificate_unreadable, certificate_number_mismatch, certificate_not_issuer, certificate_not_csd, certificate_not_valid_at_issue, seal_mismatch, stamp_not_for_this_seal, sat_seal_mismatch.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué pasó y cómo corregirlo, para una persona.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CfdiSealsStamp&lt;/c&gt;.
+/// </summary>
+public sealed partial class CfdiSealsStamp
+{
+    /// <summary>
+    /// Si el SelloSAT firma el timbre con el certificado del SAT (NoCertificadoSAT). null si el certificado del SAT no se pudo obtener en ese momento.
+    /// </summary>
+    [JsonPropertyName("sat_seal_valid")]
+    public bool? SatSealValid { get; set; }
+
+    /// <summary>
+    /// El número del certificado del SAT que selló el timbre.
+    /// </summary>
+    [JsonPropertyName("sat_certificate_number")]
+    public string SatCertificateNumber { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del PAC que timbró (RfcProvCertif).
+    /// </summary>
+    [JsonPropertyName("pac_tax_id")]
+    public string? PacTaxId { get; set; }
+}
+
+/// <summary>
 /// Lo que dice el SAT de un CFDI: si existe, si está vigente o cancelado y si se puede cancelar, con su emisor y su receptor en las listas del SAT.
 /// </summary>
 public sealed partial class CfdiVerification
@@ -1185,6 +1315,12 @@ public sealed partial class CfdiVerification
     /// </summary>
     [JsonPropertyName("xml")]
     public CfdiVerificationXml? Xml { get; set; }
+
+    /// <summary>
+    /// Los sellos del XML, si mandó xml de un CFDI 4.0: si el comprobante no se modificó después de sellarse y si el timbre es del SAT. null con qr o fields, o con un CFDI 3.3.
+    /// </summary>
+    [JsonPropertyName("seals")]
+    public CfdiSeals? Seals { get; set; }
 
     /// <summary>
     /// El emisor en las listas del SAT (69-B, 69-B Bis y art. 69), como GET /v1/sat_lists/{tax_id}, sin costo. Solo cuando el SAT tiene el comprobante (active o canceled); null si no, o si las listas no se pudieron leer.
@@ -10472,6 +10608,18 @@ public sealed partial class GetFinancialStatementsParams
 }
 
 /// <summary>
+/// Los campos de «Descargar el acuse de cancelación».
+/// </summary>
+public sealed partial class GetInvoiceCancellationReceiptParams
+{
+    /// <summary>
+    /// Con un UUID en vez del id, el emisor (iss_…) si la cuenta tiene varios.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver una factura».
 /// </summary>
 public sealed partial class GetInvoiceParams
@@ -15033,6 +15181,236 @@ public sealed partial class InvoicePayrollTotals
 }
 
 /// <summary>
+/// Una factura revisada y sin timbrar: lo que se timbraría ahora con POST /v1/invoices y el mismo cuerpo.
+/// </summary>
+public sealed partial class InvoicePreview
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: I, E, T.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public string? Series { get; set; }
+
+    /// <summary>
+    /// El folio que tendría si se timbrara ahora; otra factura timbrada antes puede tomarlo.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// Fecha de emisión (Fecha), hora de la Ciudad de México.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public InvoicePreviewCustomer Customer { get; set; } = default!;
+
+    /// <summary>
+    /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Forma de pago (FormaPago), clave de c_FormaPago: 01 efectivo, 03 transferencia, 04 tarjeta de crédito, 28 débito, 99 por definir… Obligatoria con PUE; con PPD es 99.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// Método de pago (MetodoPago): PUE (una sola exhibición, por omisión) o PPD (en parcialidades o diferido, se cobra con complementos de pago).
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de cambio a pesos (TipoCambio). Obligatorio si la moneda no es MXN; use el del DOF del día anterior.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<InvoiceItem> Items { get; set; } = default!;
+
+    /// <summary>
+    /// Suma de los importes antes de impuestos y descuentos (SubTotal).
+    /// </summary>
+    [JsonPropertyName("subtotal")]
+    public decimal? Subtotal { get; set; }
+
+    /// <summary>
+    /// Descuento (Descuento).
+    /// </summary>
+    [JsonPropertyName("discount")]
+    public decimal? Discount { get; set; }
+
+    /// <summary>
+    /// Los impuestos de la factura, por tipo: IVA e IEPS trasladados, IVA e ISR retenidos e impuestos locales.
+    /// </summary>
+    [JsonPropertyName("taxes")]
+    public InvoicePreviewTaxes? Taxes { get; set; }
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Lo que conviene revisar antes de timbrar (un cliente en las listas 69 o 69-B del SAT, una factura que parece duplicada); no impide timbrar.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<InvoicePreviewWarningsItem> Warnings { get; set; } = default!;
+
+    /// <summary>
+    /// El XML que se mandaría al PAC, sin sello ni timbre.
+    /// </summary>
+    [JsonPropertyName("unsigned_xml")]
+    public string UnsignedXml { get; set; } = default!;
+}
+
+/// <summary>
+/// Cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos en un objeto.
+/// </summary>
+public sealed partial class InvoicePreviewCustomer
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public string? LegalName { get; set; }
+
+    /// <summary>
+    /// Régimen fiscal (RegimenFiscal), clave de c_RegimenFiscal: 601, 612, 626…
+    /// </summary>
+    [JsonPropertyName("tax_system")]
+    public string? TaxSystem { get; set; }
+
+    /// <summary>
+    /// Código postal del domicilio fiscal del cliente (DomicilioFiscalReceptor), 5 dígitos.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string? Zip { get; set; }
+
+    /// <summary>
+    /// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public Dictionary<string, JsonElement>? Foreign { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;InvoicePreviewTaxes&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoicePreviewTaxes
+{
+    /// <summary>
+    /// IVA trasladado.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public decimal? Iva { get; set; }
+
+    /// <summary>
+    /// IEPS trasladado.
+    /// </summary>
+    [JsonPropertyName("ieps")]
+    public decimal? Ieps { get; set; }
+
+    /// <summary>
+    /// IVA retenido.
+    /// </summary>
+    [JsonPropertyName("iva_withheld")]
+    public decimal? IvaWithheld { get; set; }
+
+    /// <summary>
+    /// ISR retenido.
+    /// </summary>
+    [JsonPropertyName("isr_withheld")]
+    public decimal? IsrWithheld { get; set; }
+
+    /// <summary>
+    /// Impuestos locales trasladados.
+    /// </summary>
+    [JsonPropertyName("local_transferred")]
+    public decimal? LocalTransferred { get; set; }
+
+    /// <summary>
+    /// Impuestos locales retenidos.
+    /// </summary>
+    [JsonPropertyName("local_withheld")]
+    public decimal? LocalWithheld { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;InvoicePreviewWarningsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoicePreviewWarningsItem
+{
+    /// <summary>
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Qué pasó y cómo corregirlo, para una persona.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Facturar un pedido».
 /// </summary>
 public sealed partial class InvoiceSalesOrderParams
@@ -15282,6 +15660,56 @@ public sealed partial class Issuer
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string> Metadata { get; set; } = default!;
+}
+
+/// <summary>
+/// Cómo se ven los documentos de un emisor: nombre comercial, estilo y color del PDF, y logo.
+/// </summary>
+public sealed partial class IssuerBranding
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Su nombre comercial: va en grande en el PDF, el correo y la página de la factura; null: la razón social.
+    /// </summary>
+    [JsonPropertyName("trade_name")]
+    public string? TradeName { get; set; }
+
+    /// <summary>
+    /// Estilo del PDF: clasico, moderno, compacto o minimalista; null: clasico.
+    /// <br/>
+    /// Valores: clasico, moderno, compacto, minimalista.
+    /// </summary>
+    [JsonPropertyName("pdf_style")]
+    public string? PdfStyle { get; set; }
+
+    /// <summary>
+    /// Color del PDF (#RRGGBB); null: el de Fiscalisto (#5B48EE).
+    /// </summary>
+    [JsonPropertyName("pdf_color")]
+    public string? PdfColor { get; set; }
+
+    /// <summary>
+    /// Dirección pública del logo; null si no tiene.
+    /// </summary>
+    [JsonPropertyName("logo_url")]
+    public string? LogoUrl { get; set; }
 }
 
 /// <summary>
@@ -17096,6 +17524,30 @@ public sealed partial class ListWarehousesParams
     /// </summary>
     [JsonPropertyName("include_archived")]
     public bool? IncludeArchived { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar entregas».
+/// </summary>
+public sealed partial class ListWebhookDeliveriesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// false: solo los que fallaron en su último intento. true: solo los que llegaron.
+    /// </summary>
+    [JsonPropertyName("succeeded")]
+    public bool? Succeeded { get; set; }
 }
 
 /// <summary>
@@ -25439,6 +25891,32 @@ public sealed partial class UpdateInvoiceParams
 }
 
 /// <summary>
+/// Los campos de «Cambiar el diseño del PDF».
+/// </summary>
+public sealed partial class UpdateIssuerBrandingParams
+{
+    /// <summary>
+    /// Su nombre comercial, si se presenta con otra marca: va en grande en el PDF, en el correo y en la página de la factura. null: la razón social.
+    /// </summary>
+    [JsonPropertyName("trade_name")]
+    public string? TradeName { get; set; }
+
+    /// <summary>
+    /// Estilo del PDF: clasico (por omisión), moderno (encabezado y total con color, renglones alternados), compacto (letra chica, márgenes cortos) o minimalista (sin rellenos, el color solo en el total).
+    /// <br/>
+    /// Valores: clasico, moderno, compacto, minimalista.
+    /// </summary>
+    [JsonPropertyName("pdf_style")]
+    public string? PdfStyle { get; set; }
+
+    /// <summary>
+    /// Color del PDF, como #2563EB. null: el de Fiscalisto (#5B48EE).
+    /// </summary>
+    [JsonPropertyName("pdf_color")]
+    public string? PdfColor { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar un emisor».
 /// </summary>
 public sealed partial class UpdateIssuerParams
@@ -27245,6 +27723,18 @@ public sealed partial class UploadCertificateParams
 }
 
 /// <summary>
+/// Los campos de «Subir el logo».
+/// </summary>
+public sealed partial class UploadIssuerLogoParams
+{
+    /// <summary>
+    /// El logo, PNG o JPG de hasta 1 MB, en base64 (con o sin el prefijo data:image/png;base64,). Uno muy grande se reduce para el PDF.
+    /// </summary>
+    [JsonPropertyName("file")]
+    public required string File { get; set; }
+}
+
+/// <summary>
 /// Las solicitudes de producción de los últimos 30 días contra las que tiene.
 /// </summary>
 public sealed partial class Usage
@@ -27752,6 +28242,126 @@ public sealed partial class WarehouseList
     /// </summary>
     [JsonPropertyName("data")]
     public List<Warehouse> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que pasó con un evento en un webhook: su último intento, cuántos lleva y cuándo va el siguiente.
+/// </summary>
+public sealed partial class WebhookDelivery
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El último intento (whd_…). Úselo en starting_after para la página siguiente.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// El webhook (whe_…).
+    /// </summary>
+    [JsonPropertyName("webhook_endpoint")]
+    public string WebhookEndpoint { get; set; } = default!;
+
+    /// <summary>
+    /// El evento (evt_…). Reenvíelo con POST /v1/events/{id}/resend.
+    /// </summary>
+    [JsonPropertyName("event")]
+    public string Event { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo del evento (invoice.stamped…).
+    /// </summary>
+    [JsonPropertyName("event_type")]
+    public string? EventType { get; set; }
+
+    /// <summary>
+    /// true si su servidor contestó 2xx en el último intento.
+    /// </summary>
+    [JsonPropertyName("succeeded")]
+    public bool Succeeded { get; set; }
+
+    /// <summary>
+    /// El código HTTP que contestó su servidor; null si no se pudo conectar.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public long? Status { get; set; }
+
+    /// <summary>
+    /// Qué falló (tiempo de espera, DNS, o el inicio de su respuesta); null si llegó.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+
+    /// <summary>
+    /// Cuánto tardó su servidor en contestar el último intento.
+    /// </summary>
+    [JsonPropertyName("duration_ms")]
+    public long DurationMs { get; set; }
+
+    /// <summary>
+    /// Cuántas veces se ha mandado a este webhook, reenvíos incluidos.
+    /// </summary>
+    [JsonPropertyName("attempts")]
+    public long Attempts { get; set; }
+
+    /// <summary>
+    /// true si el último intento fue un reenvío (POST /v1/events/{id}/resend).
+    /// </summary>
+    [JsonPropertyName("resent")]
+    public bool Resent { get; set; }
+
+    /// <summary>
+    /// true si es un evento de prueba (POST /v1/webhook_endpoints/{id}/test); no se reintenta.
+    /// </summary>
+    [JsonPropertyName("test")]
+    public bool Test { get; set; }
+
+    /// <summary>
+    /// Cuándo fue el último intento.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo va el siguiente reintento automático; null si llegó o ya no hay más.
+    /// </summary>
+    [JsonPropertyName("next_retry_at")]
+    public string? NextRetryAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class WebhookDeliveryList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<WebhookDelivery> Data { get; set; } = default!;
 
     /// <summary>
     /// true si hay más: pida la siguiente con starting_after igual al id del último.

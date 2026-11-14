@@ -614,6 +614,62 @@ public sealed class IssuersResource
         => _client.RequestAsync<Issuer>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/certificates", @params, null, options, true, cancellationToken);
 
     /// <summary>
+    /// Ver el diseño del PDF
+    /// </summary>
+    /// <remarks>
+    /// Cómo se ven los documentos del emisor: su nombre comercial, el estilo y el color del PDF y su logo. Es lo mismo que Ajustes › Marca y documentos en la app.
+    /// <br/>
+    /// <c>GET /v1/issuers/{id}/branding</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/get-issuer-branding"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<IssuerBranding> GetBrandingAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<IssuerBranding>("GET", $"/v1/issuers/{Uri.EscapeDataString(id)}/branding", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar el diseño del PDF
+    /// </summary>
+    /// <remarks>
+    /// Cambia el nombre comercial, el estilo (clasico, moderno, compacto o minimalista) y el color del PDF de las facturas, notas, pagos, recibos y cotizaciones del emisor, y de sus correos. Lo que no mande se queda como está; null vuelve al de omisión. Se ve en el siguiente PDF que pida, también de lo ya timbrado. Una sucursal puede tener el suyo (POST /v1/branches/{id}).
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/branding</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/update-issuer-branding"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<IssuerBranding> UpdateBrandingAsync(string id, UpdateIssuerBrandingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<IssuerBranding>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/branding", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Subir el logo
+    /// </summary>
+    /// <remarks>
+    /// El logo del emisor (PNG o JPG de hasta 1 MB, en base64): va en sus PDF, sus correos y la página de la factura que ve su cliente. Reemplaza el anterior.
+    /// <br/>
+    /// <c>POST /v1/issuers/{id}/logo</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/upload-issuer-logo"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<IssuerBranding> UploadLogoAsync(string id, UploadIssuerLogoParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<IssuerBranding>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/logo", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar el logo
+    /// </summary>
+    /// <remarks>
+    /// Sus PDF y correos van sin logo, con su nombre.
+    /// <br/>
+    /// <c>DELETE /v1/issuers/{id}/logo</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/delete-issuer-logo"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<IssuerBranding> DeleteLogoAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<IssuerBranding>("DELETE", $"/v1/issuers/{Uri.EscapeDataString(id)}/logo", null, null, options, false, cancellationToken);
+
+    /// <summary>
     /// Firmar el contrato con el PAC
     /// </summary>
     /// <remarks>
@@ -826,6 +882,20 @@ public sealed class InvoicesResource
         => _client.ListAllAsync<Invoice>("/v1/invoices", @params, options, cancellationToken);
 
     /// <summary>
+    /// Revisar una factura sin timbrar
+    /// </summary>
+    /// <remarks>
+    /// El mismo cuerpo y las mismas revisiones que POST /v1/invoices, sin timbrar ni usar timbres: devuelve la factura como se timbraría ahora (con los datos fiscales del emisor, el siguiente folio, el subtotal, los impuestos y el total que calcula Fiscalisto), los avisos (un cliente en las listas del SAT, un duplicado) y el XML sin sellar (unsigned_xml). Úsela para mostrar el total antes de cobrar o para validar en su sistema; si algo falla, invoice_invalid como al timbrar. No pide Idempotency-Key y sirve con una llave de solo lectura.
+    /// <br/>
+    /// <c>POST /v1/invoices/preview</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas/preview-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<InvoicePreview> PreviewAsync(InvoiceCreate @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<InvoicePreview>("POST", "/v1/invoices/preview", @params, null, options, true, cancellationToken);
+
+    /// <summary>
     /// Ver una factura
     /// </summary>
     /// <remarks>
@@ -880,6 +950,20 @@ public sealed class InvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> XmlAsync(string id, GetInvoiceXmlParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", $"/v1/invoices/{Uri.EscapeDataString(id)}/xml", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar el acuse de cancelación
+    /// </summary>
+    /// <remarks>
+    /// El acuse de cancelación del SAT (XML firmado por el SAT) de una factura cancelada: la prueba de que el SAT la canceló y cuándo. Antes de que el SAT la cancele (status valid o pending), 409 invoice_not_canceled.
+    /// <br/>
+    /// <c>GET /v1/invoices/{id}/cancellation_receipt</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas/get-invoice-cancellation-receipt"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> CancellationReceiptAsync(string id, GetInvoiceCancellationReceiptParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", $"/v1/invoices/{Uri.EscapeDataString(id)}/cancellation_receipt", null, @params, options, false, cancellationToken);
 
     /// <summary>
     /// Enviar por correo
@@ -4608,6 +4692,26 @@ public sealed class WebhookEndpointsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<WebhookTest> TestAsync(string id, TestWebhookEndpointParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<WebhookTest>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/test", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar entregas
+    /// </summary>
+    /// <remarks>
+    /// Qué pasó con cada evento en este webhook, el más reciente primero: una fila por evento con su último intento, cuántos lleva y cuándo va el siguiente reintento. Con succeeded=false ve los que su servidor no recibió, para reenviarlos con POST /v1/events/{id}/resend.
+    /// <br/>
+    /// <c>GET /v1/webhook_endpoints/{id}/deliveries</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/webhooks/list-webhook-deliveries"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<WebhookDelivery>> ListDeliveriesAsync(string id, ListWebhookDeliveriesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<WebhookDelivery>($"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/deliveries", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar entregas: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<WebhookDelivery> ListDeliveriesAutoPagingAsync(string id, ListWebhookDeliveriesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<WebhookDelivery>($"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/deliveries", @params, options, cancellationToken);
 }
 
 /// <summary>

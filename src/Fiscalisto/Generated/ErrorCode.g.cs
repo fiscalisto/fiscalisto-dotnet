@@ -129,6 +129,9 @@ public static class ErrorCode
     /// <summary>La factura no cumple una regla del SAT que Fiscalisto revisa antes de mandarla al PAC (uso contra régimen, totales, complementos…). No se usó ningún timbre.</summary>
     public const string InvoiceInvalid = "invoice_invalid";
 
+    /// <summary>El acuse de cancelación existe cuando el SAT ya canceló la factura (status canceled). Con una cancelación en espera del cliente (pending), espere invoice.canceled.</summary>
+    public const string InvoiceNotCanceled = "invoice_not_canceled";
+
     /// <summary>Solo una factura de ingreso PUE vigente se marca pagada o por cobrar; una PPD se paga con su complemento de pago (type P).</summary>
     public const string InvoiceNotMarkable = "invoice_not_markable";
 
