@@ -225,6 +225,31 @@ public sealed partial class FiscalistoClient
     /// <summary>Verificar comprobantes.</summary>
     public CfdiVerificationsResource CfdiVerifications => _cfdiVerifications ??= new CfdiVerificationsResource(this);
 
+    private MembersResource? _members;
+
+    /// <summary>Equipo.</summary>
+    public MembersResource Members => _members ??= new MembersResource(this);
+
+    private InvitationsResource? _invitations;
+
+    /// <summary>Equipo.</summary>
+    public InvitationsResource Invitations => _invitations ??= new InvitationsResource(this);
+
+    private RolesResource? _roles;
+
+    /// <summary>Equipo.</summary>
+    public RolesResource Roles => _roles ??= new RolesResource(this);
+
+    private PermissionsResource? _permissions;
+
+    /// <summary>Equipo.</summary>
+    public PermissionsResource Permissions => _permissions ??= new PermissionsResource(this);
+
+    private ExportsResource? _exports;
+
+    /// <summary>Exportaciones.</summary>
+    public ExportsResource Exports => _exports ??= new ExportsResource(this);
+
     private SatDownloadsResource? _satDownloads;
 
     /// <summary>Descargas del SAT.</summary>
@@ -851,7 +876,7 @@ public sealed class InvoicesResource
     /// Timbrar una factura
     /// </summary>
     /// <remarks>
-    /// Revisa la factura con las reglas del SAT, la sella y la timbra en una sola llamada. Responde con la factura timbrada (status valid) o, si el PAC tarda, en processing (escuche invoice.stamped). Lo que puede omitir tiene el valor usual: PUE, MXN, uso G03 (S01 con régimen 616), objeto de impuesto 02, IVA 16%, cantidad 1, unidad E48.
+    /// Revisa la factura con las reglas del SAT, la sella y la timbra en una sola llamada. Responde con la factura timbrada (status valid) o, si el PAC tarda o el SAT no responde, 202 en processing: Fiscalisto la reintenta sola y invoice.stamped avisa. Con async: true responde 202 de inmediato y timbra después. Lo que puede omitir tiene el valor usual: PUE, MXN, uso G03 (S01 con régimen 616), objeto de impuesto 02, IVA 16%, cantidad 1, unidad E48.
     /// <br/>
     /// <c>POST /v1/invoices</c>
     /// <br/>
@@ -3294,6 +3319,286 @@ public sealed class CfdiVerificationsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<CfdiVerification> CreateAsync(VerifyCfdiParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<CfdiVerification>("POST", "/v1/cfdi_verifications", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Equipo: <c>fiscalisto.Members</c>.
+/// </summary>
+public sealed class MembersResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal MembersResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar miembros
+    /// </summary>
+    /// <remarks>
+    /// Quién entra a la empresa en la app, con su rol, sus permisos y los RFC y sucursales a su alcance, como Ajustes › Miembros. Todos, los más antiguos primero. Pide que quien creó la llave tenga el permiso de ver el equipo.
+    /// <br/>
+    /// <c>GET /v1/members</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/list-members"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<MemberList> ListAsync(ListMembersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<MemberList>("GET", "/v1/members", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver un miembro
+    /// </summary>
+    /// <remarks>
+    /// Su rol, sus permisos (los agregados, los quitados y los que tiene al final) y su alcance.
+    /// <br/>
+    /// <c>GET /v1/members/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/get-member"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Member> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Member>("GET", $"/v1/members/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar el acceso de un miembro
+    /// </summary>
+    /// <remarks>
+    /// Su rol, los permisos que se le agregan o quitan y los RFC y sucursales a su alcance; lo que no mande se queda como está. Nadie da más de lo que tiene quien creó la llave. Dar, quitar o tocar un permiso delicado (equipo, credenciales, seguridad, plan) contesta 403 team_change_requires_app: se hace en la app, que confirma la identidad.
+    /// <br/>
+    /// <c>POST /v1/members/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/update-member"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Member> UpdateAsync(string id, UpdateMemberParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Member>("POST", $"/v1/members/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar a un miembro
+    /// </summary>
+    /// <remarks>
+    /// La persona deja de entrar a la empresa y sus invitaciones se cancelan. Siempre queda al menos un propietario; quitar a alguien con permisos delicados se hace en la app.
+    /// <br/>
+    /// <c>DELETE /v1/members/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/delete-member"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/members/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Equipo: <c>fiscalisto.Invitations</c>.
+/// </summary>
+public sealed class InvitationsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal InvitationsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar invitaciones
+    /// </summary>
+    /// <remarks>
+    /// Las invitaciones pendientes de la empresa, las más antiguas primero.
+    /// <br/>
+    /// <c>GET /v1/invitations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/list-invitations"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<InvitationList> ListAsync(ListInvitationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<InvitationList>("GET", "/v1/invitations", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Invitar a alguien a la empresa
+    /// </summary>
+    /// <remarks>
+    /// Le manda un correo con un enlace para entrar a la empresa con ese rol, válido 7 días, como Invitar en Ajustes › Miembros. Invitar otra vez al mismo correo reemplaza la invitación. Una invitación con permisos delicados (equipo, credenciales, seguridad, plan) o como propietario se hace en la app.
+    /// <br/>
+    /// <c>POST /v1/invitations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/create-invitation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invitation> CreateAsync(CreateInvitationParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invitation>("POST", "/v1/invitations", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cancelar una invitación
+    /// </summary>
+    /// <remarks>
+    /// Su enlace deja de servir. Contesta la invitación con status canceled.
+    /// <br/>
+    /// <c>DELETE /v1/invitations/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/cancel-invitation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invitation> CancelAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invitation>("DELETE", $"/v1/invitations/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Equipo: <c>fiscalisto.Roles</c>.
+/// </summary>
+public sealed class RolesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal RolesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar roles
+    /// </summary>
+    /// <remarks>
+    /// Propietario, los roles de Fiscalisto (como se editaron en la empresa) y los suyos, con sus permisos y cuántas personas los tienen.
+    /// <br/>
+    /// <c>GET /v1/roles</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/list-roles"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RoleList> ListAsync(ListRolesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RoleList>("GET", "/v1/roles", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Crear un rol
+    /// </summary>
+    /// <remarks>
+    /// Un rol de la empresa con su nombre y sus permisos (GET /v1/permissions), como Ajustes › Roles. No puede tener permisos que no tenga quien creó la llave; uno con permisos delicados se hace en la app.
+    /// <br/>
+    /// <c>POST /v1/roles</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/create-role"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Role> CreateAsync(CreateRoleParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Role>("POST", "/v1/roles", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un rol
+    /// </summary>
+    /// <remarks>
+    /// Su nombre, su descripción o sus permisos; lo que no mande se queda. Cambia el acceso de todos los que lo tienen. Propietario no se cambia.
+    /// <br/>
+    /// <c>POST /v1/roles/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/update-role"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Role> UpdateAsync(string id, UpdateRoleParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Role>("POST", $"/v1/roles/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un rol
+    /// </summary>
+    /// <remarks>
+    /// Solo uno de la empresa (type custom), cuando nadie lo tiene ni lo da una invitación pendiente.
+    /// <br/>
+    /// <c>DELETE /v1/roles/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/delete-role"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, DeleteRoleParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/roles/{Uri.EscapeDataString(id)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Equipo: <c>fiscalisto.Permissions</c>.
+/// </summary>
+public sealed class PermissionsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PermissionsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar permisos
+    /// </summary>
+    /// <remarks>
+    /// Cada permiso que un rol o una persona puede tener, con su nombre en la app, su grupo y si es delicado.
+    /// <br/>
+    /// <c>GET /v1/permissions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/list-permissions"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PermissionList> ListAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PermissionList>("GET", "/v1/permissions", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Exportaciones: <c>fiscalisto.Exports</c>.
+/// </summary>
+public sealed class ExportsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ExportsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Exportar las facturas de un mes
+    /// </summary>
+    /// <remarks>
+    /// Un ZIP con el XML (y si quiere el PDF) de cada factura que el emisor emitió o recibió en un mes o un periodo, o un Excel con una fila por factura: los mismos archivos que Facturas › Exportar en la app, para su contador, un respaldo o una auditoría. Contesta 202 de inmediato con status processing; consulte GET /v1/exports/{id} hasta completed y descárguelo con GET /v1/exports/{id}/download durante 30 días. No usa timbres y sirve con una llave de solo lectura.
+    /// <br/>
+    /// <c>POST /v1/exports</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/exportaciones/create-export"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Export> CreateAsync(CreateExportParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Export>("POST", "/v1/exports", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar exportaciones
+    /// </summary>
+    /// <remarks>
+    /// Las exportaciones del emisor pedidas por la API, las más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/exports</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/exportaciones/list-exports"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Export>> ListAsync(ListExportsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Export>("/v1/exports", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar exportaciones: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Export> ListAutoPagingAsync(ListExportsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Export>("/v1/exports", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una exportación
+    /// </summary>
+    /// <remarks>
+    /// Su estado (processing, completed, failed o expired), cuántas facturas lleva, su tamaño y hasta cuándo se descarga.
+    /// <br/>
+    /// <c>GET /v1/exports/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/exportaciones/get-export"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Export> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Export>("GET", $"/v1/exports/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar una exportación
+    /// </summary>
+    /// <remarks>
+    /// El ZIP o el Excel, cuando status es completed. Antes, 409 export_not_ready; pasados 30 días, 410 export_expired.
+    /// <br/>
+    /// <c>GET /v1/exports/{id}/download</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/exportaciones/download-export"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> DownloadAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", $"/v1/exports/{Uri.EscapeDataString(id)}/download", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

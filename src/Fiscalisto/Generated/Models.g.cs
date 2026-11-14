@@ -447,6 +447,12 @@ public sealed partial class ApplyAdvanceParams
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("async")]
+    public bool? Async { get; set; }
 }
 
 /// <summary>
@@ -509,7 +515,7 @@ public sealed partial class Balance
     public bool Unlimited { get; set; }
 
     /// <summary>
-    /// Con esta cantidad o menos llega balance.low (y otra vez al acabarse). Se elige en Desarrolladores › Timbres.
+    /// Con esta cantidad o menos llega balance.low (y otra vez al acabarse). Se elige en Desarrolladores › Timbres y pagos.
     /// </summary>
     [JsonPropertyName("low_balance_at")]
     public long LowBalanceAt { get; set; }
@@ -521,7 +527,7 @@ public sealed partial class Balance
     public BalanceAutoRecharge? AutoRecharge { get; set; }
 
     /// <summary>
-    /// true si, al acabarse `available`, la API sigue timbrando con los timbres del plan de la empresa (Desarrolladores › Timbres › Si se acaban, usar los timbres de la empresa). false: responde 402 insufficient_balance.
+    /// true si, al acabarse `available`, la API sigue timbrando con los timbres del plan de la empresa (Desarrolladores › Timbres y pagos › Si se acaban, usar los timbres de la empresa). false: responde 402 insufficient_balance.
     /// </summary>
     [JsonPropertyName("use_plan_timbres")]
     public bool UsePlanTimbres { get; set; }
@@ -2704,6 +2710,68 @@ public sealed partial class CreateExpenseReportParams
 }
 
 /// <summary>
+/// Los campos de «Exportar las facturas de un mes».
+/// </summary>
+public sealed partial class CreateExportParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Un mes completo (AAAA-MM), por la fecha de emisión en hora de la Ciudad de México. Mande month, o from y to.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string? Month { get; set; }
+
+    /// <summary>
+    /// Desde qué día (incluido), en lugar de month.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Hasta qué día (incluido), en lugar de month. A lo más 7 ejercicios.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// issued (las facturas que emitió el emisor, por omisión) o received (las que le hicieron).
+    /// <br/>
+    /// Valores: issued, received.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string? Direction { get; set; }
+
+    /// <summary>
+    /// Solo un tipo de comprobante: I, E, P, T o N. Por omisión, todos.
+    /// <br/>
+    /// Valores: I, E, P, T, N.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// zip (los archivos de cada factura, por omisión) o xlsx (un Excel con una fila por factura).
+    /// <br/>
+    /// Valores: zip, xlsx.
+    /// </summary>
+    [JsonPropertyName("format")]
+    public string? Format { get; set; }
+
+    /// <summary>
+    /// Con format zip: xml (por omisión), pdf, o xml_and_pdf (los dos de cada factura).
+    /// <br/>
+    /// Valores: xml, pdf, xml_and_pdf.
+    /// </summary>
+    [JsonPropertyName("files")]
+    public string? Files { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Archivos para IDSE o SUA».
 /// </summary>
 public sealed partial class CreateImssFilesParams
@@ -2773,6 +2841,60 @@ public sealed partial class CreateImssMovementParams
     /// </summary>
     [JsonPropertyName("exit_reason")]
     public string? ExitReason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Invitar a alguien a la empresa».
+/// </summary>
+public sealed partial class CreateInvitationParams
+{
+    /// <summary>
+    /// El emisor (iss_…) de la empresa. Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El correo de la persona: le llega la invitación, válida 7 días.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public required string Email { get; set; }
+
+    /// <summary>
+    /// El rol (id de GET /v1/roles, como admin, contador, facturista o uno suyo). owner es Propietario: solo un propietario da o quita ese rol.
+    /// </summary>
+    [JsonPropertyName("role")]
+    public required string Role { get; set; }
+
+    /// <summary>
+    /// true: todos los permisos, incluidos los que se agreguen después (además de los del rol).
+    /// </summary>
+    [JsonPropertyName("all_permissions")]
+    public bool? AllPermissions { get; set; }
+
+    /// <summary>
+    /// Permisos además de los del rol (GET /v1/permissions).
+    /// </summary>
+    [JsonPropertyName("permissions_added")]
+    public List<string>? PermissionsAdded { get; set; }
+
+    /// <summary>
+    /// Permisos del rol que esta persona no tiene.
+    /// </summary>
+    [JsonPropertyName("permissions_removed")]
+    public List<string>? PermissionsRemoved { get; set; }
+
+    /// <summary>
+    /// Solo trabaja con estos RFC de la empresa. null: con todos.
+    /// </summary>
+    [JsonPropertyName("tax_ids")]
+    public List<string>? TaxIds { get; set; }
+
+    /// <summary>
+    /// Solo emite desde estas sucursales (brn_…, o "matriz" para el domicilio fiscal). null: desde todas.
+    /// </summary>
+    [JsonPropertyName("branches")]
+    public List<string>? Branches { get; set; }
 }
 
 /// <summary>
@@ -3003,6 +3125,12 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("async")]
+    public bool? Async { get; set; }
 
     /// <summary>
     /// Su identificador de esta factura (su número de pedido), hasta 100 caracteres.
@@ -4609,6 +4737,12 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("async")]
+    public bool? Async { get; set; }
 }
 
 /// <summary>
@@ -5533,6 +5667,42 @@ public sealed partial class CreateRetentionParamsTrustWithholding
     /// </summary>
     [JsonPropertyName("description")]
     public required string Description { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear un rol».
+/// </summary>
+public sealed partial class CreateRoleParams
+{
+    /// <summary>
+    /// El emisor (iss_…) de la empresa. Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Como se ve en la app.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// true: todos los permisos, incluidos los que se agreguen después.
+    /// </summary>
+    [JsonPropertyName("all_permissions")]
+    public bool? AllPermissions { get; set; }
+
+    /// <summary>
+    /// Sus permisos (GET /v1/permissions). Los que otro necesita se agregan solos (timbrar pide ver facturas).
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public List<string>? Permissions { get; set; }
 }
 
 /// <summary>
@@ -7660,6 +7830,18 @@ public sealed partial class DeleteCostCenterParams
 }
 
 /// <summary>
+/// Los campos de «Borrar un rol».
+/// </summary>
+public sealed partial class DeleteRoleParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Confirmación de que se borró.
 /// </summary>
 public sealed partial class Deleted
@@ -9057,6 +9239,154 @@ public sealed partial class ExpenseReportPayroll
     /// </summary>
     [JsonPropertyName("net")]
     public decimal Net { get; set; }
+}
+
+/// <summary>
+/// Las facturas de un emisor en un periodo, en un ZIP o en Excel.
+/// </summary>
+public sealed partial class Export
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// zip (los archivos de cada factura) o xlsx (un Excel con una fila por factura).
+    /// <br/>
+    /// Valores: zip, xlsx.
+    /// </summary>
+    [JsonPropertyName("format")]
+    public string Format { get; set; } = default!;
+
+    /// <summary>
+    /// Qué archivos de cada factura lleva el ZIP; null en un Excel.
+    /// <br/>
+    /// Valores: xml, pdf, xml_and_pdf.
+    /// </summary>
+    [JsonPropertyName("files")]
+    public string? Files { get; set; }
+
+    /// <summary>
+    /// EntradaSalidaMerc: Entrada o Salida.
+    /// <br/>
+    /// Valores: issued, received.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// Desde qué día (incluido), por la fecha de emisión.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Hasta qué día (incluido), por la fecha de emisión.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: I, E, P, T, N.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// processing: se está generando. completed: listo para descargar. failed: falló (ver error); pídala otra vez. expired: pasaron 30 días y el archivo se borró.
+    /// <br/>
+    /// Valores: processing, completed, failed, expired.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas facturas lleva.
+    /// </summary>
+    [JsonPropertyName("invoice_count")]
+    public decimal InvoiceCount { get; set; }
+
+    /// <summary>
+    /// El tamaño del archivo en bytes, cuando está listo.
+    /// </summary>
+    [JsonPropertyName("size_bytes")]
+    public decimal? SizeBytes { get; set; }
+
+    /// <summary>
+    /// Por qué falló la exportación, en palabras; null si no falló.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo terminó.
+    /// </summary>
+    [JsonPropertyName("completed_at")]
+    public string? CompletedAt { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo se descarga (30 días después de completed).
+    /// </summary>
+    [JsonPropertyName("expires_at")]
+    public string? ExpiresAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ExportList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Export> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -11044,6 +11374,122 @@ public sealed partial class ImssMovementList
 }
 
 /// <summary>
+/// Una invitación a la empresa que aún no se acepta.
+/// </summary>
+public sealed partial class Invitation
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Correo a donde se envía (varios separados por comas). Solo se usa si se pide enviarlo.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = default!;
+
+    /// <summary>
+    /// El rol (id de GET /v1/roles).
+    /// </summary>
+    [JsonPropertyName("role")]
+    public string Role { get; set; } = default!;
+
+    /// <summary>
+    /// true: todos los permisos, incluidos los que se agreguen después.
+    /// </summary>
+    [JsonPropertyName("all_permissions")]
+    public bool AllPermissions { get; set; }
+
+    /// <summary>
+    /// Permisos además de los del rol.
+    /// </summary>
+    [JsonPropertyName("permissions_added")]
+    public List<string> PermissionsAdded { get; set; } = default!;
+
+    /// <summary>
+    /// Permisos del rol que esta persona no tiene.
+    /// </summary>
+    [JsonPropertyName("permissions_removed")]
+    public List<string> PermissionsRemoved { get; set; } = default!;
+
+    /// <summary>
+    /// Solo trabaja con estos RFC de la empresa; null: con todos.
+    /// </summary>
+    [JsonPropertyName("tax_ids")]
+    public List<string>? TaxIds { get; set; }
+
+    /// <summary>
+    /// Solo emite desde estas sucursales (brn_…, o "matriz"); null: desde todas.
+    /// </summary>
+    [JsonPropertyName("branches")]
+    public List<string>? Branches { get; set; }
+
+    /// <summary>
+    /// pending: su enlace sirve. canceled: se canceló.
+    /// <br/>
+    /// Valores: pending, canceled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuándo sirve su enlace (7 días).
+    /// </summary>
+    [JsonPropertyName("expires_at")]
+    public string ExpiresAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class InvitationList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Invitation> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Un CFDI 4.0 emitido: factura de ingreso o global, traslado, nota de crédito (E), complemento de pago (P) o recibo de nómina (N).
 /// </summary>
 public sealed partial class Invoice
@@ -11747,6 +12193,12 @@ public sealed partial class InvoiceCreate
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("async")]
+    public bool? Async { get; set; }
 }
 
 /// <summary>
@@ -16405,6 +16857,30 @@ public sealed partial class ListExpenseReportsParams
 }
 
 /// <summary>
+/// Los campos de «Listar exportaciones».
+/// </summary>
+public sealed partial class ListExportsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar movimientos del IMSS».
 /// </summary>
 public sealed partial class ListImssMovementsParams
@@ -16434,6 +16910,18 @@ public sealed partial class ListImssMovementsParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar invitaciones».
+/// </summary>
+public sealed partial class ListInvitationsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -16596,6 +17084,18 @@ public sealed partial class ListJournalEntriesParams
 /// Los campos de «Ver el catálogo de cuentas».
 /// </summary>
 public sealed partial class ListLedgerAccountsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar miembros».
+/// </summary>
+public sealed partial class ListMembersParams
 {
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
@@ -16900,6 +17400,18 @@ public sealed partial class ListRetentionsParams
     /// </summary>
     [JsonPropertyName("year")]
     public string? Year { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar roles».
+/// </summary>
+public sealed partial class ListRolesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -17620,6 +18132,132 @@ public sealed partial class MatchBankTransactionParams
     /// </summary>
     [JsonPropertyName("invoices")]
     public List<string>? Invoices { get; set; }
+}
+
+/// <summary>
+/// Una persona que entra a la empresa en la app.
+/// </summary>
+public sealed partial class Member
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Correo a donde se envía (varios separados por comas). Solo se usa si se pide enviarlo.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = default!;
+
+    /// <summary>
+    /// El rol (id de GET /v1/roles).
+    /// </summary>
+    [JsonPropertyName("role")]
+    public string Role { get; set; } = default!;
+
+    /// <summary>
+    /// true: todos los permisos, incluidos los que se agreguen después.
+    /// </summary>
+    [JsonPropertyName("all_permissions")]
+    public bool AllPermissions { get; set; }
+
+    /// <summary>
+    /// Permisos además de los del rol.
+    /// </summary>
+    [JsonPropertyName("permissions_added")]
+    public List<string> PermissionsAdded { get; set; } = default!;
+
+    /// <summary>
+    /// Permisos del rol que esta persona no tiene.
+    /// </summary>
+    [JsonPropertyName("permissions_removed")]
+    public List<string> PermissionsRemoved { get; set; } = default!;
+
+    /// <summary>
+    /// Solo trabaja con estos RFC de la empresa; null: con todos.
+    /// </summary>
+    [JsonPropertyName("tax_ids")]
+    public List<string>? TaxIds { get; set; }
+
+    /// <summary>
+    /// Solo emite desde estas sucursales (brn_…, o "matriz"); null: desde todas.
+    /// </summary>
+    [JsonPropertyName("branches")]
+    public List<string>? Branches { get; set; }
+
+    /// <summary>
+    /// Lo que puede hacer al final: los permisos del rol, más los agregados, menos los quitados.
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public List<string> Permissions { get; set; } = default!;
+
+    /// <summary>
+    /// Si entra con verificación en dos pasos.
+    /// </summary>
+    [JsonPropertyName("two_factor_enabled")]
+    public bool TwoFactorEnabled { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class MemberList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Member> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -18476,6 +19114,72 @@ public sealed partial class PayrollReceiptPreviewWarningsItem
     /// </summary>
     [JsonPropertyName("message")]
     public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Algo que una persona puede hacer en la empresa.
+/// </summary>
+public sealed partial class Permission
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su grupo, como en Ajustes › Roles.
+    /// </summary>
+    [JsonPropertyName("group")]
+    public string Group { get; set; } = default!;
+
+    /// <summary>
+    /// Delicado (equipo, credenciales, seguridad, plan): darlo o quitarlo se hace en la app.
+    /// </summary>
+    [JsonPropertyName("sensitive")]
+    public bool Sensitive { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class PermissionList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Permission> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -20770,6 +21474,110 @@ public sealed partial class ReturnExpenseReportParams
     /// </summary>
     [JsonPropertyName("note")]
     public required string Note { get; set; }
+}
+
+/// <summary>
+/// Un rol de la empresa: un nombre y sus permisos.
+/// </summary>
+public sealed partial class Role
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// true: el rol tiene todos los permisos, incluidos los futuros.
+    /// </summary>
+    [JsonPropertyName("all_permissions")]
+    public bool AllPermissions { get; set; }
+
+    /// <summary>
+    /// Sus permisos (vacío con all_permissions).
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public List<string> Permissions { get; set; } = default!;
+
+    /// <summary>
+    /// owner: Propietario. starter: uno de los de Fiscalisto (se puede cambiar, no borrar). custom: uno de la empresa.
+    /// <br/>
+    /// Valores: owner, starter, custom.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos miembros lo tienen.
+    /// </summary>
+    [JsonPropertyName("members")]
+    public decimal Members { get; set; }
+
+    /// <summary>
+    /// Cuántas invitaciones pendientes lo dan.
+    /// </summary>
+    [JsonPropertyName("invitations")]
+    public decimal Invitations { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class RoleList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Role> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -25983,6 +26791,48 @@ public sealed partial class UpdateIssuerParamsDonationAuthorization
 }
 
 /// <summary>
+/// Los campos de «Cambiar el acceso de un miembro».
+/// </summary>
+public sealed partial class UpdateMemberParams
+{
+    /// <summary>
+    /// El rol (id de GET /v1/roles, como admin, contador, facturista o uno suyo). owner es Propietario: solo un propietario da o quita ese rol.
+    /// </summary>
+    [JsonPropertyName("role")]
+    public string? Role { get; set; }
+
+    /// <summary>
+    /// true: todos los permisos, incluidos los que se agreguen después (además de los del rol).
+    /// </summary>
+    [JsonPropertyName("all_permissions")]
+    public bool? AllPermissions { get; set; }
+
+    /// <summary>
+    /// Permisos además de los del rol (GET /v1/permissions).
+    /// </summary>
+    [JsonPropertyName("permissions_added")]
+    public List<string>? PermissionsAdded { get; set; }
+
+    /// <summary>
+    /// Permisos del rol que esta persona no tiene.
+    /// </summary>
+    [JsonPropertyName("permissions_removed")]
+    public List<string>? PermissionsRemoved { get; set; }
+
+    /// <summary>
+    /// Solo trabaja con estos RFC de la empresa. null: con todos.
+    /// </summary>
+    [JsonPropertyName("tax_ids")]
+    public List<string>? TaxIds { get; set; }
+
+    /// <summary>
+    /// Solo emite desde estas sucursales (brn_…, o "matriz" para el domicilio fiscal). null: desde todas.
+    /// </summary>
+    [JsonPropertyName("branches")]
+    public List<string>? Branches { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar una lista de precios».
 /// </summary>
 public sealed partial class UpdatePriceListParams
@@ -26968,6 +27818,12 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("async")]
+    public bool? Async { get; set; }
 }
 
 /// <summary>
@@ -27014,6 +27870,42 @@ public sealed partial class UpdateRecurringInvoiceParamsSchedule
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string? TimeZone { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un rol».
+/// </summary>
+public sealed partial class UpdateRoleParams
+{
+    /// <summary>
+    /// El emisor (iss_…) de la empresa. Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// true: todos los permisos, incluidos los que se agreguen después.
+    /// </summary>
+    [JsonPropertyName("all_permissions")]
+    public bool? AllPermissions { get; set; }
+
+    /// <summary>
+    /// Sus permisos (GET /v1/permissions). Los que otro necesita se agregan solos (timbrar pide ver facturas).
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public List<string>? Permissions { get; set; }
+
+    /// <summary>
+    /// Como se ve en la app.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 }
 
 /// <summary>
