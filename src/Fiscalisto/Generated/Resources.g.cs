@@ -220,6 +220,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Listas del SAT.</summary>
     public SatListsResource SatLists => _satLists ??= new SatListsResource(this);
 
+    private CfdiVerificationsResource? _cfdiVerifications;
+
+    /// <summary>Verificar comprobantes.</summary>
+    public CfdiVerificationsResource CfdiVerifications => _cfdiVerifications ??= new CfdiVerificationsResource(this);
+
     private SatDownloadsResource? _satDownloads;
 
     /// <summary>Descargas del SAT.</summary>
@@ -3184,6 +3189,30 @@ public sealed class SatListsResource
 }
 
 /// <summary>
+/// Verificar comprobantes: <c>fiscalisto.CfdiVerifications</c>.
+/// </summary>
+public sealed class CfdiVerificationsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CfdiVerificationsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Verificar un CFDI en el SAT
+    /// </summary>
+    /// <remarks>
+    /// Si cualquier CFDI (suyo, de un proveedor o de un cliente) existe en el SAT y está vigente o cancelado, si se puede cancelar, y si su emisor y su receptor están en las listas del SAT. Mande su XML, el texto de su QR, o el UUID con los dos RFC y el total. Consulta el servicio público del SAT, sin e.firma. No usa timbres. En pruebas también consulta el SAT real: los comprobantes de prueba no están ahí y responden not_found.
+    /// <br/>
+    /// <c>POST /v1/cfdi_verifications</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/verificar-comprobantes/verify-cfdi"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CfdiVerification> CreateAsync(VerifyCfdiParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CfdiVerification>("POST", "/v1/cfdi_verifications", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
 /// Descargas del SAT: <c>fiscalisto.SatDownloads</c>.
 /// </summary>
 public sealed class SatDownloadsResource
@@ -4623,4 +4652,18 @@ public sealed class EventsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Event> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Event>("GET", $"/v1/events/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Reenviar un evento
+    /// </summary>
+    /// <remarks>
+    /// Manda otra vez, ahora, un evento de los últimos 30 días: a un webhook (endpoint) o a todos los encendidos que escuchan ese tipo. Es un intento aparte, firmado con el mismo webhook-id: no cambia los reintentos automáticos, y si llega, ya no se reintenta. Úselo después de arreglar su servidor, con GET /v1/events?delivery_success=false.
+    /// <br/>
+    /// <c>POST /v1/events/{id}/resend</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/eventos/resend-event"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EventResend> ResendAsync(string id, ResendEventParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EventResend>("POST", $"/v1/events/{Uri.EscapeDataString(id)}/resend", @params, null, options, true, cancellationToken);
 }

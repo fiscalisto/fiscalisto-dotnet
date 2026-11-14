@@ -81,6 +81,9 @@ public static class ErrorCode
     /// <summary>No se pudo mandar el correo; lo demás sí se hizo: el comprobante está timbrado o la cotización quedó enviada (su url funciona). Repita el envío con su ruta /send.</summary>
     public const string EmailFailed = "email_failed";
 
+    /// <summary>Ese webhook está apagado, así que no se le puede reenviar un evento. Enciéndalo con disabled: false y reenvíe.</summary>
+    public const string EndpointDisabled = "endpoint_disabled";
+
     /// <summary>Ya hay un webhook con esa dirección en este modo; el mensaje dice cuál. Cámbielo en vez de crear otro.</summary>
     public const string EndpointExists = "endpoint_exists";
 
@@ -132,7 +135,7 @@ public static class ErrorCode
     /// <summary>La acción es para facturas timbradas (enviar, cancelar, sustituir).</summary>
     public const string InvoiceNotStamped = "invoice_not_stamped";
 
-    /// <summary>El PAC o el SAT no la aceptaron. sat_code trae su código (CFDI40xxx) y message qué corregir. La factura queda como rejected; no se usó ningún timbre.</summary>
+    /// <summary>El PAC o el SAT no la aceptaron. sat_code trae su código (CFDI40xxx), message qué corregir y doc_url su explicación en [Rechazos del SAT](/docs/api/rechazos-del-sat). La factura queda como rejected; no se usó ningún timbre.</summary>
     public const string InvoiceRejected = "invoice_rejected";
 
     /// <summary>El emisor está archivado: ya no timbra. Sus comprobantes se pueden consultar y cancelar.</summary>

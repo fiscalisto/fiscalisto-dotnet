@@ -1096,6 +1096,200 @@ public sealed partial class CancelSalesOrderParams
 }
 
 /// <summary>
+/// Lo que dice el SAT de un CFDI: si existe, si está vigente o cancelado y si se puede cancelar, con su emisor y su receptor en las listas del SAT.
+/// </summary>
+public sealed partial class CfdiVerification
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Folio fiscal que asigna el SAT (UUID del Timbre Fiscal Digital), en mayúsculas.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del emisor que se consultó.
+    /// </summary>
+    [JsonPropertyName("issuer_tax_id")]
+    public string IssuerTaxId { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del receptor que se consultó.
+    /// </summary>
+    [JsonPropertyName("receiver_tax_id")]
+    public string ReceiverTaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// De dónde se leyeron el UUID, los RFC y el total: xml, qr o fields.
+    /// <br/>
+    /// Valores: xml, qr, fields.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que dice el SAT: active (vigente), canceled (cancelado), not_found (no lo tiene: no se timbró, se timbró hace minutos o es de pruebas) o data_mismatch (el UUID existe pero los RFC o el total no coinciden).
+    /// <br/>
+    /// Valores: active, canceled, not_found, data_mismatch.
+    /// </summary>
+    [JsonPropertyName("sat_status")]
+    public string SatStatus { get; set; } = default!;
+
+    /// <summary>
+    /// Si está vigente, cómo se cancela: without_acceptance (sin que el receptor acepte), with_acceptance (el receptor tiene 3 días hábiles para aceptar) o not_cancellable (por ejemplo, tiene documentos relacionados vigentes). null si no está vigente o el SAT no lo dijo.
+    /// <br/>
+    /// Valores: without_acceptance, with_acceptance, not_cancellable.
+    /// </summary>
+    [JsonPropertyName("cancellable")]
+    public string? Cancellable { get; set; }
+
+    /// <summary>
+    /// Una cancelación en curso o terminada: in_process (esperando al receptor), rejected (el receptor la rechazó), deadline_passed (pasó el plazo y se canceló), accepted o without_acceptance (cancelado con o sin aceptación). null si nadie la pidió.
+    /// <br/>
+    /// Valores: in_process, rejected, deadline_passed, accepted, without_acceptance.
+    /// </summary>
+    [JsonPropertyName("cancellation_status")]
+    public string? CancellationStatus { get; set; }
+
+    /// <summary>
+    /// true si el SAT dice que el emisor está en la lista 69-B como definitivo (EFOS); false si no; null si no lo dijo.
+    /// </summary>
+    [JsonPropertyName("issuer_efos")]
+    public bool? IssuerEfos { get; set; }
+
+    /// <summary>
+    /// La respuesta del SAT tal cual (CodigoEstatus, Estado, EsCancelable, EstatusCancelacion, ValidacionEFOS), por si la necesita igual que el SAT.
+    /// </summary>
+    [JsonPropertyName("sat")]
+    public CfdiVerificationSat Sat { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que trae el XML además (versión, tipo, fechas, nombres, moneda), si mandó xml; null si no.
+    /// </summary>
+    [JsonPropertyName("xml")]
+    public CfdiVerificationXml? Xml { get; set; }
+
+    /// <summary>
+    /// El emisor en las listas del SAT (69-B, 69-B Bis y art. 69), como GET /v1/sat_lists/{tax_id}, sin costo. Solo cuando el SAT tiene el comprobante (active o canceled); null si no, o si las listas no se pudieron leer.
+    /// </summary>
+    [JsonPropertyName("issuer_sat_lists")]
+    public SatListCheck? IssuerSatLists { get; set; }
+
+    /// <summary>
+    /// El receptor en las listas del SAT, igual que el emisor.
+    /// </summary>
+    [JsonPropertyName("receiver_sat_lists")]
+    public SatListCheck? ReceiverSatLists { get; set; }
+
+    /// <summary>
+    /// Cuándo se le preguntó al SAT.
+    /// </summary>
+    [JsonPropertyName("checked_at")]
+    public string CheckedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// La respuesta del SAT tal cual (CodigoEstatus, Estado, EsCancelable, EstatusCancelacion, ValidacionEFOS), por si la necesita igual que el SAT.
+/// </summary>
+public sealed partial class CfdiVerificationSat
+{
+    /// <summary>
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Entidad federativa donde trabaja (ClaveEntFed): JAL, CMX, NLE…
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string State { get; set; } = default!;
+
+    /// <summary>
+    /// EsCancelable, tal cual lo dijo el SAT.
+    /// </summary>
+    [JsonPropertyName("cancellable")]
+    public string? Cancellable { get; set; }
+
+    /// <summary>
+    /// EstatusCancelacion, tal cual lo dijo el SAT.
+    /// </summary>
+    [JsonPropertyName("cancellation_status")]
+    public string? CancellationStatus { get; set; }
+
+    /// <summary>
+    /// ValidacionEFOS: 200 si el emisor no es EFOS, 100 si lo es.
+    /// </summary>
+    [JsonPropertyName("efos_validation")]
+    public string? EfosValidation { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CfdiVerificationXml&lt;/c&gt;.
+/// </summary>
+public sealed partial class CfdiVerificationXml
+{
+    /// <summary>
+    /// La versión del CFDI (4.0 o 3.3).
+    /// </summary>
+    [JsonPropertyName("version")]
+    public string? Version { get; set; }
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// La fecha de emisión (Fecha), como viene en el XML.
+    /// </summary>
+    [JsonPropertyName("issued_at")]
+    public string? IssuedAt { get; set; }
+
+    /// <summary>
+    /// La fecha de timbrado (FechaTimbrado), como viene en el XML.
+    /// </summary>
+    [JsonPropertyName("stamped_at")]
+    public string? StampedAt { get; set; }
+
+    /// <summary>
+    /// El nombre del emisor en el XML.
+    /// </summary>
+    [JsonPropertyName("issuer_name")]
+    public string? IssuerName { get; set; }
+
+    /// <summary>
+    /// El nombre del receptor en el XML.
+    /// </summary>
+    [JsonPropertyName("receiver_name")]
+    public string? ReceiverName { get; set; }
+
+    /// <summary>
+    /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Revisar varios RFC en las listas del SAT».
 /// </summary>
 public sealed partial class CheckSatListsParams
@@ -7948,6 +8142,30 @@ public sealed partial class EventList
 }
 
 /// <summary>
+/// Un evento que se mandó otra vez: a cuántos webhooks salió. Cada entrega es un intento aparte, ahora; véalo en las entregas del webhook.
+/// </summary>
+public sealed partial class EventResend
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El evento (evt_…) que se mandó otra vez.
+    /// </summary>
+    [JsonPropertyName("event")]
+    public string Event { get; set; } = default!;
+
+    /// <summary>
+    /// A cuántos webhooks salió. 0 si ninguno encendido escucha ese tipo de evento.
+    /// </summary>
+    [JsonPropertyName("deliveries")]
+    public long Deliveries { get; set; }
+}
+
+/// <summary>
 /// Un gasto de una comprobación.
 /// </summary>
 public sealed partial class ExpenseItem
@@ -13375,7 +13593,7 @@ public sealed partial class InvoiceCreateGlobal
     public required string Months { get; set; }
 
     /// <summary>
-    /// Año (Año).
+    /// Año (Año): el de la fecha de la factura o hasta cinco años antes (CFDI40136).
     /// </summary>
     [JsonPropertyName("year")]
     public required long Year { get; set; }
@@ -19642,6 +19860,18 @@ public sealed partial class RequestPurchaseReceiptInvoiceParams
     /// </summary>
     [JsonPropertyName("reply_to")]
     public string? ReplyTo { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Reenviar un evento».
+/// </summary>
+public sealed partial class ResendEventParams
+{
+    /// <summary>
+    /// El webhook (whe_…) al que mandarlo otra vez. Sin mandar: a todos los webhooks encendidos que escuchan ese tipo de evento.
+    /// </summary>
+    [JsonPropertyName("endpoint")]
+    public string? Endpoint { get; set; }
 }
 
 /// <summary>
@@ -27391,6 +27621,48 @@ public sealed partial class VatRefundReviewSuppliers
 }
 
 /// <summary>
+/// Los campos de «Verificar un CFDI en el SAT».
+/// </summary>
+public sealed partial class VerifyCfdiParams
+{
+    /// <summary>
+    /// El XML del CFDI, como texto. Se leen de él el UUID, los dos RFC y el total. Hasta 4 millones de caracteres.
+    /// </summary>
+    [JsonPropertyName("xml")]
+    public string? Xml { get; set; }
+
+    /// <summary>
+    /// El texto del QR del PDF (https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?id=…&amp;re=…&amp;rr=…&amp;tt=…&amp;fe=…), si no tiene el XML.
+    /// </summary>
+    [JsonPropertyName("qr")]
+    public string? Qr { get; set; }
+
+    /// <summary>
+    /// El folio fiscal, sin XML ni QR. Va con issuer_tax_id, receiver_tax_id y total.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// El RFC del emisor, sin XML ni QR.
+    /// </summary>
+    [JsonPropertyName("issuer_tax_id")]
+    public string? IssuerTaxId { get; set; }
+
+    /// <summary>
+    /// El RFC del receptor, sin XML ni QR.
+    /// </summary>
+    [JsonPropertyName("receiver_tax_id")]
+    public string? ReceiverTaxId { get; set; }
+
+    /// <summary>
+    /// El total del comprobante, sin XML ni QR. El SAT lo compara como número.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+}
+
+/// <summary>
 /// Un almacén del emisor: el de la Matriz y uno por sucursal se crean solos; cada factura saca existencias del de su sucursal.
 /// </summary>
 public sealed partial class Warehouse
@@ -27550,7 +27822,7 @@ public sealed partial class WebhookEndpoint
     public string Status { get; set; } = default!;
 
     /// <summary>
-    /// Por qué se apagó (sus entregas fallaron 5 días seguidos, o usted lo apagó).
+    /// Por qué se apagó: failing (sus entregas fallaron 5 días seguidos), gone (su servidor contestó 410 Gone) o manual (usted lo apagó).
     /// </summary>
     [JsonPropertyName("disabled_reason")]
     public string? DisabledReason { get; set; }
