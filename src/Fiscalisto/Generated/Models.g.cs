@@ -3659,6 +3659,12 @@ public sealed partial class CreatePayrollReceiptParams
     public decimal? Days { get; set; }
 
     /// <summary>
+    /// El recibo vigente (inv_… o UUID) que este corrige, calculado por Fiscalisto para el mismo empleado: el nuevo se calcula con los datos del empleado como están ahora, va relacionado con 04 y el anterior se cancela con motivo 01. Para un recibo que calculó su sistema use POST /v1/payroll_receipts/external con replaces.
+    /// </summary>
+    [JsonPropertyName("replaces")]
+    public string? Replaces { get; set; }
+
+    /// <summary>
     /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
     /// </summary>
     [JsonPropertyName("send_email")]
@@ -19470,6 +19476,12 @@ public sealed partial class PreviewPayrollReceiptParams
     /// </summary>
     [JsonPropertyName("days")]
     public decimal? Days { get; set; }
+
+    /// <summary>
+    /// El recibo vigente (inv_… o UUID) que este corrige, calculado por Fiscalisto para el mismo empleado: el nuevo se calcula con los datos del empleado como están ahora, va relacionado con 04 y el anterior se cancela con motivo 01. Para un recibo que calculó su sistema use POST /v1/payroll_receipts/external con replaces.
+    /// </summary>
+    [JsonPropertyName("replaces")]
+    public string? Replaces { get; set; }
 
     /// <summary>
     /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
