@@ -4325,10 +4325,40 @@ public sealed partial class CreateQuoteParamsItemsItem
     public CreateQuoteParamsItemsItemUsedVehicle? UsedVehicle { get; set; }
 
     /// <summary>
+    /// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public CreateQuoteParamsItemsItemHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
     /// </summary>
     [JsonPropertyName("addenda")]
     public Dictionary<string, string>? Addenda { get; set; }
+}
+
+/// <summary>
+/// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+/// </summary>
+public sealed partial class CreateQuoteParamsItemsItemHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public required string Subproduct { get; set; }
 }
 
 /// <summary>
@@ -6099,10 +6129,40 @@ public sealed partial class CreateSalesOrderParamsItemsItem
     public CreateSalesOrderParamsItemsItemUsedVehicle? UsedVehicle { get; set; }
 
     /// <summary>
+    /// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public CreateSalesOrderParamsItemsItemHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
     /// </summary>
     [JsonPropertyName("addenda")]
     public Dictionary<string, string>? Addenda { get; set; }
+}
+
+/// <summary>
+/// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+/// </summary>
+public sealed partial class CreateSalesOrderParamsItemsItemHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public required string Subproduct { get; set; }
 }
 
 /// <summary>
@@ -8393,7 +8453,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high o test_clock.ready.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high o test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -9619,7 +9679,7 @@ public sealed partial class ExternalPayrollReceiptCreateEmployee
     public string? StartDate { get; set; }
 
     /// <summary>
-    /// Antigüedad (P52W o P1Y2M3D). Sin el campo y con registro patronal: semanas desde start_date hasta el fin del periodo.
+    /// Antigüedad (P52W o P1Y2M3D). Sin el campo y con registro patronal: semanas desde start_date hasta el fin del periodo (días si es menos de una semana, P3D).
     /// </summary>
     [JsonPropertyName("seniority")]
     public string? Seniority { get; set; }
@@ -11971,7 +12031,7 @@ public sealed partial class InvoiceBatchList
 public sealed partial class InvoiceCancellation
 {
     /// <summary>
-    /// pending (espera la respuesta del cliente), accepted (cancelada), rejected (el cliente la rechazó) o lapsed (venció; puede pedirla otra vez).
+    /// `pending`: el SAT tiene la solicitud (la termina en minutos, o espera la respuesta del receptor). `accepted`: cancelada. `rejected`: el receptor la rechazó. `lapsed`: el SAT nunca la registró; puede pedirse otra vez. `scheduled`: el SAT aún no la acepta (no registra el CFDI que la sustituye, o rechazó la firma un momento) y Fiscalisto la vuelve a pedir sola. `failed`: Fiscalisto dejó de intentarlo; pídala de nuevo con POST /v1/invoices/{id}/cancel.
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
@@ -11993,6 +12053,18 @@ public sealed partial class InvoiceCancellation
     /// </summary>
     [JsonPropertyName("canceled_at")]
     public string? CanceledAt { get; set; }
+
+    /// <summary>
+    /// Con `scheduled`: cuándo la vuelve a pedir Fiscalisto (null: en los próximos 15 minutos).
+    /// </summary>
+    [JsonPropertyName("next_attempt_at")]
+    public string? NextAttemptAt { get; set; }
+
+    /// <summary>
+    /// Con `scheduled` o `failed`: por qué no ha pasado.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
 }
 
 /// <summary>
@@ -14409,10 +14481,40 @@ public sealed partial class InvoiceCreateItemsItem
     public InvoiceCreateItemsItemUsedVehicle? UsedVehicle { get; set; }
 
     /// <summary>
+    /// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public InvoiceCreateItemsItemHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
     /// </summary>
     [JsonPropertyName("addenda")]
     public Dictionary<string, string>? Addenda { get; set; }
+}
+
+/// <summary>
+/// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+/// </summary>
+public sealed partial class InvoiceCreateItemsItemHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public required string Subproduct { get; set; }
 }
 
 /// <summary>
@@ -15922,7 +16024,7 @@ public sealed partial class InvoiceSubstitutes
     public string Invoice { get; set; } = default!;
 
     /// <summary>
-    /// true si la sustituida ya quedó cancelada.
+    /// true si la sustituida ya quedó cancelada. false no es definitivo: vea substitutes.cancellation.
     /// </summary>
     [JsonPropertyName("canceled")]
     public bool Canceled { get; set; }
@@ -15932,6 +16034,54 @@ public sealed partial class InvoiceSubstitutes
     /// </summary>
     [JsonPropertyName("cancel_error")]
     public string? CancelError { get; set; }
+
+    /// <summary>
+    /// La cancelación de la anterior, igual que su `cancellation` en GET /v1/invoices/{id}: `accepted` si ya quedó cancelada, `pending` si el SAT la está terminando (o espera al receptor), `scheduled` si Fiscalisto la vuelve a pedir sola, `failed` si hay que pedirla de nuevo. El webhook de la anterior dice cuando cambia.
+    /// </summary>
+    [JsonPropertyName("cancellation")]
+    public InvoiceSubstitutesCancellation? Cancellation { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;InvoiceSubstitutesCancellation&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoiceSubstitutesCancellation
+{
+    /// <summary>
+    /// `pending`: el SAT tiene la solicitud (la termina en minutos, o espera la respuesta del receptor). `accepted`: cancelada. `rejected`: el receptor la rechazó. `lapsed`: el SAT nunca la registró; puede pedirse otra vez. `scheduled`: el SAT aún no la acepta (no registra el CFDI que la sustituye, o rechazó la firma un momento) y Fiscalisto la vuelve a pedir sola. `failed`: Fiscalisto dejó de intentarlo; pídala de nuevo con POST /v1/invoices/{id}/cancel.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 solo en una factura global, cuando una venta incluida se facturó a nombre del cliente.
+    /// </summary>
+    [JsonPropertyName("motive")]
+    public string? Motive { get; set; }
+
+    /// <summary>
+    /// El comprobante que sustituye a este (su id o su UUID), con el motivo 01.
+    /// </summary>
+    [JsonPropertyName("substitution")]
+    public string? Substitution { get; set; }
+
+    /// <summary>
+    /// Cuándo se canceló.
+    /// </summary>
+    [JsonPropertyName("canceled_at")]
+    public string? CanceledAt { get; set; }
+
+    /// <summary>
+    /// Con `scheduled`: cuándo la vuelve a pedir Fiscalisto (null: en los próximos 15 minutos).
+    /// </summary>
+    [JsonPropertyName("next_attempt_at")]
+    public string? NextAttemptAt { get; set; }
+
+    /// <summary>
+    /// Con `scheduled` o `failed`: por qué no ha pasado.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
 }
 
 /// <summary>
@@ -16778,7 +16928,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, usage.*, test_clock.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, usage.*, test_clock.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -21266,7 +21416,7 @@ public sealed partial class Retention
 public sealed partial class RetentionCancellation
 {
     /// <summary>
-    /// pending (espera la respuesta del cliente), accepted (cancelada), rejected (el cliente la rechazó) o lapsed (venció; puede pedirla otra vez).
+    /// pending (el SAT la tiene: la termina en minutos o espera la respuesta del cliente), accepted (cancelada), rejected (el cliente la rechazó), lapsed (venció; puede pedirla otra vez), scheduled (Fiscalisto la vuelve a pedir sola) o failed (Fiscalisto dejó de intentarlo; pídala de nuevo).
     /// </summary>
     [JsonPropertyName("status")]
     public string Status { get; set; } = default!;
@@ -25540,7 +25690,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -27412,10 +27562,40 @@ public sealed partial class UpdateQuoteParamsItemsItem
     public UpdateQuoteParamsItemsItemUsedVehicle? UsedVehicle { get; set; }
 
     /// <summary>
+    /// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public UpdateQuoteParamsItemsItemHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
     /// </summary>
     [JsonPropertyName("addenda")]
     public Dictionary<string, string>? Addenda { get; set; }
+}
+
+/// <summary>
+/// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+/// </summary>
+public sealed partial class UpdateQuoteParamsItemsItemHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public required string Subproduct { get; set; }
 }
 
 /// <summary>
@@ -28230,10 +28410,40 @@ public sealed partial class UpdateSalesOrderParamsItemsItem
     public UpdateSalesOrderParamsItemsItemUsedVehicle? UsedVehicle { get; set; }
 
     /// <summary>
+    /// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public UpdateSalesOrderParamsItemsItemHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
     /// </summary>
     [JsonPropertyName("addenda")]
     public Dictionary<string, string>? Addenda { get; set; }
+}
+
+/// <summary>
+/// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+/// </summary>
+public sealed partial class UpdateSalesOrderParamsItemsItemHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public required string Subproduct { get; set; }
 }
 
 /// <summary>
