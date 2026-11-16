@@ -2619,6 +2619,20 @@ public sealed class AttendanceResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<AttendanceMark> VoidMarkAsync(string id, VoidAttendanceMarkParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<AttendanceMark>("POST", $"/v1/attendance/marks/{Uri.EscapeDataString(id)}/void", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Autorizar horas extra
+    /// </summary>
+    /// <remarks>
+    /// Hasta cuántos minutos de horas extra de un día de un empleado cuentan para la nómina, antes o después de ese día (minutes null quita la autorización). Con la regla «Las horas extra necesitan autorización» encendida, lo demás queda en el registro como sin autorizar.
+    /// <br/>
+    /// <c>POST /v1/attendance/overtime</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/approve-attendance-overtime"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceOvertime> ApproveOvertimeAsync(ApproveAttendanceOvertimeParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceOvertime>("POST", "/v1/attendance/overtime", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

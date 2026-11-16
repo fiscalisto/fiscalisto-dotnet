@@ -530,6 +530,36 @@ public sealed partial class ApplyAdvanceParamsRemainder
 }
 
 /// <summary>
+/// Los campos de «Autorizar horas extra».
+/// </summary>
+public sealed partial class ApproveAttendanceOvertimeParams
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// Hasta cuántos minutos de horas extra de ese día cuentan para la nómina (0 a 960); null quita la autorización.
+    /// </summary>
+    [JsonPropertyName("minutes")]
+    public long? Minutes { get; set; }
+
+    /// <summary>
+    /// Por qué (opcional).
+    /// </summary>
+    [JsonPropertyName("comment")]
+    public string? Comment { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Aprobar una comprobación».
 /// </summary>
 public sealed partial class ApproveExpenseReportParams
@@ -660,6 +690,48 @@ public sealed partial class AttendanceMark
 }
 
 /// <summary>
+/// Las horas extra que la empresa autorizó para un día de un empleado, antes o después de ese día.
+/// </summary>
+public sealed partial class AttendanceOvertime
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// El día, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuántos minutos de horas extra de ese día cuentan para la nómina; null: sin autorización.
+    /// </summary>
+    [JsonPropertyName("minutes")]
+    public long? Minutes { get; set; }
+
+    /// <summary>
+    /// Por qué, o null.
+    /// </summary>
+    [JsonPropertyName("comment")]
+    public string? Comment { get; set; }
+}
+
+/// <summary>
 /// La asistencia de un periodo, por empleado: horas contra su horario, faltas, retardos y horas extra dobles y triples por semana, como Nómina › Asistencia › Registro.
 /// </summary>
 public sealed partial class AttendanceReport
@@ -693,6 +765,12 @@ public sealed partial class AttendanceReport
     /// </summary>
     [JsonPropertyName("to")]
     public string To { get; set; } = default!;
+
+    /// <summary>
+    /// true: las horas extra cuentan solo hasta lo que la empresa autorizó cada día.
+    /// </summary>
+    [JsonPropertyName("overtime_approval")]
+    public bool OvertimeApproval { get; set; }
 
     /// <summary>
     /// Cada empleado del emisor en el periodo.
@@ -797,6 +875,18 @@ public sealed partial class AttendanceReportEmployeesItem
     public long OvertimeTripleMinutes { get; set; }
 
     /// <summary>
+    /// Todos los minutos de más en el registro, autorizados o no.
+    /// </summary>
+    [JsonPropertyName("overtime_minutes")]
+    public long OvertimeMinutes { get; set; }
+
+    /// <summary>
+    /// Minutos de más que nadie autorizó: quedan en el registro y no cuentan para la nómina.
+    /// </summary>
+    [JsonPropertyName("unapproved_overtime_minutes")]
+    public long UnapprovedOvertimeMinutes { get; set; }
+
+    /// <summary>
     /// Días de descanso en que trabajó.
     /// </summary>
     [JsonPropertyName("rest_days_worked")]
@@ -875,6 +965,12 @@ public sealed partial class AttendanceReportEmployeesItemDaysItem
     /// </summary>
     [JsonPropertyName("overtime_minutes")]
     public long OvertimeMinutes { get; set; }
+
+    /// <summary>
+    /// De esos, los que cuentan para la nómina: hasta lo autorizado ese día cuando las horas extra necesitan autorización; si no, todos.
+    /// </summary>
+    [JsonPropertyName("approved_overtime_minutes")]
+    public long ApprovedOvertimeMinutes { get; set; }
 
     /// <summary>
     /// La nota del día que puso la empresa, o null.
