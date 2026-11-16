@@ -60,6 +60,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Cuentas por cobrar.</summary>
     public CustomersResource Customers => _customers ??= new CustomersResource(this);
 
+    private CashForecastResource? _cashForecast;
+
+    /// <summary>Flujo de efectivo.</summary>
+    public CashForecastResource CashForecast => _cashForecast ??= new CashForecastResource(this);
+
     private BankTransactionsResource? _bankTransactions;
 
     /// <summary>Conciliación bancaria.</summary>
@@ -1199,6 +1204,100 @@ public sealed class CustomersResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/customers/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Flujo de efectivo: <c>fiscalisto.CashForecast</c>.
+/// </summary>
+public sealed class CashForecastResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CashForecastResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver el flujo de efectivo
+    /// </summary>
+    /// <remarks>
+    /// Las próximas 13 semanas del emisor, como «Flujo de efectivo» en la app: lo que le deben, con lo que cada cliente suele tardar en pagar; lo que debe a proveedores; la nómina; las declaraciones mensuales; las facturas recurrentes y sus movimientos previstos, desde el saldo que dio. Trae avisos con lo que puede hacer, y con los parámetros, un escenario (no se guarda). Una estimación: nada cambia solo.
+    /// <br/>
+    /// <c>GET /v1/cash_forecast</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/flujo-de-efectivo/get-cash-forecast"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CashForecast> GetAsync(GetCashForecastParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CashForecast>("GET", "/v1/cash_forecast", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Dar el saldo de hoy
+    /// </summary>
+    /// <remarks>
+    /// El saldo de hoy en sus cuentas de banco (de donde parte el flujo) y lo menos que quiere tener. Solo lo que mande cambia. Responde el flujo con el saldo nuevo.
+    /// <br/>
+    /// <c>POST /v1/cash_forecast</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/flujo-de-efectivo/update-cash-forecast"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CashForecast> UpdateAsync(UpdateCashForecastParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CashForecast>("POST", "/v1/cash_forecast", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Agregar un movimiento previsto
+    /// </summary>
+    /// <remarks>
+    /// Algo que espera pagar o cobrar y que ninguna factura dice: una renta, un crédito, una venta de contado. Una vez o cada semana, dos semanas o mes. Hasta 200.
+    /// <br/>
+    /// <c>POST /v1/cash_forecast/planned_items</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/flujo-de-efectivo/create-cash-forecast-item"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CashForecastItem> CreateItemAsync(CreateCashForecastItemParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CashForecastItem>("POST", "/v1/cash_forecast/planned_items", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un movimiento previsto
+    /// </summary>
+    /// <remarks>
+    /// Solo lo que mande cambia.
+    /// <br/>
+    /// <c>POST /v1/cash_forecast/planned_items/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/flujo-de-efectivo/update-cash-forecast-item"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CashForecastItem> UpdateItemAsync(string id, UpdateCashForecastItemParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CashForecastItem>("POST", $"/v1/cash_forecast/planned_items/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un movimiento previsto
+    /// </summary>
+    /// <remarks>
+    /// Ya no cuenta en el flujo.
+    /// <br/>
+    /// <c>DELETE /v1/cash_forecast/planned_items/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/flujo-de-efectivo/delete-cash-forecast-item"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteItemAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/cash_forecast/planned_items/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un renglón del flujo
+    /// </summary>
+    /// <remarks>
+    /// Otro día o monto para un renglón (lines[].line), o no contarlo: un cliente le avisó que paga después, o una factura ya se pagó por fuera. Solo cambia el pronóstico, nunca la factura. reset: true lo regresa a lo estimado. Responde el flujo con el cambio.
+    /// <br/>
+    /// <c>POST /v1/cash_forecast/adjustments</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/flujo-de-efectivo/adjust-cash-forecast"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CashForecast> AdjustAsync(AdjustCashForecastParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CashForecast>("POST", "/v1/cash_forecast/adjustments", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

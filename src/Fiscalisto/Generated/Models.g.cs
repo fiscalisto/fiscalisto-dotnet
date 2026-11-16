@@ -104,6 +104,54 @@ public sealed partial class AccountKey
 }
 
 /// <summary>
+/// Los campos de «Cambiar un renglón del flujo».
+/// </summary>
+public sealed partial class AdjustCashForecastParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El renglón (lines[].line de GET /v1/cash_forecast).
+    /// </summary>
+    [JsonPropertyName("line")]
+    public required string Line { get; set; }
+
+    /// <summary>
+    /// Otro día para ese renglón; null el estimado.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// Otro monto, en pesos; null el estimado.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// true para no contarlo.
+    /// </summary>
+    [JsonPropertyName("excluded")]
+    public bool? Excluded { get; set; }
+
+    /// <summary>
+    /// Por qué (lo ve quien abra la semana en la app).
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// true lo regresa a lo estimado; lo demás se ignora.
+    /// </summary>
+    [JsonPropertyName("reset")]
+    public bool? Reset { get; set; }
+}
+
+/// <summary>
 /// Un anticipo timbrado que aún no se aplica.
 /// </summary>
 public sealed partial class Advance
@@ -1110,6 +1158,520 @@ public sealed partial class CancelSalesOrderParams
 }
 
 /// <summary>
+/// El flujo de efectivo de las próximas 13 semanas: lo que le deben (con lo que cada cliente suele tardar), lo que debe a proveedores, la nómina, las declaraciones, las facturas recurrentes y sus movimientos previstos, desde el saldo que usted dio. Una estimación: no cambia nada.
+/// </summary>
+public sealed partial class CashForecast
+{
+    /// <summary>
+    /// Siempre cash_forecast.
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Hoy en la Ciudad de México (AAAA-MM-DD): el inicio.
+    /// </summary>
+    [JsonPropertyName("today")]
+    public string Today { get; set; } = default!;
+
+    /// <summary>
+    /// El último día de la semana 13.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+
+    /// <summary>
+    /// Todo en pesos: lo de otra moneda, a su tipo de cambio.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo de hoy que usted dio; null si no lo ha dado (el flujo parte de 0).
+    /// </summary>
+    [JsonPropertyName("starting_balance")]
+    public CashForecastStartingBalance? StartingBalance { get; set; }
+
+    /// <summary>
+    /// Lo menos que quiere tener; cada semana debajo trae un aviso. 0 si no lo dio.
+    /// </summary>
+    [JsonPropertyName("minimum_balance")]
+    public decimal MinimumBalance { get; set; }
+
+    /// <summary>
+    /// El saldo de sus últimos estados de cuenta en Conciliación (60 días), solo como sugerencia; null sin ellos.
+    /// </summary>
+    [JsonPropertyName("suggested_starting_balance")]
+    public CashForecastSuggestedStartingBalance? SuggestedStartingBalance { get; set; }
+
+    /// <summary>
+    /// El escenario con que se calculó: el de los parámetros de la consulta.
+    /// </summary>
+    [JsonPropertyName("scenario")]
+    public CashForecastScenario Scenario { get; set; } = default!;
+
+    /// <summary>
+    /// Las 13 semanas juntas.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public CashForecastTotals Totals { get; set; } = default!;
+
+    /// <summary>
+    /// Las 13 semanas, en orden.
+    /// </summary>
+    [JsonPropertyName("weeks")]
+    public List<CashForecastWeeksItem> Weeks { get; set; } = default!;
+
+    /// <summary>
+    /// Cada cosa que entra o sale, de la que se suman las semanas.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<CashForecastLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Avisos con lo que puede hacer; usted decide.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<CashForecastWarningsItem> Warnings { get; set; } = default!;
+
+    /// <summary>
+    /// Sus movimientos previstos.
+    /// </summary>
+    [JsonPropertyName("planned_items")]
+    public List<CashForecastItem> PlannedItems { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que no se pudo estimar y por qué.
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public List<string> Notes { get; set; } = default!;
+}
+
+/// <summary>
+/// Algo que espera pagar o cobrar y que ninguna factura dice (una renta, un crédito, una venta de contado), que cuenta en el flujo de efectivo.
+/// </summary>
+public sealed partial class CashForecastItem
+{
+    /// <summary>
+    /// El movimiento previsto (cfi_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Siempre cash_forecast_item.
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es: «Renta», «Crédito del banco».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// inflow entra dinero; outflow sale.
+    /// <br/>
+    /// Valores: inflow, outflow.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// Cuánto, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El día (AAAA-MM-DD), o la primera vez si se repite.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// once una vez; weekly cada semana; biweekly cada dos; monthly cada mes.
+    /// <br/>
+    /// Valores: once, weekly, biweekly, monthly.
+    /// </summary>
+    [JsonPropertyName("frequency")]
+    public string Frequency { get; set; } = default!;
+
+    /// <summary>
+    /// El último día en que se repite; null sin fin.
+    /// </summary>
+    [JsonPropertyName("until")]
+    public string? Until { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashForecastLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashForecastLinesItem
+{
+    /// <summary>
+    /// El renglón, para cambiarlo con POST /v1/cash_forecast/adjustments.
+    /// </summary>
+    [JsonPropertyName("line")]
+    public string Line { get; set; } = default!;
+
+    /// <summary>
+    /// receivable: lo que le deben sus clientes; recurring_invoice: lo que facturarán sus recurrentes; planned_inflow / planned_outflow: un movimiento previsto que usted agregó; payable: lo que debe a proveedores; payroll: la nómina; taxes: las declaraciones mensuales.
+    /// <br/>
+    /// Valores: receivable, recurring_invoice, planned_inflow, payable, payroll, taxes, planned_outflow.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// inflow entra; outflow sale.
+    /// <br/>
+    /// Valores: inflow, outflow.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// El día en que se cuenta, con cambios y escenario.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// El día que se estimó.
+    /// </summary>
+    [JsonPropertyName("estimated_date")]
+    public string EstimatedDate { get; set; } = default!;
+
+    /// <summary>
+    /// La semana en que cae; null si se dejó fuera (left_out).
+    /// </summary>
+    [JsonPropertyName("week")]
+    public long? Week { get; set; }
+
+    /// <summary>
+    /// Lo que se cuenta, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Lo que se estimó, en pesos.
+    /// </summary>
+    [JsonPropertyName("estimated_amount")]
+    public decimal EstimatedAmount { get; set; }
+
+    /// <summary>
+    /// Qué es, como en la app.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del cliente o proveedor, o null.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas suma, o null.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long? Invoices { get; set; }
+
+    /// <summary>
+    /// Cuándo vencía, o null.
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string? DueDate { get; set; }
+
+    /// <summary>
+    /// Días de atraso si ya pasó el día esperado, o null.
+    /// </summary>
+    [JsonPropertyName("days_overdue")]
+    public long? DaysOverdue { get; set; }
+
+    /// <summary>
+    /// Cómo se estimó, en palabras.
+    /// </summary>
+    [JsonPropertyName("basis")]
+    public string Basis { get; set; } = default!;
+
+    /// <summary>
+    /// high: un monto y día conocidos; medium: un promedio; low: atrasado o sin historial.
+    /// <br/>
+    /// Valores: high, medium, low.
+    /// </summary>
+    [JsonPropertyName("confidence")]
+    public string Confidence { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué no cuenta: excluded usted lo quitó; doubtful más de 90 días de atraso; scenario el escenario lo quitó; after_horizon cae después de la semana 13. null si cuenta.
+    /// <br/>
+    /// Valores: excluded, doubtful, scenario, after_horizon.
+    /// </summary>
+    [JsonPropertyName("left_out")]
+    public string? LeftOut { get; set; }
+
+    /// <summary>
+    /// true si usted le cambió el día, monto o lo quitó.
+    /// </summary>
+    [JsonPropertyName("adjusted")]
+    public bool Adjusted { get; set; }
+
+    /// <summary>
+    /// El movimiento previsto (cfi_…) del que viene, o null.
+    /// </summary>
+    [JsonPropertyName("planned_item")]
+    public string? PlannedItem { get; set; }
+}
+
+/// <summary>
+/// El escenario con que se calculó: el de los parámetros de la consulta.
+/// </summary>
+public sealed partial class CashForecastScenario
+{
+    /// <summary>
+    /// Días que se movieron los cobros (0 como siempre).
+    /// </summary>
+    [JsonPropertyName("customers_pay_days_later")]
+    public long CustomersPayDaysLater { get; set; }
+
+    /// <summary>
+    /// Días que se movieron los pagos a proveedores.
+    /// </summary>
+    [JsonPropertyName("pay_suppliers_days_later")]
+    public long PaySuppliersDaysLater { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que lleva más de 90 días de atraso.
+    /// </summary>
+    [JsonPropertyName("include_doubtful")]
+    public bool IncludeDoubtful { get; set; }
+
+    /// <summary>
+    /// Si cuenta las facturas recurrentes que aún no se emiten.
+    /// </summary>
+    [JsonPropertyName("include_recurring")]
+    public bool IncludeRecurring { get; set; }
+
+    /// <summary>
+    /// Por ciento que cambiaron las recurrentes (−20 a +10…).
+    /// </summary>
+    [JsonPropertyName("recurring_sales_change")]
+    public long RecurringSalesChange { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashForecastStartingBalance&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashForecastStartingBalance
+{
+    /// <summary>
+    /// Lo que tenía en el banco, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El día de ese saldo.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CashForecastSuggestedStartingBalance&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashForecastSuggestedStartingBalance
+{
+    /// <summary>
+    /// La suma de los saldos, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El día del estado de cuenta más reciente.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+}
+
+/// <summary>
+/// Las 13 semanas juntas.
+/// </summary>
+public sealed partial class CashForecastTotals
+{
+    /// <summary>
+    /// Lo que entra en las 13 semanas.
+    /// </summary>
+    [JsonPropertyName("inflows")]
+    public decimal Inflows { get; set; }
+
+    /// <summary>
+    /// Lo que sale en las 13 semanas.
+    /// </summary>
+    [JsonPropertyName("outflows")]
+    public decimal Outflows { get; set; }
+
+    /// <summary>
+    /// El saldo al final de la semana 13.
+    /// </summary>
+    [JsonPropertyName("ending_balance")]
+    public decimal EndingBalance { get; set; }
+
+    /// <summary>
+    /// El saldo más bajo al cierre de una semana.
+    /// </summary>
+    [JsonPropertyName("lowest_balance")]
+    public decimal LowestBalance { get; set; }
+
+    /// <summary>
+    /// La semana de ese saldo (1 a 13).
+    /// </summary>
+    [JsonPropertyName("lowest_week")]
+    public long LowestWeek { get; set; }
+
+    /// <summary>
+    /// Cuántas semanas cierran debajo de minimum_balance (o de 0).
+    /// </summary>
+    [JsonPropertyName("weeks_below_minimum")]
+    public long WeeksBelowMinimum { get; set; }
+
+    /// <summary>
+    /// Lo que se dejó fuera por llevar más de 90 días de atraso.
+    /// </summary>
+    [JsonPropertyName("doubtful_left_out")]
+    public decimal DoubtfulLeftOut { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashForecastWarningsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashForecastWarningsItem
+{
+    /// <summary>
+    /// no_starting_balance: falta el saldo de hoy; stale_starting_balance: tiene más de 7 días; shortfall: una semana cierra debajo del mínimo; overdue_receivables: mucho por cobrar está atrasado; customer_concentration: un cliente es 40 % o más de lo que entra; doubtful_left_out: se dejó fuera lo de más de 90 días.
+    /// <br/>
+    /// Valores: no_starting_balance, stale_starting_balance, shortfall, overdue_receivables, customer_concentration, doubtful_left_out.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tan urgente es.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string Severity { get; set; } = default!;
+
+    /// <summary>
+    /// El aviso, en palabras.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// Qué puede hacer; nada cambia solo.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string Detail { get; set; } = default!;
+
+    /// <summary>
+    /// La semana, o null.
+    /// </summary>
+    [JsonPropertyName("week")]
+    public long? Week { get; set; }
+
+    /// <summary>
+    /// Lo que faltaría, en pesos, o null.
+    /// </summary>
+    [JsonPropertyName("shortfall")]
+    public decimal? Shortfall { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashForecastWeeksItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashForecastWeeksItem
+{
+    /// <summary>
+    /// 1 a 13; la 1 va de hoy al domingo.
+    /// </summary>
+    [JsonPropertyName("week")]
+    public long Week { get; set; }
+
+    /// <summary>
+    /// El primer día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// El último día, un domingo.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo al empezar la semana.
+    /// </summary>
+    [JsonPropertyName("starting_balance")]
+    public decimal StartingBalance { get; set; }
+
+    /// <summary>
+    /// Lo que entra.
+    /// </summary>
+    [JsonPropertyName("inflows")]
+    public decimal Inflows { get; set; }
+
+    /// <summary>
+    /// Lo que sale.
+    /// </summary>
+    [JsonPropertyName("outflows")]
+    public decimal Outflows { get; set; }
+
+    /// <summary>
+    /// El saldo al cerrar la semana.
+    /// </summary>
+    [JsonPropertyName("ending_balance")]
+    public decimal EndingBalance { get; set; }
+
+    /// <summary>
+    /// Lo de cada tipo de renglón (lines[].type) esa semana, en pesos.
+    /// </summary>
+    [JsonPropertyName("by_type")]
+    public Dictionary<string, JsonElement> ByType { get; set; } = default!;
+}
+
+/// <summary>
 /// Si los sellos del XML son auténticos, como los revisa el SAT: el Sello del emisor contra la cadena original y su certificado, y el SelloSAT del timbre contra el certificado del SAT.
 /// </summary>
 public sealed partial class CfdiSeals
@@ -1997,6 +2559,58 @@ public sealed partial class CreateBranchParamsSeries
     /// </summary>
     [JsonPropertyName("transfer")]
     public string? Transfer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar un movimiento previsto».
+/// </summary>
+public sealed partial class CreateCashForecastItemParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Qué es: «Renta», «Crédito del banco».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// inflow si es dinero que entra; outflow si sale.
+    /// <br/>
+    /// Valores: inflow, outflow.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public required string Direction { get; set; }
+
+    /// <summary>
+    /// Cuánto, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// El día (o la primera vez, si se repite).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// once (por omisión), weekly, biweekly (cada dos semanas) o monthly.
+    /// <br/>
+    /// Valores: once, weekly, biweekly, monthly.
+    /// </summary>
+    [JsonPropertyName("frequency")]
+    public string? Frequency { get; set; }
+
+    /// <summary>
+    /// El último día en que se repite; null sin fin.
+    /// </summary>
+    [JsonPropertyName("until")]
+    public string? Until { get; set; }
 }
 
 /// <summary>
@@ -10929,6 +11543,48 @@ public sealed partial class FinancialStatementsIncomeStatementYearToDateSections
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver el flujo de efectivo».
+/// </summary>
+public sealed partial class GetCashForecastParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Escenario: sus clientes le pagan estos días después (0 a 120).
+    /// </summary>
+    [JsonPropertyName("customers_pay_days_later")]
+    public long? CustomersPayDaysLater { get; set; }
+
+    /// <summary>
+    /// Escenario: usted paga a sus proveedores estos días después (0 a 120).
+    /// </summary>
+    [JsonPropertyName("pay_suppliers_days_later")]
+    public long? PaySuppliersDaysLater { get; set; }
+
+    /// <summary>
+    /// true cuenta lo que lleva más de 90 días de atraso (por omisión no).
+    /// </summary>
+    [JsonPropertyName("include_doubtful")]
+    public bool? IncludeDoubtful { get; set; }
+
+    /// <summary>
+    /// false deja fuera las facturas recurrentes que aún no se emiten.
+    /// </summary>
+    [JsonPropertyName("include_recurring")]
+    public bool? IncludeRecurring { get; set; }
+
+    /// <summary>
+    /// Escenario: por ciento que cambian sus recurrentes (−100 a 100).
+    /// </summary>
+    [JsonPropertyName("recurring_sales_change")]
+    public long? RecurringSalesChange { get; set; }
 }
 
 /// <summary>
@@ -26924,6 +27580,94 @@ public sealed partial class UpdateBranchParamsSeries
     /// </summary>
     [JsonPropertyName("transfer")]
     public string? Transfer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un movimiento previsto».
+/// </summary>
+public sealed partial class UpdateCashForecastItemParams
+{
+    /// <summary>
+    /// Qué es: «Renta», «Crédito del banco».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// inflow si es dinero que entra; outflow si sale.
+    /// <br/>
+    /// Valores: inflow, outflow.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string? Direction { get; set; }
+
+    /// <summary>
+    /// Cuánto, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// El día (o la primera vez, si se repite).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// once (por omisión), weekly, biweekly (cada dos semanas) o monthly.
+    /// <br/>
+    /// Valores: once, weekly, biweekly, monthly.
+    /// </summary>
+    [JsonPropertyName("frequency")]
+    public string? Frequency { get; set; }
+
+    /// <summary>
+    /// El último día en que se repite; null sin fin.
+    /// </summary>
+    [JsonPropertyName("until")]
+    public string? Until { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Dar el saldo de hoy».
+/// </summary>
+public sealed partial class UpdateCashForecastParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El saldo de hoy en sus cuentas de banco; null lo quita.
+    /// </summary>
+    [JsonPropertyName("starting_balance")]
+    public UpdateCashForecastParamsStartingBalance? StartingBalance { get; set; }
+
+    /// <summary>
+    /// Lo menos que quiere tener: cada semana debajo trae un aviso. 0 para ninguno.
+    /// </summary>
+    [JsonPropertyName("minimum_balance")]
+    public decimal? MinimumBalance { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateCashForecastParamsStartingBalance&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateCashForecastParamsStartingBalance
+{
+    /// <summary>
+    /// Lo que tiene en el banco, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// El día de ese saldo (AAAA-MM-DD); hoy si no se indica.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
 }
 
 /// <summary>
