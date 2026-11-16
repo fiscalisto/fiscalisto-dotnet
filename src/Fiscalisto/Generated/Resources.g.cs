@@ -195,6 +195,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Cumplimiento SAT.</summary>
     public SatFindingCounterpartiesResource SatFindingCounterparties => _satFindingCounterparties ??= new SatFindingCounterpartiesResource(this);
 
+    private MaterialitySuppliersResource? _materialitySuppliers;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public MaterialitySuppliersResource MaterialitySuppliers => _materialitySuppliers ??= new MaterialitySuppliersResource(this);
+
+    private MaterialityInvoicesResource? _materialityInvoices;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public MaterialityInvoicesResource MaterialityInvoices => _materialityInvoices ??= new MaterialityInvoicesResource(this);
+
     private WarehousesResource? _warehouses;
 
     /// <summary>Inventario.</summary>
@@ -3076,6 +3086,54 @@ public sealed class SatFindingCounterpartiesResource
 }
 
 /// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.MaterialitySuppliers</c>.
+/// </summary>
+public sealed class MaterialitySuppliersResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal MaterialitySuppliersResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar la materialidad por proveedor
+    /// </summary>
+    /// <remarks>
+    /// Como Materialidad en la app: los proveedores de las facturas recibidas (ingresos) del emisor en un periodo, con cuánto de lo que facturaron tiene evidencia completa de que la operación existió (acuerdo, entrega y pago). Primero los que están en 69-B definitivo (corre su plazo de 30 días hábiles), después los de más importe sin probar. Una página, hasta 500. Sin fechas, este año hasta hoy. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/materiality_suppliers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/list-materiality-suppliers"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<MaterialitySupplierList> ListAsync(ListMaterialitySuppliersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<MaterialitySupplierList>("GET", "/v1/materiality_suppliers", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.MaterialityInvoices</c>.
+/// </summary>
+public sealed class MaterialityInvoicesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal MaterialityInvoicesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar facturas recibidas por probar
+    /// </summary>
+    /// <remarks>
+    /// Las facturas recibidas (ingresos) del emisor en un periodo que no tienen su evidencia completa, de mayor a menor importe, cada una con lo que tiene, lo que le falta y de dónde salió cada evidencia (orden de compra, recepción, complemento de pago, banco, archivos). Con state, solo las de ese estado. Una página, hasta 300; has_more dice que hay más (acorte el periodo o filtre por proveedor). No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/materiality_invoices</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/list-materiality-invoices"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<MaterialityInvoiceList> ListAsync(ListMaterialityInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<MaterialityInvoiceList>("GET", "/v1/materiality_invoices", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
 /// Inventario: <c>fiscalisto.Warehouses</c>.
 /// </summary>
 public sealed class WarehousesResource
@@ -4236,7 +4294,7 @@ public sealed class AccountingResource
     /// Descargar la contabilidad electrónica
     /// </summary>
     /// <remarks>
-    /// El ZIP del mes para el Buzón Tributario: el catálogo (CT) y la balanza (BN, o BC si es complementaria), cada uno en su ZIP con el nombre que espera el SAT, en el formato 1.3 del Anexo 24. Con journal_request, también las pólizas (PL), que se entregan cuando el SAT las pide.
+    /// El ZIP del mes para el Buzón Tributario: el catálogo (CT) y la balanza (BN, o BC si es complementaria), cada uno en su ZIP con el nombre que espera el SAT, en el formato 1.3 del Anexo 24. Con journal_request, también las pólizas (PL), que se entregan cuando el SAT las pide. Con month AAAA-13, la balanza de comprobación ajustada al cierre del ejercicio (regla 2.8.1.6 RMF): solo la balanza, con los saldos finales de diciembre como saldos iniciales y, con closing_entry, la póliza de cierre.
     /// <br/>
     /// <c>GET /v1/accounting/electronic_accounting</c>
     /// <br/>

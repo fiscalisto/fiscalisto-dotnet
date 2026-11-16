@@ -1775,7 +1775,7 @@ public sealed partial class CreateAdvanceParamsCustomer
     public CreateAdvanceParamsCustomerForeign? Foreign { get; set; }
 
     /// <summary>
-    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
@@ -2249,7 +2249,7 @@ public sealed partial class CreateCustomerParams
     public decimal? DiscountPercent { get; set; }
 
     /// <summary>
-    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
@@ -6063,7 +6063,7 @@ public sealed partial class CreateSalesOrderParamsCustomer
     public CreateSalesOrderParamsCustomerForeign? Foreign { get; set; }
 
     /// <summary>
-    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
@@ -7333,7 +7333,7 @@ public sealed partial class Customer
     public CustomerForeign? Foreign { get; set; }
 
     /// <summary>
-    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool IepsTaxpayer { get; set; }
@@ -11023,10 +11023,18 @@ public sealed partial class GetDiotParams
 public sealed partial class GetElectronicAccountingParams
 {
     /// <summary>
-    /// El mes (AAAA-MM).
+    /// El mes (AAAA-MM), o AAAA-13 para la balanza de cierre de un ejercicio ya terminado.
     /// </summary>
     [JsonPropertyName("month")]
     public required string Month { get; set; }
+
+    /// <summary>
+    /// Solo con AAAA-13: true (por omisión) incluye la póliza de cierre, que cancela ingresos, costos y gastos contra el resultado del ejercicio (305.01 utilidad o 305.02 pérdida); false manda los saldos de diciembre sin movimientos.
+    /// <br/>
+    /// Valores: true, false.
+    /// </summary>
+    [JsonPropertyName("closing_entry")]
+    public string? ClosingEntry { get; set; }
 
     /// <summary>
     /// normal (BN, por omisión) o complementary (BC, con modified_on).
@@ -14323,7 +14331,7 @@ public sealed partial class InvoiceCreateCustomer
     public InvoiceCreateCustomerForeign? Foreign { get; set; }
 
     /// <summary>
-    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
@@ -17403,6 +17411,74 @@ public sealed partial class ListLedgerAccountsParams
 }
 
 /// <summary>
+/// Los campos de «Listar facturas recibidas por probar».
+/// </summary>
+public sealed partial class ListMaterialityInvoicesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Facturas desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// Facturas hasta este día (AAAA-MM-DD, completo).
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Solo las de este proveedor (su RFC).
+    /// </summary>
+    [JsonPropertyName("supplier_tax_id")]
+    public string? SupplierTaxId { get; set; }
+
+    /// <summary>
+    /// Solo las de este estado: complete, partial o none. Sin él, las que no están completas.
+    /// <br/>
+    /// Valores: complete, partial, none.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar la materialidad por proveedor».
+/// </summary>
+public sealed partial class ListMaterialitySuppliersParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Facturas desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// Facturas hasta este día (AAAA-MM-DD, completo).
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Solo este proveedor (su RFC).
+    /// </summary>
+    [JsonPropertyName("supplier_tax_id")]
+    public string? SupplierTaxId { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar miembros».
 /// </summary>
 public sealed partial class ListMembersParams
@@ -18442,6 +18518,360 @@ public sealed partial class MatchBankTransactionParams
     /// </summary>
     [JsonPropertyName("invoices")]
     public List<string>? Invoices { get; set; }
+}
+
+/// <summary>
+/// Una factura recibida (ingreso) con lo que prueba que la operación existió: qué tiene, qué le falta y de dónde salió cada evidencia.
+/// </summary>
+public sealed partial class MaterialityInvoice
+{
+    /// <summary>
+    /// El UUID de la factura (el mismo que uuid).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor que la recibió.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El folio fiscal (UUID).
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// Su serie, o null.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public string? Series { get; set; }
+
+    /// <summary>
+    /// Su folio, o null.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public string? Folio { get; set; }
+
+    /// <summary>
+    /// Su fecha (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del proveedor que la emitió.
+    /// </summary>
+    [JsonPropertyName("supplier_tax_id")]
+    public string SupplierTaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre como viene en el CFDI, o null.
+    /// </summary>
+    [JsonPropertyName("supplier_name")]
+    public string? SupplierName { get; set; }
+
+    /// <summary>
+    /// Su total en pesos (de otra moneda, a su tipo de cambio).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// complete (tiene acuerdo, entrega y pago), partial (alguno) o none (ninguno).
+    /// <br/>
+    /// Valores: complete, partial, none.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string State { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que ya tiene: agreement (contrato u orden de compra), delivery (recepción, entregables o fotos), payment (complemento, pago en el portal o en la orden, banco o comprobante).
+    /// </summary>
+    [JsonPropertyName("has")]
+    public List<string> Has { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que le falta, de lo mismo.
+    /// </summary>
+    [JsonPropertyName("missing")]
+    public List<string> Missing { get; set; } = default!;
+
+    /// <summary>
+    /// De dónde salió cada evidencia: source es un código estable (orden_compra, recepcion, complemento_pago, pago_banco, foto, mensaje_portal…), proves lo que prueba (null: respaldo que no prueba nada solo) y label lo dice en palabras.
+    /// </summary>
+    [JsonPropertyName("evidence")]
+    public List<MaterialityInvoiceEvidenceItem> Evidence { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;MaterialityInvoiceEvidenceItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class MaterialityInvoiceEvidenceItem
+{
+    /// <summary>
+    /// De dónde salió: orden_compra, recepcion, complemento_pago, pago_banco, foto, mensaje_portal…
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que prueba: agreement, delivery o payment; null si solo respalda.
+    /// <br/>
+    /// Valores: agreement, delivery, payment.
+    /// </summary>
+    [JsonPropertyName("proves")]
+    public string? Proves { get; set; }
+
+    /// <summary>
+    /// De dónde salió, en palabras.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class MaterialityInvoiceList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<MaterialityInvoice> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Un proveedor del emisor en el periodo: cuánto le facturó, cuánto de eso tiene su evidencia completa (acuerdo, entrega y pago) y, si está en la lista 69-B, su plazo.
+/// </summary>
+public sealed partial class MaterialitySupplier
+{
+    /// <summary>
+    /// Su RFC (el mismo que tax_id).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor que recibió sus facturas.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del proveedor.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre como viene en el CFDI, o null.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas recibidas (ingresos, no canceladas) le dio en el periodo.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// Lo que suman, en pesos (las de otra moneda, a su tipo de cambio).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Lo que suman las que no tienen su evidencia completa, en pesos.
+    /// </summary>
+    [JsonPropertyName("unproven")]
+    public decimal Unproven { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas están complete (acuerdo, entrega y pago), partial (alguna) y none (ninguna).
+    /// </summary>
+    [JsonPropertyName("states")]
+    public MaterialitySupplierStates States { get; set; } = default!;
+
+    /// <summary>
+    /// A cuántas facturas les falta el acuerdo, la entrega y el pago.
+    /// </summary>
+    [JsonPropertyName("missing")]
+    public MaterialitySupplierMissing Missing { get; set; } = default!;
+
+    /// <summary>
+    /// Si está en la lista 69-B: definitive (definitivo) o presumed (presunto); en definitivo, el día que se publicó, el último día de los 30 días hábiles para acreditar las operaciones o corregir y cuántos días hábiles quedan (negativo: ya venció). null: no está.
+    /// </summary>
+    [JsonPropertyName("sat_list")]
+    public MaterialitySupplierSatList? SatList { get; set; }
+
+    /// <summary>
+    /// Si está en el Portal de proveedores del emisor (para pedirle la evidencia desde la app).
+    /// </summary>
+    [JsonPropertyName("in_supplier_portal")]
+    public bool InSupplierPortal { get; set; }
+
+    /// <summary>
+    /// Cuándo se le pidió evidencia que todavía no manda, o null.
+    /// </summary>
+    [JsonPropertyName("evidence_requested_at")]
+    public string? EvidenceRequestedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class MaterialitySupplierList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<MaterialitySupplier> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// A cuántas facturas les falta el acuerdo, la entrega y el pago.
+/// </summary>
+public sealed partial class MaterialitySupplierMissing
+{
+    /// <summary>
+    /// Facturas sin acuerdo (contrato u orden de compra).
+    /// </summary>
+    [JsonPropertyName("agreement")]
+    public long Agreement { get; set; }
+
+    /// <summary>
+    /// Facturas sin entrega (recepción, entregables o fotos).
+    /// </summary>
+    [JsonPropertyName("delivery")]
+    public long Delivery { get; set; }
+
+    /// <summary>
+    /// Facturas sin pago (complemento, pago en el portal o en la orden, banco o comprobante).
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public long Payment { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class MaterialitySupplierSatList
+{
+    /// <summary>
+    /// definitive (69-B definitivo) o presumed (69-B presunto).
+    /// <br/>
+    /// Valores: definitive, presumed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El día que el SAT lo publicó como definitivo (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("published_on")]
+    public string? PublishedOn { get; set; }
+
+    /// <summary>
+    /// El último de los 30 días hábiles para acreditar las operaciones o corregir (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("deadline")]
+    public string? Deadline { get; set; }
+
+    /// <summary>
+    /// Días hábiles que quedan, sin contar hoy; negativo si ya venció. null si no es definitivo.
+    /// </summary>
+    [JsonPropertyName("business_days_left")]
+    public long? BusinessDaysLeft { get; set; }
+}
+
+/// <summary>
+/// Cuántas facturas están complete (acuerdo, entrega y pago), partial (alguna) y none (ninguna).
+/// </summary>
+public sealed partial class MaterialitySupplierStates
+{
+    /// <summary>
+    /// Facturas con acuerdo, entrega y pago.
+    /// </summary>
+    [JsonPropertyName("complete")]
+    public long Complete { get; set; }
+
+    /// <summary>
+    /// Facturas con alguna de las tres pruebas, no todas.
+    /// </summary>
+    [JsonPropertyName("partial")]
+    public long Partial { get; set; }
+
+    /// <summary>
+    /// Facturas sin ninguna prueba.
+    /// </summary>
+    [JsonPropertyName("none")]
+    public long None { get; set; }
 }
 
 /// <summary>
@@ -26636,7 +27066,7 @@ public sealed partial class UpdateCustomerParams
     public decimal? DiscountPercent { get; set; }
 
     /// <summary>
-    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
@@ -28558,7 +28988,7 @@ public sealed partial class UpdateSalesOrderParamsCustomer
     public UpdateSalesOrderParamsCustomerForeign? Foreign { get; set; }
 
     /// <summary>
-    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio.
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
