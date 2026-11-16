@@ -3604,15 +3604,15 @@ public sealed class MembersResource
     /// Quitar a un miembro
     /// </summary>
     /// <remarks>
-    /// La persona deja de entrar a la empresa y sus invitaciones se cancelan. Siempre queda al menos un propietario; quitar a alguien con permisos delicados se hace en la app.
+    /// La persona deja de entrar a la empresa y sus invitaciones se cancelan; lo que hizo se queda con su nombre. Lo que le esperaba (pasos de aprobación que la nombran, aprobaciones pendientes, avisos, ausencias, viáticos que aprueba) pasa a `transfer_to` o, sin él, a cualquiera con el permiso. Siempre queda al menos un propietario; quitar a alguien con permisos delicados se hace en la app.
     /// <br/>
     /// <c>DELETE /v1/members/{id}</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/equipo/delete-member"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<Deleted>("DELETE", $"/v1/members/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+    public Task<Deleted> DeleteAsync(string id, DeleteMemberParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/members/{Uri.EscapeDataString(id)}", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>

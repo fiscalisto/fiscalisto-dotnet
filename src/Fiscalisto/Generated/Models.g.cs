@@ -9176,6 +9176,18 @@ public sealed partial class DeleteCostCenterParams
 }
 
 /// <summary>
+/// Los campos de «Quitar a un miembro».
+/// </summary>
+public sealed partial class DeleteMemberParams
+{
+    /// <summary>
+    /// El miembro (mem_…) que recibe su trabajo; sin él, cualquiera con permiso.
+    /// </summary>
+    [JsonPropertyName("transfer_to")]
+    public string? TransferTo { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Borrar un rol».
 /// </summary>
 public sealed partial class DeleteRoleParams
