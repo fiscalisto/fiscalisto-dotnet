@@ -2621,10 +2621,10 @@ public sealed class AttendanceResource
         => _client.RequestAsync<AttendanceMark>("POST", $"/v1/attendance/marks/{Uri.EscapeDataString(id)}/void", @params, null, options, true, cancellationToken);
 
     /// <summary>
-    /// Autorizar horas extra
+    /// Autorizar o rechazar horas extra
     /// </summary>
     /// <remarks>
-    /// Hasta cuántos minutos de horas extra de un día de un empleado cuentan para la nómina, antes o después de ese día (minutes null quita la autorización). Con la regla «Las horas extra necesitan autorización» encendida, lo demás queda en el registro como sin autorizar.
+    /// Hasta cuántos minutos de horas extra de un día de un empleado cuentan para la nómina, antes o después de ese día, o rechazarlas todas (rejected: true, con comment). minutes null quita la decisión. Con la regla de horas extra «Necesitan autorización», lo que nadie autorizó queda en el registro como sin autorizar.
     /// <br/>
     /// <c>POST /v1/attendance/overtime</c>
     /// <br/>

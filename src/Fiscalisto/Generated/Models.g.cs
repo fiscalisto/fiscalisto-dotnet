@@ -530,7 +530,7 @@ public sealed partial class ApplyAdvanceParamsRemainder
 }
 
 /// <summary>
-/// Los campos de «Autorizar horas extra».
+/// Los campos de «Autorizar o rechazar horas extra».
 /// </summary>
 public sealed partial class ApproveAttendanceOvertimeParams
 {
@@ -547,13 +547,19 @@ public sealed partial class ApproveAttendanceOvertimeParams
     public required string Date { get; set; }
 
     /// <summary>
-    /// Hasta cuántos minutos de horas extra de ese día cuentan para la nómina (0 a 960); null quita la autorización.
+    /// Hasta cuántos minutos de horas extra de ese día cuentan para la nómina (0 a 960); null quita la decisión. Con rejected: true se ignora.
     /// </summary>
     [JsonPropertyName("minutes")]
     public long? Minutes { get; set; }
 
     /// <summary>
-    /// Por qué (opcional).
+    /// true rechaza todas las horas extra de ese día: quedan en el registro, no cuentan para la nómina y dejan de estar por autorizar. Pide comment.
+    /// </summary>
+    [JsonPropertyName("rejected")]
+    public bool? Rejected { get; set; }
+
+    /// <summary>
+    /// Por qué (obligatorio al rechazar; el empleado lo ve).
     /// </summary>
     [JsonPropertyName("comment")]
     public string? Comment { get; set; }
@@ -690,7 +696,7 @@ public sealed partial class AttendanceMark
 }
 
 /// <summary>
-/// Las horas extra que la empresa autorizó para un día de un empleado, antes o después de ese día.
+/// Las horas extra que la empresa autorizó o rechazó para un día de un empleado, antes o después de ese día.
 /// </summary>
 public sealed partial class AttendanceOvertime
 {
@@ -719,10 +725,16 @@ public sealed partial class AttendanceOvertime
     public string Date { get; set; } = default!;
 
     /// <summary>
-    /// Hasta cuántos minutos de horas extra de ese día cuentan para la nómina; null: sin autorización.
+    /// Hasta cuántos minutos de horas extra de ese día cuentan para la nómina (0 si se rechazaron); null: sin decisión.
     /// </summary>
     [JsonPropertyName("minutes")]
     public long? Minutes { get; set; }
+
+    /// <summary>
+    /// true: la empresa rechazó las horas extra de ese día.
+    /// </summary>
+    [JsonPropertyName("rejected")]
+    public bool Rejected { get; set; }
 
     /// <summary>
     /// Por qué, o null.
@@ -771,6 +783,14 @@ public sealed partial class AttendanceReport
     /// </summary>
     [JsonPropertyName("overtime_approval")]
     public bool OvertimeApproval { get; set; }
+
+    /// <summary>
+    /// Cómo llegan las horas extra a la nómina: approval (necesitan autorización), all (cuentan todas) o none (no hay horas extra: quedan en el registro y nunca cuentan).
+    /// <br/>
+    /// Valores: approval, all, none.
+    /// </summary>
+    [JsonPropertyName("overtime_policy")]
+    public string OvertimePolicy { get; set; } = default!;
 
     /// <summary>
     /// Cada empleado del emisor en el periodo.
@@ -887,6 +907,12 @@ public sealed partial class AttendanceReportEmployeesItem
     public long UnapprovedOvertimeMinutes { get; set; }
 
     /// <summary>
+    /// Minutos de más que la empresa rechazó: quedan en el registro, no cuentan para la nómina y ya no están por autorizar.
+    /// </summary>
+    [JsonPropertyName("rejected_overtime_minutes")]
+    public long RejectedOvertimeMinutes { get; set; }
+
+    /// <summary>
     /// Días de descanso en que trabajó.
     /// </summary>
     [JsonPropertyName("rest_days_worked")]
@@ -967,10 +993,16 @@ public sealed partial class AttendanceReportEmployeesItemDaysItem
     public long OvertimeMinutes { get; set; }
 
     /// <summary>
-    /// De esos, los que cuentan para la nómina: hasta lo autorizado ese día cuando las horas extra necesitan autorización; si no, todos.
+    /// De esos, los que cuentan para la nómina: con overtime_policy approval, hasta lo autorizado ese día; con all, todos; con none, ninguno.
     /// </summary>
     [JsonPropertyName("approved_overtime_minutes")]
     public long ApprovedOvertimeMinutes { get; set; }
+
+    /// <summary>
+    /// De esos, los que la empresa rechazó ese día: no cuentan para la nómina.
+    /// </summary>
+    [JsonPropertyName("rejected_overtime_minutes")]
+    public long RejectedOvertimeMinutes { get; set; }
 
     /// <summary>
     /// La nota del día que puso la empresa, o null.
