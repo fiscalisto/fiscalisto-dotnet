@@ -299,6 +299,14 @@ public sealed partial class ApplyAdvanceParams
     public InvoiceCreateCartaPorte? CartaPorte { get; set; }
 
     /// <summary>
+    /// Solo en un traslado (type T) sin carta_porte: la regla de la RMF 2026 que lo permite. 2.7.7.2.1 mercancías propias en un traslado local (no medicamentos, hidrocarburos ni mercancías para despacho aduanero); 2.7.7.2.2 paquetería o mensajería en primera o última milla, un concepto por paquete con su número de guía en sku; 2.7.7.2.3 grúa de arrastre o salvamento local, relacionando con related (05) la factura de ingreso del servicio. Mandarlo es declarar que el traslado no transita por ningún tramo de jurisdicción federal. Los conceptos van con unit_price 0 y taxability 01 (por omisión en un traslado).
+    /// <br/>
+    /// Valores: 2.7.7.2.1, 2.7.7.2.2, 2.7.7.2.3.
+    /// </summary>
+    [JsonPropertyName("carta_porte_exemption")]
+    public string? CartaPorteExemption { get; set; }
+
+    /// <summary>
     /// Complemento INE (procesos electorales).
     /// </summary>
     [JsonPropertyName("ine")]
@@ -323,7 +331,7 @@ public sealed partial class ApplyAdvanceParams
     public List<InvoiceCreateLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
-    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva…
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva con clave A1 (lleva comercio_exterior), 03 temporal (sin él), 04 definitiva con clave distinta a A1 o sin enajenación (con o sin comercio_exterior; con él, incoterm opcional).
     /// <br/>
     /// Valores: 01, 02, 03, 04.
     /// </summary>
@@ -1193,7 +1201,7 @@ public sealed partial class CfdiSealsCertificate
 public sealed partial class CfdiSealsProblemsItem
 {
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 06, 14 a 24 llevan su complemento, como lo pide el catálogo del SAT (share_sale con 06 y 19, dividends con 14, distributable_remainder con 15, interest, trust_lease, foreign_payment, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); 01, 02, 04 y 05 llevan foreign_payment cuando el receptor es extranjero; la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones. 27 y 28 no se pueden emitir aquí.
     /// <br/>
     /// Valores: malformed_xml, missing_seal, certificate_unreadable, certificate_number_mismatch, certificate_not_issuer, certificate_not_csd, certificate_not_valid_at_issue, seal_mismatch, stamp_not_for_this_seal, sat_seal_mismatch.
     /// </summary>
@@ -1353,7 +1361,7 @@ public sealed partial class CfdiVerification
 public sealed partial class CfdiVerificationSat
 {
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 06, 14 a 24 llevan su complemento, como lo pide el catálogo del SAT (share_sale con 06 y 19, dividends con 14, distributable_remainder con 15, interest, trust_lease, foreign_payment, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); 01, 02, 04 y 05 llevan foreign_payment cuando el receptor es extranjero; la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones. 27 y 28 no se pueden emitir aquí.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -2977,6 +2985,14 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     public InvoiceCreateCartaPorte? CartaPorte { get; set; }
 
     /// <summary>
+    /// Solo en un traslado (type T) sin carta_porte: la regla de la RMF 2026 que lo permite. 2.7.7.2.1 mercancías propias en un traslado local (no medicamentos, hidrocarburos ni mercancías para despacho aduanero); 2.7.7.2.2 paquetería o mensajería en primera o última milla, un concepto por paquete con su número de guía en sku; 2.7.7.2.3 grúa de arrastre o salvamento local, relacionando con related (05) la factura de ingreso del servicio. Mandarlo es declarar que el traslado no transita por ningún tramo de jurisdicción federal. Los conceptos van con unit_price 0 y taxability 01 (por omisión en un traslado).
+    /// <br/>
+    /// Valores: 2.7.7.2.1, 2.7.7.2.2, 2.7.7.2.3.
+    /// </summary>
+    [JsonPropertyName("carta_porte_exemption")]
+    public string? CartaPorteExemption { get; set; }
+
+    /// <summary>
     /// Complemento INE (procesos electorales).
     /// </summary>
     [JsonPropertyName("ine")]
@@ -3001,7 +3017,7 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     public List<InvoiceCreateLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
-    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva…
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva con clave A1 (lleva comercio_exterior), 03 temporal (sin él), 04 definitiva con clave distinta a A1 o sin enajenación (con o sin comercio_exterior; con él, incoterm opcional).
     /// <br/>
     /// Valores: 01, 02, 03, 04.
     /// </summary>
@@ -3593,10 +3609,22 @@ public sealed partial class CreatePayrollBatchParamsReceiptsItem
     public CreatePayrollBatchParamsReceiptsItemPeriod? Period { get; set; }
 
     /// <summary>
-    /// Días pagados; sin él, todos los días que le tocan del periodo.
+    /// Días pagados; sin él, todos los días que le tocan del periodo menos absences y disability_days.
     /// </summary>
     [JsonPropertyName("days")]
     public decimal? Days { get; set; }
+
+    /// <summary>
+    /// Faltas del periodo (días sin goce de sueldo), de 0 a 31: no se pagan (salen de days) y cotizan al IMSS solo en enfermedades y maternidad, hasta 7 por mes (LSS art. 31 fr. I).
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public long? Absences { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad que expidió el IMSS en el periodo, de 0 a 31: no se pagan (salen de days) y no causan cuotas obreras del IMSS (LSS art. 31 fr. IV).
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long? DisabilityDays { get; set; }
 
     /// <summary>
     /// Mandarle su recibo por correo; sin él, lo que diga send_email del lote. Con true el empleado debe tener correo.
@@ -3657,6 +3685,18 @@ public sealed partial class CreatePayrollReceiptParams
     /// </summary>
     [JsonPropertyName("days")]
     public decimal? Days { get; set; }
+
+    /// <summary>
+    /// Faltas del periodo (días sin goce de sueldo), de 0 a 31: no se pagan (salen de days) y cotizan al IMSS solo en enfermedades y maternidad, hasta 7 por mes (LSS art. 31 fr. I).
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public long? Absences { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad que expidió el IMSS en el periodo, de 0 a 31: no se pagan (salen de days) y no causan cuotas obreras del IMSS (LSS art. 31 fr. IV).
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long? DisabilityDays { get; set; }
 
     /// <summary>
     /// El recibo vigente (inv_… o UUID) que este corrige, calculado por Fiscalisto para el mismo empleado: el nuevo se calcula con los datos del empleado como están ahora, va relacionado con 04 y el anterior se cancela con motivo 01. Para un recibo que calculó su sistema use POST /v1/payroll_receipts/external con replaces.
@@ -3839,7 +3879,7 @@ public sealed partial class CreateProductParams
     public required string ProductKey { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -3917,6 +3957,12 @@ public sealed partial class CreateProductParams
     public List<CreateProductParamsLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
+    /// Diésel (15101505) y gasolinas (15101514, 15101515): el permiso de la CNE que lleva cada factura con él en el complemento de Hidrocarburos y Petrolíferos. Una factura cuyo concepto trae su propio hydrocarbon usa ese. null lo quita.
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public CreateProductParamsHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// Lleva existencias (Inventario): cada factura que lo vende las saca del almacén de su sucursal, y una cancelada las regresa. Ver GET /v1/products/{id}/stock.
     /// </summary>
     [JsonPropertyName("track_stock")]
@@ -3963,6 +4009,30 @@ public sealed partial class CreateProductParams
     /// </summary>
     [JsonPropertyName("category")]
     public string? Category { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateProductParamsHydrocarbon&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateProductParamsHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public string? Subproduct { get; set; }
 }
 
 /// <summary>
@@ -4211,7 +4281,7 @@ public sealed partial class CreateQuoteParamsItemsItem
     public string? ProductKey { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -4625,6 +4695,14 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     public InvoiceCreateCartaPorte? CartaPorte { get; set; }
 
     /// <summary>
+    /// Solo en un traslado (type T) sin carta_porte: la regla de la RMF 2026 que lo permite. 2.7.7.2.1 mercancías propias en un traslado local (no medicamentos, hidrocarburos ni mercancías para despacho aduanero); 2.7.7.2.2 paquetería o mensajería en primera o última milla, un concepto por paquete con su número de guía en sku; 2.7.7.2.3 grúa de arrastre o salvamento local, relacionando con related (05) la factura de ingreso del servicio. Mandarlo es declarar que el traslado no transita por ningún tramo de jurisdicción federal. Los conceptos van con unit_price 0 y taxability 01 (por omisión en un traslado).
+    /// <br/>
+    /// Valores: 2.7.7.2.1, 2.7.7.2.2, 2.7.7.2.3.
+    /// </summary>
+    [JsonPropertyName("carta_porte_exemption")]
+    public string? CartaPorteExemption { get; set; }
+
+    /// <summary>
     /// Complemento INE (procesos electorales).
     /// </summary>
     [JsonPropertyName("ine")]
@@ -4649,7 +4727,7 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     public List<InvoiceCreateLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
-    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva…
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva con clave A1 (lleva comercio_exterior), 03 temporal (sin él), 04 definitiva con clave distinta a A1 o sin enajenación (con o sin comercio_exterior; con él, incoterm opcional).
     /// <br/>
     /// Valores: 01, 02, 03, 04.
     /// </summary>
@@ -4839,7 +4917,7 @@ public sealed partial class CreateRetentionParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 06, 14 a 24 llevan su complemento, como lo pide el catálogo del SAT (share_sale con 06 y 19, dividends con 14, distributable_remainder con 15, interest, trust_lease, foreign_payment, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); 01, 02, 04 y 05 llevan foreign_payment cuando el receptor es extranjero; la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones. 27 y 28 no se pueden emitir aquí.
     /// </summary>
     [JsonPropertyName("code")]
     public required string Code { get; set; }
@@ -4893,10 +4971,16 @@ public sealed partial class CreateRetentionParams
     public CreateRetentionParamsInterest? Interest { get; set; }
 
     /// <summary>
-    /// Complemento de pagos a extranjeros.
+    /// Complemento de pagos a extranjeros: obligatorio con code 18, y con 01, 02, 04 y 05 cuando el receptor es extranjero.
     /// </summary>
     [JsonPropertyName("foreign_payment")]
     public CreateRetentionParamsForeignPayment? ForeignPayment { get; set; }
+
+    /// <summary>
+    /// Complemento de dividendos con su nodo Remanente (remanente distribuible), obligatorio con code 15. Si no lo manda, va sin proporción.
+    /// </summary>
+    [JsonPropertyName("distributable_remainder")]
+    public CreateRetentionParamsDistributableRemainder? DistributableRemainder { get; set; }
 
     /// <summary>
     /// Complemento de arrendamiento en fideicomiso (Arrendamientoenfideicomiso 1.0), obligatorio con code 17.
@@ -4905,7 +4989,7 @@ public sealed partial class CreateRetentionParams
     public CreateRetentionParamsTrustLease? TrustLease { get; set; }
 
     /// <summary>
-    /// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 19.
+    /// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 06 y 19.
     /// </summary>
     [JsonPropertyName("share_sale")]
     public CreateRetentionParamsShareSale? ShareSale { get; set; }
@@ -4957,6 +5041,18 @@ public sealed partial class CreateRetentionParams
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// Complemento de dividendos con su nodo Remanente (remanente distribuible), obligatorio con code 15. Si no lo manda, va sin proporción.
+/// </summary>
+public sealed partial class CreateRetentionParamsDistributableRemainder
+{
+    /// <summary>
+    /// Porcentaje de participación del integrante o socio en el remanente (ProporcionRem), opcional.
+    /// </summary>
+    [JsonPropertyName("proportion")]
+    public decimal? Proportion { get; set; }
 }
 
 /// <summary>
@@ -5036,7 +5132,7 @@ public sealed partial class CreateRetentionParamsFinancialDerivatives
 }
 
 /// <summary>
-/// Complemento de pagos a extranjeros.
+/// Complemento de pagos a extranjeros: obligatorio con code 18, y con 01, 02, 04 y 05 cuando el receptor es extranjero.
 /// </summary>
 public sealed partial class CreateRetentionParamsForeignPayment
 {
@@ -5478,7 +5574,7 @@ public sealed partial class CreateRetentionParamsRetirementPlanContributionsItem
 }
 
 /// <summary>
-/// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 19.
+/// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 06 y 19.
 /// </summary>
 public sealed partial class CreateRetentionParamsShareSale
 {
@@ -6015,7 +6111,7 @@ public sealed partial class CreateSalesOrderParamsItemsItem
     public string? ProductKey { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -9631,7 +9727,7 @@ public sealed partial class ExternalPayrollReceiptCreateDisabilitiesItem
 public sealed partial class ExternalPayrollReceiptCreateEmployee
 {
     /// <summary>
-    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// RFC del empleado. XAXX010101000 si falleció: con su nombre y su CURP.
     /// </summary>
     [JsonPropertyName("tax_id")]
     public required string TaxId { get; set; }
@@ -10279,7 +10375,7 @@ public sealed partial class ExternalPayrollReceiptPreviewWarningsItem
     public string Param { get; set; } = default!;
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 06, 14 a 24 llevan su complemento, como lo pide el catálogo del SAT (share_sale con 06 y 19, dividends con 14, distributable_remainder con 15, interest, trust_lease, foreign_payment, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); 01, 02, 04 y 05 llevan foreign_payment cuando el receptor es extranjero; la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones. 27 y 28 no se pueden emitir aquí.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -11625,7 +11721,7 @@ public sealed partial class Invoice
     public string? Series { get; set; }
 
     /// <summary>
-    /// El folio (Folio) que se le asignó, o null.
+    /// Folio interno. En una rechazada es el que se intentó: no se gasta, y el siguiente CFDI de la serie lo usa.
     /// </summary>
     [JsonPropertyName("folio")]
     public string? Folio { get; set; }
@@ -11789,7 +11885,7 @@ public sealed partial class Invoice
     public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
-    /// Avisos que no impidieron timbrar (por ejemplo, el XML se guardará después).
+    /// Avisos sobre la factura (solo en la respuesta que la timbra o, con 202, la que la deja en proceso): se timbra como se mandó.
     /// </summary>
     [JsonPropertyName("warnings")]
     public List<string>? Warnings { get; set; }
@@ -11993,6 +12089,12 @@ public sealed partial class InvoiceBatchInvoicesItem
     /// </summary>
     [JsonPropertyName("error")]
     public string? Error { get; set; }
+
+    /// <summary>
+    /// Solo en la respuesta de POST /v1/invoice_batches: los avisos de esta factura antes de timbrarla, los mismos que daría POST /v1/invoices. Se timbra como se mandó.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<string>? Warnings { get; set; }
 }
 
 /// <summary>
@@ -12123,6 +12225,14 @@ public sealed partial class InvoiceCreate
     public InvoiceCreateCartaPorte? CartaPorte { get; set; }
 
     /// <summary>
+    /// Solo en un traslado (type T) sin carta_porte: la regla de la RMF 2026 que lo permite. 2.7.7.2.1 mercancías propias en un traslado local (no medicamentos, hidrocarburos ni mercancías para despacho aduanero); 2.7.7.2.2 paquetería o mensajería en primera o última milla, un concepto por paquete con su número de guía en sku; 2.7.7.2.3 grúa de arrastre o salvamento local, relacionando con related (05) la factura de ingreso del servicio. Mandarlo es declarar que el traslado no transita por ningún tramo de jurisdicción federal. Los conceptos van con unit_price 0 y taxability 01 (por omisión en un traslado).
+    /// <br/>
+    /// Valores: 2.7.7.2.1, 2.7.7.2.2, 2.7.7.2.3.
+    /// </summary>
+    [JsonPropertyName("carta_porte_exemption")]
+    public string? CartaPorteExemption { get; set; }
+
+    /// <summary>
     /// Complemento INE (procesos electorales).
     /// </summary>
     [JsonPropertyName("ine")]
@@ -12147,7 +12257,7 @@ public sealed partial class InvoiceCreate
     public List<InvoiceCreateLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
-    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva…
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva con clave A1 (lleva comercio_exterior), 03 temporal (sin él), 04 definitiva con clave distinta a A1 o sin enajenación (con o sin comercio_exterior; con él, incoterm opcional).
     /// <br/>
     /// Valores: 01, 02, 03, 04.
     /// </summary>
@@ -13875,7 +13985,9 @@ public sealed partial class InvoiceCreateCartaPorteVehicleTrailersItem
 public sealed partial class InvoiceCreateComercioExterior
 {
     /// <summary>
-    /// Motivo de traslado (MotivoTraslado): 05 envío de mercancías propias.
+    /// Motivo de traslado (MotivoTraslado), c_MotivoTraslado, solo en un traslado: 01 mercancías facturadas con anterioridad (relacione la factura de venta en related), 02 reubicación de mercancías propias, 03 consignación, 04 para posterior enajenación, 05 propiedad de terceros (con owners), 99 otros.
+    /// <br/>
+    /// Valores: 99, 01, 02, 03, 04, 05.
     /// </summary>
     [JsonPropertyName("motive")]
     public string? Motive { get; set; }
@@ -14323,7 +14435,7 @@ public sealed partial class InvoiceCreateIne
 public sealed partial class InvoiceCreateIneEntitiesItem
 {
     /// <summary>
-    /// Clave de la entidad (ClaveEntidad), 3 letras.
+    /// Clave de la entidad (ClaveEntidad): la del estado (JAL, QUE…), NAC (nacional) o la circunscripción CR1 a CR5; estas seis no van con ámbito Local.
     /// </summary>
     [JsonPropertyName("key")]
     public required string Key { get; set; }
@@ -14367,7 +14479,7 @@ public sealed partial class InvoiceCreateItemsItem
     public string? ProductKey { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -15134,6 +15246,12 @@ public sealed partial class InvoicePayroll
     public List<InvoicePayrollDisabilitiesItem>? Disabilities { get; set; }
 
     /// <summary>
+    /// En un recibo que calculó Fiscalisto: los días del IMSS.
+    /// </summary>
+    [JsonPropertyName("imss_days")]
+    public InvoicePayrollImssDays? ImssDays { get; set; }
+
+    /// <summary>
     /// Totales: percepciones, deducciones, otros pagos y el neto a pagar.
     /// </summary>
     [JsonPropertyName("totals")]
@@ -15378,6 +15496,42 @@ public sealed partial class InvoicePayrollEmployerSncf
     /// </summary>
     [JsonPropertyName("own_resource_amount")]
     public decimal? OwnResourceAmount { get; set; }
+}
+
+/// <summary>
+/// En un recibo que calculó Fiscalisto: los días del IMSS.
+/// </summary>
+public sealed partial class InvoicePayrollImssDays
+{
+    /// <summary>
+    /// Días naturales del periodo que trabajó para el patrón: las cuotas del IMSS se causan por mes calendario (LSS art. 39), no por los días pagados.
+    /// </summary>
+    [JsonPropertyName("calendar_days")]
+    public long CalendarDays { get; set; }
+
+    /// <summary>
+    /// Faltas del recibo.
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public long Absences { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad del recibo.
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long DisabilityDays { get; set; }
+
+    /// <summary>
+    /// Días que cotiza en enfermedades y maternidad (excedente, prestaciones en dinero, gastos médicos de pensionados): el periodo sin la incapacidad; las faltas cuentan (LSS art. 31 fr. I).
+    /// </summary>
+    [JsonPropertyName("sickness_and_maternity")]
+    public long SicknessAndMaternity { get; set; }
+
+    /// <summary>
+    /// Días que cotiza en invalidez y vida y en cesantía en edad avanzada y vejez: además sin las faltas, hasta 7 por mes.
+    /// </summary>
+    [JsonPropertyName("disability_and_old_age")]
+    public long DisabilityAndOldAge { get; set; }
 }
 
 /// <summary>
@@ -15958,7 +16112,7 @@ public sealed partial class InvoicePreviewTaxes
 public sealed partial class InvoicePreviewWarningsItem
 {
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 06, 14 a 24 llevan su complemento, como lo pide el catálogo del SAT (share_sale con 06 y 19, dividends con 14, distributable_remainder con 15, interest, trust_lease, foreign_payment, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); 01, 02, 04 y 05 llevan foreign_payment cuando el receptor es extranjero; la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones. 27 y 28 no se pueden emitir aquí.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -18864,6 +19018,12 @@ public sealed partial class PayrollReceiptPreview
     public decimal Days { get; set; }
 
     /// <summary>
+    /// Los días por los que se calcularon las cuotas obreras del IMSS.
+    /// </summary>
+    [JsonPropertyName("imss_days")]
+    public PayrollReceiptPreviewImssDays ImssDays { get; set; } = default!;
+
+    /// <summary>
     /// Salario base de cotización (SalarioBaseCotApor).
     /// </summary>
     [JsonPropertyName("contribution_base_salary")]
@@ -18928,6 +19088,42 @@ public sealed partial class PayrollReceiptPreviewDeductionsItem
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Los días por los que se calcularon las cuotas obreras del IMSS.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewImssDays
+{
+    /// <summary>
+    /// Días naturales del periodo que trabajó para el patrón: las cuotas del IMSS se causan por mes calendario (LSS art. 39), no por los días pagados.
+    /// </summary>
+    [JsonPropertyName("calendar_days")]
+    public long CalendarDays { get; set; }
+
+    /// <summary>
+    /// Faltas del recibo.
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public long Absences { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad del recibo.
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long DisabilityDays { get; set; }
+
+    /// <summary>
+    /// Días que cotiza en enfermedades y maternidad (excedente, prestaciones en dinero, gastos médicos de pensionados): el periodo sin la incapacidad; las faltas cuentan (LSS art. 31 fr. I).
+    /// </summary>
+    [JsonPropertyName("sickness_and_maternity")]
+    public long SicknessAndMaternity { get; set; }
+
+    /// <summary>
+    /// Días que cotiza en invalidez y vida y en cesantía en edad avanzada y vejez: además sin las faltas, hasta 7 por mes.
+    /// </summary>
+    [JsonPropertyName("disability_and_old_age")]
+    public long DisabilityAndOldAge { get; set; }
 }
 
 /// <summary>
@@ -19260,7 +19456,7 @@ public sealed partial class PayrollReceiptPreviewTotals
 public sealed partial class PayrollReceiptPreviewWarningsItem
 {
     /// <summary>
-    /// finiquito_not_included: el empleado se fue en el periodo y el recibo no trae su finiquito; payroll_rates_pending: aún no se cargan los valores (ISR, subsidio, salario mínimo, UMA) de una fecha próxima.
+    /// finiquito_not_included: el empleado se fue en el periodo y el recibo no trae su finiquito; absences_over_monthly_limit: con este recibo pasa de 7 faltas en el mes y las de más cotizan como días trabajados (para dejar de cotizar, presente su aviso de baja); payroll_rates_pending: aún no se cargan los valores (ISR, subsidio, salario mínimo, UMA) de una fecha próxima.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -19626,6 +19822,18 @@ public sealed partial class PreviewPayrollReceiptParams
     /// </summary>
     [JsonPropertyName("days")]
     public decimal? Days { get; set; }
+
+    /// <summary>
+    /// Faltas del periodo (días sin goce de sueldo), de 0 a 31: no se pagan (salen de days) y cotizan al IMSS solo en enfermedades y maternidad, hasta 7 por mes (LSS art. 31 fr. I).
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public long? Absences { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad que expidió el IMSS en el periodo, de 0 a 31: no se pagan (salen de days) y no causan cuotas obreras del IMSS (LSS art. 31 fr. IV).
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long? DisabilityDays { get; set; }
 
     /// <summary>
     /// El recibo vigente (inv_… o UUID) que este corrige, calculado por Fiscalisto para el mismo empleado: el nuevo se calcula con los datos del empleado como están ahora, va relacionado con 04 y el anterior se cancela con motivo 01. Para un recibo que calculó su sistema use POST /v1/payroll_receipts/external con replaces.
@@ -20000,7 +20208,7 @@ public sealed partial class Product
     public string ProductKey { get; set; } = default!;
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string UnitKey { get; set; } = default!;
@@ -20078,6 +20286,12 @@ public sealed partial class Product
     public List<ProductLocalTaxesItem> LocalTaxes { get; set; } = default!;
 
     /// <summary>
+    /// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public ProductHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// true si lleva existencias (Inventario).
     /// </summary>
     [JsonPropertyName("track_stock")]
@@ -20130,6 +20344,30 @@ public sealed partial class Product
     /// </summary>
     [JsonPropertyName("updated_at")]
     public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ProductHydrocarbon&lt;/c&gt;.
+/// </summary>
+public sealed partial class ProductHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public string PermitType { get; set; } = default!;
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public string PermitNumber { get; set; } = default!;
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public string Subproduct { get; set; } = default!;
 }
 
 /// <summary>
@@ -20650,7 +20888,7 @@ public sealed partial class QuoteItemsItem
     public decimal? Quantity { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -21008,7 +21246,7 @@ public sealed partial class RecurringInvoiceItemsItem
     public decimal? Quantity { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -21266,7 +21504,7 @@ public sealed partial class Retention
     public string? Date { get; set; }
 
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 06, 14 a 24 llevan su complemento, como lo pide el catálogo del SAT (share_sale con 06 y 19, dividends con 14, distributable_remainder con 15, interest, trust_lease, foreign_payment, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); 01, 02, 04 y 05 llevan foreign_payment cuando el receptor es extranjero; la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones. 27 y 28 no se pueden emitir aquí.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -21314,10 +21552,16 @@ public sealed partial class Retention
     public Dictionary<string, JsonElement>? Interest { get; set; }
 
     /// <summary>
-    /// Complemento de pagos a extranjeros.
+    /// Complemento de pagos a extranjeros: obligatorio con code 18, y con 01, 02, 04 y 05 cuando el receptor es extranjero.
     /// </summary>
     [JsonPropertyName("foreign_payment")]
     public Dictionary<string, JsonElement>? ForeignPayment { get; set; }
+
+    /// <summary>
+    /// Complemento de dividendos con su nodo Remanente (remanente distribuible), obligatorio con code 15. Si no lo manda, va sin proporción.
+    /// </summary>
+    [JsonPropertyName("distributable_remainder")]
+    public Dictionary<string, JsonElement>? DistributableRemainder { get; set; }
 
     /// <summary>
     /// Complemento de arrendamiento en fideicomiso (Arrendamientoenfideicomiso 1.0), obligatorio con code 17.
@@ -21326,7 +21570,7 @@ public sealed partial class Retention
     public Dictionary<string, JsonElement>? TrustLease { get; set; }
 
     /// <summary>
-    /// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 19.
+    /// Complemento de enajenación de acciones u operaciones de valores (EnajenaciondeAcciones 1.0), obligatorio con code 06 y 19.
     /// </summary>
     [JsonPropertyName("share_sale")]
     public Dictionary<string, JsonElement>? ShareSale { get; set; }
@@ -23126,6 +23370,12 @@ public sealed partial class SatFinding
     public string? Explanation { get; set; }
 
     /// <summary>
+    /// Qué hacer con este hallazgo, en una frase o dos.
+    /// </summary>
+    [JsonPropertyName("next_step")]
+    public string NextStep { get; set; } = default!;
+
+    /// <summary>
     /// Cuántos CFDI lo tienen, sin revisar.
     /// </summary>
     [JsonPropertyName("invoices")]
@@ -23254,6 +23504,12 @@ public sealed partial class SatFindingCounterpartyFindingsItem
     /// </summary>
     [JsonPropertyName("invoices")]
     public long Invoices { get; set; }
+
+    /// <summary>
+    /// Qué hacer con este hallazgo, en una frase o dos.
+    /// </summary>
+    [JsonPropertyName("next_step")]
+    public string NextStep { get; set; } = default!;
 }
 
 /// <summary>
@@ -24280,6 +24536,22 @@ public sealed partial class SelfInvoicing
     /// </summary>
     [JsonPropertyName("portal_radius")]
     public long? PortalRadius { get; set; }
+
+    /// <summary>
+    /// Cuando se factura una persona moral que retiene (1.25% de ISR en RESICO, o lo del producto). keep_total: la base crece y la factura suma lo que se pagó. subtract: la base es la del ticket y el total es lo pagado menos la retención.
+    /// <br/>
+    /// Valores: keep_total, subtract.
+    /// </summary>
+    [JsonPropertyName("retention_mode")]
+    public string RetentionMode { get; set; } = default!;
+
+    /// <summary>
+    /// ticket: la factura global lleva un concepto «Venta» por ticket, con su folio. summary: solo el monto total del periodo, uno por combinación de impuestos (NoIdentificacion «Resumen»), para una persona física en RESICO (regla 2.7.1.21 de la RMF 2026).
+    /// <br/>
+    /// Valores: ticket, summary.
+    /// </summary>
+    [JsonPropertyName("global_concepts")]
+    public string GlobalConcepts { get; set; } = default!;
 }
 
 /// <summary>
@@ -25276,7 +25548,7 @@ public sealed partial class SupplierInvoiceList
 public sealed partial class SupplierInvoiceWarningsItem
 {
     /// <summary>
-    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 14, 16, 17 y 18 a 24 llevan su complemento (dividends, interest, trust_lease, foreign_payment, share_sale, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones.
+    /// Clave de la retención (CveRetenc), c_CveRetenc: 01 servicios profesionales, 05 arrendamiento, 14 dividendos, 16 intereses, 18 pagos al extranjero… Las claves 06, 14 a 24 llevan su complemento, como lo pide el catálogo del SAT (share_sale con 06 y 19, dividends con 14, distributable_remainder con 15, interest, trust_lease, foreign_payment, prize, trust, retirement_plan, mortgage_interest, financial_derivatives); 01, 02, 04 y 05 llevan foreign_payment cuando el receptor es extranjero; la 26 (plataformas tecnológicas) lleva platform, y sus totals y taxes se calculan de las operaciones. 27 y 28 no se pueden emitir aquí.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
@@ -25890,7 +26162,7 @@ public sealed partial class TicketLinesItem
     public string ProductKey { get; set; } = default!;
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string UnitKey { get; set; } = default!;
@@ -27114,7 +27386,7 @@ public sealed partial class UpdateProductParams
     public string? ProductKey { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -27192,6 +27464,12 @@ public sealed partial class UpdateProductParams
     public List<UpdateProductParamsLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
+    /// Diésel (15101505) y gasolinas (15101514, 15101515): el permiso de la CNE que lleva cada factura con él en el complemento de Hidrocarburos y Petrolíferos. Una factura cuyo concepto trae su propio hydrocarbon usa ese. null lo quita.
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public UpdateProductParamsHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
     /// Lleva existencias (Inventario): cada factura que lo vende las saca del almacén de su sucursal, y una cancelada las regresa. Ver GET /v1/products/{id}/stock.
     /// </summary>
     [JsonPropertyName("track_stock")]
@@ -27238,6 +27516,30 @@ public sealed partial class UpdateProductParams
     /// </summary>
     [JsonPropertyName("category")]
     public string? Category { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateProductParamsHydrocarbon&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateProductParamsHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public string? Subproduct { get; set; }
 }
 
 /// <summary>
@@ -27448,7 +27750,7 @@ public sealed partial class UpdateQuoteParamsItemsItem
     public string? ProductKey { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -27862,6 +28164,14 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public InvoiceCreateCartaPorte? CartaPorte { get; set; }
 
     /// <summary>
+    /// Solo en un traslado (type T) sin carta_porte: la regla de la RMF 2026 que lo permite. 2.7.7.2.1 mercancías propias en un traslado local (no medicamentos, hidrocarburos ni mercancías para despacho aduanero); 2.7.7.2.2 paquetería o mensajería en primera o última milla, un concepto por paquete con su número de guía en sku; 2.7.7.2.3 grúa de arrastre o salvamento local, relacionando con related (05) la factura de ingreso del servicio. Mandarlo es declarar que el traslado no transita por ningún tramo de jurisdicción federal. Los conceptos van con unit_price 0 y taxability 01 (por omisión en un traslado).
+    /// <br/>
+    /// Valores: 2.7.7.2.1, 2.7.7.2.2, 2.7.7.2.3.
+    /// </summary>
+    [JsonPropertyName("carta_porte_exemption")]
+    public string? CartaPorteExemption { get; set; }
+
+    /// <summary>
     /// Complemento INE (procesos electorales).
     /// </summary>
     [JsonPropertyName("ine")]
@@ -27886,7 +28196,7 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public List<InvoiceCreateLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
-    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva…
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva con clave A1 (lleva comercio_exterior), 03 temporal (sin él), 04 definitiva con clave distinta a A1 o sin enajenación (con o sin comercio_exterior; con él, incoterm opcional).
     /// <br/>
     /// Valores: 01, 02, 03, 04.
     /// </summary>
@@ -28296,7 +28606,7 @@ public sealed partial class UpdateSalesOrderParamsItemsItem
     public string? ProductKey { get; set; }
 
     /// <summary>
-    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio (por omisión), H87 pieza, ACT actividad…
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
@@ -28700,6 +29010,22 @@ public sealed partial class UpdateSelfInvoicingParams
     /// </summary>
     [JsonPropertyName("portal_radius")]
     public long? PortalRadius { get; set; }
+
+    /// <summary>
+    /// Cuando se factura una persona moral y retiene (1.25% de ISR a un emisor en RESICO, artículo 113-J de la LISR, o lo que diga el producto): `keep_total` (por omisión), la base crece para que la factura sume lo que se pagó; `subtract`, la base es la del ticket y la retención se resta, así que el total de la factura es menor a lo pagado.
+    /// <br/>
+    /// Valores: keep_total, subtract.
+    /// </summary>
+    [JsonPropertyName("retention_mode")]
+    public string? RetentionMode { get; set; }
+
+    /// <summary>
+    /// Los conceptos de la factura global: `ticket` (por omisión), uno «Venta» por ticket con su folio como `NoIdentificacion`; `summary`, solo el monto total del periodo, uno por combinación de impuestos con `NoIdentificacion` «Resumen» (regla 2.7.1.21 de la RMF 2026). `summary` es solo para un emisor persona física en RESICO (626); otro contesta `invalid_request`.
+    /// <br/>
+    /// Valores: ticket, summary.
+    /// </summary>
+    [JsonPropertyName("global_concepts")]
+    public string? GlobalConcepts { get; set; }
 }
 
 /// <summary>
