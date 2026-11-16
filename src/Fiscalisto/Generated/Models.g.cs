@@ -443,6 +443,12 @@ public sealed partial class ApplyAdvanceParams
     public string? Notes { get; set; }
 
     /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
+
+    /// <summary>
     /// Idioma del PDF: es (por omisión) o en.
     /// <br/>
     /// Valores: es, en, bi.
@@ -4247,6 +4253,12 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     public string? Notes { get; set; }
 
     /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
+
+    /// <summary>
     /// Idioma del PDF: es (por omisión) o en.
     /// <br/>
     /// Valores: es, en, bi.
@@ -5955,6 +5967,12 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
 
     /// <summary>
     /// Idioma del PDF: es (por omisión) o en.
@@ -8905,7 +8923,7 @@ public sealed partial class CustomerPaymentBehavior
     public string TaxId { get; set; } = default!;
 
     /// <summary>
-    /// Sus días de crédito: los suyos (Clientes) o los de la empresa (Ajustes › Cobranza automática). Contra ellos se mide el atraso.
+    /// Sus días de crédito: los suyos (Clientes, o los de su grupo) o los de la empresa (Ajustes › Cobranza automática). Contra ellos se mide el atraso.
     /// </summary>
     [JsonPropertyName("credit_days")]
     public long CreditDays { get; set; }
@@ -13003,6 +13021,12 @@ public sealed partial class Invoice
     public string? PaymentMethod { get; set; }
 
     /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
+
+    /// <summary>
     /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
     /// </summary>
     [JsonPropertyName("currency")]
@@ -13071,7 +13095,7 @@ public sealed partial class Invoice
     public string? PaidOn { get; set; }
 
     /// <summary>
-    /// Mientras falta cobrarla (unpaid o partial): el día en que vence (AAAA-MM-DD), su fecha más los días de crédito de la ficha del cliente o, sin ellos, los de la empresa (30 si no los cambió); una PUE con paid_later, el último día de su mes. Son los días que usan Cuentas por cobrar y los recordatorios de cobranza. null si ya se pagó o no aplica.
+    /// Mientras falta cobrarla (unpaid o partial): el día en que vence (AAAA-MM-DD), su fecha más los días de crédito de la ficha del cliente (o de su grupo de clientes) o, sin ellos, los de la empresa (30 si no los cambió); una PUE con paid_later, el último día de su mes. Son los días que usan Cuentas por cobrar y los recordatorios de cobranza. null si ya se pagó o no aplica.
     /// </summary>
     [JsonPropertyName("due_date")]
     public string? DueDate { get; set; }
@@ -13571,6 +13595,12 @@ public sealed partial class InvoiceCreate
     /// </summary>
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
 
     /// <summary>
     /// Idioma del PDF: es (por omisión) o en.
@@ -21238,7 +21268,7 @@ public sealed partial class PortalSupplier
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// El RFC del proveedor.
+    /// El RFC del proveedor; uno del extranjero, sin RFC, trae su clave `EXT-&lt;país&gt;-&lt;tax ID&gt;` (país en c_Pais del SAT, «EXT-USA-123456789»).
     /// </summary>
     [JsonPropertyName("tax_id")]
     public string TaxId { get; set; } = default!;
@@ -27044,13 +27074,13 @@ public sealed partial class SupplierInvoice
     public string Supplier { get; set; } = default!;
 
     /// <summary>
-    /// El RFC del proveedor.
+    /// El RFC del proveedor, o la clave `EXT-&lt;país&gt;-&lt;tax ID&gt;` de uno del extranjero.
     /// </summary>
     [JsonPropertyName("supplier_tax_id")]
     public string SupplierTaxId { get; set; } = default!;
 
     /// <summary>
-    /// El folio fiscal (UUID del timbre).
+    /// El folio fiscal (UUID del timbre); la factura de un proveedor del extranjero, que no lleva CFDI, trae `EXT-…` y sat_invoice null.
     /// </summary>
     [JsonPropertyName("uuid")]
     public string Uuid { get; set; } = default!;
@@ -30026,6 +30056,12 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
 
     /// <summary>
     /// Idioma del PDF: es (por omisión) o en.
