@@ -13071,6 +13071,12 @@ public sealed partial class Invoice
     public string? PaidOn { get; set; }
 
     /// <summary>
+    /// Mientras falta cobrarla (unpaid o partial): el día en que vence (AAAA-MM-DD), su fecha más los días de crédito de la ficha del cliente o, sin ellos, los de la empresa (30 si no los cambió); una PUE con paid_later, el último día de su mes. Son los días que usan Cuentas por cobrar y los recordatorios de cobranza. null si ya se pagó o no aplica.
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string? DueDate { get; set; }
+
+    /// <summary>
     /// CFDI relacionados (CfdiRelacionados): tipo de relación de c_TipoRelacion y los UUID.
     /// </summary>
     [JsonPropertyName("related")]
@@ -22692,6 +22698,12 @@ public sealed partial class Receivable
     /// </summary>
     [JsonPropertyName("amount_due")]
     public decimal AmountDue { get; set; }
+
+    /// <summary>
+    /// De eso, lo que ya pasó de su vencimiento (el due_date de cada factura), en esa moneda.
+    /// </summary>
+    [JsonPropertyName("amount_overdue")]
+    public decimal AmountOverdue { get; set; }
 
     /// <summary>
     /// Cuántas facturas tiene abiertas.
