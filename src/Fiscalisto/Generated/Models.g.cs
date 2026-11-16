@@ -3425,6 +3425,18 @@ public sealed partial class CreateCustomerParams
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
+
+    /// <summary>
+    /// Sus días de crédito: sus facturas vencen estos días después de su fecha (due_date, cobranza); null: los de su grupo o los de la empresa.
+    /// </summary>
+    [JsonPropertyName("credit_days")]
+    public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// Sus condiciones de pago («Crédito a 30 días»): las facturas nuevas en la app empiezan con ellas; null: las de la empresa. POST /v1/invoices no las pone solas: mándelas en payment_terms.
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
 }
 
 /// <summary>
@@ -8521,6 +8533,18 @@ public sealed partial class Customer
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool IepsTaxpayer { get; set; }
+
+    /// <summary>
+    /// Días de crédito que se le dan, de 0 a 365, o null para no cambiar los del cliente.
+    /// </summary>
+    [JsonPropertyName("credit_days")]
+    public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
 
     /// <summary>
     /// Su grupo de clientes (cgr_…), o null si no está en ninguno.
@@ -28456,6 +28480,18 @@ public sealed partial class UpdateCustomerParams
     /// </summary>
     [JsonPropertyName("ieps_taxpayer")]
     public bool? IepsTaxpayer { get; set; }
+
+    /// <summary>
+    /// Sus días de crédito: sus facturas vencen estos días después de su fecha (due_date, cobranza); null: los de su grupo o los de la empresa.
+    /// </summary>
+    [JsonPropertyName("credit_days")]
+    public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// Sus condiciones de pago («Crédito a 30 días»): las facturas nuevas en la app empiezan con ellas; null: las de la empresa. POST /v1/invoices no las pone solas: mándelas en payment_terms.
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
 }
 
 /// <summary>
