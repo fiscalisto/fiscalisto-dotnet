@@ -160,6 +160,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Listas de precios.</summary>
     public PricesResource Prices => _prices ??= new PricesResource(this);
 
+    private AttendanceResource? _attendance;
+
+    /// <summary>Asistencia.</summary>
+    public AttendanceResource Attendance => _attendance ??= new AttendanceResource(this);
+
     private ExpensePeopleResource? _expensePeople;
 
     /// <summary>Viáticos y gastos.</summary>
@@ -2562,6 +2567,58 @@ public sealed class PricesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PriceQuote> QuoteAsync(QuotePricesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PriceQuote>("POST", "/v1/prices", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Asistencia: <c>fiscalisto.Attendance</c>.
+/// </summary>
+public sealed class AttendanceResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal AttendanceResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver la asistencia de un periodo
+    /// </summary>
+    /// <remarks>
+    /// El registro de jornada del emisor (LFT art. 132) del periodo, por empleado: minutos trabajados contra su horario, faltas, retardos, días sin salida, marcas con notas y horas extra dobles y triples por semana. Con employee, también cada día y cada marca (con sus correcciones). Hasta 92 días a la vez.
+    /// <br/>
+    /// <c>GET /v1/attendance</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/get-attendance"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceReport> GetAsync(GetAttendanceParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceReport>("GET", "/v1/attendance", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Registrar una marca
+    /// </summary>
+    /// <remarks>
+    /// Una entrada o salida que viene de otro reloj checador. Queda con method api y su motivo, y el empleado la ve en su enlace. Una marca igual del mismo empleado dentro de 60 segundos no se duplica.
+    /// <br/>
+    /// <c>POST /v1/attendance/marks</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/create-attendance-mark"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceMark> CreateMarkAsync(CreateAttendanceMarkParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceMark>("POST", "/v1/attendance/marks", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar una marca
+    /// </summary>
+    /// <remarks>
+    /// La marca deja de contar y queda tachada con su motivo, quién y cuándo (nunca se borra). En la app se puede restaurar.
+    /// <br/>
+    /// <c>POST /v1/attendance/marks/{id}/void</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/void-attendance-mark"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceMark> VoidMarkAsync(string id, VoidAttendanceMarkParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceMark>("POST", $"/v1/attendance/marks/{Uri.EscapeDataString(id)}/void", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

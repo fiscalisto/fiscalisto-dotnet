@@ -542,6 +542,398 @@ public sealed partial class ApproveExpenseReportParams
 }
 
 /// <summary>
+/// Una marca de entrada o salida de Asistencia (registro electrónico de jornada, LFT art. 132).
+/// </summary>
+public sealed partial class AttendanceMark
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// in: entrada; out: salida.
+    /// <br/>
+    /// Valores: in, out.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo marcó (UTC).
+    /// </summary>
+    [JsonPropertyName("at")]
+    public string At { get; set; } = default!;
+
+    /// <summary>
+    /// El día al que cuenta, AAAA-MM-DD en la hora del lugar.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// La hora en el lugar, HH:MM.
+    /// </summary>
+    [JsonPropertyName("time")]
+    public string Time { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo marcó: kiosk_qr (el código del checador), kiosk_pin (número y NIP en el checador), printed_qr (el QR impreso), remote (fuera de la sucursal, con su ubicación), manual (corrección en la app), api.
+    /// <br/>
+    /// Valores: kiosk_qr, kiosk_pin, printed_qr, remote, manual, api.
+    /// </summary>
+    [JsonPropertyName("method")]
+    public string Method { get; set; } = default!;
+
+    /// <summary>
+    /// El lugar donde marcó, o null.
+    /// </summary>
+    [JsonPropertyName("place")]
+    public string? Place { get; set; }
+
+    /// <summary>
+    /// A cuántos metros del lugar estaba, si dio su ubicación; si no, null.
+    /// </summary>
+    [JsonPropertyName("distance_m")]
+    public decimal? DistanceM { get; set; }
+
+    /// <summary>
+    /// Notas para revisar (la marca nunca se rechaza por ellas): no_location (no dio su ubicación), far (lejos del lugar), imprecise (ubicación imprecisa), remote (fuera de la sucursal), new_device (un celular nuevo).
+    /// </summary>
+    [JsonPropertyName("flags")]
+    public List<string> Flags { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué se agregó, en una corrección o desde la API (el empleado lo ve); null si la hizo él.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// Quién la agregó, en una corrección; null si la hizo él.
+    /// </summary>
+    [JsonPropertyName("created_by")]
+    public string? CreatedBy { get; set; }
+
+    /// <summary>
+    /// true si se quitó: queda tachada, no cuenta, y se ve con su motivo.
+    /// </summary>
+    [JsonPropertyName("voided")]
+    public bool Voided { get; set; }
+
+    /// <summary>
+    /// Por qué se quitó, o null.
+    /// </summary>
+    [JsonPropertyName("void_reason")]
+    public string? VoidReason { get; set; }
+
+    /// <summary>
+    /// Quién la quitó, o null.
+    /// </summary>
+    [JsonPropertyName("voided_by")]
+    public string? VoidedBy { get; set; }
+
+    /// <summary>
+    /// Cuándo se quitó, o null.
+    /// </summary>
+    [JsonPropertyName("voided_at")]
+    public string? VoidedAt { get; set; }
+}
+
+/// <summary>
+/// La asistencia de un periodo, por empleado: horas contra su horario, faltas, retardos y horas extra dobles y triples por semana, como Nómina › Asistencia › Registro.
+/// </summary>
+public sealed partial class AttendanceReport
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…), el patrón.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Primer día del periodo, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string From { get; set; } = default!;
+
+    /// <summary>
+    /// Último día del periodo, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string To { get; set; } = default!;
+
+    /// <summary>
+    /// Cada empleado del emisor en el periodo.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<AttendanceReportEmployeesItem> Employees { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceReportEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceReportEmployeesItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de empleado, o null.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Donde marca, o null (cualquier lugar).
+    /// </summary>
+    [JsonPropertyName("place")]
+    public string? Place { get; set; }
+
+    /// <summary>
+    /// Minutos trabajados en el periodo.
+    /// </summary>
+    [JsonPropertyName("worked_minutes")]
+    public long WorkedMinutes { get; set; }
+
+    /// <summary>
+    /// Minutos de su horario en el periodo.
+    /// </summary>
+    [JsonPropertyName("scheduled_minutes")]
+    public long ScheduledMinutes { get; set; }
+
+    /// <summary>
+    /// Faltas: días de trabajo sin marcas ni nota.
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public long Absences { get; set; }
+
+    /// <summary>
+    /// Días con nota de incapacidad.
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long DisabilityDays { get; set; }
+
+    /// <summary>
+    /// Días con nota de vacaciones.
+    /// </summary>
+    [JsonPropertyName("vacation_days")]
+    public long VacationDays { get; set; }
+
+    /// <summary>
+    /// Cuántos días llegó tarde.
+    /// </summary>
+    [JsonPropertyName("late_count")]
+    public long LateCount { get; set; }
+
+    /// <summary>
+    /// Minutos de retardo en total.
+    /// </summary>
+    [JsonPropertyName("late_minutes")]
+    public long LateMinutes { get; set; }
+
+    /// <summary>
+    /// Días con una marca sin su pareja (sin salida).
+    /// </summary>
+    [JsonPropertyName("incomplete_days")]
+    public long IncompleteDays { get; set; }
+
+    /// <summary>
+    /// Marcas con una nota para revisar (flags).
+    /// </summary>
+    [JsonPropertyName("flagged_marks")]
+    public long FlaggedMarks { get; set; }
+
+    /// <summary>
+    /// Horas extra que se pagan dobles (hasta 9 por semana en 2026, 12 desde 2027).
+    /// </summary>
+    [JsonPropertyName("overtime_double_minutes")]
+    public long OvertimeDoubleMinutes { get; set; }
+
+    /// <summary>
+    /// Horas extra que se pagan triples (las que pasan del límite de la semana).
+    /// </summary>
+    [JsonPropertyName("overtime_triple_minutes")]
+    public long OvertimeTripleMinutes { get; set; }
+
+    /// <summary>
+    /// Días de descanso en que trabajó.
+    /// </summary>
+    [JsonPropertyName("rest_days_worked")]
+    public long RestDaysWorked { get; set; }
+
+    /// <summary>
+    /// Días festivos en que trabajó.
+    /// </summary>
+    [JsonPropertyName("holidays_worked")]
+    public long HolidaysWorked { get; set; }
+
+    /// <summary>
+    /// Semanas que el empleado confirmó en su enlace.
+    /// </summary>
+    [JsonPropertyName("weeks_confirmed")]
+    public long WeeksConfirmed { get; set; }
+
+    /// <summary>
+    /// Las semanas con las que el empleado no está de acuerdo.
+    /// </summary>
+    [JsonPropertyName("weeks_disputed")]
+    public List<AttendanceReportEmployeesItemWeeksDisputedItem> WeeksDisputed { get; set; } = default!;
+
+    /// <summary>
+    /// Cada día del periodo, solo cuando se pide un employee; si no, null.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public List<AttendanceReportEmployeesItemDaysItem>? Days { get; set; }
+
+    /// <summary>
+    /// Sus marcas, también las quitadas, solo cuando se pide un employee; si no, null.
+    /// </summary>
+    [JsonPropertyName("marks")]
+    public List<AttendanceMark>? Marks { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceReportEmployeesItemDaysItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceReportEmployeesItemDaysItem
+{
+    /// <summary>
+    /// AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// worked (trabajó), incomplete (falta una marca), absent (falta), rest (descanso), holiday (día festivo), excused (justificado con una nota), upcoming (por venir), before (antes de empezar su registro).
+    /// <br/>
+    /// Valores: worked, incomplete, absent, rest, holiday, excused, upcoming, before.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Su horario ese día, o null si descansa.
+    /// </summary>
+    [JsonPropertyName("scheduled")]
+    public AttendanceReportEmployeesItemDaysItemScheduled? Scheduled { get; set; }
+
+    /// <summary>
+    /// Minutos trabajados ese día.
+    /// </summary>
+    [JsonPropertyName("worked_minutes")]
+    public long WorkedMinutes { get; set; }
+
+    /// <summary>
+    /// Minutos de retardo, pasada la tolerancia.
+    /// </summary>
+    [JsonPropertyName("late_minutes")]
+    public long LateMinutes { get; set; }
+
+    /// <summary>
+    /// Minutos de más ese día (horas extra).
+    /// </summary>
+    [JsonPropertyName("overtime_minutes")]
+    public long OvertimeMinutes { get; set; }
+
+    /// <summary>
+    /// La nota del día que puso la empresa, o null.
+    /// <br/>
+    /// Valores: vacaciones, incapacidad, permiso_con_goce, permiso_sin_goce, descanso, festivo, falta.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// El nombre del día festivo, o null.
+    /// </summary>
+    [JsonPropertyName("holiday")]
+    public string? Holiday { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceReportEmployeesItemDaysItemScheduled&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceReportEmployeesItemDaysItemScheduled
+{
+    /// <summary>
+    /// Hora de entrada, HH:MM.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// Hora de salida, HH:MM (antes de la entrada: al día siguiente).
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+
+    /// <summary>
+    /// Minutos de comida que no se pagan.
+    /// </summary>
+    [JsonPropertyName("break_minutes")]
+    public long BreakMinutes { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceReportEmployeesItemWeeksDisputedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceReportEmployeesItemWeeksDisputedItem
+{
+    /// <summary>
+    /// El lunes de la semana, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("week")]
+    public string Week { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que el empleado dijo que no coincide.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = default!;
+}
+
+/// <summary>
 /// Timbres de producción de la cuenta, por paquete, el que vence antes primero.
 /// </summary>
 public sealed partial class Balance
@@ -2359,6 +2751,38 @@ public sealed partial class CreateAdvanceParamsCustomerForeign
     /// </summary>
     [JsonPropertyName("tax_id")]
     public required string TaxId { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Registrar una marca».
+/// </summary>
+public sealed partial class CreateAttendanceMarkParams
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// in: entrada; out: salida.
+    /// <br/>
+    /// Valores: in, out.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// Cuándo marcó, con su zona horaria (2027-01-04T09:02:00-06:00). No en el futuro ni de hace más de 400 días.
+    /// </summary>
+    [JsonPropertyName("at")]
+    public required string At { get; set; }
+
+    /// <summary>
+    /// Por qué se registra (se guarda y el empleado lo ve en su enlace). Por omisión «Registrada por la API».
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
 }
 
 /// <summary>
@@ -11543,6 +11967,36 @@ public sealed partial class FinancialStatementsIncomeStatementYearToDateSections
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver la asistencia de un periodo».
+/// </summary>
+public sealed partial class GetAttendanceParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Primer día, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public required string From { get; set; }
+
+    /// <summary>
+    /// Último día, AAAA-MM-DD (hasta 92 días después de from).
+    /// </summary>
+    [JsonPropertyName("to")]
+    public required string To { get; set; }
+
+    /// <summary>
+    /// Solo este empleado (emp_…), con sus días y marcas.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
 }
 
 /// <summary>
@@ -30764,6 +31218,18 @@ public sealed partial class VerifyCfdiParams
     /// </summary>
     [JsonPropertyName("total")]
     public decimal? Total { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Quitar una marca».
+/// </summary>
+public sealed partial class VoidAttendanceMarkParams
+{
+    /// <summary>
+    /// Por qué se quita: queda tachada con este motivo y el empleado lo ve.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public required string Reason { get; set; }
 }
 
 /// <summary>
