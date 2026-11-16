@@ -10255,6 +10255,12 @@ public sealed partial class ExpensePolicy
     /// </summary>
     [JsonPropertyName("notify_people")]
     public bool NotifyPeople { get; set; }
+
+    /// <summary>
+    /// Cómo se suben los tickets y recibos: image (foto), pdf o los dos. El XML de una factura siempre se acepta.
+    /// </summary>
+    [JsonPropertyName("receipt_formats")]
+    public List<string> ReceiptFormats { get; set; } = default!;
 }
 
 /// <summary>
@@ -28834,6 +28840,12 @@ public sealed partial class UpdateExpensePolicyParams
     /// </summary>
     [JsonPropertyName("notify_people")]
     public bool? NotifyPeople { get; set; }
+
+    /// <summary>
+    /// Cómo se suben los tickets y recibos: image (foto), pdf o los dos. Un archivo de otro tipo se rechaza con invalid_request_error. El XML de una factura siempre se acepta.
+    /// </summary>
+    [JsonPropertyName("receipt_formats")]
+    public List<string>? ReceiptFormats { get; set; }
 }
 
 /// <summary>
