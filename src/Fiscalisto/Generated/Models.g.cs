@@ -25594,6 +25594,12 @@ public sealed partial class SatDeclarationReceiptConceptsItem
     /// </summary>
     [JsonPropertyName("amount_to_pay")]
     public decimal? AmountToPay { get; set; }
+
+    /// <summary>
+    /// El saldo a favor que dice el acuse (la anual de personas físicas); null si no lo trae.
+    /// </summary>
+    [JsonPropertyName("in_favor")]
+    public decimal? InFavor { get; set; }
 }
 
 /// <summary>
@@ -25686,6 +25692,12 @@ public sealed partial class SatDeclarationSummaryObligationsItem
     /// </summary>
     [JsonPropertyName("amount_to_pay")]
     public decimal? AmountToPay { get; set; }
+
+    /// <summary>
+    /// El saldo a favor, de la declaración o del acuse; null si no hay o no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("in_favor")]
+    public decimal? InFavor { get; set; }
 
     /// <summary>
     /// Sus cifras con nombres fijos. ISR: income, invoiced_income, income_ytd, deductions, profit_coefficient, taxable_profit, losses_applied, tax_base, tax_caused, prior_payments, withheld. IVA: taxable_16, taxable_0, exempt, charged, paid_16, creditable, withheld, balance_applied. Salarios: workers, payments, exempt, withheld. Todas: surcharges, inflation, paid_before, due, in_favor, to_pay. null si no viene o no se pudo leer.
