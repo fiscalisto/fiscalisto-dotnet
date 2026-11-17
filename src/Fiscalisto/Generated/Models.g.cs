@@ -3251,6 +3251,12 @@ public sealed partial class CompanyReportYearsItem
     public decimal PayrollReceived { get; set; }
 
     /// <summary>
+    /// Lo que de verdad recibió de esos sueldos: el total de los recibos, después del ISR retenido y las deducciones.
+    /// </summary>
+    [JsonPropertyName("payroll_received_net")]
+    public decimal PayrollReceivedNet { get; set; }
+
+    /// <summary>
     /// Ingresos menos gastos y nómina.
     /// </summary>
     [JsonPropertyName("profit")]
