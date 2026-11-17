@@ -205,6 +205,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Cumplimiento SAT.</summary>
     public SatFindingCounterpartiesResource SatFindingCounterparties => _satFindingCounterparties ??= new SatFindingCounterpartiesResource(this);
 
+    private CompanyReportResource? _companyReport;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public CompanyReportResource CompanyReport => _companyReport ??= new CompanyReportResource(this);
+
     private MaterialitySuppliersResource? _materialitySuppliers;
 
     /// <summary>Cumplimiento SAT.</summary>
@@ -3253,6 +3258,30 @@ public sealed class SatFindingCounterpartiesResource
     /// </summary>
     public IAsyncEnumerable<SatFindingCounterparty> ListAutoPagingAsync(ListSatFindingCounterpartiesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<SatFindingCounterparty>("/v1/sat_finding_counterparties", @params, options, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.CompanyReport</c>.
+/// </summary>
+public sealed class CompanyReportResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CompanyReportResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver el reporte de la empresa
+    /// </summary>
+    /// <remarks>
+    /// Como Impuestos y SAT › Reporte de la empresa en la app: la salud fiscal del emisor en una calificación de 0 a 1,000 con la razón de cada factor, los indicadores de riesgo contra su umbral, los años lado a lado (ingresos, gastos, PUE y PPD, días de cobro y pago, margen), sus principales clientes y proveedores con su concentración (HHI), sus socios por los CFDI de retenciones por dividendos y los clientes y proveedores que publicaron su liquidación o fusión. Sale de lo que Fiscalisto ya tiene: no consulta al SAT y no usa timbres. Sin fechas, los últimos 12 meses.
+    /// <br/>
+    /// <c>GET /v1/company_report</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-company-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CompanyReport> GetAsync(GetCompanyReportParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CompanyReport>("GET", "/v1/company_report", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>

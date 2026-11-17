@@ -2608,6 +2608,656 @@ public sealed partial class CloseSalesOrderParams
 }
 
 /// <summary>
+/// El Reporte de la empresa de un emisor en un periodo: su salud fiscal, sus indicadores de riesgo, sus años, sus clientes y proveedores, sus socios y los avisos de sus contrapartes.
+/// </summary>
+public sealed partial class CompanyReport
+{
+    /// <summary>
+    /// Siempre company_report.
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su RFC.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su razón social, o null si Fiscalisto no la conoce.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// El primer día del periodo (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string DateGte { get; set; } = default!;
+
+    /// <summary>
+    /// El último día del periodo (AAAA-MM-DD), hoy a lo más.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string DateLte { get; set; } = default!;
+
+    /// <summary>
+    /// full: todo; executive: los indicadores principales y 5 clientes y proveedores.
+    /// <br/>
+    /// Valores: full, executive.
+    /// </summary>
+    [JsonPropertyName("version")]
+    public string Version { get; set; } = default!;
+
+    /// <summary>
+    /// La salud fiscal: una calificación de 0 a 1,000 que explica cada punto.
+    /// </summary>
+    [JsonPropertyName("fiscal_health")]
+    public CompanyReportFiscalHealth FiscalHealth { get; set; } = default!;
+
+    /// <summary>
+    /// Los indicadores de riesgo, cada uno contra su umbral.
+    /// </summary>
+    [JsonPropertyName("indicators")]
+    public List<CompanyReportIndicatorsItem> Indicators { get; set; } = default!;
+
+    /// <summary>
+    /// Los años lado a lado: este y al menos los dos anteriores.
+    /// </summary>
+    [JsonPropertyName("years")]
+    public List<CompanyReportYearsItem> Years { get; set; } = default!;
+
+    /// <summary>
+    /// Totales del periodo, en pesos.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public CompanyReportTotals Totals { get; set; } = default!;
+
+    /// <summary>
+    /// Sus clientes del periodo.
+    /// </summary>
+    [JsonPropertyName("customers")]
+    public CompanyReportCustomers Customers { get; set; } = default!;
+
+    /// <summary>
+    /// Sus proveedores del periodo.
+    /// </summary>
+    [JsonPropertyName("suppliers")]
+    public CompanyReportSuppliers Suppliers { get; set; } = default!;
+
+    /// <summary>
+    /// De los CFDI de retenciones por dividendos (clave 14), hasta 20 de cada lado; null en executive.
+    /// </summary>
+    [JsonPropertyName("shareholders")]
+    public CompanyReportShareholders? Shareholders { get; set; }
+
+    /// <summary>
+    /// Clientes y proveedores que publicaron en los últimos 13 meses su liquidación, fusión, escisión, transformación o reducción de capital en las Publicaciones de Sociedades Mercantiles de la Secretaría de Economía; null en executive.
+    /// </summary>
+    [JsonPropertyName("counterparty_notices")]
+    public List<CompanyReportCounterpartyNoticesItem>? CounterpartyNotices { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportCounterpartyNoticesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportCounterpartyNoticesItem
+{
+    /// <summary>
+    /// El RFC del cliente o proveedor.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en sus facturas.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// customer (cliente) o supplier (proveedor).
+    /// <br/>
+    /// Valores: customer, supplier.
+    /// </summary>
+    [JsonPropertyName("side")]
+    public string Side { get; set; } = default!;
+
+    /// <summary>
+    /// Qué publicó («Aviso de liquidación», «Fusión»…).
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Su grupo de publicaciones.
+    /// </summary>
+    [JsonPropertyName("group")]
+    public string? Group { get; set; }
+
+    /// <summary>
+    /// El día que se publicó (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de publicación.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su PDF, cuando ya se conoce.
+    /// </summary>
+    [JsonPropertyName("pdf_url")]
+    public string? PdfUrl { get; set; }
+}
+
+/// <summary>
+/// Sus clientes del periodo.
+/// </summary>
+public sealed partial class CompanyReportCustomers
+{
+    /// <summary>
+    /// Cuántos hay en el periodo.
+    /// </summary>
+    [JsonPropertyName("count")]
+    public long Count { get; set; }
+
+    /// <summary>
+    /// Su concentración (índice Herfindahl-Hirschman, 0 a 10,000; más de 1,500 es concentrado).
+    /// </summary>
+    [JsonPropertyName("hhi")]
+    public decimal? Hhi { get; set; }
+
+    /// <summary>
+    /// Por ciento del total que suman los 10 principales.
+    /// </summary>
+    [JsonPropertyName("top10_share")]
+    public decimal? Top10Share { get; set; }
+
+    /// <summary>
+    /// Los principales, de mayor a menor: 15, o 5 en executive.
+    /// </summary>
+    [JsonPropertyName("parties")]
+    public List<CompanyReportCustomersPartiesItem> Parties { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportCustomersPartiesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportCustomersPartiesItem
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Lo facturado en el periodo, sin impuestos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Por ciento del total.
+    /// </summary>
+    [JsonPropertyName("share")]
+    public decimal Share { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas del periodo.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// Lo pendiente de cobrar o pagar.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+}
+
+/// <summary>
+/// La salud fiscal: una calificación de 0 a 1,000 que explica cada punto.
+/// </summary>
+public sealed partial class CompanyReportFiscalHealth
+{
+    /// <summary>
+    /// De 0 a 1,000; null si ningún factor tuvo datos.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public long? Score { get; set; }
+
+    /// <summary>
+    /// attention (menos de 250), fair (250 a 499), good (500 a 749) o excellent (750 o más).
+    /// <br/>
+    /// Valores: attention, fair, good, excellent.
+    /// </summary>
+    [JsonPropertyName("band")]
+    public string? Band { get; set; }
+
+    /// <summary>
+    /// Factores con datos.
+    /// </summary>
+    [JsonPropertyName("factors_used")]
+    public long FactorsUsed { get; set; }
+
+    /// <summary>
+    /// Todos los factores.
+    /// </summary>
+    [JsonPropertyName("factors_total")]
+    public long FactorsTotal { get; set; }
+
+    /// <summary>
+    /// Cada factor, con su razón.
+    /// </summary>
+    [JsonPropertyName("factors")]
+    public List<CompanyReportFiscalHealthFactorsItem> Factors { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportFiscalHealthFactorsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportFiscalHealthFactorsItem
+{
+    /// <summary>
+    /// cumplimiento, listas, declaraciones, contrapartes, cancelaciones, concentracion, cobranza, buzon o crecimiento.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre, como en la app.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Los puntos que puede dar.
+    /// </summary>
+    [JsonPropertyName("max_points")]
+    public long MaxPoints { get; set; }
+
+    /// <summary>
+    /// Los que dio; null sin datos (no cuenta en la calificación).
+    /// </summary>
+    [JsonPropertyName("points")]
+    public decimal? Points { get; set; }
+
+    /// <summary>
+    /// Por qué dio esos puntos.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// Qué daría los que faltan, o null si dio todos.
+    /// </summary>
+    [JsonPropertyName("to_improve")]
+    public string? ToImprove { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportIndicatorsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportIndicatorsItem
+{
+    /// <summary>
+    /// El indicador (el de PATCH del umbral en la app).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre, como en la app.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// ok, risk (pasa el umbral) o no_data.
+    /// <br/>
+    /// Valores: ok, risk, no_data.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string State { get; set; } = default!;
+
+    /// <summary>
+    /// La cifra: por ciento 0 a 100, HHI, cuántos, pesos o días; null sin datos.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// La cifra en palabras («HHI 1,954», «3 %»).
+    /// </summary>
+    [JsonPropertyName("display")]
+    public string Display { get; set; } = default!;
+
+    /// <summary>
+    /// Desde dónde se marca en riesgo.
+    /// </summary>
+    [JsonPropertyName("threshold")]
+    public decimal? Threshold { get; set; }
+
+    /// <summary>
+    /// El umbral es el que puso la empresa, no el de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("custom_threshold")]
+    public bool CustomThreshold { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportShareholders&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportShareholders
+{
+    /// <summary>
+    /// A quién pagó dividendos: sus socios.
+    /// </summary>
+    [JsonPropertyName("paid_to")]
+    public List<CompanyReportShareholdersPaidToItem> PaidTo { get; set; } = default!;
+
+    /// <summary>
+    /// Quién le pagó dividendos: dónde tiene acciones.
+    /// </summary>
+    [JsonPropertyName("received_from")]
+    public List<CompanyReportShareholdersReceivedFromItem> ReceivedFrom { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportShareholdersPaidToItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportShareholdersPaidToItem
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Los dividendos de sus CFDI de retenciones, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// El día del más reciente.
+    /// </summary>
+    [JsonPropertyName("last_date")]
+    public string LastDate { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos CFDI de retenciones.
+    /// </summary>
+    [JsonPropertyName("retentions")]
+    public long Retentions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportShareholdersReceivedFromItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportShareholdersReceivedFromItem
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Los dividendos de sus CFDI de retenciones, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// El día del más reciente.
+    /// </summary>
+    [JsonPropertyName("last_date")]
+    public string LastDate { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos CFDI de retenciones.
+    /// </summary>
+    [JsonPropertyName("retentions")]
+    public long Retentions { get; set; }
+}
+
+/// <summary>
+/// Sus proveedores del periodo.
+/// </summary>
+public sealed partial class CompanyReportSuppliers
+{
+    /// <summary>
+    /// Cuántos hay en el periodo.
+    /// </summary>
+    [JsonPropertyName("count")]
+    public long Count { get; set; }
+
+    /// <summary>
+    /// Su concentración (índice Herfindahl-Hirschman, 0 a 10,000; más de 1,500 es concentrado).
+    /// </summary>
+    [JsonPropertyName("hhi")]
+    public decimal? Hhi { get; set; }
+
+    /// <summary>
+    /// Por ciento del total que suman los 10 principales.
+    /// </summary>
+    [JsonPropertyName("top10_share")]
+    public decimal? Top10Share { get; set; }
+
+    /// <summary>
+    /// Los principales, de mayor a menor: 15, o 5 en executive.
+    /// </summary>
+    [JsonPropertyName("parties")]
+    public List<CompanyReportSuppliersPartiesItem> Parties { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportSuppliersPartiesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportSuppliersPartiesItem
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Lo facturado en el periodo, sin impuestos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Por ciento del total.
+    /// </summary>
+    [JsonPropertyName("share")]
+    public decimal Share { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas del periodo.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// Lo pendiente de cobrar o pagar.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+}
+
+/// <summary>
+/// Totales del periodo, en pesos.
+/// </summary>
+public sealed partial class CompanyReportTotals
+{
+    /// <summary>
+    /// Ingresos del periodo, netos de notas de crédito.
+    /// </summary>
+    [JsonPropertyName("income")]
+    public decimal Income { get; set; }
+
+    /// <summary>
+    /// Gastos del periodo, netos de notas de crédito.
+    /// </summary>
+    [JsonPropertyName("expenses")]
+    public decimal Expenses { get; set; }
+
+    /// <summary>
+    /// Lo que le deben sus clientes del periodo.
+    /// </summary>
+    [JsonPropertyName("receivable")]
+    public decimal Receivable { get; set; }
+
+    /// <summary>
+    /// Lo que debe a sus proveedores del periodo.
+    /// </summary>
+    [JsonPropertyName("payable")]
+    public decimal Payable { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CompanyReportYearsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompanyReportYearsItem
+{
+    /// <summary>
+    /// Año (Ejercicio).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// El año en curso, hasta hoy.
+    /// </summary>
+    [JsonPropertyName("partial")]
+    public bool Partial { get; set; }
+
+    /// <summary>
+    /// Ingresos facturados sin impuestos, no cancelados.
+    /// </summary>
+    [JsonPropertyName("income")]
+    public decimal Income { get; set; }
+
+    /// <summary>
+    /// Ingresos facturados y cancelados.
+    /// </summary>
+    [JsonPropertyName("income_cancelled")]
+    public decimal IncomeCancelled { get; set; }
+
+    /// <summary>
+    /// Por ciento de ingresos en PUE.
+    /// </summary>
+    [JsonPropertyName("cash_share")]
+    public decimal? CashShare { get; set; }
+
+    /// <summary>
+    /// Por ciento de ingresos en PPD.
+    /// </summary>
+    [JsonPropertyName("credit_share")]
+    public decimal? CreditShare { get; set; }
+
+    /// <summary>
+    /// Por ciento de lo PPD ya cobrado (con complemento).
+    /// </summary>
+    [JsonPropertyName("collected_share")]
+    public decimal? CollectedShare { get; set; }
+
+    /// <summary>
+    /// Días promedio (ponderados) de la factura al cobro.
+    /// </summary>
+    [JsonPropertyName("days_to_collect")]
+    public decimal? DaysToCollect { get; set; }
+
+    /// <summary>
+    /// Gastos recibidos sin impuestos, no cancelados.
+    /// </summary>
+    [JsonPropertyName("expenses")]
+    public decimal Expenses { get; set; }
+
+    /// <summary>
+    /// Gastos recibidos y cancelados.
+    /// </summary>
+    [JsonPropertyName("expenses_cancelled")]
+    public decimal ExpensesCancelled { get; set; }
+
+    /// <summary>
+    /// Por ciento de lo PPD ya pagado.
+    /// </summary>
+    [JsonPropertyName("paid_share")]
+    public decimal? PaidShare { get; set; }
+
+    /// <summary>
+    /// Días promedio de la factura al pago.
+    /// </summary>
+    [JsonPropertyName("days_to_pay")]
+    public decimal? DaysToPay { get; set; }
+
+    /// <summary>
+    /// Nómina que timbró.
+    /// </summary>
+    [JsonPropertyName("payroll_paid")]
+    public decimal PayrollPaid { get; set; }
+
+    /// <summary>
+    /// Ingresos menos gastos y nómina.
+    /// </summary>
+    [JsonPropertyName("profit")]
+    public decimal Profit { get; set; }
+
+    /// <summary>
+    /// Lo que queda, por ciento de ingresos.
+    /// </summary>
+    [JsonPropertyName("margin")]
+    public decimal? Margin { get; set; }
+}
+
+/// <summary>
 /// La opinión de cumplimiento de obligaciones fiscales (32-D) más reciente del emisor, como la dio el SAT.
 /// </summary>
 public sealed partial class ComplianceOpinion
@@ -12263,6 +12913,38 @@ public sealed partial class GetCashForecastParams
     /// </summary>
     [JsonPropertyName("recurring_sales_change")]
     public long? RecurringSalesChange { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver el reporte de la empresa».
+/// </summary>
+public sealed partial class GetCompanyReportParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// Hasta este día (AAAA-MM-DD, completo; hoy a lo más).
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// full (por omisión) o executive: solo la calificación, los indicadores principales, los años y 5 clientes y proveedores.
+    /// <br/>
+    /// Valores: full, executive.
+    /// </summary>
+    [JsonPropertyName("version")]
+    public string? Version { get; set; }
 }
 
 /// <summary>
