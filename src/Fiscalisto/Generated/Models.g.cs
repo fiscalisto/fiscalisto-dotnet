@@ -13232,6 +13232,24 @@ public sealed partial class GetRetentionXmlParams
 }
 
 /// <summary>
+/// Los campos de «Ver la precarga de la anual de una persona física».
+/// </summary>
+public sealed partial class GetSatAnnualPreloadParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El ejercicio, como 2025. Por omisión, el anterior (el que se declara).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Consultar un catálogo del SAT».
 /// </summary>
 public sealed partial class GetSatCatalogParams
@@ -25086,6 +25104,354 @@ public sealed partial class SandboxList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que el SAT precargará en la declaración anual de una persona física: sus sueldos y retenciones, y sus deducciones personales.
+/// </summary>
+public sealed partial class SatAnnualPreload
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio de la anual.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que dice el visor de nómina del SAT: lo que le pagaron sus patrones y el ISR que le retuvieron, según sus recibos de nómina. null si aún no se lee.
+    /// </summary>
+    [JsonPropertyName("payroll")]
+    public SatAnnualPreloadPayroll? Payroll { get; set; }
+
+    /// <summary>
+    /// Lo que dice el visor de deducciones personales del SAT. null si aún no se lee.
+    /// </summary>
+    [JsonPropertyName("personal_deductions")]
+    public SatAnnualPreloadPersonalDeductions? PersonalDeductions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPayroll&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPayroll
+{
+    /// <summary>
+    /// Hasta qué día tiene procesados el SAT los recibos (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("updated_on")]
+    public string? UpdatedOn { get; set; }
+
+    /// <summary>
+    /// Cuándo se leyó del SAT.
+    /// </summary>
+    [JsonPropertyName("read_at")]
+    public string ReadAt { get; set; } = default!;
+
+    /// <summary>
+    /// Los totales del ejercicio de todos sus patrones.
+    /// </summary>
+    [JsonPropertyName("concepts")]
+    public List<SatAnnualPreloadPayrollConceptsItem> Concepts { get; set; } = default!;
+
+    /// <summary>
+    /// Cada patrón (retenedor) con sus totales.
+    /// </summary>
+    [JsonPropertyName("employers")]
+    public List<SatAnnualPreloadPayrollEmployersItem> Employers { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPayrollConceptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPayrollConceptsItem
+{
+    /// <summary>
+    /// La clave del SAT: PIRA1 ingresos por asimilados, PISR1 ISR retenido, y las de sueldos y salarios.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// El grupo en que el SAT la muestra.
+    /// </summary>
+    [JsonPropertyName("group")]
+    public string Group { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el SAT.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// El monto del ejercicio, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPayrollEmployersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPayrollEmployersItem
+{
+    /// <summary>
+    /// El RFC del patrón.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre o razón social.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Sus totales del ejercicio por clave.
+    /// </summary>
+    [JsonPropertyName("concepts")]
+    public List<SatAnnualPreloadPayrollEmployersItemConceptsItem> Concepts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPayrollEmployersItemConceptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPayrollEmployersItemConceptsItem
+{
+    /// <summary>
+    /// La clave del SAT, como en concepts.
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el SAT.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// El monto del ejercicio de ese patrón, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPersonalDeductions&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPersonalDeductions
+{
+    /// <summary>
+    /// Cuándo actualizó el SAT el visor.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se leyó del SAT.
+    /// </summary>
+    [JsonPropertyName("read_at")]
+    public string ReadAt { get; set; } = default!;
+
+    /// <summary>
+    /// Las deducciones personales que el SAT precarga.
+    /// </summary>
+    [JsonPropertyName("total_taken")]
+    public decimal TotalTaken { get; set; }
+
+    /// <summary>
+    /// Lo que podría deducirse y el SAT no toma (gastos factibles de ser deducción personal).
+    /// </summary>
+    [JsonPropertyName("total_possible")]
+    public decimal TotalPossible { get; set; }
+
+    /// <summary>
+    /// Lo que toma, por tipo de deducción.
+    /// </summary>
+    [JsonPropertyName("taken")]
+    public List<SatAnnualPreloadPersonalDeductionsTakenItem> Taken { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que no toma, por el tipo de deducción que parece.
+    /// </summary>
+    [JsonPropertyName("possible")]
+    public List<SatAnnualPreloadPersonalDeductionsPossibleItem> Possible { get; set; } = default!;
+
+    /// <summary>
+    /// Cada CFDI que el visor considera.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public List<SatAnnualPreloadPersonalDeductionsInvoicesItem> Invoices { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPersonalDeductionsInvoicesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPersonalDeductionsInvoicesItem
+{
+    /// <summary>
+    /// El folio fiscal.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC de quien lo emitió.
+    /// </summary>
+    [JsonPropertyName("issuer_tax_id")]
+    public string IssuerTaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("issuer_name")]
+    public string IssuerName { get; set; } = default!;
+
+    /// <summary>
+    /// Su fecha de emisión (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// Su total, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// La forma de pago, como la da el SAT.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// El método de pago, como lo da el SAT.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// La clave de producto o servicio.
+    /// </summary>
+    [JsonPropertyName("product_code")]
+    public string? ProductCode { get; set; }
+
+    /// <summary>
+    /// Sus conceptos.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// El tipo de deducción en que lo puso el SAT (A a J), o L si no lo clasificó y podría deducirse.
+    /// </summary>
+    [JsonPropertyName("deduction_code")]
+    public string? DeductionCode { get; set; }
+
+    /// <summary>
+    /// Ese tipo, como lo nombra el SAT.
+    /// </summary>
+    [JsonPropertyName("deduction_type")]
+    public string? DeductionType { get; set; }
+
+    /// <summary>
+    /// Si no lo tomó (L), el tipo que parece; null si lo tomó.
+    /// </summary>
+    [JsonPropertyName("possible_code")]
+    public string? PossibleCode { get; set; }
+
+    /// <summary>
+    /// Por qué no lo toma, o lo que el SAT observa al tomarlo, en sus palabras.
+    /// </summary>
+    [JsonPropertyName("reasons")]
+    public List<string> Reasons { get; set; } = default!;
+
+    /// <summary>
+    /// Si es una aportación o depósito para el retiro que reportó su banco (sin CFDI), cuál; null si es un CFDI.
+    /// </summary>
+    [JsonPropertyName("retirement_deposit")]
+    public string? RetirementDeposit { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPersonalDeductionsPossibleItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPersonalDeductionsPossibleItem
+{
+    /// <summary>
+    /// La clave del tipo de deducción del SAT (A a J).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el SAT.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos CFDI.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// La suma, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatAnnualPreloadPersonalDeductionsTakenItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatAnnualPreloadPersonalDeductionsTakenItem
+{
+    /// <summary>
+    /// La clave del tipo de deducción del SAT (A a J).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el SAT.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos CFDI.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// La suma, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
 }
 
 /// <summary>

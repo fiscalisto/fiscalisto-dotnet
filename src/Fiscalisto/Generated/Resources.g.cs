@@ -4248,6 +4248,20 @@ public sealed class SatDeclarationsResource
         => _client.RequestAsync<SatDeclarationCalendar>("GET", "/v1/sat_declarations/calendar", null, @params, options, false, cancellationToken);
 
     /// <summary>
+    /// Ver la precarga de la anual de una persona física
+    /// </summary>
+    /// <remarks>
+    /// Lo que el SAT precargará en la declaración anual de un emisor persona física, de sus visores: los sueldos o asimilados y el ISR que le retuvieron, por patrón, y las deducciones personales que toma de sus facturas, con las que podrían deducirse y no toma, y por qué. Se lee con la e.firma en cada consulta (POST /v1/sat_declarations/refresh), del ejercicio anterior y del actual; no usa timbres. Un emisor persona moral recibe parameter_invalid.
+    /// <br/>
+    /// <c>GET /v1/sat_declarations/annual_preload</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-annual-preload"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatAnnualPreload> AnnualPreloadAsync(GetSatAnnualPreloadParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatAnnualPreload>("GET", "/v1/sat_declarations/annual_preload", null, @params, options, false, cancellationToken);
+
+    /// <summary>
     /// Ver una declaración del SAT
     /// </summary>
     /// <remarks>
