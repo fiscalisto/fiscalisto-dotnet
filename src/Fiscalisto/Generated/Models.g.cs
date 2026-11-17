@@ -3239,10 +3239,16 @@ public sealed partial class CompanyReportYearsItem
     public decimal? DaysToPay { get; set; }
 
     /// <summary>
-    /// Nómina que timbró.
+    /// Nómina que timbró: lo que percibieron sus trabajadores, antes de deducciones.
     /// </summary>
     [JsonPropertyName("payroll_paid")]
     public decimal PayrollPaid { get; set; }
+
+    /// <summary>
+    /// Sueldos que recibió de sus patrones (recibos de nómina a su RFC), antes de deducciones: lo que gana una persona física asalariada.
+    /// </summary>
+    [JsonPropertyName("payroll_received")]
+    public decimal PayrollReceived { get; set; }
 
     /// <summary>
     /// Ingresos menos gastos y nómina.
