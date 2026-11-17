@@ -2779,13 +2779,13 @@ public sealed partial class CompanyReportCustomers
     public long Count { get; set; }
 
     /// <summary>
-    /// Su concentración (índice Herfindahl-Hirschman, 0 a 10,000; más de 1,500 es concentrado).
+    /// Su concentración (índice Herfindahl-Hirschman, 0 a 10,000; más de 1,500 es concentrado), sin el público en general.
     /// </summary>
     [JsonPropertyName("hhi")]
     public decimal? Hhi { get; set; }
 
     /// <summary>
-    /// Por ciento del total que suman los 10 principales.
+    /// Por ciento del total que suman los 10 principales, sin el público en general.
     /// </summary>
     [JsonPropertyName("top10_share")]
     public decimal? Top10Share { get; set; }
@@ -2803,7 +2803,7 @@ public sealed partial class CompanyReportCustomers
 public sealed partial class CompanyReportCustomersPartiesItem
 {
     /// <summary>
-    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// Su RFC. XAXX010101000 y XEXX010101000 son una sola fila cada uno («Público en general», «Residentes en el extranjero») con todas las personas que facturaron con ese RFC.
     /// </summary>
     [JsonPropertyName("tax_id")]
     public string TaxId { get; set; } = default!;
@@ -3071,13 +3071,13 @@ public sealed partial class CompanyReportSuppliers
     public long Count { get; set; }
 
     /// <summary>
-    /// Su concentración (índice Herfindahl-Hirschman, 0 a 10,000; más de 1,500 es concentrado).
+    /// Su concentración (índice Herfindahl-Hirschman, 0 a 10,000; más de 1,500 es concentrado), sin el público en general.
     /// </summary>
     [JsonPropertyName("hhi")]
     public decimal? Hhi { get; set; }
 
     /// <summary>
-    /// Por ciento del total que suman los 10 principales.
+    /// Por ciento del total que suman los 10 principales, sin el público en general.
     /// </summary>
     [JsonPropertyName("top10_share")]
     public decimal? Top10Share { get; set; }
@@ -3095,7 +3095,7 @@ public sealed partial class CompanyReportSuppliers
 public sealed partial class CompanyReportSuppliersPartiesItem
 {
     /// <summary>
-    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// Su RFC. XAXX010101000 y XEXX010101000 son una sola fila cada uno («Público en general», «Residentes en el extranjero») con todas las personas que facturaron con ese RFC.
     /// </summary>
     [JsonPropertyName("tax_id")]
     public string TaxId { get; set; } = default!;
@@ -25254,7 +25254,13 @@ public sealed partial class SatDeclaration
     public SatDeclarationSummary Summary { get; set; } = default!;
 
     /// <summary>
-    /// Qué archivos ya tiene: pdf (GET …/pdf), receipt (GET …/receipt) y financial_statements (GET …/financial_statements, solo en la anual de persona moral).
+    /// Su pago en el banco, de «Declaraciones pagadas» del SAT (solo las mensuales; null en las demás). status: paid (el SAT tiene el pago), unpaid (tiene algo a pagar y el SAT no lo tenía pagado en checked_at), overdue (igual, con la línea de captura vencida), nothing_to_pay o unchecked (aún no se revisa). paid_on, amount_paid y bank del pago más reciente, y cada pago en payments con su banco, día, línea de captura, medio (channel), importe, número de operación del banco y llave de pago.
+    /// </summary>
+    [JsonPropertyName("payment")]
+    public SatDeclarationPayment? Payment { get; set; }
+
+    /// <summary>
+    /// Qué archivos ya tiene: pdf (GET …/pdf), receipt (GET …/receipt), payment_record (GET …/payment_record, cuando el SAT la tiene como pagada) y financial_statements (GET …/financial_statements, solo en la anual de persona moral).
     /// </summary>
     [JsonPropertyName("files")]
     public SatDeclarationFiles Files { get; set; } = default!;
@@ -25373,7 +25379,7 @@ public sealed partial class SatDeclarationCalendarMonthsItemObligationsItem
 }
 
 /// <summary>
-/// Qué archivos ya tiene: pdf (GET …/pdf), receipt (GET …/receipt) y financial_statements (GET …/financial_statements, solo en la anual de persona moral).
+/// Qué archivos ya tiene: pdf (GET …/pdf), receipt (GET …/receipt), payment_record (GET …/payment_record, cuando el SAT la tiene como pagada) y financial_statements (GET …/financial_statements, solo en la anual de persona moral).
 /// </summary>
 public sealed partial class SatDeclarationFiles
 {
@@ -25388,6 +25394,12 @@ public sealed partial class SatDeclarationFiles
     /// </summary>
     [JsonPropertyName("receipt")]
     public bool Receipt { get; set; }
+
+    /// <summary>
+    /// Si ya tiene el registro del pago (GET …/payment_record).
+    /// </summary>
+    [JsonPropertyName("payment_record")]
+    public bool PaymentRecord { get; set; }
 
     /// <summary>
     /// Si ya tiene el Excel de estados financieros (GET …/financial_statements), solo en la anual de persona moral.
@@ -25424,6 +25436,98 @@ public sealed partial class SatDeclarationList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationPayment&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationPayment
+{
+    /// <summary>
+    /// paid, unpaid (algo a pagar que el SAT no tenía pagado), overdue (igual, línea de captura vencida), nothing_to_pay o unchecked.
+    /// <br/>
+    /// Valores: paid, unpaid, overdue, nothing_to_pay, unchecked.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El día del pago más reciente (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("paid_on")]
+    public string? PaidOn { get; set; }
+
+    /// <summary>
+    /// Lo pagado, en pesos (la suma de los pagos).
+    /// </summary>
+    [JsonPropertyName("amount_paid")]
+    public decimal? AmountPaid { get; set; }
+
+    /// <summary>
+    /// El banco del pago más reciente.
+    /// </summary>
+    [JsonPropertyName("bank")]
+    public string? Bank { get; set; }
+
+    /// <summary>
+    /// Cuándo se buscó por última vez en «Declaraciones pagadas».
+    /// </summary>
+    [JsonPropertyName("checked_at")]
+    public string? CheckedAt { get; set; }
+
+    /// <summary>
+    /// Cada pago como el SAT lo registró del banco.
+    /// </summary>
+    [JsonPropertyName("payments")]
+    public List<SatDeclarationPaymentPaymentsItem> Payments { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatDeclarationPaymentPaymentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatDeclarationPaymentPaymentsItem
+{
+    /// <summary>
+    /// La institución de crédito.
+    /// </summary>
+    [JsonPropertyName("bank")]
+    public string? Bank { get; set; }
+
+    /// <summary>
+    /// El día del pago (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// La línea de captura pagada.
+    /// </summary>
+    [JsonPropertyName("payment_line")]
+    public string? PaymentLine { get; set; }
+
+    /// <summary>
+    /// Cómo se pagó, como lo dice el SAT («Ventanilla», «Internet»).
+    /// </summary>
+    [JsonPropertyName("channel")]
+    public string? Channel { get; set; }
+
+    /// <summary>
+    /// El importe pagado.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// El número de operación del banco.
+    /// </summary>
+    [JsonPropertyName("bank_operation_number")]
+    public string? BankOperationNumber { get; set; }
+
+    /// <summary>
+    /// La llave de pago.
+    /// </summary>
+    [JsonPropertyName("payment_key")]
+    public string? PaymentKey { get; set; }
 }
 
 /// <summary>

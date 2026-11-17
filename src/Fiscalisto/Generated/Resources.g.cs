@@ -4290,6 +4290,20 @@ public sealed class SatDeclarationsResource
         => _client.RequestBytesAsync("GET", $"/v1/sat_declarations/{Uri.EscapeDataString(id)}/receipt", null, null, options, false, cancellationToken);
 
     /// <summary>
+    /// Descargar el registro del pago de una declaración
+    /// </summary>
+    /// <remarks>
+    /// La «Información registrada de pagos de contribuciones federales» de una declaración mensual pagada, como la da el SAT: el banco, el día, el importe, el número de operación del banco y la llave de pago. Existe cuando payment.status es paid. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_declarations/{id}/payment_record</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-declaration-payment-record"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PaymentRecordAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/sat_declarations/{Uri.EscapeDataString(id)}/payment_record", null, null, options, false, cancellationToken);
+
+    /// <summary>
     /// Descargar los estados financieros de una anual
     /// </summary>
     /// <remarks>
