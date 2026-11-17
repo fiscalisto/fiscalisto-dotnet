@@ -1115,6 +1115,12 @@ public sealed partial class Balance
     public bool UsePlanTimbres { get; set; }
 
     /// <summary>
+    /// Los timbres del mes del plan de su empresa, que los RFC de la empresa (type own) usan antes que `available`; no se suman a `available`. null si la empresa no tiene un plan de paga con timbres al mes (Gratis o una prueba sin pagar) o en modo de prueba.
+    /// </summary>
+    [JsonPropertyName("plan_timbres")]
+    public BalancePlanTimbres? PlanTimbres { get; set; }
+
+    /// <summary>
     /// Los paquetes con timbres, el que vence antes primero (en ese orden se usan).
     /// </summary>
     [JsonPropertyName("packs")]
@@ -1181,6 +1187,36 @@ public sealed partial class BalancePacksItem
     /// </summary>
     [JsonPropertyName("expires_at")]
     public string? ExpiresAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;BalancePlanTimbres&lt;/c&gt;.
+/// </summary>
+public sealed partial class BalancePlanTimbres
+{
+    /// <summary>
+    /// El plan de la empresa (despacho, negocio…).
+    /// </summary>
+    [JsonPropertyName("plan")]
+    public string Plan { get; set; } = default!;
+
+    /// <summary>
+    /// Los que le quedan este mes.
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public long Remaining { get; set; }
+
+    /// <summary>
+    /// Los que trae el plan cada mes.
+    /// </summary>
+    [JsonPropertyName("included")]
+    public long Included { get; set; }
+
+    /// <summary>
+    /// El día en que vuelven a estar completos (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("resets_on")]
+    public string ResetsOn { get; set; } = default!;
 }
 
 /// <summary>
