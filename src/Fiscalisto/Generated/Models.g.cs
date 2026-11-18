@@ -8469,9 +8469,9 @@ public sealed partial class CreateStoreConnectionParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// shopify, woocommerce, mercadolibre, tiendanube o amazon.
+    /// shopify, woocommerce, mercadolibre, tiendanube, amazon, mercadopago, conekta u openpay.
     /// <br/>
-    /// Valores: shopify, mercadolibre, amazon, tiendanube, woocommerce.
+    /// Valores: shopify, mercadolibre, amazon, tiendanube, woocommerce, mercadopago, conekta, openpay.
     /// </summary>
     [JsonPropertyName("platform")]
     public required string Platform { get; set; }
@@ -8495,10 +8495,28 @@ public sealed partial class CreateStoreConnectionParams
     public string? ClientSecret { get; set; }
 
     /// <summary>
-    /// Shopify, solo apps personalizadas antiguas: su token de la Admin API (shpat_…); client_secret es entonces su API secret key.
+    /// Mercado Pago: el Access Token de producción (APP_USR-…), en Tus integraciones › su aplicación › Credenciales de producción. Shopify, solo apps personalizadas antiguas: su token de la Admin API (shpat_…); client_secret es entonces su API secret key. Se guarda cifrado y nunca se muestra.
     /// </summary>
     [JsonPropertyName("access_token")]
     public string? AccessToken { get; set; }
+
+    /// <summary>
+    /// Conekta: la llave privada (key_…). Openpay: la llave privada (sk_…). Se guarda cifrada y nunca se muestra.
+    /// </summary>
+    [JsonPropertyName("private_key")]
+    public string? PrivateKey { get; set; }
+
+    /// <summary>
+    /// Openpay: el ID de comercio (m…).
+    /// </summary>
+    [JsonPropertyName("merchant_id")]
+    public string? MerchantId { get; set; }
+
+    /// <summary>
+    /// Openpay: true para conectar su comercio de pruebas (sandbox).
+    /// </summary>
+    [JsonPropertyName("sandbox")]
+    public bool? Sandbox { get; set; }
 
     /// <summary>
     /// WooCommerce: la dirección de la tienda (https://mitienda.com).
@@ -8575,7 +8593,7 @@ public sealed partial class CreateStoreConnectionParamsSettings
     public string? PaymentForm { get; set; }
 
     /// <summary>
-    /// c_FormaPago por pasarela de Shopify (shopify_payments, paypal, manual…) o tipo de pago de Mercado Libre (credit_card, debit_card, account_money, ticket, bank_transfer).
+    /// c_FormaPago por pasarela de Shopify (shopify_payments, paypal, manual…) o tipo de pago de Mercado Libre y Mercado Pago (credit_card, debit_card, account_money, ticket, bank_transfer), o de Conekta y Openpay (credit_card, debit_card, cash, spei).
     /// </summary>
     [JsonPropertyName("payment_forms")]
     public Dictionary<string, string>? PaymentForms { get; set; }
@@ -8587,7 +8605,7 @@ public sealed partial class CreateStoreConnectionParamsSettings
     public bool? AutoInvoice { get; set; }
 
     /// <summary>
-    /// WooCommerce y Tiendanube: mandar al comprador el enlace para facturar (WooCommerce, como nota al cliente del pedido; Tiendanube, por correo). Por omisión true.
+    /// WooCommerce, Tiendanube, Mercado Pago, Conekta y Openpay: mandar al comprador el enlace para facturar (WooCommerce, como nota al cliente del pedido; los demás, por correo, cuando la plataforma da su correo). Por omisión true.
     /// </summary>
     [JsonPropertyName("notify_buyer")]
     public bool? NotifyBuyer { get; set; }
@@ -28118,15 +28136,15 @@ public sealed partial class StoreConnection
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// shopify, woocommerce, tiendanube, mercadolibre o amazon.
+    /// shopify, woocommerce, tiendanube, mercadolibre, amazon, mercadopago, conekta u openpay.
     /// <br/>
-    /// Valores: shopify, mercadolibre, amazon, tiendanube, woocommerce.
+    /// Valores: shopify, mercadolibre, amazon, tiendanube, woocommerce, mercadopago, conekta, openpay.
     /// </summary>
     [JsonPropertyName("platform")]
     public string Platform { get; set; } = default!;
 
     /// <summary>
-    /// El dominio de la tienda (Shopify, WooCommerce), o el id de la tienda en Tiendanube o del vendedor en Mercado Libre y Amazon (al autorizar).
+    /// El dominio de la tienda (Shopify, WooCommerce), el id de la tienda en Tiendanube o del vendedor en Mercado Libre y Amazon (al autorizar), el id de la cuenta de Mercado Pago, el ID de comercio de Openpay, o una referencia de la cuenta de Conekta.
     /// </summary>
     [JsonPropertyName("shop")]
     public string? Shop { get; set; }
@@ -32262,7 +32280,7 @@ public sealed partial class UpdateStoreConnectionParamsSettings
     public string? PaymentForm { get; set; }
 
     /// <summary>
-    /// c_FormaPago por pasarela de Shopify (shopify_payments, paypal, manual…) o tipo de pago de Mercado Libre (credit_card, debit_card, account_money, ticket, bank_transfer).
+    /// c_FormaPago por pasarela de Shopify (shopify_payments, paypal, manual…) o tipo de pago de Mercado Libre y Mercado Pago (credit_card, debit_card, account_money, ticket, bank_transfer), o de Conekta y Openpay (credit_card, debit_card, cash, spei).
     /// </summary>
     [JsonPropertyName("payment_forms")]
     public Dictionary<string, string>? PaymentForms { get; set; }
@@ -32274,7 +32292,7 @@ public sealed partial class UpdateStoreConnectionParamsSettings
     public bool? AutoInvoice { get; set; }
 
     /// <summary>
-    /// WooCommerce y Tiendanube: mandar al comprador el enlace para facturar (WooCommerce, como nota al cliente del pedido; Tiendanube, por correo). Por omisión true.
+    /// WooCommerce, Tiendanube, Mercado Pago, Conekta y Openpay: mandar al comprador el enlace para facturar (WooCommerce, como nota al cliente del pedido; los demás, por correo, cuando la plataforma da su correo). Por omisión true.
     /// </summary>
     [JsonPropertyName("notify_buyer")]
     public bool? NotifyBuyer { get; set; }
