@@ -6939,6 +6939,12 @@ public sealed partial class CreateRetentionParams
     public CreateRetentionParamsFinancialDerivatives? FinancialDerivatives { get; set; }
 
     /// <summary>
+    /// Folio fiscal (UUID) de la constancia que esta corrige: vigente, del mismo emisor y al mismo receptor (emitida aquí o en otro sistema). Va en CfdiRetenRelacionados (04) y, timbrada esta, la anterior se cancela con el motivo 01; `replaced` dice si se canceló.
+    /// </summary>
+    [JsonPropertyName("replaces")]
+    public string? Replaces { get; set; }
+
+    /// <summary>
     /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
     /// </summary>
     [JsonPropertyName("send_email")]
@@ -24650,6 +24656,12 @@ public sealed partial class Retention
     /// </summary>
     [JsonPropertyName("email_error")]
     public string? EmailError { get; set; }
+
+    /// <summary>
+    /// Solo al timbrar con `replaces`: la constancia que corrige y si se canceló (motivo 01). Si no, `error` dice por qué y se cancela con POST /v1/sat_retentions/{id}/cancel.
+    /// </summary>
+    [JsonPropertyName("replaced")]
+    public RetentionReplaced? Replaced { get; set; }
 }
 
 /// <summary>
@@ -24806,6 +24818,30 @@ public sealed partial class RetentionRecipient
     /// </summary>
     [JsonPropertyName("curp")]
     public string? Curp { get; set; }
+}
+
+/// <summary>
+/// Solo al timbrar con `replaces`: la constancia que corrige y si se canceló (motivo 01). Si no, `error` dice por qué y se cancela con POST /v1/sat_retentions/{id}/cancel.
+/// </summary>
+public sealed partial class RetentionReplaced
+{
+    /// <summary>
+    /// Folio fiscal que asigna el SAT (UUID del Timbre Fiscal Digital), en mayúsculas.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// true si la sustituida ya quedó cancelada. false no es definitivo: vea substitutes.cancellation.
+    /// </summary>
+    [JsonPropertyName("canceled")]
+    public bool Canceled { get; set; }
+
+    /// <summary>
+    /// Por qué no se pudo cancelar la anterior; `null` si se canceló.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
 }
 
 /// <summary>
