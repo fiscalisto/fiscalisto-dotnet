@@ -26100,7 +26100,7 @@ public sealed partial class SatDeclaration
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// El tipo de complementaria como lo dice el SAT («Modificación de obligaciones»…), o null.
+    /// En una complementaria, su tipo como lo dice el SAT («Modificación de Obligaciones», «Obligación no presentada», «Dejar sin efecto obligación»). Se liga con la que corrige por source, year, month y period.
     /// </summary>
     [JsonPropertyName("complementary_type")]
     public string? ComplementaryType { get; set; }
@@ -26606,7 +26606,7 @@ public sealed partial class SatDeclarationSummaryObligationsItem
     public decimal? InFavor { get; set; }
 
     /// <summary>
-    /// Sus cifras con nombres fijos. ISR: income, invoiced_income, income_ytd, deductions, profit_coefficient, taxable_profit, losses_applied, tax_base, tax_caused, prior_payments, withheld. IVA: taxable_16, taxable_0, exempt, charged, paid_16, creditable, withheld, balance_applied. Salarios: workers, payments, exempt, withheld. Todas: surcharges, inflation, paid_before, due, in_favor, to_pay. null si no viene o no se pudo leer.
+    /// Las cifras de la obligación con nombres fijos (en IVA: taxable_16, taxable_0, exempt, charged, charged_16, charged_16_invoiced, paid_16, creditable, withheld, balance_applied; en todas: surcharges, inflation, paid_before, due, in_favor, to_pay). null si la declaración no la trae o no se pudo leer, nunca 0.
     /// </summary>
     [JsonPropertyName("figures")]
     public Dictionary<string, JsonElement> Figures { get; set; } = default!;
