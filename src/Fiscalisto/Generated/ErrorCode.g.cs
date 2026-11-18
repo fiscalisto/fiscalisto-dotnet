@@ -279,6 +279,9 @@ public static class ErrorCode
     /// <summary>La constancia de retenciones no cumple una regla del SAT. No se usó ningún timbre.</summary>
     public const string RetentionInvalid = "retention_invalid";
 
+    /// <summary>Solo quien emitió la constancia puede cancelarla; esta la recibió el emisor.</summary>
+    public const string RetentionNotIssued = "retention_not_issued";
+
     /// <summary>La acción es para constancias timbradas.</summary>
     public const string RetentionNotStamped = "retention_not_stamped";
 

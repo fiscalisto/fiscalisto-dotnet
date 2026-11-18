@@ -1720,6 +1720,26 @@ public sealed partial class CancelSalesOrderParams
 }
 
 /// <summary>
+/// Los campos de «Cancelar una constancia de retenciones emitida».
+/// </summary>
+public sealed partial class CancelSatRetentionParams
+{
+    /// <summary>
+    /// Motivo de cancelación (c_MotivoCancelacion): 01 con errores con relación (lleva substitution), 02 con errores sin relación (por omisión), 03 no se llevó a cabo, 04 solo en una factura global, cuando una venta incluida se facturó a nombre del cliente.
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("motive")]
+    public string? Motive { get; set; }
+
+    /// <summary>
+    /// El comprobante que sustituye a este (su id o su UUID), con el motivo 01.
+    /// </summary>
+    [JsonPropertyName("substitution")]
+    public string? Substitution { get; set; }
+}
+
+/// <summary>
 /// El flujo de efectivo de las próximas 13 semanas: lo que le deben (con lo que cada cliente suele tardar), lo que debe a proveedores, la nómina, las declaraciones, las facturas recurrentes y sus movimientos previstos, desde el saldo que usted dio. Una estimación: no cambia nada.
 /// </summary>
 public sealed partial class CashForecast
@@ -8953,6 +8973,12 @@ public sealed partial class CrossCheckCfdi
     /// </summary>
     [JsonPropertyName("adjustment")]
     public decimal Adjustment { get; set; }
+
+    /// <summary>
+    /// Qué CFDI explicarían la diferencia; null si coincide.
+    /// </summary>
+    [JsonPropertyName("explanation")]
+    public CrossCheckCfdiExplanation? Explanation { get; set; }
 }
 
 /// <summary>
@@ -8997,6 +9023,192 @@ public sealed partial class CrossCheckCfdiCfdiItem
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CrossCheckCfdiExplanation&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossCheckCfdiExplanation
+{
+    /// <summary>
+    /// La diferencia.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal Difference { get; set; }
+
+    /// <summary>
+    /// Los CFDI cuyo effect suma la diferencia; null si ninguno.
+    /// </summary>
+    [JsonPropertyName("exact")]
+    public CrossCheckCfdiExplanationExact? Exact { get; set; }
+
+    /// <summary>
+    /// true si varias combinaciones la suman.
+    /// </summary>
+    [JsonPropertyName("ambiguous")]
+    public bool Ambiguous { get; set; }
+
+    /// <summary>
+    /// Las posibles causas, por motivo.
+    /// </summary>
+    [JsonPropertyName("causes")]
+    public List<CrossCheckCfdiExplanationCausesItem> Causes { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CrossCheckCfdiExplanationCausesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossCheckCfdiExplanationCausesItem
+{
+    /// <summary>
+    /// El motivo que comparten.
+    /// <br/>
+    /// Valores: cancelled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// La suma de su effect.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Sus CFDI.
+    /// </summary>
+    [JsonPropertyName("cfdi")]
+    public List<CrossCheckCfdiExplanationCausesItemCfdiItem> Cfdi { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CrossCheckCfdiExplanationCausesItemCfdiItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossCheckCfdiExplanationCausesItemCfdiItem
+{
+    /// <summary>
+    /// El folio fiscal (UUID) del CFDI; el de la factura PPD en un pago.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// La fecha del CFDI, o la del pago (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El RFC de la contraparte: el cliente en lo emitido, el proveedor en lo recibido.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// El nombre de la contraparte, como viene en el CFDI.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Lo que aporta a la cifra, en pesos; negativo en una nota de crédito.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Cuánto cambiaría invoiced.
+    /// </summary>
+    [JsonPropertyName("effect")]
+    public decimal Effect { get; set; }
+
+    /// <summary>
+    /// Por qué lo explicaría.
+    /// <br/>
+    /// Valores: cancelled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// true si está en cfdi.
+    /// </summary>
+    [JsonPropertyName("in_invoiced")]
+    public bool InInvoiced { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CrossCheckCfdiExplanationExact&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossCheckCfdiExplanationExact
+{
+    /// <summary>
+    /// Los CFDI de la combinación.
+    /// </summary>
+    [JsonPropertyName("cfdi")]
+    public List<CrossCheckCfdiExplanationExactCfdiItem> Cfdi { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que queda (redondeo).
+    /// </summary>
+    [JsonPropertyName("remainder")]
+    public decimal Remainder { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CrossCheckCfdiExplanationExactCfdiItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CrossCheckCfdiExplanationExactCfdiItem
+{
+    /// <summary>
+    /// El folio fiscal (UUID) del CFDI; el de la factura PPD en un pago.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// La fecha del CFDI, o la del pago (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El RFC de la contraparte: el cliente en lo emitido, el proveedor en lo recibido.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// El nombre de la contraparte, como viene en el CFDI.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Lo que aporta a la cifra, en pesos; negativo en una nota de crédito.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Cuánto cambiaría invoiced.
+    /// </summary>
+    [JsonPropertyName("effect")]
+    public decimal Effect { get; set; }
+
+    /// <summary>
+    /// Por qué lo explicaría.
+    /// <br/>
+    /// Valores: cancelled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// true si está en cfdi.
+    /// </summary>
+    [JsonPropertyName("in_invoiced")]
+    public bool InInvoiced { get; set; }
 }
 
 /// <summary>
