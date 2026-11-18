@@ -1085,7 +1085,7 @@ public sealed partial class Balance
     public bool Livemode { get; set; }
 
     /// <summary>
-    /// Timbres disponibles en total.
+    /// Timbres de sus paquetes, en total: un solo saldo para la API y la app, comprados en Desarrolladores o en Plan y pagos.
     /// </summary>
     [JsonPropertyName("available")]
     public long Available { get; set; }
@@ -1109,7 +1109,7 @@ public sealed partial class Balance
     public BalanceAutoRecharge? AutoRecharge { get; set; }
 
     /// <summary>
-    /// Los RFC de la empresa (type own) timbran primero con los timbres del mes de su plan y después con `available`. true si, al acabarse `available`, la API sigue timbrando esos RFC con los paquetes de la app de la empresa; los emisores conectados no (Desarrolladores › Timbres y pagos › Si se acaban, usar los timbres de la empresa). false: responde 402 insufficient_balance.
+    /// Siempre true: los RFC de la empresa (type own) timbran primero con los timbres del mes de su plan y después con `available`, los paquetes de su único saldo (comprados en Desarrolladores o en Plan y pagos). Los emisores conectados usan solo `available`. Se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("use_plan_timbres")]
     public bool UsePlanTimbres { get; set; }
@@ -8679,6 +8679,12 @@ public sealed partial class CreateTicketParams
     public string? Iva { get; set; }
 
     /// <summary>
+    /// Impuestos locales incluidos en su total, como el ISH 3.5% de hospedaje, con `product_key` (un producto lleva los suyos). Cada uno se calcula sobre la base de este concepto y la factura los suma por nombre y tasa en el complemento de impuestos locales.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<CreateTicketParamsLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
     /// Quién pagó, para reconocer la venta en Tickets. No es el receptor de la factura (eso lo escribe el comprador en el portal) y no se le manda nada.
     /// </summary>
     [JsonPropertyName("buyer")]
@@ -8747,6 +8753,12 @@ public sealed partial class CreateTicketParamsLinesItem
     public string? Iva { get; set; }
 
     /// <summary>
+    /// Impuestos locales incluidos en su total, como el ISH 3.5% de hospedaje, con `product_key` (un producto lleva los suyos). Cada uno se calcula sobre la base de este concepto y la factura los suma por nombre y tasa en el complemento de impuestos locales.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<CreateTicketParamsLinesItemLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
     /// Unidades (noches, piezas). Por omisión 1.
     /// </summary>
     [JsonPropertyName("quantity")]
@@ -8757,6 +8769,54 @@ public sealed partial class CreateTicketParamsLinesItem
     /// </summary>
     [JsonPropertyName("total")]
     public required decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateTicketParamsLinesItemLocalTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateTicketParamsLinesItemLocalTaxesItem
+{
+    /// <summary>
+    /// `false`: un traslado local que se suma (el ISH). `true`: una retención local que el cliente resta (el cedular); la factura global, a público en general, no la lleva.
+    /// </summary>
+    [JsonPropertyName("retention")]
+    public required bool Retention { get; set; }
+
+    /// <summary>
+    /// Su nombre en el CFDI (ImpLocTrasladado o ImpLocRetenido), como «ISH».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// La tasa en porcentaje: 3.5 es 3.5%.
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateTicketParamsLocalTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateTicketParamsLocalTaxesItem
+{
+    /// <summary>
+    /// `false`: un traslado local que se suma (el ISH). `true`: una retención local que el cliente resta (el cedular); la factura global, a público en general, no la lleva.
+    /// </summary>
+    [JsonPropertyName("retention")]
+    public required bool Retention { get; set; }
+
+    /// <summary>
+    /// Su nombre en el CFDI (ImpLocTrasladado o ImpLocRetenido), como «ISH».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// La tasa en porcentaje: 3.5 es 3.5%.
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
 }
 
 /// <summary>
@@ -29138,6 +29198,12 @@ public sealed partial class TicketLinesItem
     public string? Iva { get; set; }
 
     /// <summary>
+    /// Sus impuestos locales (los de su producto o los que mandó), incluidos en su total.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<TicketLinesItemLocalTaxesItem> LocalTaxes { get; set; } = default!;
+
+    /// <summary>
     /// Cantidad (Cantidad). Por omisión 1.
     /// </summary>
     [JsonPropertyName("quantity")]
@@ -29148,6 +29214,30 @@ public sealed partial class TicketLinesItem
     /// </summary>
     [JsonPropertyName("total")]
     public decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;TicketLinesItemLocalTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TicketLinesItemLocalTaxesItem
+{
+    /// <summary>
+    /// true si es una retención local; false si es un traslado.
+    /// </summary>
+    [JsonPropertyName("retention")]
+    public bool Retention { get; set; }
+
+    /// <summary>
+    /// Nombre del impuesto local (ImpLocTrasladado o ImpLocRetenido), como ISH.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Tasa en por ciento (TasadeTraslado o TasadeRetencion).
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public decimal Rate { get; set; }
 }
 
 /// <summary>
