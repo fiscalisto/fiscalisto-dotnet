@@ -22319,6 +22319,214 @@ public sealed partial class PermissionList
 }
 
 /// <summary>
+/// Cómo se ve el portal además de su tema, color y esquinas (Autofactura › Cómo se ve el portal).
+/// </summary>
+public sealed partial class PortalStyle
+{
+    /// <summary>
+    /// checkout: la factura se llena junto al formulario. compact: solo el formulario, la factura plegada. card: el formulario en una tarjeta al centro.
+    /// <br/>
+    /// Valores: checkout, compact, card.
+    /// </summary>
+    [JsonPropertyName("layout")]
+    public string Layout { get; set; } = default!;
+
+    /// <summary>
+    /// comfortable o compact.
+    /// <br/>
+    /// Valores: comfortable, compact.
+    /// </summary>
+    [JsonPropertyName("density")]
+    public string Density { get; set; } = default!;
+
+    /// <summary>
+    /// Qué dice arriba: name_rfc, name, logo_name o logo.
+    /// <br/>
+    /// Valores: logo, name, name_rfc, logo_name.
+    /// </summary>
+    [JsonPropertyName("header")]
+    public string Header { get; set; } = default!;
+
+    /// <summary>
+    /// El tamaño del logo: s, m o l.
+    /// <br/>
+    /// Valores: s, m, l.
+    /// </summary>
+    [JsonPropertyName("logo_size")]
+    public string LogoSize { get; set; } = default!;
+
+    /// <summary>
+    /// La forma del logo: square, rounded o circle.
+    /// <br/>
+    /// Valores: square, rounded, circle.
+    /// </summary>
+    [JsonPropertyName("logo_shape")]
+    public string LogoShape { get; set; } = default!;
+
+    /// <summary>
+    /// La letra: system o una de Google Fonts.
+    /// </summary>
+    [JsonPropertyName("font")]
+    public string Font { get; set; } = default!;
+
+    /// <summary>
+    /// La letra de los títulos, o null para la misma del texto.
+    /// </summary>
+    [JsonPropertyName("heading_font")]
+    public string? HeadingFont { get; set; }
+
+    /// <summary>
+    /// El tamaño del título: s, m o l.
+    /// <br/>
+    /// Valores: s, m, l.
+    /// </summary>
+    [JsonPropertyName("heading_size")]
+    public string HeadingSize { get; set; } = default!;
+
+    /// <summary>
+    /// Los bordes: none, subtle o strong.
+    /// <br/>
+    /// Valores: none, subtle, strong.
+    /// </summary>
+    [JsonPropertyName("borders")]
+    public string Borders { get; set; } = default!;
+
+    /// <summary>
+    /// La sombra: none, soft o strong.
+    /// <br/>
+    /// Valores: none, soft, strong.
+    /// </summary>
+    [JsonPropertyName("shadow")]
+    public string Shadow { get; set; } = default!;
+
+    /// <summary>
+    /// Las formas de dar sus datos además de escribirlos.
+    /// </summary>
+    [JsonPropertyName("ways")]
+    public PortalStyleWays Ways { get; set; } = default!;
+
+    /// <summary>
+    /// Si no se factura sin correo.
+    /// </summary>
+    [JsonPropertyName("email_required")]
+    public bool EmailRequired { get; set; }
+
+    /// <summary>
+    /// Si dice hasta cuándo se puede facturar.
+    /// </summary>
+    [JsonPropertyName("show_deadline")]
+    public bool ShowDeadline { get; set; }
+
+    /// <summary>
+    /// El botón al terminar para volver a su sitio, o null.
+    /// </summary>
+    [JsonPropertyName("back")]
+    public PortalStyleBack? Back { get; set; }
+
+    /// <summary>
+    /// CSS propio, ya limpio.
+    /// </summary>
+    [JsonPropertyName("css")]
+    public string Css { get; set; } = default!;
+
+    /// <summary>
+    /// Los colores de la página; null usa el del tema.
+    /// </summary>
+    [JsonPropertyName("colors")]
+    public PortalStyleColors Colors { get; set; } = default!;
+
+    /// <summary>
+    /// Los textos propios por llave (step_ticket, submit, success_title…), cada uno con es y en. Uno que falta lleva el de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("texts")]
+    public Dictionary<string, JsonElement> Texts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PortalStyleBack&lt;/c&gt;.
+/// </summary>
+public sealed partial class PortalStyleBack
+{
+    /// <summary>
+    /// El texto del botón.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// A dónde lleva (https).
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Los colores de la página; null usa el del tema.
+/// </summary>
+public sealed partial class PortalStyleColors
+{
+    /// <summary>
+    /// El fondo de la página, o null.
+    /// </summary>
+    [JsonPropertyName("background")]
+    public string? Background { get; set; }
+
+    /// <summary>
+    /// El fondo de los campos y tarjetas, o null.
+    /// </summary>
+    [JsonPropertyName("card")]
+    public string? Card { get; set; }
+
+    /// <summary>
+    /// El texto, o null.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+
+    /// <summary>
+    /// El texto de los botones, o null.
+    /// </summary>
+    [JsonPropertyName("button_text")]
+    public string? ButtonText { get; set; }
+}
+
+/// <summary>
+/// Las formas de dar sus datos además de escribirlos.
+/// </summary>
+public sealed partial class PortalStyleWays
+{
+    /// <summary>
+    /// Subir la constancia (PDF).
+    /// </summary>
+    [JsonPropertyName("constancia")]
+    public bool Constancia { get; set; }
+
+    /// <summary>
+    /// Escanear el QR de la constancia.
+    /// </summary>
+    [JsonPropertyName("qr")]
+    public bool Qr { get; set; }
+
+    /// <summary>
+    /// Buscar los datos con RFC e idCIF.
+    /// </summary>
+    [JsonPropertyName("cif")]
+    public bool Cif { get; set; }
+
+    /// <summary>
+    /// «Ya le hemos facturado antes»: RFC y correo.
+    /// </summary>
+    [JsonPropertyName("recall")]
+    public bool Recall { get; set; }
+
+    /// <summary>
+    /// Facturar a clientes en el extranjero.
+    /// </summary>
+    [JsonPropertyName("abroad")]
+    public bool Abroad { get; set; }
+}
+
+/// <summary>
 /// Un proveedor del Portal de proveedores del emisor: su alta, sus documentos, la cuenta a la que se le paga y su calificación.
 /// </summary>
 public sealed partial class PortalSupplier
@@ -27792,6 +28000,12 @@ public sealed partial class SelfInvoicing
     public long? PortalRadius { get; set; }
 
     /// <summary>
+    /// Cómo se ve el portal además de su tema, color y esquinas: acomodo, encabezado, colores, letra, textos, formas de dar los datos, botón para volver y CSS.
+    /// </summary>
+    [JsonPropertyName("portal_style")]
+    public PortalStyle PortalStyle { get; set; } = default!;
+
+    /// <summary>
     /// Cuando se factura una persona moral que retiene (1.25% de ISR en RESICO, o lo del producto). keep_total: la base crece y la factura suma lo que se pagó. subtract: la base es la del ticket y el total es lo pagado menos la retención.
     /// <br/>
     /// Valores: keep_total, subtract.
@@ -32414,6 +32628,12 @@ public sealed partial class UpdateSelfInvoicingParams
     public long? PortalRadius { get; set; }
 
     /// <summary>
+    /// Todo lo demás de cómo se ve el portal (Autofactura › Cómo se ve el portal): acomodo, encabezado, colores, letra, bordes, textos en español e inglés, las formas de dar los datos, el botón para volver a su sitio y CSS propio. Mande solo lo que cambia: `colors`, `ways` y `texts` se combinan por llave (un texto en `null` lo quita); lo demás se reemplaza. `null` regresa todo al diseño de Fiscalisto. La leyenda «Facturado con Fiscalisto» no se puede ocultar.
+    /// </summary>
+    [JsonPropertyName("portal_style")]
+    public UpdateSelfInvoicingParamsPortalStyle? PortalStyle { get; set; }
+
+    /// <summary>
     /// Cuando se factura una persona moral y retiene (1.25% de ISR a un emisor en RESICO, artículo 113-J de la LISR, o lo que diga el producto): `keep_total` (por omisión), la base crece para que la factura sume lo que se pagó; `subtract`, la base es la del ticket y la retención se resta, así que el total de la factura es menor a lo pagado.
     /// <br/>
     /// Valores: keep_total, subtract.
@@ -32434,6 +32654,470 @@ public sealed partial class UpdateSelfInvoicingParams
     /// </summary>
     [JsonPropertyName("global_concepts")]
     public string? GlobalConcepts { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyle&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyle
+{
+    /// <summary>
+    /// `checkout` (por omisión): la factura se llena junto al formulario. `compact`: solo el formulario, la factura plegada. `card`: el formulario en una tarjeta al centro.
+    /// <br/>
+    /// Valores: checkout, compact, card.
+    /// </summary>
+    [JsonPropertyName("layout")]
+    public string? Layout { get; set; }
+
+    /// <summary>
+    /// `comfortable` o `compact`.
+    /// <br/>
+    /// Valores: comfortable, compact.
+    /// </summary>
+    [JsonPropertyName("density")]
+    public string? Density { get; set; }
+
+    /// <summary>
+    /// Qué dice arriba: `name_rfc` (por omisión), `name`, `logo_name` o `logo`. El logo y el nombre salen de Marca y documentos.
+    /// <br/>
+    /// Valores: logo, name, name_rfc, logo_name.
+    /// </summary>
+    [JsonPropertyName("header")]
+    public string? Header { get; set; }
+
+    /// <summary>
+    /// El tamaño del logo: `s`, `m` o `l`.
+    /// <br/>
+    /// Valores: s, m, l.
+    /// </summary>
+    [JsonPropertyName("logo_size")]
+    public string? LogoSize { get; set; }
+
+    /// <summary>
+    /// La forma del logo: `square`, `rounded` o `circle`.
+    /// <br/>
+    /// Valores: square, rounded, circle.
+    /// </summary>
+    [JsonPropertyName("logo_shape")]
+    public string? LogoShape { get; set; }
+
+    /// <summary>
+    /// Los colores de la página; cada uno se combina con lo guardado.
+    /// </summary>
+    [JsonPropertyName("colors")]
+    public UpdateSelfInvoicingParamsPortalStyleColors? Colors { get; set; }
+
+    /// <summary>
+    /// La letra: `system` (por omisión) o una de Google Fonts.
+    /// <br/>
+    /// Valores: system, inter, manrope, dm-sans, work-sans, nunito, space-grotesk, montserrat, lora, merriweather, playfair-display, cormorant-garamond.
+    /// </summary>
+    [JsonPropertyName("font")]
+    public string? Font { get; set; }
+
+    /// <summary>
+    /// La letra de los títulos; `null`, la misma del texto.
+    /// <br/>
+    /// Valores: system, inter, manrope, dm-sans, work-sans, nunito, space-grotesk, montserrat, lora, merriweather, playfair-display, cormorant-garamond.
+    /// </summary>
+    [JsonPropertyName("heading_font")]
+    public string? HeadingFont { get; set; }
+
+    /// <summary>
+    /// El tamaño del título: `s`, `m` o `l`.
+    /// <br/>
+    /// Valores: s, m, l.
+    /// </summary>
+    [JsonPropertyName("heading_size")]
+    public string? HeadingSize { get; set; }
+
+    /// <summary>
+    /// Los bordes: `none`, `subtle` (por omisión) o `strong`.
+    /// <br/>
+    /// Valores: none, subtle, strong.
+    /// </summary>
+    [JsonPropertyName("borders")]
+    public string? Borders { get; set; }
+
+    /// <summary>
+    /// La sombra: `none`, `soft` (por omisión) o `strong`.
+    /// <br/>
+    /// Valores: none, soft, strong.
+    /// </summary>
+    [JsonPropertyName("shadow")]
+    public string? Shadow { get; set; }
+
+    /// <summary>
+    /// Los textos, cada uno con `es` y `en`, combinados por llave con lo guardado. El título, el mensaje y dónde viene el código en español son `portal_title`, `portal_message` y `code_hint`; aquí van en inglés.
+    /// </summary>
+    [JsonPropertyName("texts")]
+    public UpdateSelfInvoicingParamsPortalStyleTexts? Texts { get; set; }
+
+    /// <summary>
+    /// Las formas de dar sus datos además de escribirlos. Todas `true` por omisión.
+    /// </summary>
+    [JsonPropertyName("ways")]
+    public UpdateSelfInvoicingParamsPortalStyleWays? Ways { get; set; }
+
+    /// <summary>
+    /// `true`: no se factura sin correo. Por omisión `false`.
+    /// </summary>
+    [JsonPropertyName("email_required")]
+    public bool? EmailRequired { get; set; }
+
+    /// <summary>
+    /// Decir hasta cuándo se puede facturar. Por omisión `true`.
+    /// </summary>
+    [JsonPropertyName("show_deadline")]
+    public bool? ShowDeadline { get; set; }
+
+    /// <summary>
+    /// Un botón al terminar para volver a su sitio; `null` lo quita.
+    /// </summary>
+    [JsonPropertyName("back")]
+    public UpdateSelfInvoicingParamsPortalStyleBack? Back { get; set; }
+
+    /// <summary>
+    /// CSS propio, dentro del portal y sin llegar a su pie. Se quitan @import, url() y lo que cargue o ejecute algo; la leyenda «Facturado con Fiscalisto» se queda.
+    /// </summary>
+    [JsonPropertyName("css")]
+    public string? Css { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleBack&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleBack
+{
+    /// <summary>
+    /// El texto del botón.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public required string Label { get; set; }
+
+    /// <summary>
+    /// A dónde lleva (https).
+    /// </summary>
+    [JsonPropertyName("url")]
+    public required string Url { get; set; }
+}
+
+/// <summary>
+/// Los colores de la página; cada uno se combina con lo guardado.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleColors
+{
+    /// <summary>
+    /// El fondo de la página, como `#f5f1e8`; `null` usa el del tema.
+    /// </summary>
+    [JsonPropertyName("background")]
+    public string? Background { get; set; }
+
+    /// <summary>
+    /// El fondo de los campos y tarjetas, como `#f5f1e8`; `null` usa el del tema.
+    /// </summary>
+    [JsonPropertyName("card")]
+    public string? Card { get; set; }
+
+    /// <summary>
+    /// El texto, como `#f5f1e8`; `null` usa el del tema.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+
+    /// <summary>
+    /// El texto de los botones, como `#f5f1e8`; `null` usa el del tema.
+    /// </summary>
+    [JsonPropertyName("button_text")]
+    public string? ButtonText { get; set; }
+}
+
+/// <summary>
+/// Los textos, cada uno con `es` y `en`, combinados por llave con lo guardado. El título, el mensaje y dónde viene el código en español son `portal_title`, `portal_message` y `code_hint`; aquí van en inglés.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTexts
+{
+    /// <summary>
+    /// El título (en español es `portal_title`); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsTitle? Title { get; set; }
+
+    /// <summary>
+    /// El mensaje bajo el título (en español es `portal_message`); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsMessage? Message { get; set; }
+
+    /// <summary>
+    /// Dónde viene el código (en español es `code_hint`); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("code_hint")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsCodeHint? CodeHint { get; set; }
+
+    /// <summary>
+    /// El nombre del paso 1; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("step_ticket")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsStepTicket? StepTicket { get; set; }
+
+    /// <summary>
+    /// El nombre del paso 2; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("step_data")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsStepData? StepData { get; set; }
+
+    /// <summary>
+    /// El nombre del paso 3; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("step_invoice")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsStepInvoice? StepInvoice { get; set; }
+
+    /// <summary>
+    /// El botón para buscar el ticket; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("find_button")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsFindButton? FindButton { get; set; }
+
+    /// <summary>
+    /// La pregunta de cómo dar los datos; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("how_question")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsHowQuestion? HowQuestion { get; set; }
+
+    /// <summary>
+    /// El botón para facturar; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("submit")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsSubmit? Submit { get; set; }
+
+    /// <summary>
+    /// El título al terminar; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("success_title")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsSuccessTitle? SuccessTitle { get; set; }
+
+    /// <summary>
+    /// El mensaje al terminar; `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("success_message")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsSuccessMessage? SuccessMessage { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsCodeHint&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsCodeHint
+{
+    /// <summary>
+    /// Dónde viene el código (en español es `code_hint`) en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsFindButton&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsFindButton
+{
+    /// <summary>
+    /// El botón para buscar el ticket en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El botón para buscar el ticket en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsHowQuestion&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsHowQuestion
+{
+    /// <summary>
+    /// La pregunta de cómo dar los datos en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// La pregunta de cómo dar los datos en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsMessage&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsMessage
+{
+    /// <summary>
+    /// El mensaje bajo el título (en español es `portal_message`) en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsStepData&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsStepData
+{
+    /// <summary>
+    /// El nombre del paso 2 en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El nombre del paso 2 en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsStepInvoice&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsStepInvoice
+{
+    /// <summary>
+    /// El nombre del paso 3 en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El nombre del paso 3 en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsStepTicket&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsStepTicket
+{
+    /// <summary>
+    /// El nombre del paso 1 en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El nombre del paso 1 en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsSubmit&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsSubmit
+{
+    /// <summary>
+    /// El botón para facturar en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El botón para facturar en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsSuccessMessage&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsSuccessMessage
+{
+    /// <summary>
+    /// El mensaje al terminar en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El mensaje al terminar en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsSuccessTitle&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsSuccessTitle
+{
+    /// <summary>
+    /// El título al terminar en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El título al terminar en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsTitle&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsTitle
+{
+    /// <summary>
+    /// El título (en español es `portal_title`) en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// Las formas de dar sus datos además de escribirlos. Todas `true` por omisión.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleWays
+{
+    /// <summary>
+    /// Ofrecer subir la constancia (PDF).
+    /// </summary>
+    [JsonPropertyName("constancia")]
+    public bool? Constancia { get; set; }
+
+    /// <summary>
+    /// Ofrecer escanear el QR de la constancia.
+    /// </summary>
+    [JsonPropertyName("qr")]
+    public bool? Qr { get; set; }
+
+    /// <summary>
+    /// Ofrecer buscar los datos con RFC e idCIF.
+    /// </summary>
+    [JsonPropertyName("cif")]
+    public bool? Cif { get; set; }
+
+    /// <summary>
+    /// Ofrecer «Ya le hemos facturado antes» (RFC y correo).
+    /// </summary>
+    [JsonPropertyName("recall")]
+    public bool? Recall { get; set; }
+
+    /// <summary>
+    /// Ofrecer facturar a clientes en el extranjero.
+    /// </summary>
+    [JsonPropertyName("abroad")]
+    public bool? Abroad { get; set; }
 }
 
 /// <summary>
