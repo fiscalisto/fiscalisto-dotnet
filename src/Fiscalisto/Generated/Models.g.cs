@@ -4682,6 +4682,50 @@ public sealed partial class CreateExportParams
 }
 
 /// <summary>
+/// Los campos de «Agregar un activo fijo sin factura».
+/// </summary>
+public sealed partial class CreateFixedAssetParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Qué es.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// El tipo de activo por su uso CFDI: I01 construcciones, I02 mobiliario, I03 transporte, I04 cómputo, I05 dados y troqueles, I06 telefonía, I07 satelital, I08 otra maquinaria. Da su tasa de depreciación.
+    /// <br/>
+    /// Valores: I01, I02, I03, I04, I05, I06, I07, I08.
+    /// </summary>
+    [JsonPropertyName("cfdi_use")]
+    public required string CfdiUse { get; set; }
+
+    /// <summary>
+    /// El monto original sin IVA.
+    /// </summary>
+    [JsonPropertyName("cost")]
+    public required decimal Cost { get; set; }
+
+    /// <summary>
+    /// La fecha de compra.
+    /// </summary>
+    [JsonPropertyName("acquired_on")]
+    public required string AcquiredOn { get; set; }
+
+    /// <summary>
+    /// Desde cuándo se usa (se deprecia desde el mes siguiente); por omisión, la de compra.
+    /// </summary>
+    [JsonPropertyName("in_use_since")]
+    public string? InUseSince { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Archivos para IDSE o SUA».
 /// </summary>
 public sealed partial class CreateImssFilesParams
@@ -5151,6 +5195,124 @@ public sealed partial class CreateIssuerParamsDonationAuthorization
     /// </summary>
     [JsonPropertyName("date")]
     public required string Date { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar una cuenta al catálogo».
+/// </summary>
+public sealed partial class CreateLedgerAccountParams
+{
+    /// <summary>
+    /// Su número en el catálogo, por ejemplo 210-01-01. No se repite.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public required string Number { get; set; }
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Una subcuenta del código agrupador del SAT (Anexo 24), por ejemplo 210.01.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public required string GroupingCode { get; set; }
+
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Capturar una póliza».
+/// </summary>
+public sealed partial class CreateManualEntryParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La fecha de la póliza (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// Su concepto.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// adjustment (ajuste), accrual (provisión), reclassification (reclasificación) u other.
+    /// <br/>
+    /// Valores: adjustment, accrual, reclassification, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// El tipo de póliza: journal (diario), income (ingresos) o expense (egresos).
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string? JournalType { get; set; }
+
+    /// <summary>
+    /// Solo con kind accrual: la póliza se revierte sola el día 1 del mes siguiente (para cuando llegue la factura).
+    /// </summary>
+    [JsonPropertyName("reverse_next_month")]
+    public bool? ReverseNextMonth { get; set; }
+
+    /// <summary>
+    /// El UUID del CFDI con el que se relaciona, si hay uno.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// Con uuid: el RFC de la otra parte de ese CFDI.
+    /// </summary>
+    [JsonPropertyName("uuid_tax_id")]
+    public string? UuidTaxId { get; set; }
+
+    /// <summary>
+    /// Sus cargos y abonos: cada renglón uno u otro; los cargos suman lo mismo que los abonos.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<CreateManualEntryParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateManualEntryParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateManualEntryParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts), por ejemplo 205-06.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal? Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal? Credit { get; set; }
 }
 
 /// <summary>
@@ -10426,6 +10588,32 @@ public sealed partial class DiotLinesItemReturns
 }
 
 /// <summary>
+/// Los campos de «Vender o dar de baja un activo fijo».
+/// </summary>
+public sealed partial class DisposeFixedAssetParams
+{
+    /// <summary>
+    /// El día de la venta o la baja.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// sale (venta) o write_off (robo, pérdida, desecho).
+    /// <br/>
+    /// Valores: sale, write_off.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// Una nota.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Un empleado de un emisor, para sus recibos de nómina.
 /// </summary>
 public sealed partial class Employee
@@ -13149,6 +13337,178 @@ public sealed partial class FinancialStatementsIncomeStatementYearToDateSections
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Un activo fijo del emisor en su contabilidad al cierre de un mes: su monto original, su depreciación en línea recta (tasas del artículo 34 de la LISR) y su valor en libros.
+/// </summary>
+public sealed partial class FixedAsset
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es: lo capturado, o el emisor del CFDI.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// cfdi (llegó con una factura recibida de uso I01 a I08) o manual (capturado sin factura).
+    /// <br/>
+    /// Valores: cfdi, manual.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// Su tipo por uso CFDI (I01 a I08), que da su tasa.
+    /// </summary>
+    [JsonPropertyName("cfdi_use")]
+    public string CfdiUse { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de su tipo, por ejemplo «Equipo de cómputo».
+    /// </summary>
+    [JsonPropertyName("class")]
+    public string Class { get; set; } = default!;
+
+    /// <summary>
+    /// El UUID de su CFDI, o null si se capturó.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// Desde cuándo se usa: se deprecia desde el mes siguiente.
+    /// </summary>
+    [JsonPropertyName("in_use_since")]
+    public string InUseSince { get; set; } = default!;
+
+    /// <summary>
+    /// Su monto original sin IVA.
+    /// </summary>
+    [JsonPropertyName("cost")]
+    public decimal Cost { get; set; }
+
+    /// <summary>
+    /// Su tasa anual de depreciación (0.3 es 30%).
+    /// </summary>
+    [JsonPropertyName("annual_rate")]
+    public decimal AnnualRate { get; set; }
+
+    /// <summary>
+    /// Lo que se deprecia cada mes mientras dura.
+    /// </summary>
+    [JsonPropertyName("monthly_depreciation")]
+    public decimal MonthlyDepreciation { get; set; }
+
+    /// <summary>
+    /// El mes (AAAA-MM) a cuyo cierre van las cifras.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se depreció en ese mes.
+    /// </summary>
+    [JsonPropertyName("month_depreciation")]
+    public decimal MonthDepreciation { get; set; }
+
+    /// <summary>
+    /// Lo depreciado hasta el cierre de ese mes.
+    /// </summary>
+    [JsonPropertyName("accumulated_depreciation")]
+    public decimal AccumulatedDepreciation { get; set; }
+
+    /// <summary>
+    /// Su valor en libros: el monto original menos lo depreciado; 0 después de su baja.
+    /// </summary>
+    [JsonPropertyName("book_value")]
+    public decimal BookValue { get; set; }
+
+    /// <summary>
+    /// Su venta o baja (date, reason sale o write_off, note), o null si sigue en uso.
+    /// </summary>
+    [JsonPropertyName("disposal")]
+    public FixedAssetDisposal? Disposal { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;FixedAssetDisposal&lt;/c&gt;.
+/// </summary>
+public sealed partial class FixedAssetDisposal
+{
+    /// <summary>
+    /// El día de la venta o la baja.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// sale (venta) o write_off (robo, pérdida, desecho).
+    /// <br/>
+    /// Valores: sale, write_off.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// La nota que se dejó, o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class FixedAssetList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<FixedAsset> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -19122,12 +19482,18 @@ public sealed partial class JournalEntry
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina), employee_expenses (un anticipo, reembolso, devolución o comprobación de viáticos, contra 107.01 «Funcionarios y empleados») o depreciation (la depreciación del mes de los activos fijos).
+    /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina), employee_expenses (un anticipo, reembolso, devolución o comprobación de viáticos, contra 107.01 «Funcionarios y empleados»), depreciation (la depreciación del mes de los activos fijos), manual (una póliza capturada a mano, o la reversión de una provisión) o asset_disposal (la venta o baja de un activo fijo).
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Con type manual: la póliza capturada (mje_…), también en su reversión; null en las demás.
+    /// </summary>
+    [JsonPropertyName("manual_entry")]
+    public string? ManualEntry { get; set; }
 
     /// <summary>
     /// La fecha del CFDI o del pago; en la depreciación, el último día del mes.
@@ -19665,6 +20031,24 @@ public sealed partial class ListExportsParams
 }
 
 /// <summary>
+/// Los campos de «Listar los activos fijos».
+/// </summary>
+public sealed partial class ListFixedAssetsParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM) a cuyo cierre van las cifras. Por omisión, el actual.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string? Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar movimientos del IMSS».
 /// </summary>
 public sealed partial class ListImssMovementsParams
@@ -19869,6 +20253,42 @@ public sealed partial class ListJournalEntriesParams
 /// </summary>
 public sealed partial class ListLedgerAccountsParams
 {
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar las pólizas capturadas».
+/// </summary>
+public sealed partial class ListManualEntriesParams
+{
+    /// <summary>
+    /// Cuántas por página, de 1 a 1,000. Por omisión 100.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// La última (mje_…) de la página anterior.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// Desde este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Hasta este día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -20930,6 +21350,178 @@ public sealed partial class ListWebhookEndpointsParams
     /// </summary>
     [JsonPropertyName("starting_after")]
     public string? StartingAfter { get; set; }
+}
+
+/// <summary>
+/// Una póliza capturada a mano (ajuste, provisión, reclasificación): entra a las pólizas, la balanza, los estados financieros y la contabilidad electrónica de su mes.
+/// </summary>
+public sealed partial class ManualJournalEntry
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha de la póliza.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Su concepto.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// adjustment (ajuste), accrual (provisión), reclassification (reclasificación) u other.
+    /// <br/>
+    /// Valores: adjustment, accrual, reclassification, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de póliza: journal (diario), income (ingresos) o expense (egresos).
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string JournalType { get; set; } = default!;
+
+    /// <summary>
+    /// true: una provisión que se revierte sola el día 1 del mes siguiente.
+    /// </summary>
+    [JsonPropertyName("reverse_next_month")]
+    public bool ReverseNextMonth { get; set; }
+
+    /// <summary>
+    /// El día de su reversión, o null si no se revierte.
+    /// </summary>
+    [JsonPropertyName("reverses_on")]
+    public string? ReversesOn { get; set; }
+
+    /// <summary>
+    /// El UUID del CFDI con el que se relaciona, o null.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// El RFC de la otra parte de ese CFDI, o null.
+    /// </summary>
+    [JsonPropertyName("uuid_tax_id")]
+    public string? UuidTaxId { get; set; }
+
+    /// <summary>
+    /// La suma de sus cargos (igual a la de sus abonos).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Sus renglones: la cuenta y su cargo (debit) o abono (credit).
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<ManualJournalEntryLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se capturó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ManualJournalEntryLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ManualJournalEntryLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// El cargo, en pesos.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono, en pesos.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ManualJournalEntryList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ManualJournalEntry> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -31006,6 +31598,88 @@ public sealed partial class UpdateIssuerParamsDonationAuthorization
     /// </summary>
     [JsonPropertyName("date")]
     public required string Date { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Corregir una póliza capturada».
+/// </summary>
+public sealed partial class UpdateManualEntryParams
+{
+    /// <summary>
+    /// La fecha de la póliza (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// Su concepto.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// adjustment (ajuste), accrual (provisión), reclassification (reclasificación) u other.
+    /// <br/>
+    /// Valores: adjustment, accrual, reclassification, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// El tipo de póliza: journal (diario), income (ingresos) o expense (egresos).
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string? JournalType { get; set; }
+
+    /// <summary>
+    /// Solo con kind accrual: la póliza se revierte sola el día 1 del mes siguiente (para cuando llegue la factura).
+    /// </summary>
+    [JsonPropertyName("reverse_next_month")]
+    public bool? ReverseNextMonth { get; set; }
+
+    /// <summary>
+    /// El UUID del CFDI con el que se relaciona, si hay uno.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// Con uuid: el RFC de la otra parte de ese CFDI.
+    /// </summary>
+    [JsonPropertyName("uuid_tax_id")]
+    public string? UuidTaxId { get; set; }
+
+    /// <summary>
+    /// Sus cargos y abonos: cada renglón uno u otro; los cargos suman lo mismo que los abonos.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<UpdateManualEntryParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateManualEntryParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateManualEntryParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts), por ejemplo 205-06.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal? Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal? Credit { get; set; }
 }
 
 /// <summary>

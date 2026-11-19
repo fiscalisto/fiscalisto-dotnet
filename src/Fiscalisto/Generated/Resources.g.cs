@@ -315,6 +315,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public AccountingResource Accounting => _accounting ??= new AccountingResource(this);
 
+    private ManualEntriesResource? _manualEntries;
+
+    /// <summary>Contabilidad.</summary>
+    public ManualEntriesResource ManualEntries => _manualEntries ??= new ManualEntriesResource(this);
+
+    private FixedAssetsResource? _fixedAssets;
+
+    /// <summary>Contabilidad.</summary>
+    public FixedAssetsResource FixedAssets => _fixedAssets ??= new FixedAssetsResource(this);
+
     private StoreConnectionsResource? _storeConnections;
 
     /// <summary>Tiendas en línea.</summary>
@@ -4431,7 +4441,7 @@ public sealed class AccountingResource
     /// Listar las pólizas de un mes
     /// </summary>
     /// <remarks>
-    /// Las pólizas de diario del mes, con sus cuentas y código agrupador del SAT: una por cada CFDI de ingreso o egreso vigente, emitido o recibido (los recibidos con la categoría de su gasto); una por cada pago de un complemento; una por cada recibo de nómina, y una con la depreciación de los activos fijos. Un PUE se registra cobrado o pagado según su forma de pago. En pesos; un CFDI en otra moneda sin tipo de cambio no se registra. No incluye movimientos de banco sin CFDI ni provisiones.
+    /// Las pólizas de diario del mes, con sus cuentas y código agrupador del SAT: una por cada CFDI de ingreso o egreso vigente, emitido o recibido (los recibidos con la categoría de su gasto); una por cada pago de un complemento; una por cada recibo de nómina; una con la depreciación de los activos fijos; una por cada venta o baja de un activo, y las capturadas a mano (POST /v1/accounting/manual_entries) con las reversiones de sus provisiones. Un PUE se registra cobrado o pagado según su forma de pago. En pesos; un CFDI en otra moneda sin tipo de cambio no se registra. No incluye movimientos de banco sin CFDI.
     /// <br/>
     /// <c>GET /v1/accounting/journal_entries</c>
     /// <br/>
@@ -4532,6 +4542,20 @@ public sealed class AccountingResource
         => _client.RequestAsync<LedgerAccountList>("GET", "/v1/accounting/accounts", null, @params, options, false, cancellationToken);
 
     /// <summary>
+    /// Agregar una cuenta al catálogo
+    /// </summary>
+    /// <remarks>
+    /// Una cuenta propia del emisor, para sus pólizas a mano: su número (que no se repite), su nombre y una subcuenta del código agrupador del SAT. Entra al catálogo de la contabilidad electrónica.
+    /// <br/>
+    /// <c>POST /v1/accounting/accounts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-ledger-account"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<LedgerAccount> CreateAccountAsync(CreateLedgerAccountParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<LedgerAccount>("POST", "/v1/accounting/accounts", @params, null, options, true, cancellationToken);
+
+    /// <summary>
     /// Descargar la contabilidad electrónica
     /// </summary>
     /// <remarks>
@@ -4572,6 +4596,186 @@ public sealed class AccountingResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> DiotFileAsync(GetDiotFileParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", "/v1/accounting/diot/file", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.ManualEntries</c>.
+/// </summary>
+public sealed class ManualEntriesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ManualEntriesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Capturar una póliza
+    /// </summary>
+    /// <remarks>
+    /// Una póliza a mano: un ajuste, una provisión (reverse_next_month la revierte el día 1 del mes siguiente), una reclasificación. Cada renglón lleva una cuenta del catálogo por su número y un cargo o un abono; si no cuadran contesta entry_unbalanced, y una cuenta que no existe, account_missing. Entra a journal_entries, trial_balance, financial_statements y electronic_accounting de su mes. No puede ser antes de los saldos iniciales.
+    /// <br/>
+    /// <c>POST /v1/accounting/manual_entries</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-manual-entry"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ManualJournalEntry> CreateAsync(CreateManualEntryParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ManualJournalEntry>("POST", "/v1/accounting/manual_entries", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar las pólizas capturadas
+    /// </summary>
+    /// <remarks>
+    /// Las pólizas capturadas a mano del emisor, las más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/accounting/manual_entries</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-manual-entries"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ManualJournalEntry>> ListAsync(ListManualEntriesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ManualJournalEntry>("/v1/accounting/manual_entries", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar las pólizas capturadas: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ManualJournalEntry> ListAutoPagingAsync(ListManualEntriesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ManualJournalEntry>("/v1/accounting/manual_entries", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una póliza capturada
+    /// </summary>
+    /// <remarks>
+    /// Una póliza capturada a mano.
+    /// <br/>
+    /// <c>GET /v1/accounting/manual_entries/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-manual-entry"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ManualJournalEntry> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ManualJournalEntry>("GET", $"/v1/accounting/manual_entries/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Corregir una póliza capturada
+    /// </summary>
+    /// <remarks>
+    /// La reemplaza con lo que manda, con las mismas reglas que al capturarla.
+    /// <br/>
+    /// <c>POST /v1/accounting/manual_entries/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-manual-entry"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ManualJournalEntry> UpdateAsync(string id, UpdateManualEntryParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ManualJournalEntry>("POST", $"/v1/accounting/manual_entries/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una póliza capturada
+    /// </summary>
+    /// <remarks>
+    /// Sale de la contabilidad con su reversión, si tenía.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/manual_entries/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-manual-entry"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/accounting/manual_entries/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.FixedAssets</c>.
+/// </summary>
+public sealed class FixedAssetsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal FixedAssetsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar los activos fijos
+    /// </summary>
+    /// <remarks>
+    /// Los activos fijos del emisor al cierre de un mes: los que llegaron con una factura recibida de uso I01 a I08 (fxc_…) y los capturados sin ella (fxa_…), con su depreciación mensual y acumulada y su valor en libros.
+    /// <br/>
+    /// <c>GET /v1/accounting/fixed_assets</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-fixed-assets"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FixedAssetList> ListAsync(ListFixedAssetsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FixedAssetList>("GET", "/v1/accounting/fixed_assets", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Agregar un activo fijo sin factura
+    /// </summary>
+    /// <remarks>
+    /// Uno que compró antes de usar Fiscalisto o cuya factura no está aquí. Se deprecia cada mes desde el siguiente a in_use_since, en la contabilidad y en el cálculo del ISR. Su costo no entra solo a los libros: va en los saldos iniciales o en una póliza (POST /v1/accounting/manual_entries).
+    /// <br/>
+    /// <c>POST /v1/accounting/fixed_assets</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-fixed-asset"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FixedAsset> CreateAsync(CreateFixedAssetParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FixedAsset>("POST", "/v1/accounting/fixed_assets", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver un activo fijo
+    /// </summary>
+    /// <remarks>
+    /// Un activo fijo, con sus cifras al cierre del mes actual.
+    /// <br/>
+    /// <c>GET /v1/accounting/fixed_assets/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-fixed-asset"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FixedAsset> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FixedAsset>("GET", $"/v1/accounting/fixed_assets/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Borrar un activo fijo capturado
+    /// </summary>
+    /// <remarks>
+    /// Solo uno capturado sin factura (fxa_…); uno con CFDI contesta asset_from_cfdi: véndalo o dele de baja.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/fixed_assets/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-fixed-asset"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/accounting/fixed_assets/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Vender o dar de baja un activo fijo
+    /// </summary>
+    /// <remarks>
+    /// Deja de depreciarse el mes de date, y ese día una póliza (asset_disposal) cancela el activo y su depreciación acumulada; su valor en libros va a pérdida en venta o baja (703). El ingreso de una venta entra con la factura que emita. Uno ya dado de baja contesta asset_already_disposed.
+    /// <br/>
+    /// <c>POST /v1/accounting/fixed_assets/{id}/dispose</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/dispose-fixed-asset"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FixedAsset> DisposeAsync(string id, DisposeFixedAssetParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FixedAsset>("POST", $"/v1/accounting/fixed_assets/{Uri.EscapeDataString(id)}/dispose", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Deshacer la baja de un activo fijo
+    /// </summary>
+    /// <remarks>
+    /// El activo vuelve a depreciarse como si nunca se hubiera dado de baja.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/fixed_assets/{id}/disposal</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/undispose-fixed-asset"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FixedAsset> UndisposeAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FixedAsset>("DELETE", $"/v1/accounting/fixed_assets/{Uri.EscapeDataString(id)}/disposal", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
