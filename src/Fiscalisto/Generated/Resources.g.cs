@@ -235,6 +235,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Inventario.</summary>
     public StockAdjustmentsResource StockAdjustments => _stockAdjustments ??= new StockAdjustmentsResource(this);
 
+    private ProductionOrdersResource? _productionOrders;
+
+    /// <summary>Inventario.</summary>
+    public ProductionOrdersResource ProductionOrders => _productionOrders ??= new ProductionOrdersResource(this);
+
     private SatCatalogsResource? _satCatalogs;
 
     /// <summary>Catálogos del SAT.</summary>
@@ -1875,7 +1880,7 @@ public sealed class PayrollReceiptsResource
     /// Timbrar un recibo de nómina
     /// </summary>
     /// <remarks>
-    /// Nómina ordinaria (Nómina 1.2): Fiscalisto calcula sueldo, ISR con subsidio al empleo e IMSS del empleado y el periodo, como la app, y nada más: aguinaldo, PTU, finiquitos, bonos, horas extra, Infonavit o préstamos los calcula su sistema y se timbran con POST /v1/payroll_receipts/external (pedirlos aquí contesta payroll_calculation_unsupported). Revise antes el recibo con POST /v1/payroll_receipts/preview y mande su confirmation_token: así solo se timbra el recibo que revisó (si cambió, 409 payroll_calculation_changed). Queda como factura tipo N (GET /v1/invoices/{id}). El emisor necesita employer_registration.
+    /// Nómina ordinaria (Nómina 1.2): Fiscalisto calcula sueldo, ISR con subsidio al empleo e IMSS del empleado y el periodo, como la app, y nada más: el aguinaldo, la PTU y los finiquitos los calcula POST /v1/payroll_receipts/extraordinary; bonos, horas extra, Infonavit o préstamos los calcula su sistema y se timbran con POST /v1/payroll_receipts/external (pedirlos aquí contesta payroll_calculation_unsupported). Revise antes el recibo con POST /v1/payroll_receipts/preview y mande su confirmation_token: así solo se timbra el recibo que revisó (si cambió, 409 payroll_calculation_changed). Queda como factura tipo N (GET /v1/invoices/{id}). El emisor necesita employer_registration.
     /// <br/>
     /// <c>POST /v1/payroll_receipts</c>
     /// <br/>
@@ -1898,6 +1903,34 @@ public sealed class PayrollReceiptsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollReceiptPreview> PreviewAsync(PreviewPayrollReceiptParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollReceiptPreview>("POST", "/v1/payroll_receipts/preview", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Timbrar un aguinaldo, PTU o finiquito
+    /// </summary>
+    /// <remarks>
+    /// Nómina extraordinaria (TipoNomina E) que calcula Fiscalisto, como la app en Nómina › Aguinaldo, PTU y finiquitos: el aguinaldo (los días al año del empleado, al menos 15, en proporción a los trabajados, 30 UMA exentas), la PTU (la parte que le toca, 15 UMA exentas) o el finiquito al último día trabajado (end_date): aguinaldo, vacaciones y prima vacacional proporcionales, menos lo que ya se le pagó en el año, y con exit_reason dismissal la indemnización de 3 meses, opcionalmente 20 días por año, y la prima de antigüedad (90 UMA exentas por año de servicio). El ISR de un aguinaldo o PTU, con el cálculo que retenga menos (art. 96 LISR o 174 del Reglamento) salvo que pida uno. Uno por empleado, tipo y año (el finiquito, por fecha de baja): pedirlo otra vez devuelve el mismo; cancelado, se emite de nuevo. Revíselo antes con POST /v1/payroll_receipts/extraordinary/preview y mande su confirmation_token. Queda como factura tipo N.
+    /// <br/>
+    /// <c>POST /v1/payroll_receipts/extraordinary</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-extraordinary-payroll-receipt"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> CreateExtraordinaryAsync(CreateExtraordinaryPayrollReceiptParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", "/v1/payroll_receipts/extraordinary", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Calcular un aguinaldo, PTU o finiquito sin timbrar
+    /// </summary>
+    /// <remarks>
+    /// El recibo extraordinario como se timbraría (lo que paga, su parte exenta, el ISR con los dos cálculos y el neto), sin timbrar ni usar timbres, con el confirmation_token que lo timbra tal cual.
+    /// <br/>
+    /// <c>POST /v1/payroll_receipts/extraordinary/preview</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/preview-extraordinary-payroll-receipt"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ExtraordinaryPayrollReceiptPreview> PreviewExtraordinaryAsync(PreviewExtraordinaryPayrollReceiptParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ExtraordinaryPayrollReceiptPreview>("POST", "/v1/payroll_receipts/extraordinary/preview", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Timbrar un recibo calculado por su sistema
@@ -3500,6 +3533,106 @@ public sealed class StockAdjustmentsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<StockAdjustment> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<StockAdjustment>("GET", $"/v1/stock_adjustments/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Inventario: <c>fiscalisto.ProductionOrders</c>.
+/// </summary>
+public sealed class ProductionOrdersResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ProductionOrdersResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una orden de producción
+    /// </summary>
+    /// <remarks>
+    /// Una orden en borrador (status draft) para producir quantity de un producto con receta: sus components salen de la receta (la hoja de costo de Compras › Costos y márgenes) con su merma y rendimiento, y sus other_costs se escalan a la cantidad. Nada se mueve hasta iniciarla. Enciende Producción en el inventario si estaba apagada. Un producto sin receta: 400 inventory_refused.
+    /// <br/>
+    /// <c>POST /v1/production_orders</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/create-production-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ProductionOrder> CreateAsync(CreateProductionOrderParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ProductionOrder>("POST", "/v1/production_orders", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar órdenes de producción
+    /// </summary>
+    /// <remarks>
+    /// Las órdenes del emisor, las más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/production_orders</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/list-production-orders"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ProductionOrder>> ListAsync(ListProductionOrdersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ProductionOrder>("/v1/production_orders", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar órdenes de producción: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ProductionOrder> ListAutoPagingAsync(ListProductionOrdersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ProductionOrder>("/v1/production_orders", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una orden de producción
+    /// </summary>
+    /// <remarks>
+    /// Una orden con sus componentes, sus otros costos y, al terminar, su costo por unidad.
+    /// <br/>
+    /// <c>GET /v1/production_orders/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/get-production-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ProductionOrder> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ProductionOrder>("GET", $"/v1/production_orders/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Iniciar una orden de producción
+    /// </summary>
+    /// <remarks>
+    /// Los componentes salen del almacén (status in_process), cada lote el que caduca primero, al costo del emisor (promedio o PEPS). Mande components para lo que de verdad se usó de alguno. Con existencias negativas en «No permitir», uno que no alcanza: 400 inventory_refused.
+    /// <br/>
+    /// <c>POST /v1/production_orders/{id}/start</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/start-production-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ProductionOrder> StartAsync(string id, StartProductionOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ProductionOrder>("POST", $"/v1/production_orders/{Uri.EscapeDataString(id)}/start", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Terminar una orden de producción
+    /// </summary>
+    /// <remarks>
+    /// Lo producido entra al almacén destino a su costo real: (materials_cost + other_costs) ÷ quantity_made (status completed). Una en borrador se inicia antes con lo planeado.
+    /// <br/>
+    /// <c>POST /v1/production_orders/{id}/complete</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/complete-production-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ProductionOrder> CompleteAsync(string id, CompleteProductionOrderParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ProductionOrder>("POST", $"/v1/production_orders/{Uri.EscapeDataString(id)}/complete", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cancelar una orden de producción
+    /// </summary>
+    /// <remarks>
+    /// Los componentes regresan a su almacén y lo producido sale (status cancelled). Una ya cancelada: 400 inventory_refused.
+    /// <br/>
+    /// <c>POST /v1/production_orders/{id}/cancel</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/inventario/cancel-production-order"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ProductionOrder> CancelAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ProductionOrder>("POST", $"/v1/production_orders/{Uri.EscapeDataString(id)}/cancel", null, null, options, true, cancellationToken);
 }
 
 /// <summary>

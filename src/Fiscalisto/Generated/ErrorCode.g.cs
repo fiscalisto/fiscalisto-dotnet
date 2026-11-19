@@ -234,7 +234,7 @@ public static class ErrorCode
     /// <summary>Mandó el confirmation_token de una vista previa, pero el recibo que se calcularía ahora es otro (se timbró otro recibo del empleado ese mes, cambió su salario o se actualizaron las tablas). No se timbró: pida la vista previa otra vez y mande su token nuevo.</summary>
     public const string PayrollCalculationChanged = "payroll_calculation_changed";
 
-    /// <summary>Fiscalisto calcula solo la nómina ordinaria (sueldo, ISR con el subsidio para el empleo y cuotas obreras del IMSS). Aguinaldo, PTU, finiquitos, liquidaciones, pensiones y demás los calcula su sistema de nómina: timbre esos importes con POST /v1/payroll_receipts/external. param dice qué campo lo pidió.</summary>
+    /// <summary>POST /v1/payroll_receipts calcula solo la nómina ordinaria (sueldo, ISR con el subsidio para el empleo y cuotas obreras del IMSS). El aguinaldo, la PTU y el finiquito o la liquidación los calcula Fiscalisto con POST /v1/payroll_receipts/extraordinary; pensiones, bonos y demás los calcula su sistema de nómina y se timbran con POST /v1/payroll_receipts/external. param dice qué campo lo pidió.</summary>
     public const string PayrollCalculationUnsupported = "payroll_calculation_unsupported";
 
     /// <summary>El recibo de nómina no se puede calcular o timbrar con esos datos (periodo, días, registro patronal del emisor…). En un recibo calculado por su sistema (/v1/payroll_receipts/external), errors trae todos los problemas, cada uno con su param, code (missing, not_allowed, invalid, catalog, totals_mismatch, rule) y message. No se usó ningún timbre.</summary>

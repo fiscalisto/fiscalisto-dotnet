@@ -3290,6 +3290,54 @@ public sealed partial class CompanyReportYearsItem
 }
 
 /// <summary>
+/// Los campos de «Terminar una orden de producción».
+/// </summary>
+public sealed partial class CompleteProductionOrderParams
+{
+    /// <summary>
+    /// Cuántas unidades salieron. Por omisión, quantity.
+    /// </summary>
+    [JsonPropertyName("quantity_made")]
+    public decimal? QuantityMade { get; set; }
+
+    /// <summary>
+    /// El lote de lo producido, si el producto lleva lotes. Por omisión, OP-&lt;folio&gt;.
+    /// </summary>
+    [JsonPropertyName("lot")]
+    public string? Lot { get; set; }
+
+    /// <summary>
+    /// La caducidad de ese lote (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("expires_on")]
+    public string? ExpiresOn { get; set; }
+
+    /// <summary>
+    /// Los otros costos como de verdad fueron; por omisión, los de la receta.
+    /// </summary>
+    [JsonPropertyName("other_costs")]
+    public List<CompleteProductionOrderParamsOtherCostsItem>? OtherCosts { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CompleteProductionOrderParamsOtherCostsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CompleteProductionOrderParamsOtherCostsItem
+{
+    /// <summary>
+    /// Qué fue: gas, mano de obra…
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// Cuánto, en pesos sin IVA.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+}
+
+/// <summary>
 /// La opinión de cumplimiento de obligaciones fiscales (32-D) más reciente del emisor, como la dio el SAT.
 /// </summary>
 public sealed partial class ComplianceOpinion
@@ -4679,6 +4727,96 @@ public sealed partial class CreateExportParams
     /// </summary>
     [JsonPropertyName("files")]
     public string? Files { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Timbrar un aguinaldo, PTU o finiquito».
+/// </summary>
+public sealed partial class CreateExtraordinaryPayrollReceiptParams
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// aguinaldo (sus días al año, al menos 15, en proporción a los trabajados), ptu (la parte que le toca de las utilidades) o finiquito (al último día trabajado, end_date del empleado: aguinaldo, vacaciones y prima vacacional proporcionales y, con exit_reason dismissal, la indemnización y la prima de antigüedad).
+    /// <br/>
+    /// Valores: aguinaldo, ptu, finiquito.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// FechaPago del recibo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public required string PaymentDate { get; set; }
+
+    /// <summary>
+    /// aguinaldo: el año que paga (por omisión, el de payment_date). ptu: el año de la utilidad (por omisión, el anterior a payment_date).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// aguinaldo: los días trabajados en el año, si no son todos los que estuvo contratado (faltas o incapacidades que no cuentan).
+    /// </summary>
+    [JsonPropertyName("days_worked")]
+    public decimal? DaysWorked { get; set; }
+
+    /// <summary>
+    /// ptu: lo que le toca a este empleado (la mitad de la PTU por días trabajados y la mitad por salario, con el tope de tres meses de salario). Fiscalisto calcula su parte exenta (15 UMA) y su ISR.
+    /// </summary>
+    [JsonPropertyName("ptu_amount")]
+    public decimal? PtuAmount { get; set; }
+
+    /// <summary>
+    /// aguinaldo y ptu: cómo retener el ISR de la parte gravada. lower (por omisión) el que retenga menos; art96 sumada al sueldo del mes; art174 el procedimiento opcional del Reglamento de la LISR.
+    /// <br/>
+    /// Valores: lower, art96, art174.
+    /// </summary>
+    [JsonPropertyName("isr_method")]
+    public string? IsrMethod { get; set; }
+
+    /// <summary>
+    /// finiquito: resignation (renuncia o común acuerdo, por omisión) o dismissal (despido sin causa: suma 3 meses de salario integrado y la prima de antigüedad).
+    /// <br/>
+    /// Valores: resignation, dismissal.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
+
+    /// <summary>
+    /// finiquito con dismissal: incluye 20 días por año de servicio (LFT art. 50), cuando el patrón no lo reinstala.
+    /// </summary>
+    [JsonPropertyName("twenty_days_per_year")]
+    public bool? TwentyDaysPerYear { get; set; }
+
+    /// <summary>
+    /// finiquito: los días de vacaciones del año de servicio en curso que ya tomó.
+    /// </summary>
+    [JsonPropertyName("vacation_days_taken")]
+    public decimal? VacationDaysTaken { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// El confirmation_token de POST /v1/payroll_receipts/extraordinary/preview: timbra solo si el recibo calculado ahora es el que revisó (si no, 409 payroll_calculation_changed).
+    /// </summary>
+    [JsonPropertyName("confirmation_token")]
+    public string? ConfirmationToken { get; set; }
 }
 
 /// <summary>
@@ -6127,6 +6265,54 @@ public sealed partial class CreateProductParamsLocalTaxesItem
     /// </summary>
     [JsonPropertyName("rate")]
     public required decimal Rate { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear una orden de producción».
+/// </summary>
+public sealed partial class CreateProductionOrderParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Lo que va a producir (prd_…): un producto con receta (su hoja de costo en Compras › Costos y márgenes).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public required string Product { get; set; }
+
+    /// <summary>
+    /// Cuántas unidades, en la unidad del producto.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public required decimal Quantity { get; set; }
+
+    /// <summary>
+    /// El almacén de donde salen los componentes (whs_…). Por omisión, el de la Matriz.
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
+
+    /// <summary>
+    /// El almacén al que entra lo producido (whs_…). Por omisión, warehouse.
+    /// </summary>
+    [JsonPropertyName("destination_warehouse")]
+    public string? DestinationWarehouse { get; set; }
+
+    /// <summary>
+    /// Para cuándo (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string? DueDate { get; set; }
+
+    /// <summary>
+    /// Una nota.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }
 
 /// <summary>
@@ -12793,6 +12979,496 @@ public sealed partial class ExternalPayrollReceiptPreviewWarningsItem
     /// </summary>
     [JsonPropertyName("message")]
     public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Un aguinaldo, PTU o finiquito como se timbraría (nómina extraordinaria): lo que paga, su parte exenta, el ISR y el neto.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreview
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Lo calculó Fiscalisto, como nómina extraordinaria.
+    /// </summary>
+    [JsonPropertyName("calculation")]
+    public string Calculation { get; set; } = default!;
+
+    /// <summary>
+    /// Mándelo en POST /v1/payroll_receipts/extraordinary para timbrar exactamente este recibo: si al timbrar se calcula otro, contesta 409 payroll_calculation_changed sin timbrar.
+    /// </summary>
+    [JsonPropertyName("confirmation_token")]
+    public string ConfirmationToken { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Qué paga: aguinaldo, ptu o finiquito.
+    /// <br/>
+    /// Valores: aguinaldo, ptu, finiquito.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// El periodo (FechaInicialPago, FechaFinalPago) de un recibo extraordinario es un solo día: payment_date (aguinaldo, PTU) o el último día trabajado (finiquito); payment_date es FechaPago.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public ExtraordinaryPayrollReceiptPreviewPeriod Period { get; set; } = default!;
+
+    /// <summary>
+    /// Salario base de cotización (SalarioBaseCotApor).
+    /// </summary>
+    [JsonPropertyName("contribution_base_salary")]
+    public decimal ContributionBaseSalary { get; set; }
+
+    /// <summary>
+    /// Lo que paga, como lo muestra la app.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<ExtraordinaryPayrollReceiptPreviewLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Percepciones (Percepcion): sueldo y demás, gravado y exento.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public List<ExtraordinaryPayrollReceiptPreviewPerceptionsItem> Perceptions { get; set; } = default!;
+
+    /// <summary>
+    /// Deducciones (Deduccion): ISR, cuotas IMSS y demás.
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public List<ExtraordinaryPayrollReceiptPreviewDeductionsItem> Deductions { get; set; } = default!;
+
+    /// <summary>
+    /// Otros pagos (OtroPago): subsidio para el empleo.
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public List<ExtraordinaryPayrollReceiptPreviewOtherPaymentsItem> OtherPayments { get; set; } = default!;
+
+    /// <summary>
+    /// SeparacionIndemnizacion: solo en una liquidación (indemnización y prima de antigüedad).
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public ExtraordinaryPayrollReceiptPreviewSeparation? Separation { get; set; }
+
+    /// <summary>
+    /// El cálculo del ISR del periodo: base, tarifa, subsidio y resultado.
+    /// </summary>
+    [JsonPropertyName("isr")]
+    public ExtraordinaryPayrollReceiptPreviewIsr Isr { get; set; } = default!;
+
+    /// <summary>
+    /// Totales: percepciones, deducciones, otros pagos y el neto a pagar.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public ExtraordinaryPayrollReceiptPreviewTotals Totals { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ExtraordinaryPayrollReceiptPreviewDeductionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewDeductionsItem
+{
+    /// <summary>
+    /// Tipo de deducción (TipoDeduccion), c_TipoDeduccion: 001 IMSS, 002 ISR…
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Clave del patrón (Clave).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Concepto (Concepto).
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// Importe (Importe).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El cálculo del ISR del periodo: base, tarifa, subsidio y resultado.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewIsr
+{
+    /// <summary>
+    /// ISR retenido.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// aguinaldo y ptu: ISR con la parte gravada sumada al sueldo del mes.
+    /// </summary>
+    [JsonPropertyName("art96")]
+    public decimal? Art96 { get; set; }
+
+    /// <summary>
+    /// aguinaldo y ptu: ISR con el procedimiento del art. 174 del Reglamento.
+    /// </summary>
+    [JsonPropertyName("art174")]
+    public decimal? Art174 { get; set; }
+
+    /// <summary>
+    /// aguinaldo y ptu: el cálculo que se aplicó.
+    /// <br/>
+    /// Valores: art96, art174.
+    /// </summary>
+    [JsonPropertyName("method")]
+    public string? Method { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExtraordinaryPayrollReceiptPreviewLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewLinesItem
+{
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo se calculó (días, años, salario).
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string Detail { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("gross")]
+    public decimal Gross { get; set; }
+
+    /// <summary>
+    /// De él, la parte exenta del ISR.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExtraordinaryPayrollReceiptPreviewOtherPaymentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewOtherPaymentsItem
+{
+    /// <summary>
+    /// Tipo de otro pago (TipoOtroPago), c_TipoOtroPago: 002 subsidio para el empleo.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Clave del patrón (Clave).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Concepto (Concepto).
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// Importe pagado (Importe).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Subsidio causado (SubsidioCausado).
+    /// </summary>
+    [JsonPropertyName("subsidy_caused")]
+    public decimal? SubsidyCaused { get; set; }
+
+    /// <summary>
+    /// Del subsidio causado, el ISR que evitó (no va en el XML).
+    /// </summary>
+    [JsonPropertyName("subsidy_applied")]
+    public decimal? SubsidyApplied { get; set; }
+
+    /// <summary>
+    /// Compensación del saldo a favor (CompensacionSaldosAFavor), con el 004.
+    /// </summary>
+    [JsonPropertyName("balance_compensation")]
+    public ExtraordinaryPayrollReceiptPreviewOtherPaymentsItemBalanceCompensation? BalanceCompensation { get; set; }
+}
+
+/// <summary>
+/// Compensación del saldo a favor (CompensacionSaldosAFavor), con el 004.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewOtherPaymentsItemBalanceCompensation
+{
+    /// <summary>
+    /// Saldo a favor (SaldoAFavor).
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// Año del saldo a favor (Año).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Remanente del saldo a favor (RemanenteSalFav).
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public decimal Remaining { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExtraordinaryPayrollReceiptPreviewPerceptionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewPerceptionsItem
+{
+    /// <summary>
+    /// Tipo de percepción (TipoPercepcion), c_TipoPercepcion: 001 sueldos…
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Clave del patrón (Clave).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Concepto (Concepto).
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// Importe gravado (ImporteGravado).
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal Taxed { get; set; }
+
+    /// <summary>
+    /// Importe exento (ImporteExento).
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Horas extra (HorasExtra), con la percepción 019.
+    /// </summary>
+    [JsonPropertyName("overtime")]
+    public List<ExtraordinaryPayrollReceiptPreviewPerceptionsItemOvertimeItem>? Overtime { get; set; }
+
+    /// <summary>
+    /// Acciones o títulos (AccionesOTitulos), con la percepción 045.
+    /// </summary>
+    [JsonPropertyName("stock_options")]
+    public ExtraordinaryPayrollReceiptPreviewPerceptionsItemStockOptions? StockOptions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ExtraordinaryPayrollReceiptPreviewPerceptionsItemOvertimeItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewPerceptionsItemOvertimeItem
+{
+    /// <summary>
+    /// Días con horas extra (Dias).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long Days { get; set; }
+
+    /// <summary>
+    /// c_TipoHoras: 01 dobles, 02 triples, 03 simples.
+    /// </summary>
+    [JsonPropertyName("hours_type")]
+    public string HoursType { get; set; } = default!;
+
+    /// <summary>
+    /// Horas extra (HorasExtra).
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public long Hours { get; set; }
+
+    /// <summary>
+    /// Importe pagado (ImportePagado).
+    /// </summary>
+    [JsonPropertyName("amount_paid")]
+    public decimal AmountPaid { get; set; }
+}
+
+/// <summary>
+/// Acciones o títulos (AccionesOTitulos), con la percepción 045.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewPerceptionsItemStockOptions
+{
+    /// <summary>
+    /// Valor de mercado (ValorMercado).
+    /// </summary>
+    [JsonPropertyName("market_value")]
+    public decimal MarketValue { get; set; }
+
+    /// <summary>
+    /// Precio al otorgarse (PrecioAlOtorgarse).
+    /// </summary>
+    [JsonPropertyName("grant_price")]
+    public decimal GrantPrice { get; set; }
+}
+
+/// <summary>
+/// El periodo (FechaInicialPago, FechaFinalPago) de un recibo extraordinario es un solo día: payment_date (aguinaldo, PTU) o el último día trabajado (finiquito); payment_date es FechaPago.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewPeriod
+{
+    /// <summary>
+    /// Primer día del periodo (FechaInicialPago), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// Último día del periodo (FechaFinalPago), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+
+    /// <summary>
+    /// Fecha de pago (FechaPago), AAAA-MM-DD. Por omisión el último día del periodo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string PaymentDate { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ExtraordinaryPayrollReceiptPreviewSeparation&lt;/c&gt;.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewSeparation
+{
+    /// <summary>
+    /// Total pagado (TotalPagado).
+    /// </summary>
+    [JsonPropertyName("total_paid")]
+    public decimal TotalPaid { get; set; }
+
+    /// <summary>
+    /// Años de servicio (NumAñosServicio).
+    /// </summary>
+    [JsonPropertyName("years_of_service")]
+    public long YearsOfService { get; set; }
+
+    /// <summary>
+    /// Último sueldo mensual ordinario (UltimoSueldoMensOrd).
+    /// </summary>
+    [JsonPropertyName("last_monthly_salary")]
+    public decimal LastMonthlySalary { get; set; }
+
+    /// <summary>
+    /// Ingreso acumulable (IngresoAcumulable).
+    /// </summary>
+    [JsonPropertyName("accumulable_income")]
+    public decimal AccumulableIncome { get; set; }
+
+    /// <summary>
+    /// Ingreso no acumulable (IngresoNoAcumulable).
+    /// </summary>
+    [JsonPropertyName("non_accumulable_income")]
+    public decimal NonAccumulableIncome { get; set; }
+}
+
+/// <summary>
+/// Totales: percepciones, deducciones, otros pagos y el neto a pagar.
+/// </summary>
+public sealed partial class ExtraordinaryPayrollReceiptPreviewTotals
+{
+    /// <summary>
+    /// Total de sueldos, salarios y asimilados (TotalSueldos).
+    /// </summary>
+    [JsonPropertyName("salaries")]
+    public decimal Salaries { get; set; }
+
+    /// <summary>
+    /// Total gravado (TotalGravado).
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal Taxed { get; set; }
+
+    /// <summary>
+    /// Total exento (TotalExento).
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// Total de separación e indemnización (TotalSeparacionIndemnizacion).
+    /// </summary>
+    [JsonPropertyName("separation")]
+    public decimal Separation { get; set; }
+
+    /// <summary>
+    /// Total de jubilación, pensión o retiro (TotalJubilacionPensionRetiro).
+    /// </summary>
+    [JsonPropertyName("retirement")]
+    public decimal Retirement { get; set; }
+
+    /// <summary>
+    /// Total de percepciones (TotalPercepciones).
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public decimal Perceptions { get; set; }
+
+    /// <summary>
+    /// Otras deducciones (TotalOtrasDeducciones).
+    /// </summary>
+    [JsonPropertyName("other_deductions")]
+    public decimal OtherDeductions { get; set; }
+
+    /// <summary>
+    /// Impuestos retenidos (TotalImpuestosRetenidos).
+    /// </summary>
+    [JsonPropertyName("taxes_withheld")]
+    public decimal TaxesWithheld { get; set; }
+
+    /// <summary>
+    /// Total de deducciones (TotalDeducciones).
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public decimal Deductions { get; set; }
+
+    /// <summary>
+    /// Total de otros pagos (TotalOtrosPagos).
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public decimal OtherPayments { get; set; }
+
+    /// <summary>
+    /// Subtotal del comprobante: percepciones más otros pagos.
+    /// </summary>
+    [JsonPropertyName("subtotal")]
+    public decimal Subtotal { get; set; }
+
+    /// <summary>
+    /// Neto a pagar al empleado.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public decimal Net { get; set; }
 }
 
 /// <summary>
@@ -20463,6 +21139,44 @@ public sealed partial class ListPriceListsParams
 }
 
 /// <summary>
+/// Los campos de «Listar órdenes de producción».
+/// </summary>
+public sealed partial class ListProductionOrdersParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de este producto (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string? Product { get; set; }
+
+    /// <summary>
+    /// draft, in_process, completed o cancelled.
+    /// <br/>
+    /// Valores: draft, in_process, completed, cancelled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar productos».
 /// </summary>
 public sealed partial class ListProductsParams
@@ -21138,7 +21852,7 @@ public sealed partial class ListStockMovementsParams
     /// <summary>
     /// Solo los de este tipo.
     /// <br/>
-    /// Valores: sale, purchase, customer_return, supplier_return, adjustment, count, transfer_out, transfer_in, initial, cost, reversal.
+    /// Valores: sale, purchase, customer_return, supplier_return, adjustment, count, transfer_out, transfer_in, production_consumption, production_output, initial, cost, reversal.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -23511,6 +24225,90 @@ public sealed partial class PortalSupplierScorePartsItem
 }
 
 /// <summary>
+/// Los campos de «Calcular un aguinaldo, PTU o finiquito sin timbrar».
+/// </summary>
+public sealed partial class PreviewExtraordinaryPayrollReceiptParams
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// aguinaldo (sus días al año, al menos 15, en proporción a los trabajados), ptu (la parte que le toca de las utilidades) o finiquito (al último día trabajado, end_date del empleado: aguinaldo, vacaciones y prima vacacional proporcionales y, con exit_reason dismissal, la indemnización y la prima de antigüedad).
+    /// <br/>
+    /// Valores: aguinaldo, ptu, finiquito.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// FechaPago del recibo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public required string PaymentDate { get; set; }
+
+    /// <summary>
+    /// aguinaldo: el año que paga (por omisión, el de payment_date). ptu: el año de la utilidad (por omisión, el anterior a payment_date).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// aguinaldo: los días trabajados en el año, si no son todos los que estuvo contratado (faltas o incapacidades que no cuentan).
+    /// </summary>
+    [JsonPropertyName("days_worked")]
+    public decimal? DaysWorked { get; set; }
+
+    /// <summary>
+    /// ptu: lo que le toca a este empleado (la mitad de la PTU por días trabajados y la mitad por salario, con el tope de tres meses de salario). Fiscalisto calcula su parte exenta (15 UMA) y su ISR.
+    /// </summary>
+    [JsonPropertyName("ptu_amount")]
+    public decimal? PtuAmount { get; set; }
+
+    /// <summary>
+    /// aguinaldo y ptu: cómo retener el ISR de la parte gravada. lower (por omisión) el que retenga menos; art96 sumada al sueldo del mes; art174 el procedimiento opcional del Reglamento de la LISR.
+    /// <br/>
+    /// Valores: lower, art96, art174.
+    /// </summary>
+    [JsonPropertyName("isr_method")]
+    public string? IsrMethod { get; set; }
+
+    /// <summary>
+    /// finiquito: resignation (renuncia o común acuerdo, por omisión) o dismissal (despido sin causa: suma 3 meses de salario integrado y la prima de antigüedad).
+    /// <br/>
+    /// Valores: resignation, dismissal.
+    /// </summary>
+    [JsonPropertyName("exit_reason")]
+    public string? ExitReason { get; set; }
+
+    /// <summary>
+    /// finiquito con dismissal: incluye 20 días por año de servicio (LFT art. 50), cuando el patrón no lo reinstala.
+    /// </summary>
+    [JsonPropertyName("twenty_days_per_year")]
+    public bool? TwentyDaysPerYear { get; set; }
+
+    /// <summary>
+    /// finiquito: los días de vacaciones del año de servicio en curso que ya tomó.
+    /// </summary>
+    [JsonPropertyName("vacation_days_taken")]
+    public decimal? VacationDaysTaken { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Calcular un recibo sin timbrar».
 /// </summary>
 public sealed partial class PreviewPayrollReceiptParams
@@ -24132,6 +24930,230 @@ public sealed partial class ProductLocalTaxesItem
     /// </summary>
     [JsonPropertyName("rate")]
     public decimal Rate { get; set; }
+}
+
+/// <summary>
+/// Una orden de producción: los componentes de la receta salen de un almacén y lo producido entra a otro a su costo real.
+/// </summary>
+public sealed partial class ProductionOrder
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su folio, como OP-12.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// draft (borrador, nada se ha movido), in_process (los componentes ya salieron), completed (lo producido ya entró) o cancelled (todo regresó).
+    /// <br/>
+    /// Valores: draft, in_process, completed, cancelled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se produce (prd_…).
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas unidades se planearon.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// Cuántas salieron de verdad, o null si no ha terminado.
+    /// </summary>
+    [JsonPropertyName("quantity_made")]
+    public decimal? QuantityMade { get; set; }
+
+    /// <summary>
+    /// El almacén de donde salen los componentes (whs_…).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string Warehouse { get; set; } = default!;
+
+    /// <summary>
+    /// El almacén al que entra lo producido (whs_…).
+    /// </summary>
+    [JsonPropertyName("destination_warehouse")]
+    public string DestinationWarehouse { get; set; } = default!;
+
+    /// <summary>
+    /// El lote de lo producido, o null.
+    /// </summary>
+    [JsonPropertyName("lot")]
+    public string? Lot { get; set; }
+
+    /// <summary>
+    /// Para cuándo (AAAA-MM-DD), o null.
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string? DueDate { get; set; }
+
+    /// <summary>
+    /// Su nota, o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Lo que lleva, de la receta para quantity con su merma: quantity lo planeado, quantity_used lo que salió y value lo que costó (pesos sin IVA). tracks_stock false es un servicio: solo suma su costo.
+    /// </summary>
+    [JsonPropertyName("components")]
+    public List<ProductionOrderComponentsItem> Components { get; set; } = default!;
+
+    /// <summary>
+    /// Mano de obra, gas, empaque…: se suman al costo de lo producido.
+    /// </summary>
+    [JsonPropertyName("other_costs")]
+    public List<ProductionOrderOtherCostsItem> OtherCosts { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que costaron los componentes que salieron, o null antes de iniciar.
+    /// </summary>
+    [JsonPropertyName("materials_cost")]
+    public decimal? MaterialsCost { get; set; }
+
+    /// <summary>
+    /// (materials_cost + other_costs) ÷ quantity_made: el costo con que entró cada unidad, o null si no ha terminado.
+    /// </summary>
+    [JsonPropertyName("unit_cost")]
+    public decimal? UnitCost { get; set; }
+
+    /// <summary>
+    /// Cuándo se hizo.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo salieron los componentes, o null.
+    /// </summary>
+    [JsonPropertyName("started_at")]
+    public string? StartedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo entró lo producido, o null.
+    /// </summary>
+    [JsonPropertyName("completed_at")]
+    public string? CompletedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se canceló, o null.
+    /// </summary>
+    [JsonPropertyName("cancelled_at")]
+    public string? CancelledAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ProductionOrderComponentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ProductionOrderComponentsItem
+{
+    /// <summary>
+    /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string Product { get; set; } = default!;
+
+    /// <summary>
+    /// Cantidad (Cantidad). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal Quantity { get; set; }
+
+    /// <summary>
+    /// Lo que de verdad salió de ese componente, o null antes de iniciar la orden.
+    /// </summary>
+    [JsonPropertyName("quantity_used")]
+    public decimal? QuantityUsed { get; set; }
+
+    /// <summary>
+    /// true si lleva existencias; false es un servicio, que solo suma su costo.
+    /// </summary>
+    [JsonPropertyName("tracks_stock")]
+    public bool TracksStock { get; set; }
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ProductionOrderList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ProductionOrder> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ProductionOrderOtherCostsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ProductionOrderOtherCostsItem
+{
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
 }
 
 /// <summary>
@@ -28909,6 +29931,36 @@ public sealed partial class SignEfirmaParams
 }
 
 /// <summary>
+/// Los campos de «Iniciar una orden de producción».
+/// </summary>
+public sealed partial class StartProductionOrderParams
+{
+    /// <summary>
+    /// Lo que de verdad se usó de algún componente; los que no mande salen como dice la orden.
+    /// </summary>
+    [JsonPropertyName("components")]
+    public List<StartProductionOrderParamsComponentsItem>? Components { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;StartProductionOrderParamsComponentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class StartProductionOrderParamsComponentsItem
+{
+    /// <summary>
+    /// El componente (prd_…) de la orden.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public required string Product { get; set; }
+
+    /// <summary>
+    /// Lo que de verdad se usó, en la unidad del componente.
+    /// </summary>
+    [JsonPropertyName("quantity_used")]
+    public required decimal QuantityUsed { get; set; }
+}
+
+/// <summary>
 /// Un ajuste de existencias: lo que entró o salió de un almacén por inventario inicial, merma, robo, conteo…
 /// </summary>
 public sealed partial class StockAdjustment
@@ -29182,9 +30234,9 @@ public sealed partial class StockMovement
     public string Warehouse { get; set; } = default!;
 
     /// <summary>
-    /// sale (una factura), purchase (una compra), customer_return, supplier_return, adjustment, count (conteo físico), transfer_out, transfer_in, initial, cost (un ajuste de costo) o reversal (deshace otro, como una factura cancelada).
+    /// sale (una factura), purchase (una compra), customer_return, supplier_return, adjustment, count (conteo físico), transfer_out, transfer_in, production_consumption (un componente que salió a producción), production_output (lo producido), initial, cost (un ajuste de costo) o reversal (deshace otro, como una factura cancelada).
     /// <br/>
-    /// Valores: sale, purchase, customer_return, supplier_return, adjustment, count, transfer_out, transfer_in, initial, cost, reversal.
+    /// Valores: sale, purchase, customer_return, supplier_return, adjustment, count, transfer_out, transfer_in, production_consumption, production_output, initial, cost, reversal.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -29214,7 +30266,7 @@ public sealed partial class StockMovement
     public string? Lot { get; set; }
 
     /// <summary>
-    /// Lo que lo causó: type invoice (id es el UUID del CFDI), adjustment (adj_…), receipt, transfer, count o ticket.
+    /// Lo que lo causó: type invoice (id es el UUID del CFDI), adjustment (adj_…), production (mfo_…), receipt, transfer, count o ticket.
     /// </summary>
     [JsonPropertyName("source")]
     public StockMovementSource Source { get; set; } = default!;
@@ -29275,12 +30327,12 @@ public sealed partial class StockMovementList
 }
 
 /// <summary>
-/// Lo que lo causó: type invoice (id es el UUID del CFDI), adjustment (adj_…), receipt, transfer, count o ticket.
+/// Lo que lo causó: type invoice (id es el UUID del CFDI), adjustment (adj_…), production (mfo_…), receipt, transfer, count o ticket.
 /// </summary>
 public sealed partial class StockMovementSource
 {
     /// <summary>
-    /// Qué lo movió: invoice (una factura; id es su UUID), adjustment (un ajuste, adj_…), count (un conteo) u otro origen.
+    /// Qué lo movió: invoice (una factura; id es su UUID), adjustment (un ajuste, adj_…), production (una orden de producción, mfo_…), count (un conteo) u otro origen.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
