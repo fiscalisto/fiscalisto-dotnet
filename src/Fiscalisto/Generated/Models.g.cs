@@ -5261,6 +5261,12 @@ public sealed partial class CreateIssuerOnboardingLinkParams
     /// </summary>
     [JsonPropertyName("expires_in_hours")]
     public long? ExpiresInHours { get; set; }
+
+    /// <summary>
+    /// true para que la página también guarde (cifrada) la e.firma de su cliente, con su autorización, y pueda pedir al SAT sus facturas (POST /v1/sat_downloads), sus declaraciones (/v1/sat_declarations), su opinión de cumplimiento, constancia y buzón tributario. Sin esto la e.firma solo firma el contrato con el PAC y no se guarda.
+    /// </summary>
+    [JsonPropertyName("keep_efirma")]
+    public bool? KeepEfirma { get; set; }
 }
 
 /// <summary>
@@ -20253,7 +20259,7 @@ public sealed partial class IssuerList
 }
 
 /// <summary>
-/// Una liga para que el dueño de un emisor suba su CSD y firme con su e.firma.
+/// Una liga para que el dueño de un emisor suba su CSD y firme con su e.firma (y, con keep_efirma, la guarde para consultar el SAT).
 /// </summary>
 public sealed partial class IssuerOnboardingLink
 {
@@ -20286,6 +20292,12 @@ public sealed partial class IssuerOnboardingLink
     /// </summary>
     [JsonPropertyName("return_url")]
     public string? ReturnUrl { get; set; }
+
+    /// <summary>
+    /// La página también guarda la e.firma (cifrada) para las consultas al SAT del emisor.
+    /// </summary>
+    [JsonPropertyName("keep_efirma")]
+    public bool KeepEfirma { get; set; }
 
     /// <summary>
     /// Cuándo deja de servir la liga. Pida otra cuando quiera.
