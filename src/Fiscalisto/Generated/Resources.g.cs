@@ -4605,6 +4605,20 @@ public sealed class AccountingResource
         => _client.RequestAsync<TrialBalance>("GET", "/v1/accounting/trial_balance", null, @params, options, false, cancellationToken);
 
     /// <summary>
+    /// Ver el auxiliar de cuentas
+    /// </summary>
+    /// <remarks>
+    /// El libro mayor de un periodo de hasta 12 meses: el saldo inicial de cada cuenta, cada cargo y abono con su póliza (journal_entry, el mismo id de journal_entries), su CFDI y el saldo que deja, y el saldo final. Solo las cuentas que se movieron, o la que pida con account aunque no tenga movimientos. Una cuenta que no está en el catálogo contesta account_missing.
+    /// <br/>
+    /// <c>GET /v1/accounting/general_ledger</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-general-ledger"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<GeneralLedger> GeneralLedgerAsync(GetGeneralLedgerParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<GeneralLedger>("GET", "/v1/accounting/general_ledger", null, @params, options, false, cancellationToken);
+
+    /// <summary>
     /// Ver los estados financieros
     /// </summary>
     /// <remarks>

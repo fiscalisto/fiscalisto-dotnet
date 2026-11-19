@@ -14188,6 +14188,178 @@ public sealed partial class FixedAssetList
 }
 
 /// <summary>
+/// El auxiliar de cuentas (libro mayor) de un periodo de hasta 12 meses: cada cuenta con su saldo inicial, cada cargo y abono con su póliza y el saldo que deja, y su saldo final.
+/// </summary>
+public sealed partial class GeneralLedger
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El primer mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public string FromMonth { get; set; } = default!;
+
+    /// <summary>
+    /// El último mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("to_month")]
+    public string ToMonth { get; set; } = default!;
+
+    /// <summary>
+    /// Cada cuenta que se movió en el periodo (o la que pidió con account): sus saldos, sus sumas y sus movimientos.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<GeneralLedgerAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;GeneralLedgerAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class GeneralLedgerAccountsItem
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// debit (deudora) o credit (acreedora).
+    /// <br/>
+    /// Valores: debit, credit.
+    /// </summary>
+    [JsonPropertyName("nature")]
+    public string Nature { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo al empezar el mes.
+    /// </summary>
+    [JsonPropertyName("opening_balance")]
+    public decimal OpeningBalance { get; set; }
+
+    /// <summary>
+    /// Los cargos del mes.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// Los abonos del mes.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+
+    /// <summary>
+    /// El saldo al terminar el mes.
+    /// </summary>
+    [JsonPropertyName("closing_balance")]
+    public decimal ClosingBalance { get; set; }
+
+    /// <summary>
+    /// Cada cargo y abono de la cuenta en el periodo, en el orden de sus pólizas, con el saldo que deja.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public List<GeneralLedgerAccountsItemMovementsItem> Movements { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;GeneralLedgerAccountsItemMovementsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class GeneralLedgerAccountsItemMovementsItem
+{
+    /// <summary>
+    /// Fecha de emisión (Fecha), hora de la Ciudad de México.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// La póliza (el mismo id de GET /v1/accounting/journal_entries).
+    /// </summary>
+    [JsonPropertyName("journal_entry")]
+    public string JournalEntry { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Folio fiscal que asigna el SAT (UUID del Timbre Fiscal Digital), en mayúsculas.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+
+    /// <summary>
+    /// El saldo de la cuenta después de este movimiento, en su naturaleza.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver la asistencia de un periodo».
 /// </summary>
 public sealed partial class GetAttendanceParams
@@ -14459,6 +14631,36 @@ public sealed partial class GetFinancialStatementsParams
     /// </summary>
     [JsonPropertyName("month")]
     public required string Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver el auxiliar de cuentas».
+/// </summary>
+public sealed partial class GetGeneralLedgerParams
+{
+    /// <summary>
+    /// El primer mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public required string FromMonth { get; set; }
+
+    /// <summary>
+    /// El último mes (AAAA-MM), hasta 12 meses después; por omisión, from_month.
+    /// </summary>
+    [JsonPropertyName("to_month")]
+    public string? ToMonth { get; set; }
+
+    /// <summary>
+    /// Solo esta cuenta, por su número en el catálogo.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
 
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
