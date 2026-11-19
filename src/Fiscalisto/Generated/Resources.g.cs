@@ -330,6 +330,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public FixedAssetsResource FixedAssets => _fixedAssets ??= new FixedAssetsResource(this);
 
+    private BankMovementsResource? _bankMovements;
+
+    /// <summary>Contabilidad.</summary>
+    public BankMovementsResource BankMovements => _bankMovements ??= new BankMovementsResource(this);
+
     private StoreConnectionsResource? _storeConnections;
 
     /// <summary>Tiendas en línea.</summary>
@@ -4923,6 +4928,72 @@ public sealed class FixedAssetsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<FixedAsset> UndisposeAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<FixedAsset>("DELETE", $"/v1/accounting/fixed_assets/{Uri.EscapeDataString(id)}/disposal", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.BankMovements</c>.
+/// </summary>
+public sealed class BankMovementsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal BankMovementsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar los movimientos de banco sin factura
+    /// </summary>
+    /// <remarks>
+    /// Los movimientos de banco de un mes que ninguna factura explica: los retiros de los estados de cuenta importados en la conciliación (comisiones, impuestos, pagos de préstamos, traspasos) y los depósitos que ahí se clasificaron como préstamo, traspaso o devolución. Cada uno con su póliza, si ya se registró, y la cuenta sugerida. Lo que pagó o cobró una factura ya está en la contabilidad por su CFDI.
+    /// <br/>
+    /// <c>GET /v1/accounting/bank_movements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-bank-movements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AccountingBankMovementList> ListAsync(ListBankMovementsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AccountingBankMovementList>("GET", "/v1/accounting/bank_movements", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Registrar un movimiento de banco
+    /// </summary>
+    /// <remarks>
+    /// Le hace su póliza con fecha del movimiento: de ingresos (Bancos contra account) a un depósito, de egresos (account contra Bancos) a un retiro. Entra a la balanza, el auxiliar y la contabilidad electrónica como cualquier póliza capturada (manual_entry). Uno ya registrado contesta bank_movement_posted; un depósito sin clasificar o un retiro marcado, bank_movement_not_bookable.
+    /// <br/>
+    /// <c>POST /v1/accounting/bank_movements/{id}/post</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/post-bank-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AccountingBankMovement> PostAsync(string id, PostBankMovementParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AccountingBankMovement>("POST", $"/v1/accounting/bank_movements/{Uri.EscapeDataString(id)}/post", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar la póliza de un movimiento de banco
+    /// </summary>
+    /// <remarks>
+    /// Su póliza sale de la contabilidad y el movimiento vuelve a pending. Sin póliza contesta bank_movement_not_posted.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/bank_movements/{id}/post</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/unpost-bank-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AccountingBankMovement> UnpostAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AccountingBankMovement>("DELETE", $"/v1/accounting/bank_movements/{Uri.EscapeDataString(id)}/post", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Marcar un retiro
+    /// </summary>
+    /// <remarks>
+    /// paid_invoices: pagó facturas que ya están en la contabilidad por su CFDI; ignored: no se registra; pending: vuelve a por registrar. Solo retiros sin póliza.
+    /// <br/>
+    /// <c>POST /v1/accounting/bank_movements/{id}/mark</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/mark-bank-movement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AccountingBankMovement> MarkAsync(string id, MarkBankMovementParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AccountingBankMovement>("POST", $"/v1/accounting/bank_movements/{Uri.EscapeDataString(id)}/mark", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

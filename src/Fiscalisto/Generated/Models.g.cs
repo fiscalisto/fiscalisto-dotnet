@@ -104,6 +104,144 @@ public sealed partial class AccountKey
 }
 
 /// <summary>
+/// Un movimiento de banco que ninguna factura explica (un retiro, o un depósito clasificado como préstamo, traspaso o devolución) y su póliza de ingresos o egresos contra Bancos, cuando ya se registró.
+/// </summary>
+public sealed partial class AccountingBankMovement
+{
+    /// <summary>
+    /// btx_… para un depósito (el mismo de la conciliación) o bwd_… para un retiro.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// deposit (depósito) o withdrawal (retiro).
+    /// <br/>
+    /// Valores: deposit, withdrawal.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// El día del movimiento (AAAA-MM-DD), que es el de su póliza.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// El texto del banco, como vino en el estado de cuenta.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// La referencia o clave de rastreo, si la trae.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// El importe, en positivo.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El banco del estado de cuenta.
+    /// </summary>
+    [JsonPropertyName("bank")]
+    public string Bank { get; set; } = default!;
+
+    /// <summary>
+    /// Los últimos 4 dígitos de la cuenta, si se sabe.
+    /// </summary>
+    [JsonPropertyName("bank_account")]
+    public string? BankAccount { get; set; }
+
+    /// <summary>
+    /// Un depósito: lo que dijo la conciliación (loan, transfer o refund). null en un retiro.
+    /// <br/>
+    /// Valores: loan, transfer, refund.
+    /// </summary>
+    [JsonPropertyName("classification")]
+    public string? Classification { get; set; }
+
+    /// <summary>
+    /// pending (por registrar), posted (con póliza), paid_invoices (pagó facturas que ya están en la contabilidad) o ignored (no se registra).
+    /// <br/>
+    /// Valores: pending, posted, paid_invoices, ignored.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Su póliza (mje_…), que se ve y se corrige como cualquier póliza capturada, o null.
+    /// </summary>
+    [JsonPropertyName("manual_entry")]
+    public string? ManualEntry { get; set; }
+
+    /// <summary>
+    /// El número de la cuenta que va contra Bancos en su póliza, o null.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// La cuenta que sugiere un movimiento anterior con el mismo texto registrado con remember, o null.
+    /// </summary>
+    [JsonPropertyName("suggested_account")]
+    public string? SuggestedAccount { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class AccountingBankMovementList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<AccountingBankMovement> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Cambiar un renglón del flujo».
 /// </summary>
 public sealed partial class AdjustCashForecastParams
@@ -20593,6 +20731,24 @@ public sealed partial class ListAdvancesParams
 }
 
 /// <summary>
+/// Los campos de «Listar los movimientos de banco sin factura».
+/// </summary>
+public sealed partial class ListBankMovementsParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM). Por omisión, el actual.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string? Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar depósitos».
 /// </summary>
 public sealed partial class ListBankTransactionsParams
@@ -22450,6 +22606,20 @@ public sealed partial class ManualJournalEntryList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Los campos de «Marcar un retiro».
+/// </summary>
+public sealed partial class MarkBankMovementParams
+{
+    /// <summary>
+    /// paid_invoices: pagó facturas que ya están en la contabilidad; ignored: no se registra; pending: vuelve a por registrar. Solo retiros.
+    /// <br/>
+    /// Valores: pending, paid_invoices, ignored.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public required string Status { get; set; }
 }
 
 /// <summary>
@@ -24436,6 +24606,30 @@ public sealed partial class PortalSupplierScorePartsItem
     /// </summary>
     [JsonPropertyName("total")]
     public long Total { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Registrar un movimiento de banco».
+/// </summary>
+public sealed partial class PostBankMovementParams
+{
+    /// <summary>
+    /// El número de la cuenta del catálogo que va contra Bancos (GET /v1/accounting/accounts).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// El concepto de la póliza. Sin él, el texto del banco.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Sugerir esta cuenta para los movimientos con el mismo texto del banco (suggested_account).
+    /// </summary>
+    [JsonPropertyName("remember")]
+    public bool? Remember { get; set; }
 }
 
 /// <summary>

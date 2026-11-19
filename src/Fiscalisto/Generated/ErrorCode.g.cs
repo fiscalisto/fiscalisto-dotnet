@@ -30,6 +30,15 @@ public static class ErrorCode
     /// <summary>Asistencia no lo permite: el mensaje dice por qué (una hora en el futuro o de hace más de 400 días, un empleado con fecha de baja, un periodo de más de 92 días, una marca ya quitada).</summary>
     public const string AttendanceInvalid = "attendance_invalid";
 
+    /// <summary>Ese movimiento no va a la contabilidad así: un depósito tiene que estar clasificado en la conciliación como préstamo, traspaso o devolución (los demás los explica su factura), y un retiro marcado como pago de facturas o sin registrar vuelve primero a pending.</summary>
+    public const string BankMovementNotBookable = "bank_movement_not_bookable";
+
+    /// <summary>Ese movimiento de banco no tiene póliza: no hay nada que quitar.</summary>
+    public const string BankMovementNotPosted = "bank_movement_not_posted";
+
+    /// <summary>Ese movimiento de banco ya tiene su póliza: quítela con DELETE /v1/accounting/bank_movements/{id}/post para registrarlo con otra cuenta.</summary>
+    public const string BankMovementPosted = "bank_movement_posted";
+
     /// <summary>El depósito no se puede conciliar, clasificar o reabrir así (ya está conciliado, las facturas son de otro cliente o una está cancelada…). El mensaje dice por qué.</summary>
     public const string BankTransactionInvalid = "bank_transaction_invalid";
 
