@@ -330,6 +330,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public FixedAssetsResource FixedAssets => _fixedAssets ??= new FixedAssetsResource(this);
 
+    private ClosedPeriodResource? _closedPeriod;
+
+    /// <summary>Contabilidad.</summary>
+    public ClosedPeriodResource ClosedPeriod => _closedPeriod ??= new ClosedPeriodResource(this);
+
     private BankMovementsResource? _bankMovements;
 
     /// <summary>Contabilidad.</summary>
@@ -4928,6 +4933,44 @@ public sealed class FixedAssetsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<FixedAsset> UndisposeAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<FixedAsset>("DELETE", $"/v1/accounting/fixed_assets/{Uri.EscapeDataString(id)}/disposal", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.ClosedPeriod</c>.
+/// </summary>
+public sealed class ClosedPeriodResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ClosedPeriodResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver hasta qué mes está cerrada la contabilidad
+    /// </summary>
+    /// <remarks>
+    /// El último mes cerrado del emisor (closed_through), como Cierre del mes › Cerrar la contabilidad en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/closed_period</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-closed-period"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClosedPeriod> GetAsync(GetClosedPeriodParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClosedPeriod>("GET", "/v1/accounting/closed_period", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cerrar o reabrir meses de la contabilidad
+    /// </summary>
+    /// <remarks>
+    /// Cierra la contabilidad hasta closed_through (y los meses anteriores), o la reabre con un mes anterior o null. En un mes cerrado, crear, corregir o borrar una póliza a mano, registrar o quitar la póliza de un movimiento de banco y dar de baja un activo contestan period_closed. Las facturas siguen llegando del SAT.
+    /// <br/>
+    /// <c>POST /v1/accounting/closed_period</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/set-closed-period"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClosedPeriod> SetAsync(SetClosedPeriodParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClosedPeriod>("POST", "/v1/accounting/closed_period", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

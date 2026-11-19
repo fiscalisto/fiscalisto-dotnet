@@ -261,6 +261,9 @@ public static class ErrorCode
     /// <summary>No se pudo dibujar el PDF de ese CFDI (su XML trae algo que el generador no lee). Descargue el XML: es el documento válido ante el SAT.</summary>
     public const string PdfUnavailable = "pdf_unavailable";
 
+    /// <summary>Ese mes de la contabilidad está cerrado: no se registra, corrige ni borra nada con fecha en él. Reábralo con POST /v1/accounting/closed_period si hay que corregirlo.</summary>
+    public const string PeriodClosed = "period_closed";
+
     /// <summary>El ticket de compra no se puede guardar, corregir o pedir así (un archivo que no es foto ni PDF, un RFC o uso que no corresponde, una tienda que no factura con Fiscalisto, faltan datos fiscales del emisor…). El mensaje dice por qué.</summary>
     public const string PurchaseReceiptInvalid = "purchase_receipt_invalid";
 

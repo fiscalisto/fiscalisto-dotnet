@@ -2766,6 +2766,42 @@ public sealed partial class CloseSalesOrderParams
 }
 
 /// <summary>
+/// Hasta qué mes está cerrada la contabilidad del emisor: lo capturado (pólizas a mano y de banco, bajas de activos, saldos iniciales) con fecha en un mes cerrado no se registra, corrige ni borra.
+/// </summary>
+public sealed partial class ClosedPeriod
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El último mes cerrado (AAAA-MM), con todos los anteriores; null si ninguno está cerrado.
+    /// </summary>
+    [JsonPropertyName("closed_through")]
+    public string? ClosedThrough { get; set; }
+
+    /// <summary>
+    /// Cuándo se cerró, o null.
+    /// </summary>
+    [JsonPropertyName("closed_at")]
+    public string? ClosedAt { get; set; }
+}
+
+/// <summary>
 /// El Reporte de la empresa de un emisor en un periodo: su salud fiscal, sus indicadores de riesgo, sus años, sus clientes y proveedores, sus socios y los avisos de sus contrapartes.
 /// </summary>
 public sealed partial class CompanyReport
@@ -14579,6 +14615,18 @@ public sealed partial class GetCashForecastParams
     /// </summary>
     [JsonPropertyName("recurring_sales_change")]
     public long? RecurringSalesChange { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver hasta qué mes está cerrada la contabilidad».
+/// </summary>
+public sealed partial class GetClosedPeriodParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -30318,6 +30366,24 @@ public sealed partial class SendSalesOrderParams
     /// </summary>
     [JsonPropertyName("message")]
     public string? Message { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cerrar o reabrir meses de la contabilidad».
+/// </summary>
+public sealed partial class SetClosedPeriodParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El último mes cerrado (AAAA-MM); los anteriores quedan cerrados también. null reabre todos.
+    /// </summary>
+    [JsonPropertyName("closed_through")]
+    public string? ClosedThrough { get; set; }
 }
 
 /// <summary>
