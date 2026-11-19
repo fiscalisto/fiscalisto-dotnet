@@ -14537,18 +14537,24 @@ public sealed partial class InvoiceCancellation
 public sealed partial class InvoiceConcepts
 {
     /// <summary>
-    /// itemized: un concepto por renglón del ticket; single: uno solo (más uno por cada otro juego de impuestos, como una noche con ISH).
+    /// itemized: un concepto por renglón del ticket; single: uno solo; grouped: uno por cada grupo de groups. Lo que lleva otro juego de impuestos (como una noche con ISH) va siempre en su propio concepto.
     /// <br/>
-    /// Valores: itemized, single.
+    /// Valores: itemized, single, grouped.
     /// </summary>
     [JsonPropertyName("mode")]
     public string Mode { get; set; } = default!;
 
     /// <summary>
-    /// Si el comprador puede elegir en el portal entre desglosados y un solo concepto.
+    /// Si el comprador puede elegir en el portal entre las opciones de customer_options.
     /// </summary>
     [JsonPropertyName("customer_choice")]
     public bool CustomerChoice { get; set; }
+
+    /// <summary>
+    /// Las opciones que ve el comprador cuando puede elegir (incluye siempre mode, que llega elegida).
+    /// </summary>
+    [JsonPropertyName("customer_options")]
+    public List<string> CustomerOptions { get; set; } = default!;
 
     /// <summary>
     /// La descripción del concepto único, como «Consumo».
@@ -14567,6 +14573,62 @@ public sealed partial class InvoiceConcepts
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Los grupos de «Por categoría», en orden: cada renglón va en el primero que lo tome.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<InvoiceConceptsGroupsItem> Groups { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que ningún grupo toma: itemized, desglosado; group, en un concepto más llamado ungrouped_name.
+    /// <br/>
+    /// Valores: itemized, group.
+    /// </summary>
+    [JsonPropertyName("ungrouped")]
+    public string Ungrouped { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del concepto para lo que ningún grupo toma.
+    /// </summary>
+    [JsonPropertyName("ungrouped_name")]
+    public string UngroupedName { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;InvoiceConceptsGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoiceConceptsGroupsItem
+{
+    /// <summary>
+    /// El nombre del concepto, como «Alimentos y bebidas».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su ClaveProdServ, o null para la del renglón más grande del grupo.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// Su ClaveUnidad, o null para la del renglón más grande.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Las claves del SAT que toma, completas o su inicio (de 2 a 8 dígitos, como 9010).
+    /// </summary>
+    [JsonPropertyName("sat_keys")]
+    public List<string> SatKeys { get; set; } = default!;
+
+    /// <summary>
+    /// Las categorías de producto que toma, por su ruta («Hotel › Habitaciones»); una categoría toma también las de adentro.
+    /// </summary>
+    [JsonPropertyName("categories")]
+    public List<string> Categories { get; set; } = default!;
 }
 
 /// <summary>
@@ -22480,7 +22542,7 @@ public sealed partial class PortalStyle
     public PortalStyleColors Colors { get; set; } = default!;
 
     /// <summary>
-    /// Los textos propios por llave (step_ticket, submit, success_title…), cada uno con es y en. Uno que falta lleva el de Fiscalisto.
+    /// Los textos propios por llave (step_ticket, submit, success_title, concepts_title…), cada uno con es y en. Uno que falta lleva el de Fiscalisto.
     /// </summary>
     [JsonPropertyName("texts")]
     public Dictionary<string, JsonElement> Texts { get; set; } = default!;
@@ -28080,7 +28142,7 @@ public sealed partial class SelfInvoicing
     public PortalStyle PortalStyle { get; set; } = default!;
 
     /// <summary>
-    /// Desglosados o en un solo concepto, y si el comprador puede elegir (Autofactura › Conceptos de la factura).
+    /// Desglosados, en un solo concepto o por los grupos de la empresa, y qué puede elegir el comprador (Autofactura › Conceptos de la factura).
     /// </summary>
     [JsonPropertyName("invoice_concepts")]
     public InvoiceConcepts InvoiceConcepts { get; set; } = default!;
@@ -32748,18 +32810,24 @@ public sealed partial class UpdateSelfInvoicingParams
 public sealed partial class UpdateSelfInvoicingParamsInvoiceConcepts
 {
     /// <summary>
-    /// `itemized` (por omisión): un concepto por renglón del ticket (Hospedaje, Restaurante, Bar…). `single`: uno solo, con `description`; los renglones con otros impuestos (una noche con ISH, IVA 0 %, retenciones) van en su propio concepto, porque un concepto lleva un solo juego de impuestos. El total y los impuestos no cambian.
+    /// `itemized` (por omisión): un concepto por renglón del ticket (Hospedaje, Restaurante, Bar…). `single`: uno solo, con `description`. `grouped`: los conceptos de `groups`. Un concepto lleva un solo juego de impuestos, así que los renglones con otros (una noche con ISH, IVA 0 %, retenciones) van aparte. El total y los impuestos no cambian.
     /// <br/>
-    /// Valores: itemized, single.
+    /// Valores: itemized, single, grouped.
     /// </summary>
     [JsonPropertyName("mode")]
     public string? Mode { get; set; }
 
     /// <summary>
-    /// `true`: el comprador elige en el portal entre desglosados y un solo concepto (empieza en `mode`), también en el portal dentro de su sitio.
+    /// `true`: el comprador elige en el portal (también dentro de su sitio) entre `customer_options`, empezando en `mode`.
     /// </summary>
     [JsonPropertyName("customer_choice")]
     public bool? CustomerChoice { get; set; }
+
+    /// <summary>
+    /// Entre qué puede elegir el comprador, por omisión `itemized` y `single`. `mode` va siempre; `grouped` necesita `groups`.
+    /// </summary>
+    [JsonPropertyName("customer_options")]
+    public List<string>? CustomerOptions { get; set; }
 
     /// <summary>
     /// La descripción del concepto único, como «Consumo» (por omisión) o «Servicios de hospedaje y alimentos».
@@ -32768,7 +32836,7 @@ public sealed partial class UpdateSelfInvoicingParamsInvoiceConcepts
     public string? Description { get; set; }
 
     /// <summary>
-    /// Su ClaveProdServ. `null` (por omisión): la del renglón más grande del ticket.
+    /// La ClaveProdServ del concepto único. `null` (por omisión): la del renglón más grande del ticket.
     /// </summary>
     [JsonPropertyName("product_key")]
     public string? ProductKey { get; set; }
@@ -32778,6 +32846,62 @@ public sealed partial class UpdateSelfInvoicingParamsInvoiceConcepts
     /// </summary>
     [JsonPropertyName("unit_key")]
     public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Los conceptos de `grouped`, hasta 12: cada renglón va al primero que lo toma, por su clave del SAT (`sat_keys`) o la categoría de su producto (`categories`). Reemplaza la lista guardada.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<UpdateSelfInvoicingParamsInvoiceConceptsGroupsItem>? Groups { get; set; }
+
+    /// <summary>
+    /// Con `grouped`, los renglones que ningún grupo toma: `itemized` (por omisión) como vienen, o `group` en un concepto más llamado `ungrouped_name`.
+    /// <br/>
+    /// Valores: itemized, group.
+    /// </summary>
+    [JsonPropertyName("ungrouped")]
+    public string? Ungrouped { get; set; }
+
+    /// <summary>
+    /// El nombre de ese concepto, por omisión «Otros».
+    /// </summary>
+    [JsonPropertyName("ungrouped_name")]
+    public string? UngroupedName { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsInvoiceConceptsGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsInvoiceConceptsGroupsItem
+{
+    /// <summary>
+    /// La descripción del concepto, como «Alimentos y bebidas».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Su ClaveProdServ. `null` (por omisión): la de su renglón más grande.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// Su ClaveUnidad, con `product_key`, como `E48`.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Los renglones cuya clave del SAT empieza así: `9010` toma 90101501 (restaurante) y 90101503 (bar); `90111800`, solo hospedaje.
+    /// </summary>
+    [JsonPropertyName("sat_keys")]
+    public List<string>? SatKeys { get; set; }
+
+    /// <summary>
+    /// Los renglones de los productos de estas categorías y sus subcategorías, por su ruta como la da `category` del producto («Alimentos › Bebidas»).
+    /// </summary>
+    [JsonPropertyName("categories")]
+    public List<string>? Categories { get; set; }
 }
 
 /// <summary>
@@ -33026,6 +33150,30 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleTexts
     /// </summary>
     [JsonPropertyName("success_message")]
     public UpdateSelfInvoicingParamsPortalStyleTextsSuccessMessage? SuccessMessage { get; set; }
+
+    /// <summary>
+    /// El título de la elección de conceptos («Conceptos en su factura»; ver `invoice_concepts`); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("concepts_title")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsConceptsTitle? ConceptsTitle { get; set; }
+
+    /// <summary>
+    /// La opción de conceptos desglosados («Desglosados»); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("concepts_itemized")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsConceptsItemized? ConceptsItemized { get; set; }
+
+    /// <summary>
+    /// La opción de un solo concepto («Un solo concepto»); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("concepts_single")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsConceptsSingle? ConceptsSingle { get; set; }
+
+    /// <summary>
+    /// La opción de conceptos por categoría («Por categoría»); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("concepts_grouped")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsConceptsGrouped? ConceptsGrouped { get; set; }
 }
 
 /// <summary>
@@ -33035,6 +33183,78 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsCodeHint
 {
     /// <summary>
     /// Dónde viene el código (en español es `code_hint`) en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsConceptsGrouped&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsConceptsGrouped
+{
+    /// <summary>
+    /// La opción de conceptos por categoría («Por categoría») en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// La opción de conceptos por categoría («Por categoría») en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsConceptsItemized&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsConceptsItemized
+{
+    /// <summary>
+    /// La opción de conceptos desglosados («Desglosados») en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// La opción de conceptos desglosados («Desglosados») en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsConceptsSingle&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsConceptsSingle
+{
+    /// <summary>
+    /// La opción de un solo concepto («Un solo concepto») en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// La opción de un solo concepto («Un solo concepto») en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsConceptsTitle&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsConceptsTitle
+{
+    /// <summary>
+    /// El título de la elección de conceptos («Conceptos en su factura»; ver `invoice_concepts`) en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// El título de la elección de conceptos («Conceptos en su factura»; ver `invoice_concepts`) en inglés.
     /// </summary>
     [JsonPropertyName("en")]
     public string? En { get; set; }
