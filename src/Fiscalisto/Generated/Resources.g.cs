@@ -350,6 +350,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public FxRevaluationsResource FxRevaluations => _fxRevaluations ??= new FxRevaluationsResource(this);
 
+    private CostOfSalesResource? _costOfSales;
+
+    /// <summary>Contabilidad.</summary>
+    public CostOfSalesResource CostOfSales => _costOfSales ??= new CostOfSalesResource(this);
+
+    private TaxDeterminationsResource? _taxDeterminations;
+
+    /// <summary>Contabilidad.</summary>
+    public TaxDeterminationsResource TaxDeterminations => _taxDeterminations ??= new TaxDeterminationsResource(this);
+
     private BankMovementsResource? _bankMovements;
 
     /// <summary>Contabilidad.</summary>
@@ -5148,6 +5158,110 @@ public sealed class FxRevaluationsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<FxRevaluation> DeleteAsync(string month, DeleteFxRevaluationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<FxRevaluation>("DELETE", $"/v1/accounting/fx_revaluations/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.CostOfSales</c>.
+/// </summary>
+public sealed class CostOfSalesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CostOfSalesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver el costo de ventas de un mes
+    /// </summary>
+    /// <remarks>
+    /// Las compras netas del mes según sus pólizas, el inventario en libros, lo que vale el inventario según Inventario y la póliza de costo de ventas, si ya se registró. Como Cierre del mes › Inventario y costo de ventas en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/cost_of_sales/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-cost-of-sales"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CostOfSales> GetAsync(string month, GetCostOfSalesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CostOfSales>("GET", $"/v1/accounting/cost_of_sales/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Registrar el costo de ventas de un mes
+    /// </summary>
+    /// <remarks>
+    /// Registra (o reemplaza) la póliza del último día del mes en el sistema de inventarios periódico: Inventario queda en ending_inventory, las compras (502) y sus devoluciones (503) se cancelan y la diferencia va a Costo de ventas (501.01): inventario inicial + compras netas − inventario final, el costo de lo vendido que se deduce (LISR arts. 25-II y 39). Sin compras ni cambio de inventario contesta parameter_invalid en month; en un mes cerrado, period_closed.
+    /// <br/>
+    /// <c>POST /v1/accounting/cost_of_sales/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-cost-of-sales"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CostOfSales> CreateAsync(string month, CreateCostOfSalesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CostOfSales>("POST", $"/v1/accounting/cost_of_sales/{Uri.EscapeDataString(month)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar el costo de ventas de un mes
+    /// </summary>
+    /// <remarks>
+    /// Quita la póliza de costo de ventas del mes. En un mes cerrado contesta period_closed.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/cost_of_sales/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-cost-of-sales"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CostOfSales> DeleteAsync(string month, DeleteCostOfSalesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CostOfSales>("DELETE", $"/v1/accounting/cost_of_sales/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.TaxDeterminations</c>.
+/// </summary>
+public sealed class TaxDeterminationsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TaxDeterminationsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver la determinación de impuestos de un mes
+    /// </summary>
+    /// <remarks>
+    /// El IVA cobrado y pagado del mes según sus pólizas (y el que le retuvieron sus clientes), el IVA por pagar o a favor que resulta, el pago provisional de ISR que sugiere Impuestos y la póliza de determinación, si ya se registró. Como Cierre del mes › Impuestos del mes en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/tax_determinations/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-tax-determination"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TaxDetermination> GetAsync(string month, GetTaxDeterminationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TaxDetermination>("GET", $"/v1/accounting/tax_determinations/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Registrar la determinación de impuestos de un mes
+    /// </summary>
+    /// <remarks>
+    /// Registra (o reemplaza) la póliza del último día del mes: IVA trasladado cobrado contra IVA acreditable pagado y el IVA retenido por clientes, la diferencia a IVA por pagar o IVA a favor, e isr a Pagos provisionales de ISR contra ISR por pagar. Al pagarlos, registre el retiro del banco contra esas cuentas (POST /v1/accounting/bank_movements/{id}/post). Sin IVA ni ISR contesta parameter_invalid en month; en un mes cerrado, period_closed.
+    /// <br/>
+    /// <c>POST /v1/accounting/tax_determinations/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-tax-determination"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TaxDetermination> CreateAsync(string month, CreateTaxDeterminationParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TaxDetermination>("POST", $"/v1/accounting/tax_determinations/{Uri.EscapeDataString(month)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar la determinación de impuestos de un mes
+    /// </summary>
+    /// <remarks>
+    /// Quita la póliza de determinación del mes. En un mes cerrado contesta period_closed.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/tax_determinations/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-tax-determination"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TaxDetermination> DeleteAsync(string month, DeleteTaxDeterminationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TaxDetermination>("DELETE", $"/v1/accounting/tax_determinations/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>

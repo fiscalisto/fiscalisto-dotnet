@@ -3676,6 +3676,114 @@ public sealed partial class CostCenterList
 }
 
 /// <summary>
+/// El costo de ventas de un mes en la contabilidad (sistema de inventarios periódico): las compras del mes, el inventario en libros y al cierre, y la póliza que lleva la diferencia a Costo de ventas, si ya se registró.
+/// </summary>
+public sealed partial class CostOfSales
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El último día del mes: la fecha de la póliza.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Las compras del mes por cuenta (código agrupador 502: cargos menos abonos), sin la póliza del mes.
+    /// </summary>
+    [JsonPropertyName("purchases")]
+    public List<CostOfSalesPurchasesItem> Purchases { get; set; } = default!;
+
+    /// <summary>
+    /// Las devoluciones y descuentos sobre compras del mes por cuenta (503: abonos menos cargos).
+    /// </summary>
+    [JsonPropertyName("purchase_returns")]
+    public List<CostOfSalesPurchaseReturnsItem> PurchaseReturns { get; set; } = default!;
+
+    /// <summary>
+    /// purchases − purchase_returns.
+    /// </summary>
+    [JsonPropertyName("net_purchases")]
+    public decimal NetPurchases { get; set; }
+
+    /// <summary>
+    /// El saldo de las cuentas de inventario (115) al cierre del mes en sus libros, sin la póliza del mes.
+    /// </summary>
+    [JsonPropertyName("book_inventory")]
+    public decimal BookInventory { get; set; }
+
+    /// <summary>
+    /// Lo que valen sus existencias al cierre del mes según Inventario (con su método de valuación), o null si no lleva existencias en Fiscalisto: entonces use su conteo físico.
+    /// </summary>
+    [JsonPropertyName("suggested_ending_inventory")]
+    public decimal? SuggestedEndingInventory { get; set; }
+
+    /// <summary>
+    /// La póliza de costo de ventas (mje_…) si ya se registró, o null. Es una póliza a mano de tipo adjustment.
+    /// </summary>
+    [JsonPropertyName("manual_entry")]
+    public string? ManualEntry { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CostOfSalesPurchaseReturnsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CostOfSalesPurchaseReturnsItem
+{
+    /// <summary>
+    /// La cuenta: su número y nombre en el catálogo.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CostOfSalesPurchasesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CostOfSalesPurchasesItem
+{
+    /// <summary>
+    /// La cuenta: su número y nombre en el catálogo.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Timbrar un anticipo».
 /// </summary>
 public sealed partial class CreateAdvanceParams
@@ -4133,6 +4241,24 @@ public sealed partial class CreateCostCenterParams
     /// </summary>
     [JsonPropertyName("code")]
     public string? Code { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Registrar el costo de ventas de un mes».
+/// </summary>
+public sealed partial class CreateCostOfSalesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Lo que vale el inventario al cierre del mes en pesos (0 si no hay). Por lo general, suggested_ending_inventory o el de su conteo físico.
+    /// </summary>
+    [JsonPropertyName("ending_inventory")]
+    public required decimal EndingInventory { get; set; }
 }
 
 /// <summary>
@@ -9296,6 +9422,24 @@ public sealed partial class CreateStoreConnectionParamsSettings
 }
 
 /// <summary>
+/// Los campos de «Registrar la determinación de impuestos de un mes».
+/// </summary>
+public sealed partial class CreateTaxDeterminationParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El pago provisional de ISR del mes en pesos (0 si no hay). Por lo general, suggested_isr.
+    /// </summary>
+    [JsonPropertyName("isr")]
+    public required decimal Isr { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear un reloj de prueba».
 /// </summary>
 public sealed partial class CreateTestClockParams
@@ -10878,6 +11022,18 @@ public sealed partial class DeleteCostCenterParams
 }
 
 /// <summary>
+/// Los campos de «Quitar el costo de ventas de un mes».
+/// </summary>
+public sealed partial class DeleteCostOfSalesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Quitar la revaluación cambiaria de un mes».
 /// </summary>
 public sealed partial class DeleteFxRevaluationParams
@@ -10905,6 +11061,18 @@ public sealed partial class DeleteMemberParams
 /// Los campos de «Borrar un rol».
 /// </summary>
 public sealed partial class DeleteRoleParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Quitar la determinación de impuestos de un mes».
+/// </summary>
+public sealed partial class DeleteTaxDeterminationParams
 {
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
@@ -14976,6 +15144,18 @@ public sealed partial class GetCompanyReportParams
 }
 
 /// <summary>
+/// Los campos de «Ver el costo de ventas de un mes».
+/// </summary>
+public sealed partial class GetCostOfSalesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver los CFDI de una cifra del cruce».
 /// </summary>
 public sealed partial class GetCrossCheckCfdiParams
@@ -15353,6 +15533,18 @@ public sealed partial class GetSatDeclarationCalendarParams
     /// </summary>
     [JsonPropertyName("year")]
     public long? Year { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver la determinación de impuestos de un mes».
+/// </summary>
+public sealed partial class GetTaxDeterminationParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -32052,6 +32244,78 @@ public sealed partial class SupplierInvoiceWarningsItem
     /// </summary>
     [JsonPropertyName("message")]
     public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// La determinación de impuestos de un mes en la contabilidad: el IVA cobrado y pagado del mes (de sus pólizas) que pasa a IVA por pagar o a favor, el pago provisional de ISR sugerido y la póliza que los registra, si ya se registró.
+/// </summary>
+public sealed partial class TaxDetermination
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El último día del mes: la fecha de la póliza.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// El IVA trasladado cobrado en el mes, según sus pólizas.
+    /// </summary>
+    [JsonPropertyName("vat_collected")]
+    public decimal VatCollected { get; set; }
+
+    /// <summary>
+    /// El IVA acreditable pagado en el mes, según sus pólizas.
+    /// </summary>
+    [JsonPropertyName("vat_creditable")]
+    public decimal VatCreditable { get; set; }
+
+    /// <summary>
+    /// El IVA que le retuvieron sus clientes en el mes.
+    /// </summary>
+    [JsonPropertyName("vat_withheld_by_customers")]
+    public decimal VatWithheldByCustomers { get; set; }
+
+    /// <summary>
+    /// vat_collected − vat_creditable − vat_withheld_by_customers: positivo, IVA por pagar; negativo, IVA a favor.
+    /// </summary>
+    [JsonPropertyName("vat")]
+    public decimal Vat { get; set; }
+
+    /// <summary>
+    /// El pago provisional de ISR que calcula Impuestos con su configuración, o null si no está configurado.
+    /// </summary>
+    [JsonPropertyName("suggested_isr")]
+    public decimal? SuggestedIsr { get; set; }
+
+    /// <summary>
+    /// La póliza de determinación (mje_…) si ya se registró, o null. Es una póliza a mano de tipo adjustment.
+    /// </summary>
+    [JsonPropertyName("manual_entry")]
+    public string? ManualEntry { get; set; }
 }
 
 /// <summary>
