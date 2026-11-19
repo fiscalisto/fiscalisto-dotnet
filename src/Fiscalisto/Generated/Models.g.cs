@@ -14532,6 +14532,44 @@ public sealed partial class InvoiceCancellation
 }
 
 /// <summary>
+/// Los conceptos de la factura que se hace el comprador en el portal.
+/// </summary>
+public sealed partial class InvoiceConcepts
+{
+    /// <summary>
+    /// itemized: un concepto por renglón del ticket; single: uno solo (más uno por cada otro juego de impuestos, como una noche con ISH).
+    /// <br/>
+    /// Valores: itemized, single.
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = default!;
+
+    /// <summary>
+    /// Si el comprador puede elegir en el portal entre desglosados y un solo concepto.
+    /// </summary>
+    [JsonPropertyName("customer_choice")]
+    public bool CustomerChoice { get; set; }
+
+    /// <summary>
+    /// La descripción del concepto único, como «Consumo».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// La ClaveProdServ del concepto único, o null para la del renglón más grande.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// Su ClaveUnidad, o null para la del renglón más grande.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+}
+
+/// <summary>
 /// Una factura (CFDI 4.0). Un campo que no existe se rechaza con parameter_unknown, nunca se ignora.
 /// </summary>
 public sealed partial class InvoiceCreate
@@ -28042,6 +28080,12 @@ public sealed partial class SelfInvoicing
     public PortalStyle PortalStyle { get; set; } = default!;
 
     /// <summary>
+    /// Desglosados o en un solo concepto, y si el comprador puede elegir (Autofactura › Conceptos de la factura).
+    /// </summary>
+    [JsonPropertyName("invoice_concepts")]
+    public InvoiceConcepts InvoiceConcepts { get; set; } = default!;
+
+    /// <summary>
     /// Cuando se factura una persona moral que retiene (1.25% de ISR en RESICO, o lo del producto). keep_total: la base crece y la factura suma lo que se pagó. subtract: la base es la del ticket y el total es lo pagado menos la retención.
     /// <br/>
     /// Valores: keep_total, subtract.
@@ -32684,12 +32728,56 @@ public sealed partial class UpdateSelfInvoicingParams
     public string? InvoiceSeries { get; set; }
 
     /// <summary>
+    /// Los conceptos de la factura que se hace el comprador (Autofactura › Conceptos de la factura): desglosados o en uno solo, y si el comprador puede elegir. Mande solo lo que cambia; `null` regresa a desglosados sin elección.
+    /// </summary>
+    [JsonPropertyName("invoice_concepts")]
+    public UpdateSelfInvoicingParamsInvoiceConcepts? InvoiceConcepts { get; set; }
+
+    /// <summary>
     /// Los conceptos de la factura global: `ticket` (por omisión), uno «Venta» por ticket con su folio como `NoIdentificacion`; `summary`, solo el monto total del periodo, uno por combinación de impuestos con `NoIdentificacion` «Resumen» (regla 2.7.1.21 de la RMF 2026). `summary` es solo para un emisor persona física en RESICO (626); otro contesta `invalid_request`.
     /// <br/>
     /// Valores: ticket, summary.
     /// </summary>
     [JsonPropertyName("global_concepts")]
     public string? GlobalConcepts { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsInvoiceConcepts&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsInvoiceConcepts
+{
+    /// <summary>
+    /// `itemized` (por omisión): un concepto por renglón del ticket (Hospedaje, Restaurante, Bar…). `single`: uno solo, con `description`; los renglones con otros impuestos (una noche con ISH, IVA 0 %, retenciones) van en su propio concepto, porque un concepto lleva un solo juego de impuestos. El total y los impuestos no cambian.
+    /// <br/>
+    /// Valores: itemized, single.
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public string? Mode { get; set; }
+
+    /// <summary>
+    /// `true`: el comprador elige en el portal entre desglosados y un solo concepto (empieza en `mode`), también en el portal dentro de su sitio.
+    /// </summary>
+    [JsonPropertyName("customer_choice")]
+    public bool? CustomerChoice { get; set; }
+
+    /// <summary>
+    /// La descripción del concepto único, como «Consumo» (por omisión) o «Servicios de hospedaje y alimentos».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Su ClaveProdServ. `null` (por omisión): la del renglón más grande del ticket.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// Su ClaveUnidad, con `product_key`, como `E48`. `null`: la del renglón más grande.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
 }
 
 /// <summary>
