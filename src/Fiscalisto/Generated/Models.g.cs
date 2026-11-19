@@ -11323,7 +11323,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high o test_clock.ready.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high o test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -21028,7 +21028,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, issuer.*, balance.*, usage.*, test_clock.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, sat_refresh.*, issuer.*, balance.*, usage.*, test_clock.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -22140,6 +22140,38 @@ public sealed partial class ListSatMailboxMessagesParams
     /// </summary>
     [JsonPropertyName("unread")]
     public bool? Unread { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar consultas al SAT».
+/// </summary>
+public sealed partial class ListSatRefreshesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// Solo las de un emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de un documento.
+    /// <br/>
+    /// Valores: declarations, compliance_opinion, tax_status_certificate, sat_mailbox.
+    /// </summary>
+    [JsonPropertyName("document")]
+    public string? Document { get; set; }
 }
 
 /// <summary>
@@ -28829,80 +28861,6 @@ public sealed partial class SatDeclarationSummaryObligationsItem
 }
 
 /// <summary>
-/// Lo que trajo una consulta de las declaraciones del emisor en el SAT.
-/// </summary>
-public sealed partial class SatDeclarationsRefresh
-{
-    /// <summary>
-    /// Qué tipo de objeto es («invoice», «customer»…).
-    /// </summary>
-    [JsonPropertyName("object")]
-    public string Object { get; set; } = default!;
-
-    /// <summary>
-    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
-    /// </summary>
-    [JsonPropertyName("livemode")]
-    public bool Livemode { get; set; }
-
-    /// <summary>
-    /// El emisor consultado.
-    /// </summary>
-    [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
-
-    /// <summary>
-    /// completed (ya bajó todo) o processing (queda algo por bajar: sigue solo en la siguiente hora, sin otro timbre).
-    /// <br/>
-    /// Valores: completed, processing.
-    /// </summary>
-    [JsonPropertyName("status")]
-    public string Status { get; set; } = default!;
-
-    /// <summary>
-    /// Cuántas declaraciones listó el SAT en los años consultados.
-    /// </summary>
-    [JsonPropertyName("found")]
-    public long Found { get; set; }
-
-    /// <summary>
-    /// Cuántos archivos bajó en esta consulta.
-    /// </summary>
-    [JsonPropertyName("downloaded")]
-    public long Downloaded { get; set; }
-
-    /// <summary>
-    /// Cuántas declaraciones quedan con archivos por bajar.
-    /// </summary>
-    [JsonPropertyName("pending")]
-    public long Pending { get; set; }
-
-    /// <summary>
-    /// Con status processing: cuándo deberían estar los archivos y las cifras que faltan (pending), que se descargan solos sin otro timbre. Mientras, GET /v1/sat_declarations ya las lista, con figures_status pending. null con status completed.
-    /// </summary>
-    [JsonPropertyName("completes_at")]
-    public string? CompletesAt { get; set; }
-
-    /// <summary>
-    /// Si una parte del SAT falló (por ejemplo, la anual), lo que dijo; lo demás sí se trajo. null si todo salió.
-    /// </summary>
-    [JsonPropertyName("warning")]
-    public string? Warning { get; set; }
-
-    /// <summary>
-    /// Cuándo se consultó.
-    /// </summary>
-    [JsonPropertyName("refreshed_at")]
-    public string RefreshedAt { get; set; } = default!;
-
-    /// <summary>
-    /// Desde cuándo se puede volver a consultar este emisor (10 minutos después).
-    /// </summary>
-    [JsonPropertyName("next_refresh_at")]
-    public string NextRefreshAt { get; set; } = default!;
-}
-
-/// <summary>
 /// Una solicitud al SAT de las facturas emitidas o recibidas de un emisor en un periodo.
 /// </summary>
 public sealed partial class SatDownload
@@ -29817,7 +29775,7 @@ public sealed partial class SatMailboxMessageList
 }
 
 /// <summary>
-/// Una consulta al SAT de un documento del emisor: si ya terminó y dónde leerlo.
+/// Una consulta al SAT de las declaraciones o de un documento del emisor (opinión de cumplimiento, constancia o buzón): se contesta al aceptarla (status processing) y termina sola; sat_refresh.completed o sat_refresh.failed dicen cómo.
 /// </summary>
 public sealed partial class SatRefresh
 {
@@ -29826,6 +29784,12 @@ public sealed partial class SatRefresh
     /// </summary>
     [JsonPropertyName("object")]
     public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El id de la consulta (srf_…): GET /v1/sat_refreshes/{id} dice cómo va.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
 
     /// <summary>
     /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
@@ -29840,35 +29804,101 @@ public sealed partial class SatRefresh
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// Qué se consultó.
+    /// Qué se consultó: declarations, compliance_opinion, tax_status_certificate o sat_mailbox.
     /// <br/>
-    /// Valores: compliance_opinion, tax_status_certificate, sat_mailbox.
+    /// Valores: declarations, compliance_opinion, tax_status_certificate, sat_mailbox.
     /// </summary>
     [JsonPropertyName("document")]
     public string Document { get; set; } = default!;
 
     /// <summary>
-    /// completed (ya está en url) o processing (el SAT tarda; llega a url en unos minutos).
+    /// processing (el SAT se está consultando), completed (lo que trajo está en url) o failed (el SAT no contestó: motivo en error, el timbre regresó).
     /// <br/>
-    /// Valores: completed, processing.
+    /// Valores: processing, completed, failed.
     /// </summary>
     [JsonPropertyName("status")]
     public string Status { get; set; } = default!;
 
     /// <summary>
-    /// Cuándo se pidió.
+    /// Lo que trajo, con status completed: en declarations cuántas listó y bajó; en los demás, dónde leer el documento. null mientras sigue o si falló.
     /// </summary>
-    [JsonPropertyName("refreshed_at")]
-    public string? RefreshedAt { get; set; }
+    [JsonPropertyName("result")]
+    public JsonElement? Result { get; set; }
 
     /// <summary>
-    /// Desde cuándo se puede pedir otra vez.
+    /// Con status failed: lo que dijo el SAT. null en los demás.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+
+    /// <summary>
+    /// true cuando se usó su timbre (el SAT contestó). En pruebas siempre false: no se usan timbres.
+    /// </summary>
+    [JsonPropertyName("charged")]
+    public bool Charged { get; set; }
+
+    /// <summary>
+    /// true mientras sigue: su timbre está apartado (GET /v1/balance ya no lo cuenta) y regresa si el SAT no contesta.
+    /// </summary>
+    [JsonPropertyName("timbre_held")]
+    public bool TimbreHeld { get; set; }
+
+    /// <summary>
+    /// Cuándo se pidió.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo terminó (completed o failed). null mientras sigue.
+    /// </summary>
+    [JsonPropertyName("completed_at")]
+    public string? CompletedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se pidió (igual que created_at).
+    /// </summary>
+    [JsonPropertyName("refreshed_at")]
+    public string RefreshedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo se puede pedir otra vez para el mismo emisor (10 minutos después).
     /// </summary>
     [JsonPropertyName("next_refresh_at")]
-    public string? NextRefreshAt { get; set; }
+    public string NextRefreshAt { get; set; } = default!;
 
     /// <summary>
     /// Dónde leer lo que trajo.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatRefreshList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatRefresh> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
@@ -31754,7 +31784,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, issuer.ready, balance.low, usage.high, test_clock.ready.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }

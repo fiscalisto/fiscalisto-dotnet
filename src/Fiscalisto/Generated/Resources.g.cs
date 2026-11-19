@@ -310,6 +310,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Declaraciones del SAT.</summary>
     public SatDeclarationsResource SatDeclarations => _satDeclarations ??= new SatDeclarationsResource(this);
 
+    private SatRefreshesResource? _satRefreshes;
+
+    /// <summary>Declaraciones del SAT.</summary>
+    public SatRefreshesResource SatRefreshes => _satRefreshes ??= new SatRefreshesResource(this);
+
     private TicketsResource? _tickets;
 
     /// <summary>Autofactura.</summary>
@@ -804,7 +809,7 @@ public sealed class IssuersResource
     /// Pedir la opinión de cumplimiento al SAT
     /// </summary>
     /// <remarks>
-    /// La pide al SAT ahora con la e.firma guardada del emisor (POST /v1/issuers/{id}/efirma con keep_for_downloads: true). 1 timbre en producción, una vez cada 10 minutos; regresa si el SAT no contesta. Si el SAT tarda, contesta status processing y el resultado llega a GET /v1/issuers/{id}/compliance_opinion. En pruebas da una positiva de ejemplo.
+    /// La pide al SAT con la e.firma guardada del emisor (POST /v1/issuers/{id}/efirma con keep_for_downloads: true); llega a GET /v1/issuers/{id}/compliance_opinion. 1 timbre en producción, una vez cada 10 minutos. Contesta 202 en cuanto la acepta (status processing) y consulta al SAT en segundo plano: sat_refresh.completed o sat_refresh.failed dicen cómo terminó, y GET /v1/sat_refreshes/{id} también. Su timbre se aparta al aceptarla (sin timbres contesta 402 de inmediato), se usa cuando el SAT contesta y regresa si no contesta. En pruebas da una positiva de ejemplo al instante (la consulta ya viene completed y también llega sat_refresh.completed).
     /// <br/>
     /// <c>POST /v1/issuers/{id}/compliance_opinion/refresh</c>
     /// <br/>
@@ -846,7 +851,7 @@ public sealed class IssuersResource
     /// Generar la constancia de situación fiscal en el SAT
     /// </summary>
     /// <remarks>
-    /// Genera una constancia nueva con la e.firma guardada del emisor. 1 timbre en producción, una vez cada 10 minutos; regresa si el SAT no contesta. En pruebas hace una con los datos del emisor.
+    /// Genera una constancia nueva con la e.firma guardada del emisor; llega a GET /v1/issuers/{id}/tax_status_certificate. 1 timbre en producción, una vez cada 10 minutos. Contesta 202 en cuanto la acepta (status processing) y consulta al SAT en segundo plano: sat_refresh.completed o sat_refresh.failed dicen cómo terminó, y GET /v1/sat_refreshes/{id} también. Su timbre se aparta al aceptarla (sin timbres contesta 402 de inmediato), se usa cuando el SAT contesta y regresa si no contesta. En pruebas hace una con los datos del emisor al instante.
     /// <br/>
     /// <c>POST /v1/issuers/{id}/tax_status_certificate/refresh</c>
     /// <br/>
@@ -874,7 +879,7 @@ public sealed class IssuersResource
     /// Revisar el buzón tributario en el SAT
     /// </summary>
     /// <remarks>
-    /// Lee los avisos del buzón tributario del emisor ahora, con su e.firma guardada; nunca abre notificaciones (abrirlas firma el acuse y corren los plazos). 1 timbre en producción, una vez cada 10 minutos. En pruebas deja dos avisos de ejemplo.
+    /// Lee los avisos del buzón tributario del emisor con su e.firma guardada; nunca abre notificaciones (abrirlas firma el acuse y corren los plazos). Llegan a GET /v1/sat_mailbox_messages. 1 timbre en producción, una vez cada 10 minutos. Contesta 202 en cuanto la acepta (status processing) y consulta al SAT en segundo plano: sat_refresh.completed o sat_refresh.failed dicen cómo terminó, y GET /v1/sat_refreshes/{id} también. Su timbre se aparta al aceptarla (sin timbres contesta 402 de inmediato), se usa cuando el SAT contesta y regresa si no contesta. En pruebas deja dos avisos de ejemplo al instante.
     /// <br/>
     /// <c>POST /v1/issuers/{id}/sat_mailbox/refresh</c>
     /// <br/>
@@ -4370,15 +4375,15 @@ public sealed class SatDeclarationsResource
     /// Consultar las declaraciones de un emisor en el SAT
     /// </summary>
     /// <remarks>
-    /// Entra al SAT con la e.firma guardada del emisor y trae las declaraciones que presentó: provisionales o definitivas (desde 2022), la anual de persona moral (desde 2019) y las del servicio anterior Declaraciones y pagos, con su PDF, su acuse y sus cifras. La primera consulta trae todos los años que el SAT conserva; las siguientes, este año y el anterior. Solo consulta: nunca presenta ni firma nada. En producción usa 1 timbre por consulta (regresa si el SAT no contesta) y se puede hacer una vez cada 10 minutos por emisor. Contesta en menos de un minuto; si queda algo por bajar (status processing), sigue solo en la siguiente hora sin otro timbre. En pruebas no se le pregunta al SAT: trae declaraciones de ejemplo al instante.
+    /// Entra al SAT con la e.firma guardada del emisor y trae las declaraciones que presentó: provisionales o definitivas (desde 2022), la anual de persona moral (desde 2019) y las del servicio anterior Declaraciones y pagos, con su PDF, su acuse y sus cifras. La primera consulta trae todos los años que el SAT conserva; las siguientes, este año y el anterior. Solo consulta: nunca presenta ni firma nada. En producción usa 1 timbre por consulta y se puede hacer una vez cada 10 minutos por emisor. Contesta 202 en cuanto la acepta (status processing) y consulta al SAT en segundo plano: sat_refresh.completed o sat_refresh.failed dicen cómo terminó, y GET /v1/sat_refreshes/{id} también. Su timbre se aparta al aceptarla (sin timbres contesta 402 de inmediato), se usa cuando el SAT contesta y regresa si no contesta. Si al terminar queda algo por bajar (result.pending), sigue solo en la siguiente hora sin otro timbre. En pruebas no se le pregunta al SAT: trae declaraciones de ejemplo al instante (la consulta ya viene completed y también llega sat_refresh.completed).
     /// <br/>
     /// <c>POST /v1/sat_declarations/refresh</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/refresh-sat-declarations"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<SatDeclarationsRefresh> RefreshAsync(RefreshSatDeclarationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<SatDeclarationsRefresh>("POST", "/v1/sat_declarations/refresh", @params, null, options, true, cancellationToken);
+    public Task<SatRefresh> RefreshAsync(RefreshSatDeclarationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatRefresh>("POST", "/v1/sat_declarations/refresh", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Listar declaraciones del SAT
@@ -4497,6 +4502,50 @@ public sealed class SatDeclarationsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> FinancialStatementsAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", $"/v1/sat_declarations/{Uri.EscapeDataString(id)}/financial_statements", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Declaraciones del SAT: <c>fiscalisto.SatRefreshes</c>.
+/// </summary>
+public sealed class SatRefreshesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatRefreshesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar consultas al SAT
+    /// </summary>
+    /// <remarks>
+    /// Las consultas al SAT que pidió (declaraciones, opinión de cumplimiento, constancia y buzón), de la más reciente a la más antigua, con cómo van. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_refreshes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/list-sat-refreshes"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SatRefresh>> ListAsync(ListSatRefreshesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SatRefresh>("/v1/sat_refreshes", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar consultas al SAT: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SatRefresh> ListAutoPagingAsync(ListSatRefreshesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SatRefresh>("/v1/sat_refreshes", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una consulta al SAT
+    /// </summary>
+    /// <remarks>
+    /// Cómo va una consulta al SAT (srf_…): processing mientras se consulta, completed con lo que trajo en result o failed con el motivo en error (su timbre regresó). No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_refreshes/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/declaraciones-del-sat/get-sat-refresh"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatRefresh> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatRefresh>("GET", $"/v1/sat_refreshes/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
