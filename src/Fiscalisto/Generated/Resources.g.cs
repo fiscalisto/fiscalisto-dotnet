@@ -345,6 +345,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public ClosedPeriodResource ClosedPeriod => _closedPeriod ??= new ClosedPeriodResource(this);
 
+    private FxRevaluationsResource? _fxRevaluations;
+
+    /// <summary>Contabilidad.</summary>
+    public FxRevaluationsResource FxRevaluations => _fxRevaluations ??= new FxRevaluationsResource(this);
+
     private BankMovementsResource? _bankMovements;
 
     /// <summary>Contabilidad.</summary>
@@ -5091,6 +5096,58 @@ public sealed class ClosedPeriodResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<ClosedPeriod> SetAsync(SetClosedPeriodParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<ClosedPeriod>("POST", "/v1/accounting/closed_period", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.FxRevaluations</c>.
+/// </summary>
+public sealed class FxRevaluationsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal FxRevaluationsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver la revaluación cambiaria de un mes
+    /// </summary>
+    /// <remarks>
+    /// Las facturas PPD en otra moneda que seguían pendientes al cierre del mes, lo pendiente por moneda con el tipo de cambio de cierre que sugerimos (el FIX del DOF) y la póliza de revaluación, si ya se registró. Como Cierre del mes › Revaluación cambiaria en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/fx_revaluations/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-fx-revaluation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FxRevaluation> GetAsync(string month, GetFxRevaluationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FxRevaluation>("GET", $"/v1/accounting/fx_revaluations/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Registrar la revaluación cambiaria de un mes
+    /// </summary>
+    /// <remarks>
+    /// Registra (o reemplaza) la póliza de ajuste del último día del mes que lleva lo pendiente en otra moneda al tipo de cambio de cierre (rates): Clientes contra Utilidad o Pérdida cambiaria, y Proveedores contra Pérdida o Utilidad cambiaria. Se revierte sola el día 1 del mes siguiente, para que cada pago siga calculando su diferencia cambiaria desde el tipo de cambio de la factura. Sin facturas pendientes, o sin diferencia a esos tipos de cambio, contesta parameter_invalid en month; en un mes cerrado, period_closed.
+    /// <br/>
+    /// <c>POST /v1/accounting/fx_revaluations/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-fx-revaluation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FxRevaluation> CreateAsync(string month, CreateFxRevaluationParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FxRevaluation>("POST", $"/v1/accounting/fx_revaluations/{Uri.EscapeDataString(month)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar la revaluación cambiaria de un mes
+    /// </summary>
+    /// <remarks>
+    /// Quita la póliza de revaluación del mes y su reversión. En un mes cerrado contesta period_closed.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/fx_revaluations/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-fx-revaluation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FxRevaluation> DeleteAsync(string month, DeleteFxRevaluationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FxRevaluation>("DELETE", $"/v1/accounting/fx_revaluations/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>

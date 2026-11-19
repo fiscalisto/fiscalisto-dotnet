@@ -5064,6 +5064,24 @@ public sealed partial class CreateFixedAssetParams
 }
 
 /// <summary>
+/// Los campos de «Registrar la revaluación cambiaria de un mes».
+/// </summary>
+public sealed partial class CreateFxRevaluationParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El tipo de cambio de cierre (pesos por unidad) de cada moneda que aparece en currencies, por ejemplo {"USD": 18.2915}. Por lo general, el FIX que trae closing_rate.
+    /// </summary>
+    [JsonPropertyName("rates")]
+    public required Dictionary<string, JsonElement> Rates { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Archivos para IDSE o SUA».
 /// </summary>
 public sealed partial class CreateImssFilesParams
@@ -5617,7 +5635,7 @@ public sealed partial class CreateManualEntryParams
     public string? JournalType { get; set; }
 
     /// <summary>
-    /// Solo con kind accrual: la póliza se revierte sola el día 1 del mes siguiente (para cuando llegue la factura).
+    /// Solo con kind accrual o adjustment: la póliza se revierte sola el día 1 del mes siguiente (una provisión, para cuando llegue la factura; un ajuste de cierre como la revaluación cambiaria).
     /// </summary>
     [JsonPropertyName("reverse_next_month")]
     public bool? ReverseNextMonth { get; set; }
@@ -10860,6 +10878,18 @@ public sealed partial class DeleteCostCenterParams
 }
 
 /// <summary>
+/// Los campos de «Quitar la revaluación cambiaria de un mes».
+/// </summary>
+public sealed partial class DeleteFxRevaluationParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Quitar a un miembro».
 /// </summary>
 public sealed partial class DeleteMemberParams
@@ -14506,6 +14536,158 @@ public sealed partial class FixedAssetList
 }
 
 /// <summary>
+/// La revaluación cambiaria de un mes (NIF B-15): las facturas PPD en otra moneda que seguían pendientes al cierre, lo que se debe por moneda con el tipo de cambio de cierre que sugerimos (el FIX del DOF) y la póliza de ajuste que registra la diferencia, si ya se registró.
+/// </summary>
+public sealed partial class FxRevaluation
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El último día del mes: la fecha de la póliza. Su reversión es del día 1 del mes siguiente.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Cada moneda con saldos pendientes: receivable (lo que le deben sus clientes, en esa moneda), payable (lo que usted debe a sus proveedores), closing_rate (el FIX publicado en el DOF el día hábil siguiente al cierre, o null si no se pudo leer) y closing_rate_date (el día de esa publicación).
+    /// </summary>
+    [JsonPropertyName("currencies")]
+    public List<FxRevaluationCurrenciesItem> Currencies { get; set; } = default!;
+
+    /// <summary>
+    /// Las facturas PPD en otra moneda aún pendientes al cierre: direction issued (de un cliente) o received (de un proveedor), balance (lo que faltaba pagar, en su moneda) y booked_rate (su TipoCambio, al que se registró).
+    /// </summary>
+    [JsonPropertyName("documents")]
+    public List<FxRevaluationDocumentsItem> Documents { get; set; } = default!;
+
+    /// <summary>
+    /// La póliza de revaluación (mje_…) si ya se registró, o null. Es una póliza a mano de tipo adjustment con reverse_next_month.
+    /// </summary>
+    [JsonPropertyName("manual_entry")]
+    public string? ManualEntry { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;FxRevaluationCurrenciesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FxRevaluationCurrenciesItem
+{
+    /// <summary>
+    /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que le deben sus clientes al cierre, en esa moneda.
+    /// </summary>
+    [JsonPropertyName("receivable")]
+    public decimal Receivable { get; set; }
+
+    /// <summary>
+    /// Lo que usted debe a sus proveedores al cierre, en esa moneda.
+    /// </summary>
+    [JsonPropertyName("payable")]
+    public decimal Payable { get; set; }
+
+    /// <summary>
+    /// El tipo de cambio de cierre que sugerimos (pesos por unidad): el FIX publicado en el DOF el día hábil siguiente al cierre, o null si no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("closing_rate")]
+    public decimal? ClosingRate { get; set; }
+
+    /// <summary>
+    /// El día en que se publicó ese FIX, o null.
+    /// </summary>
+    [JsonPropertyName("closing_rate_date")]
+    public string? ClosingRateDate { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;FxRevaluationDocumentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FxRevaluationDocumentsItem
+{
+    /// <summary>
+    /// Folio fiscal que asigna el SAT (UUID del Timbre Fiscal Digital), en mayúsculas.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// EntradaSalidaMerc: Entrada o Salida.
+    /// <br/>
+    /// Valores: issued, received.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public string Direction { get; set; } = default!;
+
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su serie y folio, o null si no tiene.
+    /// </summary>
+    [JsonPropertyName("series_folio")]
+    public string? SeriesFolio { get; set; }
+
+    /// <summary>
+    /// Fecha de emisión (Fecha), hora de la Ciudad de México.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Moneda de la factura pagada (MonedaDR).
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que faltaba pagar al cierre del mes, en su moneda.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// Su TipoCambio: los pesos por unidad a los que se registró.
+    /// </summary>
+    [JsonPropertyName("booked_rate")]
+    public decimal BookedRate { get; set; }
+}
+
+/// <summary>
 /// El auxiliar de cuentas (libro mayor) de un periodo de hasta 12 meses: cada cuenta con su saldo inicial, cada cargo y abono con su póliza y el saldo que deja, y su saldo final.
 /// </summary>
 public sealed partial class GeneralLedger
@@ -14962,6 +15144,18 @@ public sealed partial class GetFinancialStatementsParams
     [JsonPropertyName("month")]
     public required string Month { get; set; }
 
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver la revaluación cambiaria de un mes».
+/// </summary>
+public sealed partial class GetFxRevaluationParams
+{
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -22870,7 +23064,7 @@ public sealed partial class ManualJournalEntry
     public string JournalType { get; set; } = default!;
 
     /// <summary>
-    /// true: una provisión que se revierte sola el día 1 del mes siguiente.
+    /// true: una provisión o un ajuste de cierre (como la revaluación cambiaria) que se revierte solo el día 1 del mes siguiente.
     /// </summary>
     [JsonPropertyName("reverse_next_month")]
     public bool ReverseNextMonth { get; set; }
@@ -33726,7 +33920,7 @@ public sealed partial class UpdateManualEntryParams
     public string? JournalType { get; set; }
 
     /// <summary>
-    /// Solo con kind accrual: la póliza se revierte sola el día 1 del mes siguiente (para cuando llegue la factura).
+    /// Solo con kind accrual o adjustment: la póliza se revierte sola el día 1 del mes siguiente (una provisión, para cuando llegue la factura; un ajuste de cierre como la revaluación cambiaria).
     /// </summary>
     [JsonPropertyName("reverse_next_month")]
     public bool? ReverseNextMonth { get; set; }
