@@ -5405,6 +5405,12 @@ public sealed partial class CreateIssuerOnboardingLinkParams
     /// </summary>
     [JsonPropertyName("keep_efirma")]
     public bool? KeepEfirma { get; set; }
+
+    /// <summary>
+    /// true para pedir solo la e.firma, sin el CSD: para consultar el SAT por su cliente sin timbrar por él. Implica keep_efirma. El emisor sigue sin poder timbrar hasta que suba su CSD.
+    /// </summary>
+    [JsonPropertyName("efirma_only")]
+    public bool? EfirmaOnly { get; set; }
 }
 
 /// <summary>
@@ -20436,6 +20442,12 @@ public sealed partial class IssuerOnboardingLink
     /// </summary>
     [JsonPropertyName("keep_efirma")]
     public bool KeepEfirma { get; set; }
+
+    /// <summary>
+    /// La página pide solo la e.firma, sin el CSD (para consultar el SAT).
+    /// </summary>
+    [JsonPropertyName("efirma_only")]
+    public bool EfirmaOnly { get; set; }
 
     /// <summary>
     /// Cuándo deja de servir la liga. Pida otra cuando quiera.
