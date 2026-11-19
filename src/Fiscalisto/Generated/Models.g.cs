@@ -14113,6 +14113,12 @@ public sealed partial class Invoice
     public string? PaymentTerms { get; set; }
 
     /// <summary>
+    /// Nota para el cliente: sale en el PDF, no en el XML. Se cambia después de timbrar con POST /v1/invoices/{id} (el XML no cambia; el siguiente PDF ya la lleva).
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+
+    /// <summary>
     /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
     /// </summary>
     [JsonPropertyName("currency")]
@@ -22542,6 +22548,14 @@ public sealed partial class PortalStyle
     public PortalStyleColors Colors { get; set; } = default!;
 
     /// <summary>
+    /// Cómo llama el portal a lo que se factura («reservacion» en un hotel).
+    /// <br/>
+    /// Valores: ticket, nota, cuenta, compra, pedido, orden, reservacion, estancia, boleto.
+    /// </summary>
+    [JsonPropertyName("noun")]
+    public string Noun { get; set; } = default!;
+
+    /// <summary>
     /// Los textos propios por llave (step_ticket, submit, success_title, concepts_title…), cada uno con es y en. Uno que falta lleva el de Fiscalisto.
     /// </summary>
     [JsonPropertyName("texts")]
@@ -22630,6 +22644,12 @@ public sealed partial class PortalStyleWays
     /// </summary>
     [JsonPropertyName("abroad")]
     public bool Abroad { get; set; }
+
+    /// <summary>
+    /// «No tengo RFC»: a nombre de la persona, con XAXX010101000.
+    /// </summary>
+    [JsonPropertyName("norfc")]
+    public bool Norfc { get; set; }
 }
 
 /// <summary>
@@ -28162,6 +28182,12 @@ public sealed partial class SelfInvoicing
     public string? InvoiceSeries { get; set; }
 
     /// <summary>
+    /// true: el portal le pide al comprador una nota para el PDF de su factura (hasta 500 caracteres). Solo sale en el PDF, nunca en el XML.
+    /// </summary>
+    [JsonPropertyName("customer_notes")]
+    public bool CustomerNotes { get; set; }
+
+    /// <summary>
     /// ticket: la factura global lleva un concepto «Venta» por ticket, con su folio. summary: solo el monto total del periodo, uno por combinación de impuestos (NoIdentificacion «Resumen»), para una persona física en RESICO (regla 2.7.1.21 de la RMF 2026).
     /// <br/>
     /// Valores: ticket, summary.
@@ -30882,6 +30908,12 @@ public sealed partial class UpdateInvoiceParams
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Nota para el cliente en el PDF (hasta 1,000 caracteres), o null para quitarla. No va en el XML: la factura timbrada no cambia y el siguiente PDF (GET /v1/invoices/{id}/pdf, el correo) ya la lleva. Cada cambio queda en el historial de la factura en Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
 }
 
 /// <summary>
@@ -32790,6 +32822,12 @@ public sealed partial class UpdateSelfInvoicingParams
     public string? InvoiceSeries { get; set; }
 
     /// <summary>
+    /// `true`: el portal le pide al comprador una nota para el PDF de su factura (hasta 500 caracteres; Autofactura › Nota del cliente). Solo sale en el PDF, nunca en el XML. Por omisión `false`.
+    /// </summary>
+    [JsonPropertyName("customer_notes")]
+    public bool? CustomerNotes { get; set; }
+
+    /// <summary>
     /// Los conceptos de la factura que se hace el comprador (Autofactura › Conceptos de la factura): desglosados o en uno solo, y si el comprador puede elegir. Mande solo lo que cambia; `null` regresa a desglosados sin elección.
     /// </summary>
     [JsonPropertyName("invoice_concepts")]
@@ -32996,13 +33034,21 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyle
     public string? Shadow { get; set; }
 
     /// <summary>
+    /// Cómo llama el portal a lo que se factura, en todos sus textos: `ticket` (por omisión), `nota`, `cuenta`, `compra`, `pedido`, `orden`, `reservacion`, `estancia` o `boleto`. Un hotel usa `reservacion`: «Esta reservación ya se facturó».
+    /// <br/>
+    /// Valores: ticket, nota, cuenta, compra, pedido, orden, reservacion, estancia, boleto.
+    /// </summary>
+    [JsonPropertyName("noun")]
+    public string? Noun { get; set; }
+
+    /// <summary>
     /// Los textos, cada uno con `es` y `en`, combinados por llave con lo guardado. El título, el mensaje y dónde viene el código en español son `portal_title`, `portal_message` y `code_hint`; aquí van en inglés.
     /// </summary>
     [JsonPropertyName("texts")]
     public UpdateSelfInvoicingParamsPortalStyleTexts? Texts { get; set; }
 
     /// <summary>
-    /// Las formas de dar sus datos además de escribirlos. Todas `true` por omisión.
+    /// Las formas de dar sus datos además de escribirlos. Todas `true` por omisión menos `norfc`.
     /// </summary>
     [JsonPropertyName("ways")]
     public UpdateSelfInvoicingParamsPortalStyleWays? Ways { get; set; }
@@ -33429,7 +33475,7 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsTitle
 }
 
 /// <summary>
-/// Las formas de dar sus datos además de escribirlos. Todas `true` por omisión.
+/// Las formas de dar sus datos además de escribirlos. Todas `true` por omisión menos `norfc`.
 /// </summary>
 public sealed partial class UpdateSelfInvoicingParamsPortalStyleWays
 {
@@ -33458,10 +33504,16 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleWays
     public bool? Recall { get; set; }
 
     /// <summary>
-    /// Ofrecer facturar a clientes en el extranjero.
+    /// Ofrecer facturar a clientes en el extranjero (el tax ID es opcional).
     /// </summary>
     [JsonPropertyName("abroad")]
     public bool? Abroad { get; set; }
+
+    /// <summary>
+    /// Ofrecer «No tengo RFC»: facturar a nombre de la persona con XAXX010101000, régimen 616, uso S01 y el CP del emisor. `false` por omisión.
+    /// </summary>
+    [JsonPropertyName("norfc")]
+    public bool? Norfc { get; set; }
 }
 
 /// <summary>
