@@ -330,6 +330,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public ManualEntriesResource ManualEntries => _manualEntries ??= new ManualEntriesResource(this);
 
+    private OpeningBalancesResource? _openingBalances;
+
+    /// <summary>Contabilidad.</summary>
+    public OpeningBalancesResource OpeningBalances => _openingBalances ??= new OpeningBalancesResource(this);
+
     private FixedAssetsResource? _fixedAssets;
 
     /// <summary>Contabilidad.</summary>
@@ -4888,6 +4893,72 @@ public sealed class ManualEntriesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/accounting/manual_entries/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Importar pólizas de otro sistema
+    /// </summary>
+    /// <remarks>
+    /// Hasta 3,000 pólizas de una vez (las de CONTPAQi, COI o una hoja de cálculo), todas o ninguna: cada una con las reglas de POST /v1/accounting/manual_entries, y el error dice cuál (param entries[i].…). Entran como kind other. Una con el mismo number, fecha, tipo y total que una ya importada se salta (duplicates). DELETE /v1/accounting/manual_entry_imports/{id} quita las de una importación.
+    /// <br/>
+    /// <c>POST /v1/accounting/manual_entry_imports</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/import-manual-entries"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ManualEntryImport> ImportEntriesAsync(ImportManualEntriesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ManualEntryImport>("POST", "/v1/accounting/manual_entry_imports", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Deshacer una importación de pólizas
+    /// </summary>
+    /// <remarks>
+    /// Borra todas las pólizas que trajo esa importación (mji_…). No se puede si alguna es de un mes cerrado (period_closed).
+    /// <br/>
+    /// <c>DELETE /v1/accounting/manual_entry_imports/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/undo-manual-entries-import"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> UndoImportAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/accounting/manual_entry_imports/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.OpeningBalances</c>.
+/// </summary>
+public sealed class OpeningBalancesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal OpeningBalancesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver los saldos iniciales
+    /// </summary>
+    /// <remarks>
+    /// Los saldos de cada cuenta con los que empiezan los libros del emisor (date), como Estados financieros › Saldos iniciales en la app. Sin saldos iniciales, date es null.
+    /// <br/>
+    /// <c>GET /v1/accounting/opening_balances</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-opening-balances"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<OpeningBalances> GetAsync(GetOpeningBalancesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<OpeningBalances>("GET", "/v1/accounting/opening_balances", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Guardar los saldos iniciales
+    /// </summary>
+    /// <remarks>
+    /// Reemplaza los saldos iniciales: el día 1 del mes en que empiezan sus libros y el saldo deudor o acreedor de cada cuenta (por su número); las dos columnas suman lo mismo o contesta entry_unbalanced. Son los saldos finales de la balanza de su sistema anterior. Sin renglones, los borra. Nada antes de esa fecha cuenta.
+    /// <br/>
+    /// <c>POST /v1/accounting/opening_balances</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/set-opening-balances"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<OpeningBalances> SetAsync(SetOpeningBalancesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<OpeningBalances>("POST", "/v1/accounting/opening_balances", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

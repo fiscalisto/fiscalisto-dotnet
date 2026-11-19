@@ -14922,6 +14922,18 @@ public sealed partial class GetInvoiceXmlParams
 }
 
 /// <summary>
+/// Los campos de «Ver los saldos iniciales».
+/// </summary>
+public sealed partial class GetOpeningBalancesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver una constancia».
 /// </summary>
 public sealed partial class GetRetentionParams
@@ -15051,6 +15063,86 @@ public sealed partial class GetVatRefundParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Importar pólizas de otro sistema».
+/// </summary>
+public sealed partial class ImportManualEntriesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Las pólizas, hasta 3,000.
+    /// </summary>
+    [JsonPropertyName("entries")]
+    public required List<ImportManualEntriesParamsEntriesItem> Entries { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ImportManualEntriesParamsEntriesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ImportManualEntriesParamsEntriesItem
+{
+    /// <summary>
+    /// La fecha de la póliza (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// El tipo de póliza: journal (diario), income (ingresos) o expense (egresos).
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string? JournalType { get; set; }
+
+    /// <summary>
+    /// Su número en el otro sistema (por ejemplo Dr 15). Con la fecha, el tipo y el total, reconoce una póliza ya importada y la salta.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Su concepto.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// Sus cargos y abonos: cada renglón uno u otro; los cargos suman lo mismo que los abonos.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<ImportManualEntriesParamsEntriesItemLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ImportManualEntriesParamsEntriesItemLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ImportManualEntriesParamsEntriesItemLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts), por ejemplo 205-06.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal? Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal? Credit { get; set; }
 }
 
 /// <summary>
@@ -22529,6 +22621,66 @@ public sealed partial class ListWebhookEndpointsParams
 }
 
 /// <summary>
+/// Las pólizas que entraron de otro sistema (CONTPAQi, COI, una hoja de cálculo) en una importación.
+/// </summary>
+public sealed partial class ManualEntryImport
+{
+    /// <summary>
+    /// La importación (mji_…), para deshacerla; null si todas las pólizas ya estaban.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas pólizas entraron.
+    /// </summary>
+    [JsonPropertyName("imported")]
+    public long Imported { get; set; }
+
+    /// <summary>
+    /// Cuántas se saltaron porque ya estaban importadas.
+    /// </summary>
+    [JsonPropertyName("duplicates")]
+    public long Duplicates { get; set; }
+
+    /// <summary>
+    /// La fecha de la primera póliza del archivo.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string From { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha de la última.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string To { get; set; } = default!;
+
+    /// <summary>
+    /// Las pólizas que entraron (mje_…).
+    /// </summary>
+    [JsonPropertyName("manual_entries")]
+    public List<string> ManualEntries { get; set; } = default!;
+}
+
+/// <summary>
 /// Una póliza capturada a mano (ajuste, provisión, reclasificación): entra a las pólizas, la balanza, los estados financieros y la contabilidad electrónica de su mes.
 /// </summary>
 public sealed partial class ManualJournalEntry
@@ -23246,6 +23398,72 @@ public sealed partial class MemberList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Los saldos iniciales del emisor: con qué saldo empieza cada cuenta el día en que empiezan sus libros.
+/// </summary>
+public sealed partial class OpeningBalances
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El día en que empiezan sus libros, o null si no tiene saldos iniciales.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// El saldo de cada cuenta: deudor (debit) o acreedor (credit).
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<OpeningBalancesLinesItem> Lines { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;OpeningBalancesLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class OpeningBalancesLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// El cargo, en pesos.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono, en pesos.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
 }
 
 /// <summary>
@@ -30434,6 +30652,54 @@ public sealed partial class SetClosedPeriodParams
     /// </summary>
     [JsonPropertyName("closed_through")]
     public string? ClosedThrough { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Guardar los saldos iniciales».
+/// </summary>
+public sealed partial class SetOpeningBalancesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cuándo empiezan sus libros (el día 1 de un mes): lo anterior no se cuenta.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// El saldo de cada cuenta, deudor o acreedor; las dos columnas suman lo mismo. Sin renglones, borra los saldos iniciales.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<SetOpeningBalancesParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SetOpeningBalancesParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SetOpeningBalancesParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts), por ejemplo 205-06.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// Su saldo deudor.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal? Debit { get; set; }
+
+    /// <summary>
+    /// Su saldo acreedor.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal? Credit { get; set; }
 }
 
 /// <summary>
