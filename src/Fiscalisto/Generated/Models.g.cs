@@ -5635,6 +5635,12 @@ public sealed partial class CreateManualEntryParams
     public string? UuidTaxId { get; set; }
 
     /// <summary>
+    /// Una póliza recurrente: se repite cada mes, el mismo día (el último si la fecha es el último del mes), hasta este mes (AAAA-MM), hasta 60 meses. null: solo en su fecha.
+    /// </summary>
+    [JsonPropertyName("repeat_until")]
+    public string? RepeatUntil { get; set; }
+
+    /// <summary>
     /// Sus cargos y abonos: cada renglón uno u otro; los cargos suman lo mismo que los abonos.
     /// </summary>
     [JsonPropertyName("lines")]
@@ -6119,6 +6125,12 @@ public sealed partial class CreatePayrollReceiptParams
     public long? DisabilityDays { get; set; }
 
     /// <summary>
+    /// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+    /// </summary>
+    [JsonPropertyName("incidents")]
+    public CreatePayrollReceiptParamsIncidents? Incidents { get; set; }
+
+    /// <summary>
     /// El recibo vigente (inv_… o UUID) que este corrige, calculado por Fiscalisto para el mismo empleado: el nuevo se calcula con los datos del empleado como están ahora, va relacionado con 04 y el anterior se cancela con motivo 01. Para un recibo que calculó su sistema use POST /v1/payroll_receipts/external con replaces.
     /// </summary>
     [JsonPropertyName("replaces")]
@@ -6141,6 +6153,74 @@ public sealed partial class CreatePayrollReceiptParams
     /// </summary>
     [JsonPropertyName("confirmation_token")]
     public string? ConfirmationToken { get; set; }
+}
+
+/// <summary>
+/// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+/// </summary>
+public sealed partial class CreatePayrollReceiptParamsIncidents
+{
+    /// <summary>
+    /// Horas extra dobles (pagadas al doble), horas completas: hasta 9 por semana en 2026 y 2027, 10 en 2028, 11 en 2029 y 12 desde 2030 (LFT arts. 66 y transitorio cuarto del decreto DOF 01-05-2026). Exentas la mitad, hasta 5 UMA por semana; todas si gana el salario mínimo (LISR art. 93 fr. I).
+    /// </summary>
+    [JsonPropertyName("double_hours")]
+    public long? DoubleHours { get; set; }
+
+    /// <summary>
+    /// Horas extra triples, las que pasan de las dobles de la semana (LFT art. 68). Gravadas.
+    /// </summary>
+    [JsonPropertyName("triple_hours")]
+    public long? TripleHours { get; set; }
+
+    /// <summary>
+    /// Días en que se trabajaron las horas extra (nodo HorasExtra); uno por cada 3 horas si no lo manda.
+    /// </summary>
+    [JsonPropertyName("overtime_days")]
+    public long? OvertimeDays { get; set; }
+
+    /// <summary>
+    /// Domingos trabajados: prima dominical del 25% del salario diario por cada uno (LFT art. 71), exenta hasta 1 UMA por domingo.
+    /// </summary>
+    [JsonPropertyName("sundays")]
+    public long? Sundays { get; set; }
+
+    /// <summary>
+    /// Días de vacaciones que disfrutó en el periodo (se pagan como sueldo dentro de days): su prima vacacional con el porcentaje del empleado, exenta hasta 15 UMA en el año.
+    /// </summary>
+    [JsonPropertyName("vacation_days")]
+    public decimal? VacationDays { get; set; }
+
+    /// <summary>
+    /// Premios y bonos del periodo, gravados.
+    /// </summary>
+    [JsonPropertyName("bonuses")]
+    public List<CreatePayrollReceiptParamsIncidentsBonusesItem>? Bonuses { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreatePayrollReceiptParamsIncidentsBonusesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreatePayrollReceiptParamsIncidentsBonusesItem
+{
+    /// <summary>
+    /// 010 premio de puntualidad, 049 premio de asistencia, 038 otro bono (c_TipoPercepcion).
+    /// <br/>
+    /// Valores: 010, 049, 038.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string? Concept { get; set; }
 }
 
 /// <summary>
@@ -22802,6 +22882,12 @@ public sealed partial class ManualJournalEntry
     public string? ReversesOn { get; set; }
 
     /// <summary>
+    /// El último mes (AAAA-MM) en que se repite cada mes, o null si es de una sola fecha.
+    /// </summary>
+    [JsonPropertyName("repeat_until")]
+    public string? RepeatUntil { get; set; }
+
+    /// <summary>
     /// El UUID del CFDI con el que se relaciona, o null.
     /// </summary>
     [JsonPropertyName("uuid")]
@@ -25114,6 +25200,12 @@ public sealed partial class PreviewPayrollReceiptParams
     public long? DisabilityDays { get; set; }
 
     /// <summary>
+    /// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+    /// </summary>
+    [JsonPropertyName("incidents")]
+    public PreviewPayrollReceiptParamsIncidents? Incidents { get; set; }
+
+    /// <summary>
     /// El recibo vigente (inv_… o UUID) que este corrige, calculado por Fiscalisto para el mismo empleado: el nuevo se calcula con los datos del empleado como están ahora, va relacionado con 04 y el anterior se cancela con motivo 01. Para un recibo que calculó su sistema use POST /v1/payroll_receipts/external con replaces.
     /// </summary>
     [JsonPropertyName("replaces")]
@@ -25130,6 +25222,74 @@ public sealed partial class PreviewPayrollReceiptParams
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+/// </summary>
+public sealed partial class PreviewPayrollReceiptParamsIncidents
+{
+    /// <summary>
+    /// Horas extra dobles (pagadas al doble), horas completas: hasta 9 por semana en 2026 y 2027, 10 en 2028, 11 en 2029 y 12 desde 2030 (LFT arts. 66 y transitorio cuarto del decreto DOF 01-05-2026). Exentas la mitad, hasta 5 UMA por semana; todas si gana el salario mínimo (LISR art. 93 fr. I).
+    /// </summary>
+    [JsonPropertyName("double_hours")]
+    public long? DoubleHours { get; set; }
+
+    /// <summary>
+    /// Horas extra triples, las que pasan de las dobles de la semana (LFT art. 68). Gravadas.
+    /// </summary>
+    [JsonPropertyName("triple_hours")]
+    public long? TripleHours { get; set; }
+
+    /// <summary>
+    /// Días en que se trabajaron las horas extra (nodo HorasExtra); uno por cada 3 horas si no lo manda.
+    /// </summary>
+    [JsonPropertyName("overtime_days")]
+    public long? OvertimeDays { get; set; }
+
+    /// <summary>
+    /// Domingos trabajados: prima dominical del 25% del salario diario por cada uno (LFT art. 71), exenta hasta 1 UMA por domingo.
+    /// </summary>
+    [JsonPropertyName("sundays")]
+    public long? Sundays { get; set; }
+
+    /// <summary>
+    /// Días de vacaciones que disfrutó en el periodo (se pagan como sueldo dentro de days): su prima vacacional con el porcentaje del empleado, exenta hasta 15 UMA en el año.
+    /// </summary>
+    [JsonPropertyName("vacation_days")]
+    public decimal? VacationDays { get; set; }
+
+    /// <summary>
+    /// Premios y bonos del periodo, gravados.
+    /// </summary>
+    [JsonPropertyName("bonuses")]
+    public List<PreviewPayrollReceiptParamsIncidentsBonusesItem>? Bonuses { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PreviewPayrollReceiptParamsIncidentsBonusesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PreviewPayrollReceiptParamsIncidentsBonusesItem
+{
+    /// <summary>
+    /// 010 premio de puntualidad, 049 premio de asistencia, 038 otro bono (c_TipoPercepcion).
+    /// <br/>
+    /// Valores: 010, 049, 038.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string? Concept { get; set; }
 }
 
 /// <summary>
@@ -33582,6 +33742,12 @@ public sealed partial class UpdateManualEntryParams
     /// </summary>
     [JsonPropertyName("uuid_tax_id")]
     public string? UuidTaxId { get; set; }
+
+    /// <summary>
+    /// Una póliza recurrente: se repite cada mes, el mismo día (el último si la fecha es el último del mes), hasta este mes (AAAA-MM), hasta 60 meses. null: solo en su fecha.
+    /// </summary>
+    [JsonPropertyName("repeat_until")]
+    public string? RepeatUntil { get; set; }
 
     /// <summary>
     /// Sus cargos y abonos: cada renglón uno u otro; los cargos suman lo mismo que los abonos.

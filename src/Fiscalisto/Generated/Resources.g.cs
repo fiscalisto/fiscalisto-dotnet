@@ -1900,7 +1900,7 @@ public sealed class PayrollReceiptsResource
     /// Timbrar un recibo de nómina
     /// </summary>
     /// <remarks>
-    /// Nómina ordinaria (Nómina 1.2): Fiscalisto calcula sueldo, ISR con subsidio al empleo e IMSS del empleado y el periodo, como la app, y nada más: el aguinaldo, la PTU y los finiquitos los calcula POST /v1/payroll_receipts/extraordinary; bonos, horas extra, Infonavit o préstamos los calcula su sistema y se timbran con POST /v1/payroll_receipts/external (pedirlos aquí contesta payroll_calculation_unsupported). Revise antes el recibo con POST /v1/payroll_receipts/preview y mande su confirmation_token: así solo se timbra el recibo que revisó (si cambió, 409 payroll_calculation_changed). Queda como factura tipo N (GET /v1/invoices/{id}). El emisor necesita employer_registration.
+    /// Nómina ordinaria (Nómina 1.2): Fiscalisto calcula sueldo, ISR con subsidio al empleo e IMSS del empleado y el periodo, con sus incidencias (incidents: horas extra, domingos, vacaciones y premios), como la app: el aguinaldo, la PTU y los finiquitos los calcula POST /v1/payroll_receipts/extraordinary; comisiones, Infonavit o préstamos los calcula su sistema y se timbran con POST /v1/payroll_receipts/external (pedirlos aquí contesta payroll_calculation_unsupported). Revise antes el recibo con POST /v1/payroll_receipts/preview y mande su confirmation_token: así solo se timbra el recibo que revisó (si cambió, 409 payroll_calculation_changed). Queda como factura tipo N (GET /v1/invoices/{id}). El emisor necesita employer_registration.
     /// <br/>
     /// <c>POST /v1/payroll_receipts</c>
     /// <br/>
@@ -1914,7 +1914,7 @@ public sealed class PayrollReceiptsResource
     /// Calcular un recibo sin timbrar
     /// </summary>
     /// <remarks>
-    /// El recibo como se timbraría (percepciones, ISR con el subsidio para el empleo, cuotas IMSS y el neto), sin timbrar ni usar timbres, con el confirmation_token que lo timbra tal cual y los avisos de lo que no incluye (un finiquito, valores del año que aún no se cargan).
+    /// El recibo como se timbraría (percepciones con sus incidencias, ISR con el subsidio para el empleo, cuotas IMSS y el neto), sin timbrar ni usar timbres, con el confirmation_token que lo timbra tal cual y los avisos de lo que no incluye (un finiquito, valores del año que aún no se cargan).
     /// <br/>
     /// <c>POST /v1/payroll_receipts/preview</c>
     /// <br/>
