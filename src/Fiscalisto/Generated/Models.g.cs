@@ -4287,6 +4287,32 @@ public sealed partial class CreateCustomerGroupParams
     /// </summary>
     [JsonPropertyName("portal_ordering")]
     public bool? PortalOrdering { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo sus clientes cambian o cancelan desde su portal un pedido que mandaron ahí: none, until_confirmed (hasta que usted lo confirme; por omisión) o until_delivered (hasta que se entregue o facture algo).
+    /// <br/>
+    /// Valores: none, until_confirmed, until_delivered.
+    /// </summary>
+    [JsonPropertyName("portal_changes")]
+    public string? PortalChanges { get; set; }
+
+    /// <summary>
+    /// Días de la semana en que les entrega (0 domingo a 6 sábado); null: cualquier día. El portal solo ofrece esos días.
+    /// </summary>
+    [JsonPropertyName("delivery_days")]
+    public List<long>? DeliveryDays { get; set; }
+
+    /// <summary>
+    /// Hora de corte (0 a 23, Ciudad de México): un pedido del portal después de ella cuenta desde el día siguiente; null: sin hora de corte.
+    /// </summary>
+    [JsonPropertyName("cutoff_hour")]
+    public long? CutoffHour { get; set; }
+
+    /// <summary>
+    /// Días para preparar un pedido antes de poder entregarlo (0 por omisión).
+    /// </summary>
+    [JsonPropertyName("prep_days")]
+    public long? PrepDays { get; set; }
 }
 
 /// <summary>
@@ -10365,6 +10391,32 @@ public sealed partial class CustomerGroup
     /// </summary>
     [JsonPropertyName("portal_ordering")]
     public bool PortalOrdering { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo sus clientes cambian o cancelan desde su portal un pedido que mandaron ahí: none, until_confirmed (hasta que usted lo confirme) o until_delivered (hasta que se entregue o facture algo).
+    /// <br/>
+    /// Valores: none, until_confirmed, until_delivered.
+    /// </summary>
+    [JsonPropertyName("portal_changes")]
+    public string PortalChanges { get; set; } = default!;
+
+    /// <summary>
+    /// Días de la semana en que les entrega (0 domingo a 6 sábado), o null si cualquier día. El Portal del cliente solo ofrece esos días.
+    /// </summary>
+    [JsonPropertyName("delivery_days")]
+    public List<long>? DeliveryDays { get; set; }
+
+    /// <summary>
+    /// Hora de corte (0 a 23, Ciudad de México): un pedido del portal después de ella cuenta desde el día siguiente; null sin hora de corte.
+    /// </summary>
+    [JsonPropertyName("cutoff_hour")]
+    public long? CutoffHour { get; set; }
+
+    /// <summary>
+    /// Días para preparar un pedido antes de poder entregarlo.
+    /// </summary>
+    [JsonPropertyName("prep_days")]
+    public long PrepDays { get; set; }
 
     /// <summary>
     /// Cuántos clientes hay en el grupo.
@@ -32774,6 +32826,32 @@ public sealed partial class UpdateCustomerGroupParams
     /// </summary>
     [JsonPropertyName("portal_ordering")]
     public bool? PortalOrdering { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo sus clientes cambian o cancelan desde su portal un pedido que mandaron ahí: none, until_confirmed (hasta que usted lo confirme; por omisión) o until_delivered (hasta que se entregue o facture algo).
+    /// <br/>
+    /// Valores: none, until_confirmed, until_delivered.
+    /// </summary>
+    [JsonPropertyName("portal_changes")]
+    public string? PortalChanges { get; set; }
+
+    /// <summary>
+    /// Días de la semana en que les entrega (0 domingo a 6 sábado); null: cualquier día. El portal solo ofrece esos días.
+    /// </summary>
+    [JsonPropertyName("delivery_days")]
+    public List<long>? DeliveryDays { get; set; }
+
+    /// <summary>
+    /// Hora de corte (0 a 23, Ciudad de México): un pedido del portal después de ella cuenta desde el día siguiente; null: sin hora de corte.
+    /// </summary>
+    [JsonPropertyName("cutoff_hour")]
+    public long? CutoffHour { get; set; }
+
+    /// <summary>
+    /// Días para preparar un pedido antes de poder entregarlo (0 por omisión).
+    /// </summary>
+    [JsonPropertyName("prep_days")]
+    public long? PrepDays { get; set; }
 }
 
 /// <summary>
