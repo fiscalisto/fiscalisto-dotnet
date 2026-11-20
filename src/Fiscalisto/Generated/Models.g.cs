@@ -20284,6 +20284,30 @@ public sealed partial class GetPayrollAccumulatedParams
 }
 
 /// <summary>
+/// Los campos de «Calendario de nómina».
+/// </summary>
+public sealed partial class GetPayrollCalendarParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Hasta cuántos días adelante (por omisión 90, hasta 366).
+    /// </summary>
+    [JsonPropertyName("days_ahead")]
+    public long? DaysAhead { get; set; }
+
+    /// <summary>
+    /// Desde cuántos días atrás (por omisión 31, hasta 366).
+    /// </summary>
+    [JsonPropertyName("days_back")]
+    public long? DaysBack { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Costo de la nómina».
 /// </summary>
 public sealed partial class GetPayrollCostParams
@@ -28951,6 +28975,38 @@ public sealed partial class MarkInvoicePaidParams
 }
 
 /// <summary>
+/// Los campos de «Marcar un pago de nómina como pagado».
+/// </summary>
+public sealed partial class MarkPayrollCalendarEventParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo o ajuste_anual.
+    /// <br/>
+    /// Valores: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual.
+    /// </summary>
+    [JsonPropertyName("obligation")]
+    public required string Obligation { get; set; }
+
+    /// <summary>
+    /// Como lo da GET /v1/payroll_calendar: 2026-11, 2026-B6, 2026, 2026-11:CMX.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// true lo marca pagado; false lo desmarca.
+    /// </summary>
+    [JsonPropertyName("paid")]
+    public required bool Paid { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ya llegó la factura».
 /// </summary>
 public sealed partial class MarkPurchaseReceiptInvoicedParams
@@ -30555,6 +30611,176 @@ public sealed partial class PayrollBatchReceiptsItemError
 }
 
 /// <summary>
+/// El calendario de nómina del emisor, por fecha.
+/// </summary>
+public sealed partial class PayrollCalendar
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Hoy en la Ciudad de México (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("today")]
+    public string Today { get; set; } = default!;
+
+    /// <summary>
+    /// Eventos que quiere recibir, o ["*"] para todos (por omisión). La lista con cuándo llega cada uno: [Tipos de evento](https://fiscalisto.com/docs/api/webhooks#tipos-de-evento).
+    /// </summary>
+    [JsonPropertyName("events")]
+    public List<PayrollCalendarEvent> Events { get; set; } = default!;
+}
+
+/// <summary>
+/// Una fecha del calendario de nómina.
+/// </summary>
+public sealed partial class PayrollCalendarEvent
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// pago (una nómina, en su fecha de pago), imss (cuotas del mes, LSS art. 39), rcv_infonavit (bimestrales), isn (impuesto sobre nómina de un estado), aguinaldo (LFT art. 87), ptu (LFT art. 122), prima_riesgo (determinación anual, RACERF art. 32) o ajuste_anual (LISR art. 97).
+    /// <br/>
+    /// Valores: pago, imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual.
+    /// </summary>
+    [JsonPropertyName("obligation")]
+    public string Obligation { get; set; } = default!;
+
+    /// <summary>
+    /// Lo identifica junto con obligation: 2026-11 (mes), 2026-B6 (bimestre), 2026 (año), 2026-11:CMX (ISN de un estado) o 2026-11-16/2026-11-30:04 (una nómina).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es, como lo dice la app.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// El último día para pagarlo (YYYY-MM-DD), ya movido al siguiente día hábil cuando la ley lo mueve.
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string DueDate { get; set; } = default!;
+
+    /// <summary>
+    /// El artículo de la ley que da la fecha.
+    /// </summary>
+    [JsonPropertyName("basis")]
+    public string Basis { get; set; } = default!;
+
+    /// <summary>
+    /// Si se debe depende de algo que no sabemos (una PTU sin utilidad, una prima que no cambió) o falta el día de pago del ISN de un estado: qué confirmar. No se avisa.
+    /// </summary>
+    [JsonPropertyName("to_confirm")]
+    public string? ToConfirm { get; set; }
+
+    /// <summary>
+    /// Marcado como pagado; una nómina, cuando todos sus recibos están timbrados.
+    /// </summary>
+    [JsonPropertyName("paid")]
+    public bool Paid { get; set; }
+
+    /// <summary>
+    /// Cuándo se marcó pagado (ISO 8601); una nómina timbrada, su fecha de pago.
+    /// </summary>
+    [JsonPropertyName("paid_at")]
+    public string? PaidAt { get; set; }
+
+    /// <summary>
+    /// El c_Estado de un isn.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    /// <summary>
+    /// Una nómina (obligation pago): su periodo y cuántos recibos van.
+    /// </summary>
+    [JsonPropertyName("payroll")]
+    public PayrollCalendarEventPayroll? Payroll { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollCalendarEventPayroll&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollCalendarEventPayroll
+{
+    /// <summary>
+    /// c_PeriodicidadPago.
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public string Periodicity { get; set; } = default!;
+
+    /// <summary>
+    /// El periodo de pago: FechaInicialPago, FechaFinalPago y FechaPago de sus recibos.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public PayrollCalendarEventPayrollPeriod Period { get; set; } = default!;
+
+    /// <summary>
+    /// El último día para timbrar sus recibos (RMF 2.7.5.1: 3 a 11 días hábiles después del pago, según cuántos trabajadores).
+    /// </summary>
+    [JsonPropertyName("stamp_by")]
+    public string StampBy { get; set; } = default!;
+
+    /// <summary>
+    /// Los empleados que paga ese periodo.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public long Employees { get; set; }
+
+    /// <summary>
+    /// Los que ya tienen su recibo timbrado.
+    /// </summary>
+    [JsonPropertyName("stamped")]
+    public long Stamped { get; set; }
+}
+
+/// <summary>
+/// El periodo de pago: FechaInicialPago, FechaFinalPago y FechaPago de sus recibos.
+/// </summary>
+public sealed partial class PayrollCalendarEventPayrollPeriod
+{
+    /// <summary>
+    /// FechaInicialPago.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// FechaFinalPago.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+
+    /// <summary>
+    /// FechaPago.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string PaymentDate { get; set; } = default!;
+}
+
+/// <summary>
 /// Lo que cuesta la nómina del año mes por mes: lo pagado más las cuotas del patrón y el impuesto sobre nómina.
 /// </summary>
 public sealed partial class PayrollCost
@@ -31548,6 +31774,12 @@ public sealed partial class PayrollTaxSettings
     /// </summary>
     [JsonPropertyName("state_options")]
     public Dictionary<string, string> StateOptions { get; set; } = default!;
+
+    /// <summary>
+    /// El día del mes siguiente en que se paga el impuesto de cada estado que lo indicó, por su c_Estado; los demás, el de su ley.
+    /// </summary>
+    [JsonPropertyName("due_days")]
+    public Dictionary<string, JsonElement> DueDays { get; set; } = default!;
 }
 
 /// <summary>
@@ -42370,6 +42602,12 @@ public sealed partial class UpdatePayrollTaxSettingsParams
     /// </summary>
     [JsonPropertyName("state_options")]
     public Dictionary<string, string>? StateOptions { get; set; }
+
+    /// <summary>
+    /// El día del mes siguiente en que se paga el impuesto de cada estado, por su c_Estado: {"NLE": 17}. null vuelve al día de su ley (Ciudad de México 17, Jalisco 12, Estado de México 10); los demás estados, sin día, salen por confirmar en GET /v1/payroll_calendar. Solo cambia los estados que mande.
+    /// </summary>
+    [JsonPropertyName("due_days")]
+    public Dictionary<string, JsonElement>? DueDays { get; set; }
 }
 
 /// <summary>

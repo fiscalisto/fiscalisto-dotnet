@@ -160,6 +160,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollReportsResource PayrollReports => _payrollReports ??= new PayrollReportsResource(this);
 
+    private PayrollCalendarResource? _payrollCalendar;
+
+    /// <summary>Nómina.</summary>
+    public PayrollCalendarResource PayrollCalendar => _payrollCalendar ??= new PayrollCalendarResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -2783,6 +2788,44 @@ public sealed class PayrollReportsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollCost> CostAsync(GetPayrollCostParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollCost>("GET", "/v1/payroll_reports/cost", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollCalendar</c>.
+/// </summary>
+public sealed class PayrollCalendarResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollCalendarResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Calendario de nómina
+    /// </summary>
+    /// <remarks>
+    /// Como «Nómina › Calendario» de la app: cada nómina en su fecha de pago (con cuántos de sus recibos están timbrados y el último día para timbrarlos), y lo que se paga por ella, con el artículo de la ley de cada fecha: cuotas del IMSS (día 17 del mes siguiente, LSS art. 39), RCV e Infonavit (bimestrales, día 17), impuesto sobre nómina de cada estado donde trabajan sus empleados, aguinaldo (antes del 20 de diciembre), PTU, prima de riesgo de trabajo (febrero) y ajuste anual. Una fecha de pago al IMSS que cae en día inhábil o viernes pasa al siguiente día hábil (CFF art. 12, RACERF art. 3).
+    /// <br/>
+    /// <c>GET /v1/payroll_calendar</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-payroll-calendar"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollCalendar> GetAsync(GetPayrollCalendarParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollCalendar>("GET", "/v1/payroll_calendar", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Marcar un pago de nómina como pagado
+    /// </summary>
+    /// <remarks>
+    /// Marca (paid true) o desmarca (false) un pago del calendario de nómina: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo o ajuste_anual, con su key como lo da GET /v1/payroll_calendar. Una nómina (pago) queda hecha al timbrar sus recibos.
+    /// <br/>
+    /// <c>POST /v1/payroll_calendar/mark</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/mark-payroll-calendar-event"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollCalendarEvent> MarkAsync(MarkPayrollCalendarEventParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollCalendarEvent>("POST", "/v1/payroll_calendar/mark", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
