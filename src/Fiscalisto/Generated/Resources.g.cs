@@ -115,6 +115,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollBatchesResource PayrollBatches => _payrollBatches ??= new PayrollBatchesResource(this);
 
+    private PayrollApprovalsResource? _payrollApprovals;
+
+    /// <summary>Nómina.</summary>
+    public PayrollApprovalsResource PayrollApprovals => _payrollApprovals ??= new PayrollApprovalsResource(this);
+
     private PayrollBankFilesResource? _payrollBankFiles;
 
     /// <summary>Nómina.</summary>
@@ -1980,7 +1985,7 @@ public sealed class EmployeesResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-employee-raise"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<EmployeeRaise> RaiseAsync(CreateEmployeeRaiseParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    public Task<EmployeeRaise> GiveRaiseAsync(CreateEmployeeRaiseParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<EmployeeRaise>("POST", "/v1/employee_raises", @params, null, options, true, cancellationToken);
 
     /// <summary>
@@ -2326,6 +2331,78 @@ public sealed class PayrollBatchesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollBatch> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollBatch>("GET", $"/v1/payroll_batches/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollApprovals</c>.
+/// </summary>
+public sealed class PayrollApprovalsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollApprovalsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Pedir aprobación de la prenómina
+    /// </summary>
+    /// <remarks>
+    /// Para un emisor que pide aprobar la prenómina antes de timbrar (Ajustes › Aprobaciones › Prenómina en la app): manda la nómina del periodo a aprobación. Calcula cada recibo como lo timbraría POST /v1/payroll_receipts y guarda sus importes; reemplaza la que se haya pedido antes para el mismo periodo, y avisa a quienes pueden aprobarla. La aprueba o rechaza una persona en Nómina › Emitir recibos (no una llave). Mientras no esté aprobada, POST /v1/payroll_receipts y POST /v1/payroll_batches de ese periodo contestan payroll_approval_required; aprobada, timbran solo los recibos de ella con los mismos importes y fecha de pago.
+    /// <br/>
+    /// <c>POST /v1/payroll_approvals</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-payroll-approval"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollApproval> CreateAsync(CreatePayrollApprovalParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollApproval>("POST", "/v1/payroll_approvals", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar prenóminas por aprobar
+    /// </summary>
+    /// <remarks>
+    /// Las prenóminas pedidas para aprobación, las más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/payroll_approvals</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-payroll-approvals"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<PayrollApproval>> ListAsync(ListPayrollApprovalsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<PayrollApproval>("/v1/payroll_approvals", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar prenóminas por aprobar: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<PayrollApproval> ListAutoPagingAsync(ListPayrollApprovalsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<PayrollApproval>("/v1/payroll_approvals", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una prenómina por aprobar
+    /// </summary>
+    /// <remarks>
+    /// Con su estado y los importes de cada recibo.
+    /// <br/>
+    /// <c>GET /v1/payroll_approvals/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-payroll-approval"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollApproval> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollApproval>("GET", $"/v1/payroll_approvals/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Retirar una prenómina por aprobar
+    /// </summary>
+    /// <remarks>
+    /// Retira una que espera aprobación (status withdrawn), para corregirla y pedirla de nuevo, o porque no se pagará.
+    /// <br/>
+    /// <c>POST /v1/payroll_approvals/{id}/cancel</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/cancel-payroll-approval"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollApproval> CancelAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollApproval>("POST", $"/v1/payroll_approvals/{Uri.EscapeDataString(id)}/cancel", null, null, options, true, cancellationToken);
 }
 
 /// <summary>

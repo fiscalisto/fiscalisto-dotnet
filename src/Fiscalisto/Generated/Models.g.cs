@@ -8824,6 +8824,226 @@ public sealed partial class CreatePaymentParamsDocumentsItem
 }
 
 /// <summary>
+/// Los campos de «Pedir aprobación de la prenómina».
+/// </summary>
+public sealed partial class CreatePayrollApprovalParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El periodo de pago de la nómina: FechaInicialPago, FechaFinalPago y FechaPago de sus recibos.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public required CreatePayrollApprovalParamsPeriod Period { get; set; }
+
+    /// <summary>
+    /// El recibo de cada empleado de la nómina, como se timbraría con POST /v1/payroll_receipts. Todos de la misma periodicidad.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public required List<CreatePayrollApprovalParamsReceiptsItem> Receipts { get; set; }
+}
+
+/// <summary>
+/// El periodo de pago de la nómina: FechaInicialPago, FechaFinalPago y FechaPago de sus recibos.
+/// </summary>
+public sealed partial class CreatePayrollApprovalParamsPeriod
+{
+    /// <summary>
+    /// Primer día pagado (FechaInicialPago).
+    /// </summary>
+    [JsonPropertyName("start")]
+    public required string Start { get; set; }
+
+    /// <summary>
+    /// Último día pagado (FechaFinalPago).
+    /// </summary>
+    [JsonPropertyName("end")]
+    public required string End { get; set; }
+
+    /// <summary>
+    /// Día de pago (FechaPago); sin él, el último día del periodo.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string? PaymentDate { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreatePayrollApprovalParamsReceiptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreatePayrollApprovalParamsReceiptsItem
+{
+    /// <summary>
+    /// El empleado (emp_…) del emisor.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// Días pagados; sin él, todos los días que le tocan del periodo menos absences y disability_days.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal? Days { get; set; }
+
+    /// <summary>
+    /// Faltas del periodo (días sin goce de sueldo), de 0 a 31.
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public long? Absences { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad que expidió el IMSS en el periodo, de 0 a 31.
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long? DisabilityDays { get; set; }
+
+    /// <summary>
+    /// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos, descansos y festivos trabajados, vacaciones, premios y comisiones. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+    /// </summary>
+    [JsonPropertyName("incidents")]
+    public CreatePayrollApprovalParamsReceiptsItemIncidents? Incidents { get; set; }
+}
+
+/// <summary>
+/// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos, descansos y festivos trabajados, vacaciones, premios y comisiones. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+/// </summary>
+public sealed partial class CreatePayrollApprovalParamsReceiptsItemIncidents
+{
+    /// <summary>
+    /// Horas extra dobles (pagadas al doble), horas completas: hasta 9 por semana en 2026 y 2027, 10 en 2028, 11 en 2029 y 12 desde 2030 (LFT arts. 66 y transitorio cuarto del decreto DOF 01-05-2026). Exentas la mitad, hasta 5 UMA por semana; todas si gana el salario mínimo (LISR art. 93 fr. I).
+    /// </summary>
+    [JsonPropertyName("double_hours")]
+    public long? DoubleHours { get; set; }
+
+    /// <summary>
+    /// Horas extra triples, las que pasan de las dobles de la semana (LFT art. 68). Gravadas.
+    /// </summary>
+    [JsonPropertyName("triple_hours")]
+    public long? TripleHours { get; set; }
+
+    /// <summary>
+    /// Días en que se trabajaron las horas extra (nodo HorasExtra); uno por cada 3 horas si no lo manda.
+    /// </summary>
+    [JsonPropertyName("overtime_days")]
+    public long? OvertimeDays { get; set; }
+
+    /// <summary>
+    /// Domingos trabajados: prima dominical del 25% del salario diario por cada uno (LFT art. 71), exenta hasta 1 UMA por domingo.
+    /// </summary>
+    [JsonPropertyName("sundays")]
+    public long? Sundays { get; set; }
+
+    /// <summary>
+    /// Días de descanso semanal que trabajó sin descansar otro en su lugar: salario doble por cada uno además del día (LFT art. 73). Exentos con las horas extra: la mitad, hasta 5 UMA por semana entre ambos; todo si gana el salario mínimo (LISR art. 93 fr. I).
+    /// </summary>
+    [JsonPropertyName("rest_days_worked")]
+    public long? RestDaysWorked { get; set; }
+
+    /// <summary>
+    /// Días de descanso obligatorio que trabajó (1 de enero, 1 de mayo, 16 de septiembre, 25 de diciembre, los lunes del art. 74 y la jornada electoral): salario doble por cada uno además del día (LFT art. 75), exento como rest_days_worked.
+    /// </summary>
+    [JsonPropertyName("holidays_worked")]
+    public long? HolidaysWorked { get; set; }
+
+    /// <summary>
+    /// Días de vacaciones que disfrutó en el periodo (se pagan como sueldo dentro de days): su prima vacacional con el porcentaje del empleado, exenta hasta 15 UMA en el año.
+    /// </summary>
+    [JsonPropertyName("vacation_days")]
+    public decimal? VacationDays { get; set; }
+
+    /// <summary>
+    /// Si la empresa paga los disability_days del recibo: percepción 014 con su nodo Incapacidad. Exenta como previsión social con el límite de 7 UMA al año (art. 93 de la LISR); la de un riesgo de trabajo, toda.
+    /// </summary>
+    [JsonPropertyName("disability_pay")]
+    public CreatePayrollApprovalParamsReceiptsItemIncidentsDisabilityPay? DisabilityPay { get; set; }
+
+    /// <summary>
+    /// Retroactivo de un aumento: la diferencia de salario de los días ya pagados con el anterior, como percepción 001 (clave RET) gravada, que paga ISR con el sueldo del periodo (art. 96 de la LISR). Las cuotas IMSS de la diferencia las cubre la modificación de salario con su fecha en el SUA; el recibo no retiene la parte del trabajador (art. 38 de la LSS).
+    /// </summary>
+    [JsonPropertyName("retroactive")]
+    public CreatePayrollApprovalParamsReceiptsItemIncidentsRetroactive? Retroactive { get; set; }
+
+    /// <summary>
+    /// Premios, comisiones y bonos del periodo, gravados.
+    /// </summary>
+    [JsonPropertyName("bonuses")]
+    public List<CreatePayrollApprovalParamsReceiptsItemIncidentsBonusesItem>? Bonuses { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreatePayrollApprovalParamsReceiptsItemIncidentsBonusesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreatePayrollApprovalParamsReceiptsItemIncidentsBonusesItem
+{
+    /// <summary>
+    /// 010 premio de puntualidad, 049 premio de asistencia, 028 comisiones, 038 otro bono (c_TipoPercepcion).
+    /// <br/>
+    /// Valores: 010, 049, 028, 038.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string? Concept { get; set; }
+}
+
+/// <summary>
+/// Si la empresa paga los disability_days del recibo: percepción 014 con su nodo Incapacidad. Exenta como previsión social con el límite de 7 UMA al año (art. 93 de la LISR); la de un riesgo de trabajo, toda.
+/// </summary>
+public sealed partial class CreatePayrollApprovalParamsReceiptsItemIncidentsDisabilityPay
+{
+    /// <summary>
+    /// Tipo de incapacidad (c_TipoIncapacidad): 01 riesgo de trabajo, 02 enfermedad general, 03 maternidad, 04 licencia por cuidados médicos de hijos con cáncer.
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Lo que paga la empresa de cada día de incapacidad, como fracción del salario diario: 1 todo; 0.4 lo que completa el 60% que paga el IMSS.
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
+}
+
+/// <summary>
+/// Retroactivo de un aumento: la diferencia de salario de los días ya pagados con el anterior, como percepción 001 (clave RET) gravada, que paga ISR con el sueldo del periodo (art. 96 de la LISR). Las cuotas IMSS de la diferencia las cubre la modificación de salario con su fecha en el SUA; el recibo no retiene la parte del trabajador (art. 38 de la LSS).
+/// </summary>
+public sealed partial class CreatePayrollApprovalParamsReceiptsItemIncidentsRetroactive
+{
+    /// <summary>
+    /// Día desde el que rige el aumento (YYYY-MM-DD), antes del periodo y hasta un año antes.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public required string From { get; set; }
+
+    /// <summary>
+    /// Salario diario que tenía el empleado antes del aumento. El de ahora es el del empleado: cámbielo antes con PATCH /v1/employees/{id}.
+    /// </summary>
+    [JsonPropertyName("previous_salary")]
+    public required decimal PreviousSalary { get; set; }
+
+    /// <summary>
+    /// Días que se pagaron con el salario anterior desde from. Si no lo manda, los de los periodos ya pagados desde ese día.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal? Days { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Archivo para pagar la nómina en el banco».
 /// </summary>
 public sealed partial class CreatePayrollBankFileParams
@@ -19347,7 +19567,7 @@ public sealed partial class GeneralLedgerAccountsItemMovementsItem
     /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification, foreign_supplier_operations.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -26196,7 +26416,7 @@ public sealed partial class JournalEntry
     /// <summary>
     /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina), employee_expenses (un anticipo, reembolso, devolución o comprobación de viáticos, contra 107.01 «Funcionarios y empleados»), depreciation (la depreciación del mes de los activos fijos), manual (una póliza capturada a mano, o la reversión de una provisión) o asset_disposal (la venta o baja de un activo fijo).
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification, foreign_supplier_operations.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -27293,6 +27513,38 @@ public sealed partial class ListMaterialitySuppliersParams
 /// </summary>
 public sealed partial class ListMembersParams
 {
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar prenóminas por aprobar».
+/// </summary>
+public sealed partial class ListPayrollApprovalsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// pending, approved, rejected, withdrawn o replaced.
+    /// <br/>
+    /// Valores: pending, approved, rejected, withdrawn, replaced.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -29657,6 +29909,218 @@ public sealed partial class PayrollAccumulatedEmployeesItem
 }
 
 /// <summary>
+/// Una prenómina pedida para aprobación: con ella aprobada se timbran sus recibos, con esos importes.
+/// </summary>
+public sealed partial class PayrollApproval
+{
+    /// <summary>
+    /// pap_…
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// iss_…
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Periodicidad de la nómina (c_PeriodicidadPago): 02, 03, 04 o 05.
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public string Periodicity { get; set; } = default!;
+
+    /// <summary>
+    /// El periodo de pago de la nómina: FechaInicialPago, FechaFinalPago y FechaPago de sus recibos.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public PayrollApprovalPeriod Period { get; set; } = default!;
+
+    /// <summary>
+    /// pending (por aprobar), approved, rejected (note dice por qué), withdrawn (retirada) o replaced (se pidió otra del mismo periodo).
+    /// <br/>
+    /// Valores: pending, approved, rejected, withdrawn, replaced.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El neto de todos sus recibos.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public decimal Net { get; set; }
+
+    /// <summary>
+    /// El recibo de cada empleado, como se calculó al pedirla.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public List<PayrollApprovalReceiptsItem> Receipts { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se pidió (ISO 8601).
+    /// </summary>
+    [JsonPropertyName("requested_at")]
+    public string RequestedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se aprobó, rechazó o retiró, o null.
+    /// </summary>
+    [JsonPropertyName("decided_at")]
+    public string? DecidedAt { get; set; }
+
+    /// <summary>
+    /// Por qué se rechazó (o el comentario de quien la aprobó), o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class PayrollApprovalList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<PayrollApproval> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// El periodo de pago de la nómina: FechaInicialPago, FechaFinalPago y FechaPago de sus recibos.
+/// </summary>
+public sealed partial class PayrollApprovalPeriod
+{
+    /// <summary>
+    /// Primer día pagado.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// Último día pagado.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+
+    /// <summary>
+    /// Día de pago.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string PaymentDate { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollApprovalReceiptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollApprovalReceiptsItem
+{
+    /// <summary>
+    /// emp_…
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Días pagados.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal Days { get; set; }
+
+    /// <summary>
+    /// Faltas.
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public decimal Absences { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad.
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public decimal DisabilityDays { get; set; }
+
+    /// <summary>
+    /// Los importes aprobados: se timbra solo un recibo que los tenga.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public PayrollApprovalReceiptsItemTotals Totals { get; set; } = default!;
+}
+
+/// <summary>
+/// Los importes aprobados: se timbra solo un recibo que los tenga.
+/// </summary>
+public sealed partial class PayrollApprovalReceiptsItemTotals
+{
+    /// <summary>
+    /// Percepciones.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public decimal Perceptions { get; set; }
+
+    /// <summary>
+    /// Deducciones.
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public decimal Deductions { get; set; }
+
+    /// <summary>
+    /// Otros pagos.
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public decimal OtherPayments { get; set; }
+
+    /// <summary>
+    /// ISR retenido.
+    /// </summary>
+    [JsonPropertyName("taxes_withheld")]
+    public decimal TaxesWithheld { get; set; }
+
+    /// <summary>
+    /// Neto a pagar.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public decimal Net { get; set; }
+}
+
+/// <summary>
 /// El archivo para pagar la nómina desde el portal del banco (no cobra nada).
 /// </summary>
 public sealed partial class PayrollBankFile
@@ -30044,7 +30508,7 @@ public sealed partial class PayrollBatchReceiptsItem
 public sealed partial class PayrollBatchReceiptsItemError
 {
     /// <summary>
-    /// payroll_invalid, payroll_period_overlap, payroll_receipt_exists, invoice_rejected, invoice_invalid, insufficient_balance…
+    /// payroll_invalid, payroll_approval_required, payroll_period_overlap, payroll_receipt_exists, invoice_rejected, invoice_invalid, insufficient_balance…
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;
