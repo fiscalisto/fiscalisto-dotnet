@@ -17840,6 +17840,30 @@ public sealed partial class GetGeneralLedgerParams
 }
 
 /// <summary>
+/// Los campos de «Calcular el ajuste anual por inflación».
+/// </summary>
+public sealed partial class GetInflationAdjustmentParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El primer mes del ejercicio, de 1 a 12. Por omisión 1; otro si la empresa empezó en el año.
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public long? FromMonth { get; set; }
+
+    /// <summary>
+    /// El último mes, de 1 a 12. Por omisión 12 en un año pasado y el mes actual en el año en curso.
+    /// </summary>
+    [JsonPropertyName("through_month")]
+    public long? ThroughMonth { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Descargar el acuse de cancelación».
 /// </summary>
 public sealed partial class GetInvoiceCancellationReceiptParams
@@ -18485,6 +18509,258 @@ public sealed partial class ImssMovementList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Cómo cuentan las cuentas en el ajuste anual por inflación, después del cambio.
+/// </summary>
+public sealed partial class InflationAccounts
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Las cuentas que cambió, con cómo cuentan ahora.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<InflationAccountsAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;InflationAccountsAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InflationAccountsAccountsItem
+{
+    /// <summary>
+    /// El número de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// credit (crédito, art. 45 de la LISR), debt (deuda, art. 46) o none.
+    /// <br/>
+    /// Valores: credit, debt, none.
+    /// </summary>
+    [JsonPropertyName("treatment")]
+    public string Treatment { get; set; } = default!;
+
+    /// <summary>
+    /// true si difiere del de su código agrupador.
+    /// </summary>
+    [JsonPropertyName("changed")]
+    public bool Changed { get; set; }
+}
+
+/// <summary>
+/// El ajuste anual por inflación de una persona moral (artículo 44 de la Ley del ISR), con el promedio de los saldos mensuales de sus créditos y sus deudas.
+/// </summary>
+public sealed partial class InflationAdjustment
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// El primer mes del ejercicio (1, o el mes en que empezó si fue en el año).
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public long FromMonth { get; set; }
+
+    /// <summary>
+    /// El último mes calculado: 12, o uno anterior para una estimación.
+    /// </summary>
+    [JsonPropertyName("through_month")]
+    public long ThroughMonth { get; set; }
+
+    /// <summary>
+    /// Cuántos meses se promediaron.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public long Months { get; set; }
+
+    /// <summary>
+    /// Cada cuenta de balance con saldo en el ejercicio.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<InflationAdjustmentAccountsItem> Accounts { get; set; } = default!;
+
+    /// <summary>
+    /// Los créditos al último día de cada mes.
+    /// </summary>
+    [JsonPropertyName("credits_by_month")]
+    public List<decimal> CreditsByMonth { get; set; } = default!;
+
+    /// <summary>
+    /// Las deudas al último día de cada mes.
+    /// </summary>
+    [JsonPropertyName("debts_by_month")]
+    public List<decimal> DebtsByMonth { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo promedio anual de los créditos.
+    /// </summary>
+    [JsonPropertyName("average_credits")]
+    public decimal AverageCredits { get; set; }
+
+    /// <summary>
+    /// El saldo promedio anual de las deudas.
+    /// </summary>
+    [JsonPropertyName("average_debts")]
+    public decimal AverageDebts { get; set; }
+
+    /// <summary>
+    /// La diferencia entre los dos promedios, en positivo.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal Difference { get; set; }
+
+    /// <summary>
+    /// El factor de ajuste anual: INPC del último mes entre el del último mes del ejercicio anterior, menos 1, al diezmilésimo. null sin INPC publicado.
+    /// </summary>
+    [JsonPropertyName("factor")]
+    public decimal? Factor { get; set; }
+
+    /// <summary>
+    /// El INPC de la base.
+    /// </summary>
+    [JsonPropertyName("inpc_start")]
+    public decimal? InpcStart { get; set; }
+
+    /// <summary>
+    /// El INPC del último mes.
+    /// </summary>
+    [JsonPropertyName("inpc_end")]
+    public decimal? InpcEnd { get; set; }
+
+    /// <summary>
+    /// De qué mes es inpc_end (AAAA-MM): diciembre, o el último publicado en una estimación.
+    /// </summary>
+    [JsonPropertyName("inpc_end_month")]
+    public string? InpcEndMonth { get; set; }
+
+    /// <summary>
+    /// true mientras no hay saldos de diciembre o INPC de diciembre: una estimación.
+    /// </summary>
+    [JsonPropertyName("estimated")]
+    public bool Estimated { get; set; }
+
+    /// <summary>
+    /// taxable (acumulable, art. 18 fr. X) cuando las deudas son mayores; deductible (art. 25 fr. VIII) cuando los créditos lo son.
+    /// <br/>
+    /// Valores: taxable, deductible.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// El ajuste anual por inflación: difference × factor.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;InflationAdjustmentAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class InflationAdjustmentAccountsItem
+{
+    /// <summary>
+    /// El número de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// credit (crédito, art. 45 de la LISR), debt (deuda, art. 46) o none.
+    /// <br/>
+    /// Valores: credit, debt, none.
+    /// </summary>
+    [JsonPropertyName("treatment")]
+    public string Treatment { get; set; } = default!;
+
+    /// <summary>
+    /// true si se cambió del de su código agrupador (POST /v1/accounting/inflation_accounts).
+    /// </summary>
+    [JsonPropertyName("changed")]
+    public bool Changed { get; set; }
+
+    /// <summary>
+    /// Por qué cuenta así, con el artículo de la ley.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo al último día de cada mes, positivo como crédito o como deuda (en none, el saldo contable).
+    /// </summary>
+    [JsonPropertyName("month_end_balances")]
+    public List<decimal> MonthEndBalances { get; set; } = default!;
+
+    /// <summary>
+    /// La suma de los saldos entre los meses (0 en none).
+    /// </summary>
+    [JsonPropertyName("average_balance")]
+    public decimal AverageBalance { get; set; }
 }
 
 /// <summary>
@@ -34660,6 +34936,44 @@ public sealed partial class SaveBudgetParamsLinesItem
     /// </summary>
     [JsonPropertyName("months")]
     public required List<decimal> Months { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar cómo cuenta una cuenta en el ajuste por inflación».
+/// </summary>
+public sealed partial class SaveInflationAccountsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Las cuentas que cambia.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public required List<SaveInflationAccountsParamsAccountsItem> Accounts { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveInflationAccountsParamsAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveInflationAccountsParamsAccountsItem
+{
+    /// <summary>
+    /// El número de la cuenta en el catálogo (GET /v1/accounting/accounts).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// credit (crédito, art. 45), debt (deuda, art. 46) o none. null regresa al de su código agrupador.
+    /// <br/>
+    /// Valores: credit, debt, none.
+    /// </summary>
+    [JsonPropertyName("treatment")]
+    public string? Treatment { get; set; }
 }
 
 /// <summary>

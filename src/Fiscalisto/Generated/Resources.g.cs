@@ -395,6 +395,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public BudgetsResource Budgets => _budgets ??= new BudgetsResource(this);
 
+    private InflationAdjustmentsResource? _inflationAdjustments;
+
+    /// <summary>Contabilidad.</summary>
+    public InflationAdjustmentsResource InflationAdjustments => _inflationAdjustments ??= new InflationAdjustmentsResource(this);
+
+    private InflationAccountsResource? _inflationAccounts;
+
+    /// <summary>Contabilidad.</summary>
+    public InflationAccountsResource InflationAccounts => _inflationAccounts ??= new InflationAccountsResource(this);
+
     private CostCenterResultsResource? _costCenterResults;
 
     /// <summary>Contabilidad.</summary>
@@ -5765,6 +5775,54 @@ public sealed class BudgetsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Budget> SaveAsync(string year, SaveBudgetParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Budget>("POST", $"/v1/accounting/budgets/{Uri.EscapeDataString(year)}", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.InflationAdjustments</c>.
+/// </summary>
+public sealed class InflationAdjustmentsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal InflationAdjustmentsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Calcular el ajuste anual por inflación
+    /// </summary>
+    /// <remarks>
+    /// El ajuste anual por inflación de una persona moral (artículo 44 de la Ley del ISR): la suma de los saldos al último día de cada mes de sus créditos y de sus deudas entre los meses del ejercicio, y la diferencia por el factor de ajuste anual. Deudas mayores dan un ajuste acumulable (taxable); créditos mayores, uno deducible. Cada cuenta cuenta por su código agrupador (con la razón en reason) o como la marcó con POST /v1/accounting/inflation_accounts. En el año en curso es una estimación hasta el mes actual. Como Estados financieros › Ajuste por inflación en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/inflation_adjustments/{year}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-inflation-adjustment"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<InflationAdjustment> GetAsync(string year, GetInflationAdjustmentParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<InflationAdjustment>("GET", $"/v1/accounting/inflation_adjustments/{Uri.EscapeDataString(year)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.InflationAccounts</c>.
+/// </summary>
+public sealed class InflationAccountsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal InflationAccountsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Cambiar cómo cuenta una cuenta en el ajuste por inflación
+    /// </summary>
+    /// <remarks>
+    /// Marca cuentas de balance como crédito (credit), deuda (debt) o ninguno (none) para el ajuste anual por inflación, por ejemplo un préstamo a un socio persona moral o una deuda de un gasto no deducible. treatment null regresa al de su código agrupador. Una cuenta de resultados contesta parameter_invalid.
+    /// <br/>
+    /// <c>POST /v1/accounting/inflation_accounts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/save-inflation-accounts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<InflationAccounts> SaveAsync(SaveInflationAccountsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<InflationAccounts>("POST", "/v1/accounting/inflation_accounts", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
