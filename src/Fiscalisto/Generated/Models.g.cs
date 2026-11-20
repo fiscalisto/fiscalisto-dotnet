@@ -607,9 +607,9 @@ public sealed partial class AnnualAdjustmentEmployeesItem
     public decimal Balance { get; set; }
 
     /// <summary>
-    /// Por qué no se le calcula (artículo 97): started, entró después del 1 de enero; left, salió antes del 1 de diciembre; income, ganó más de $400,000; files_own, presenta su declaración.
+    /// Por qué no se le calcula (artículo 97): started, entró después del 1 de enero; left, salió antes del 1 de diciembre; income, ganó más de $400,000; files_own, presenta su declaración; minimum, gana el salario mínimo y su saldo a cargo no se le descuenta (Constitución art. 123-A-VIII, LFT 97).
     /// <br/>
-    /// Valores: started, left, income, files_own.
+    /// Valores: started, left, income, files_own, minimum.
     /// </summary>
     [JsonPropertyName("excluded")]
     public string? Excluded { get; set; }
@@ -13089,10 +13089,10 @@ public sealed partial class CreateRuleParamsActionsItem
     public required string Type { get; set; }
 
     /// <summary>
-    /// tag: la etiqueta.
+    /// tag: la etiqueta (tag_…, GET /v1/tags). Un número, el id de antes, también se acepta.
     /// </summary>
     [JsonPropertyName("tag")]
-    public long? Tag { get; set; }
+    public JsonElement? Tag { get; set; }
 
     /// <summary>
     /// tag: quitarla si la orden deja de cumplir.
@@ -37878,10 +37878,10 @@ public sealed partial class RuleActionsItem
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// tag: la etiqueta.
+    /// tag: la etiqueta (tag_…, GET /v1/tags).
     /// </summary>
     [JsonPropertyName("tag")]
-    public long? Tag { get; set; }
+    public string? Tag { get; set; }
 
     /// <summary>
     /// tag: se quita si la orden deja de cumplir.
@@ -47278,10 +47278,10 @@ public sealed partial class UpdateRuleParamsActionsItem
     public required string Type { get; set; }
 
     /// <summary>
-    /// tag: la etiqueta.
+    /// tag: la etiqueta (tag_…, GET /v1/tags). Un número, el id de antes, también se acepta.
     /// </summary>
     [JsonPropertyName("tag")]
-    public long? Tag { get; set; }
+    public JsonElement? Tag { get; set; }
 
     /// <summary>
     /// tag: quitarla si la orden deja de cumplir.
