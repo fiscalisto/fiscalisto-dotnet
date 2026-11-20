@@ -375,10 +375,20 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public CostOfSalesResource CostOfSales => _costOfSales ??= new CostOfSalesResource(this);
 
+    private PayrollProvisionsResource? _payrollProvisions;
+
+    /// <summary>Contabilidad.</summary>
+    public PayrollProvisionsResource PayrollProvisions => _payrollProvisions ??= new PayrollProvisionsResource(this);
+
     private TaxDeterminationsResource? _taxDeterminations;
 
     /// <summary>Contabilidad.</summary>
     public TaxDeterminationsResource TaxDeterminations => _taxDeterminations ??= new TaxDeterminationsResource(this);
+
+    private LedgerBankAccountsResource? _ledgerBankAccounts;
+
+    /// <summary>Contabilidad.</summary>
+    public LedgerBankAccountsResource LedgerBankAccounts => _ledgerBankAccounts ??= new LedgerBankAccountsResource(this);
 
     private BankMovementsResource? _bankMovements;
 
@@ -2582,6 +2592,34 @@ public sealed class BranchesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/branches/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Subir el logo de la sucursal
+    /// </summary>
+    /// <remarks>
+    /// El logo de la sucursal (PNG o JPG de hasta 1 MB, en base64): va en lo que factura desde ella y en el portal de autofactura de los tickets que la nombran. Reemplaza el anterior; sin logo propio usa el del emisor.
+    /// <br/>
+    /// <c>POST /v1/branches/{id}/logo</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/sucursales/upload-branch-logo"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Branch> UploadLogoAsync(string id, UploadBranchLogoParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Branch>("POST", $"/v1/branches/{Uri.EscapeDataString(id)}/logo", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar el logo de la sucursal
+    /// </summary>
+    /// <remarks>
+    /// Lo que factura y sus tickets vuelven al logo del emisor. Sin logo contesta 404.
+    /// <br/>
+    /// <c>DELETE /v1/branches/{id}/logo</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/sucursales/delete-branch-logo"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Branch> DeleteLogoAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Branch>("DELETE", $"/v1/branches/{Uri.EscapeDataString(id)}/logo", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
@@ -5427,6 +5465,58 @@ public sealed class CostOfSalesResource
 }
 
 /// <summary>
+/// Contabilidad: <c>fiscalisto.PayrollProvisions</c>.
+/// </summary>
+public sealed class PayrollProvisionsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollProvisionsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver las cuotas patronales de un mes
+    /// </summary>
+    /// <remarks>
+    /// Lo que la empresa debe al IMSS, al SAR y al Infonavit por los días del mes, calculado de sus recibos de nómina timbrados (su salario base de cotización y sus días, con faltas e incapacidades como dice la Ley del Seguro Social), el impuesto sobre nómina del mes y la póliza de provisión, si ya se registró. Como Cierre del mes › Cuotas patronales del mes en la app. Se calcula con las tasas de 2026; otro año contesta parameter_invalid en month.
+    /// <br/>
+    /// <c>GET /v1/accounting/payroll_provisions/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-payroll-provision"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollProvision> GetAsync(string month, GetPayrollProvisionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollProvision>("GET", $"/v1/accounting/payroll_provisions/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Registrar las cuotas patronales de un mes
+    /// </summary>
+    /// <remarks>
+    /// Registra (o reemplaza) la provisión del último día del mes: Cuotas patronales al IMSS (601.26), Aportaciones patronales al Infonavit (601.27), al SAR (601.28) e Impuesto sobre nómina (601.29) contra IMSS, SAR e Infonavit por pagar (211.01 a 211.03) e Impuesto sobre nómina por pagar (213.04). Los importes que mande reemplazan los calculados; employer_risk_premium se guarda para los meses siguientes. Al pagarlos, registre el retiro del banco contra esas cuentas. Sin recibos ni importes contesta parameter_invalid en month; en un mes cerrado, period_closed.
+    /// <br/>
+    /// <c>POST /v1/accounting/payroll_provisions/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-payroll-provision"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollProvision> CreateAsync(string month, CreatePayrollProvisionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollProvision>("POST", $"/v1/accounting/payroll_provisions/{Uri.EscapeDataString(month)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar las cuotas patronales de un mes
+    /// </summary>
+    /// <remarks>
+    /// Quita la póliza de provisión del mes. En un mes cerrado contesta period_closed.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/payroll_provisions/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-payroll-provision"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollProvision> DeleteAsync(string month, DeletePayrollProvisionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollProvision>("DELETE", $"/v1/accounting/payroll_provisions/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
 /// Contabilidad: <c>fiscalisto.TaxDeterminations</c>.
 /// </summary>
 public sealed class TaxDeterminationsResource
@@ -5476,6 +5566,44 @@ public sealed class TaxDeterminationsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<TaxDetermination> DeleteAsync(string month, DeleteTaxDeterminationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<TaxDetermination>("DELETE", $"/v1/accounting/tax_determinations/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.LedgerBankAccounts</c>.
+/// </summary>
+public sealed class LedgerBankAccountsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal LedgerBankAccountsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar las cuentas de banco de la contabilidad
+    /// </summary>
+    /// <remarks>
+    /// Las cuentas de banco del emisor que la contabilidad lleva aparte, cada una su propia subcuenta de Bancos (102-01-&lt;últimos 4&gt;): las de sus cuentas bancarias y las que ya tienen pólizas. Lo que la conciliación identifica en el estado de cuenta (depósitos ligados a su CFDI, retiros marcados como pago de facturas) pasa de Bancos a esa cuenta; lo que ningún estado de cuenta explica se queda en Bancos.
+    /// <br/>
+    /// <c>GET /v1/accounting/bank_accounts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-ledger-bank-accounts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<LedgerBankAccountList> ListAsync(ListLedgerBankAccountsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<LedgerBankAccountList>("GET", "/v1/accounting/bank_accounts", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar la moneda de una cuenta de banco
+    /// </summary>
+    /// <remarks>
+    /// Cambia la moneda (y el nombre) de una cuenta de banco de la contabilidad, por sus últimos 4 dígitos. Una cuenta en otra moneda se revalúa en las revaluaciones cambiarias con el saldo de su último estado de cuenta.
+    /// <br/>
+    /// <c>POST /v1/accounting/bank_accounts/{last_four}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-ledger-bank-account"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<LedgerBankAccount> UpdateAsync(string lastFour, UpdateLedgerBankAccountParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<LedgerBankAccount>("POST", $"/v1/accounting/bank_accounts/{Uri.EscapeDataString(lastFour)}", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

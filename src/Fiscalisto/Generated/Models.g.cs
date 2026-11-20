@@ -6474,6 +6474,48 @@ public sealed partial class CreatePayrollBatchParamsReceiptsItemPeriod
 }
 
 /// <summary>
+/// Los campos de «Registrar las cuotas patronales de un mes».
+/// </summary>
+public sealed partial class CreatePayrollProvisionParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La prima de riesgo de trabajo de su determinación anual, como fracción (0.0054355 es 0.54355%). Se guarda para los meses siguientes. Sin ella, la guardada o la prima media de la clase.
+    /// </summary>
+    [JsonPropertyName("employer_risk_premium")]
+    public decimal? EmployerRiskPremium { get; set; }
+
+    /// <summary>
+    /// Las cuotas patronales al IMSS en pesos, si no quiere el calculado (el del SUA, por ejemplo).
+    /// </summary>
+    [JsonPropertyName("imss")]
+    public decimal? Imss { get; set; }
+
+    /// <summary>
+    /// Retiro y cesantía y vejez en pesos, si no quiere el calculado (el del SUA, por ejemplo).
+    /// </summary>
+    [JsonPropertyName("sar")]
+    public decimal? Sar { get; set; }
+
+    /// <summary>
+    /// La aportación al Infonavit en pesos, si no quiere el calculado (el del SUA, por ejemplo).
+    /// </summary>
+    [JsonPropertyName("infonavit")]
+    public decimal? Infonavit { get; set; }
+
+    /// <summary>
+    /// El impuesto sobre nómina en pesos, si no quiere el calculado (el del SUA, por ejemplo).
+    /// </summary>
+    [JsonPropertyName("payroll_tax")]
+    public decimal? PayrollTax { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Timbrar un recibo de nómina».
 /// </summary>
 public sealed partial class CreatePayrollReceiptParams
@@ -9777,6 +9819,12 @@ public sealed partial class CreateTicketParams
     public CreateTicketParamsBuyer? Buyer { get; set; }
 
     /// <summary>
+    /// Sucursal (brn_…) donde se hizo la venta: su factura se timbra desde ahí (su código postal en LugarExpedicion) y el portal muestra el nombre comercial y el logo de la sucursal. Sin ella, la Matriz.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
     /// Una venta de varios conceptos (el folio de un hotel: noches, desayunos, lavandería), cada uno con su producto o sus claves, sus impuestos y lo que se cobró por él; hasta 200. En lugar de `product`, `description`, `product_key`, `unit_key` e `iva`. La factura del cliente lleva un concepto por línea; la factura global, uno por cada combinación de impuestos del ticket.
     /// </summary>
     [JsonPropertyName("lines")]
@@ -11295,6 +11343,18 @@ public sealed partial class DeleteMemberParams
     /// </summary>
     [JsonPropertyName("transfer_to")]
     public string? TransferTo { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Quitar las cuotas patronales de un mes».
+/// </summary>
+public sealed partial class DeletePayrollProvisionParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -15145,10 +15205,52 @@ public sealed partial class FxRevaluation
     public List<FxRevaluationDocumentsItem> Documents { get; set; } = default!;
 
     /// <summary>
+    /// Sus cuentas de banco en otra moneda: statement_balance (el saldo del último estado de cuenta al cierre, en su moneda, o null si no hay), statement_date y book_balance (lo que sus libros traen en pesos antes de la revaluación). La diferencia contra statement_balance × el tipo de cambio de cierre va a Utilidad o Pérdida cambiaria.
+    /// </summary>
+    [JsonPropertyName("bank_accounts")]
+    public List<FxRevaluationBankAccountsItem> BankAccounts { get; set; } = default!;
+
+    /// <summary>
     /// La póliza de revaluación (mje_…) si ya se registró, o null. Es una póliza a mano de tipo adjustment con reverse_next_month.
     /// </summary>
     [JsonPropertyName("manual_entry")]
     public string? ManualEntry { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;FxRevaluationBankAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FxRevaluationBankAccountsItem
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo de su último estado de cuenta del mes, en su moneda, o null si no hay.
+    /// </summary>
+    [JsonPropertyName("statement_balance")]
+    public decimal? StatementBalance { get; set; }
+
+    /// <summary>
+    /// La fecha de ese saldo, o null.
+    /// </summary>
+    [JsonPropertyName("statement_date")]
+    public string? StatementDate { get; set; }
+
+    /// <summary>
+    /// Los pesos que la cuenta lleva en los libros al cierre, sin la póliza de revaluación.
+    /// </summary>
+    [JsonPropertyName("book_balance")]
+    public decimal BookBalance { get; set; }
 }
 
 /// <summary>
@@ -15379,7 +15481,7 @@ public sealed partial class GeneralLedgerAccountsItemMovementsItem
     /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -15843,6 +15945,18 @@ public sealed partial class GetInvoiceXmlParams
 /// Los campos de «Ver los saldos iniciales».
 /// </summary>
 public sealed partial class GetOpeningBalancesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver las cuotas patronales de un mes».
+/// </summary>
+public sealed partial class GetPayrollProvisionParams
 {
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
@@ -21630,7 +21744,7 @@ public sealed partial class JournalEntry
     /// <summary>
     /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina), employee_expenses (un anticipo, reembolso, devolución o comprobación de viáticos, contra 107.01 «Funcionarios y empleados»), depreciation (la depreciación del mes de los activos fijos), manual (una póliza capturada a mano, o la reversión de una provisión) o asset_disposal (la venta o baja de un activo fijo).
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -21816,6 +21930,84 @@ public sealed partial class LedgerAccountList
     /// </summary>
     [JsonPropertyName("data")]
     public List<LedgerAccount> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una cuenta de banco que la contabilidad lleva aparte: su propia subcuenta de Bancos, con la moneda en que se revalúa.
+/// </summary>
+public sealed partial class LedgerBankAccount
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Los últimos 4 dígitos de la cuenta, como los muestra su estado de cuenta.
+    /// </summary>
+    [JsonPropertyName("last4")]
+    public string Last4 { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el catálogo.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de cuenta en el catálogo (código agrupador 102.01).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// Su moneda (MXN, USD…).
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class LedgerBankAccountList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<LedgerBankAccount> Data { get; set; } = default!;
 
     /// <summary>
     /// true si hay más: pida la siguiente con starting_after igual al id del último.
@@ -22434,6 +22626,18 @@ public sealed partial class ListJournalEntriesParams
 /// Los campos de «Ver el catálogo de cuentas».
 /// </summary>
 public sealed partial class ListLedgerAccountsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar las cuentas de banco de la contabilidad».
+/// </summary>
+public sealed partial class ListLedgerBankAccountsParams
 {
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
@@ -24854,6 +25058,234 @@ public sealed partial class PayrollBatchReceiptsItemError
     /// </summary>
     [JsonPropertyName("message")]
     public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Las cuotas patronales de un mes en la contabilidad: lo que la empresa debe al IMSS, al SAR y al Infonavit por los días del mes según sus recibos de nómina timbrados, el impuesto sobre nómina del mes y la póliza de provisión que los registra, si ya se registró.
+/// </summary>
+public sealed partial class PayrollProvision
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El último día del mes: la fecha de la póliza.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// La prima de riesgo de trabajo del cálculo, como fracción (0.0054355 es 0.54355%).
+    /// </summary>
+    [JsonPropertyName("employer_risk_premium")]
+    public decimal EmployerRiskPremium { get; set; }
+
+    /// <summary>
+    /// true si es la que se guardó al registrar; false si es la prima media de la clase de sus empleados.
+    /// </summary>
+    [JsonPropertyName("employer_risk_premium_saved")]
+    public bool EmployerRiskPremiumSaved { get; set; }
+
+    /// <summary>
+    /// Lo calculado: imss (enfermedades y maternidad, invalidez y vida, riesgos de trabajo y guarderías), sar (retiro y cesantía y vejez), infonavit y payroll_tax (el impuesto sobre nómina del mes, como GET /v1/payroll_taxes).
+    /// </summary>
+    [JsonPropertyName("calculated")]
+    public PayrollProvisionCalculated Calculated { get; set; } = default!;
+
+    /// <summary>
+    /// Los importes de la póliza registrada (pueden ser los que escribió), o null si no se ha registrado.
+    /// </summary>
+    [JsonPropertyName("posted")]
+    public PayrollProvisionPosted? Posted { get; set; }
+
+    /// <summary>
+    /// El cálculo por empleado: su salario base de cotización, los días de cada ramo (las faltas solo cotizan en enfermedades y maternidad; las incapacidades solo en retiro e Infonavit) y lo que toca a cada parte. minimum_wage: la empresa paga también la parte del trabajador (LSS art. 36).
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<PayrollProvisionEmployeesItem> Employees { get; set; } = default!;
+
+    /// <summary>
+    /// El impuesto sobre nómina de cada estado.
+    /// </summary>
+    [JsonPropertyName("payroll_tax_states")]
+    public List<PayrollProvisionPayrollTaxStatesItem> PayrollTaxStates { get; set; } = default!;
+
+    /// <summary>
+    /// La póliza de provisión (mje_…) si ya se registró, o null. Es una póliza a mano de tipo adjustment.
+    /// </summary>
+    [JsonPropertyName("manual_entry")]
+    public string? ManualEntry { get; set; }
+}
+
+/// <summary>
+/// Lo calculado: imss (enfermedades y maternidad, invalidez y vida, riesgos de trabajo y guarderías), sar (retiro y cesantía y vejez), infonavit y payroll_tax (el impuesto sobre nómina del mes, como GET /v1/payroll_taxes).
+/// </summary>
+public sealed partial class PayrollProvisionCalculated
+{
+    /// <summary>
+    /// Calculado: enfermedades y maternidad, invalidez y vida, riesgos de trabajo y guarderías.
+    /// </summary>
+    [JsonPropertyName("imss")]
+    public decimal Imss { get; set; }
+
+    /// <summary>
+    /// Calculado: retiro y cesantía en edad avanzada y vejez.
+    /// </summary>
+    [JsonPropertyName("sar")]
+    public decimal Sar { get; set; }
+
+    /// <summary>
+    /// Calculado: la aportación al Infonavit (5%).
+    /// </summary>
+    [JsonPropertyName("infonavit")]
+    public decimal Infonavit { get; set; }
+
+    /// <summary>
+    /// Calculado: el impuesto sobre nómina del mes.
+    /// </summary>
+    [JsonPropertyName("payroll_tax")]
+    public decimal PayrollTax { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollProvisionEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollProvisionEmployeesItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su salario base de cotización: el SDI del recibo, entre el salario mínimo y 25 UMA.
+    /// </summary>
+    [JsonPropertyName("sbc")]
+    public decimal Sbc { get; set; }
+
+    /// <summary>
+    /// Días del mes en enfermedades y maternidad: menos las incapacidades.
+    /// </summary>
+    [JsonPropertyName("days_health")]
+    public decimal DaysHealth { get; set; }
+
+    /// <summary>
+    /// Días en invalidez y vida, riesgos de trabajo, guarderías y cesantía y vejez: menos faltas (hasta 7 al mes) e incapacidades.
+    /// </summary>
+    [JsonPropertyName("days_disability_life")]
+    public decimal DaysDisabilityLife { get; set; }
+
+    /// <summary>
+    /// Días en retiro e Infonavit: menos las faltas; las incapacidades sí cuentan.
+    /// </summary>
+    [JsonPropertyName("days_retirement")]
+    public decimal DaysRetirement { get; set; }
+
+    /// <summary>
+    /// Gana el salario mínimo: la empresa paga también su parte (LSS art. 36).
+    /// </summary>
+    [JsonPropertyName("minimum_wage")]
+    public bool MinimumWage { get; set; }
+
+    /// <summary>
+    /// Sus cuotas patronales al IMSS.
+    /// </summary>
+    [JsonPropertyName("imss")]
+    public decimal Imss { get; set; }
+
+    /// <summary>
+    /// Su retiro y cesantía y vejez.
+    /// </summary>
+    [JsonPropertyName("sar")]
+    public decimal Sar { get; set; }
+
+    /// <summary>
+    /// Su aportación al Infonavit.
+    /// </summary>
+    [JsonPropertyName("infonavit")]
+    public decimal Infonavit { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollProvisionPayrollTaxStatesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollProvisionPayrollTaxStatesItem
+{
+    /// <summary>
+    /// Entidad federativa donde trabaja (ClaveEntFed): JAL, CMX, NLE…
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string State { get; set; } = default!;
+
+    /// <summary>
+    /// Base del impuesto retenido (BaseRet).
+    /// </summary>
+    [JsonPropertyName("base")]
+    public decimal Base { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollProvisionPosted&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollProvisionPosted
+{
+    /// <summary>
+    /// Registrado: enfermedades y maternidad, invalidez y vida, riesgos de trabajo y guarderías.
+    /// </summary>
+    [JsonPropertyName("imss")]
+    public decimal Imss { get; set; }
+
+    /// <summary>
+    /// Registrado: retiro y cesantía en edad avanzada y vejez.
+    /// </summary>
+    [JsonPropertyName("sar")]
+    public decimal Sar { get; set; }
+
+    /// <summary>
+    /// Registrado: la aportación al Infonavit (5%).
+    /// </summary>
+    [JsonPropertyName("infonavit")]
+    public decimal Infonavit { get; set; }
+
+    /// <summary>
+    /// Registrado: el impuesto sobre nómina del mes.
+    /// </summary>
+    [JsonPropertyName("payroll_tax")]
+    public decimal PayrollTax { get; set; }
 }
 
 /// <summary>
@@ -33560,6 +33992,12 @@ public sealed partial class Ticket
     public TicketCustomer? Customer { get; set; }
 
     /// <summary>
+    /// La sucursal (brn_…) donde se hizo la venta, o null (la Matriz). Su factura se timbra desde ahí y el portal muestra su nombre y su logo.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
     /// Quién pagó, como lo conoce el origen de la venta (el `buyer` que mandó, o el cliente de un pago de Stripe). No es el receptor de la factura (`customer`).
     /// </summary>
     [JsonPropertyName("buyer")]
@@ -34956,6 +35394,30 @@ public sealed partial class UpdateIssuerParamsDonationAuthorization
     /// </summary>
     [JsonPropertyName("date")]
     public required string Date { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar la moneda de una cuenta de banco».
+/// </summary>
+public sealed partial class UpdateLedgerBankAccountParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La moneda de la cuenta (ISO 4217: MXN, USD…). Una en otra moneda se revalúa con las revaluaciones cambiarias.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public required string Currency { get; set; }
+
+    /// <summary>
+    /// Su nombre en el catálogo.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 }
 
 /// <summary>
@@ -37686,6 +38148,18 @@ public sealed partial class UpdateWebhookEndpointParams
     /// </summary>
     [JsonPropertyName("api_version")]
     public string? ApiVersion { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Subir el logo de la sucursal».
+/// </summary>
+public sealed partial class UploadBranchLogoParams
+{
+    /// <summary>
+    /// El logo, PNG o JPG de hasta 1 MB, en base64 (con o sin el prefijo data:image/png;base64,). Uno muy grande se reduce para el PDF.
+    /// </summary>
+    [JsonPropertyName("file")]
+    public required string File { get; set; }
 }
 
 /// <summary>
