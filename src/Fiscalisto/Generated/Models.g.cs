@@ -8013,6 +8013,12 @@ public sealed partial class CreatePayrollReceiptParamsIncidents
     public CreatePayrollReceiptParamsIncidentsDisabilityPay? DisabilityPay { get; set; }
 
     /// <summary>
+    /// Retroactivo de un aumento: la diferencia de salario de los días ya pagados con el anterior, como percepción 001 (clave RET) gravada, que paga ISR con el sueldo del periodo (art. 96 de la LISR). Las cuotas IMSS de la diferencia las cubre la modificación de salario con su fecha en el SUA; el recibo no retiene la parte del trabajador (art. 38 de la LSS).
+    /// </summary>
+    [JsonPropertyName("retroactive")]
+    public CreatePayrollReceiptParamsIncidentsRetroactive? Retroactive { get; set; }
+
+    /// <summary>
     /// Premios, comisiones y bonos del periodo, gravados.
     /// </summary>
     [JsonPropertyName("bonuses")]
@@ -8063,6 +8069,30 @@ public sealed partial class CreatePayrollReceiptParamsIncidentsDisabilityPay
     /// </summary>
     [JsonPropertyName("rate")]
     public required decimal Rate { get; set; }
+}
+
+/// <summary>
+/// Retroactivo de un aumento: la diferencia de salario de los días ya pagados con el anterior, como percepción 001 (clave RET) gravada, que paga ISR con el sueldo del periodo (art. 96 de la LISR). Las cuotas IMSS de la diferencia las cubre la modificación de salario con su fecha en el SUA; el recibo no retiene la parte del trabajador (art. 38 de la LSS).
+/// </summary>
+public sealed partial class CreatePayrollReceiptParamsIncidentsRetroactive
+{
+    /// <summary>
+    /// Día desde el que rige el aumento (YYYY-MM-DD), antes del periodo y hasta un año antes.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public required string From { get; set; }
+
+    /// <summary>
+    /// Salario diario que tenía el empleado antes del aumento. El de ahora es el del empleado: cámbielo antes con PATCH /v1/employees/{id}.
+    /// </summary>
+    [JsonPropertyName("previous_salary")]
+    public required decimal PreviousSalary { get; set; }
+
+    /// <summary>
+    /// Días que se pagaron con el salario anterior desde from. Si no lo manda, los de los periodos ya pagados desde ese día.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal? Days { get; set; }
 }
 
 /// <summary>
@@ -29782,6 +29812,12 @@ public sealed partial class PreviewPayrollReceiptParamsIncidents
     public PreviewPayrollReceiptParamsIncidentsDisabilityPay? DisabilityPay { get; set; }
 
     /// <summary>
+    /// Retroactivo de un aumento: la diferencia de salario de los días ya pagados con el anterior, como percepción 001 (clave RET) gravada, que paga ISR con el sueldo del periodo (art. 96 de la LISR). Las cuotas IMSS de la diferencia las cubre la modificación de salario con su fecha en el SUA; el recibo no retiene la parte del trabajador (art. 38 de la LSS).
+    /// </summary>
+    [JsonPropertyName("retroactive")]
+    public PreviewPayrollReceiptParamsIncidentsRetroactive? Retroactive { get; set; }
+
+    /// <summary>
     /// Premios, comisiones y bonos del periodo, gravados.
     /// </summary>
     [JsonPropertyName("bonuses")]
@@ -29832,6 +29868,30 @@ public sealed partial class PreviewPayrollReceiptParamsIncidentsDisabilityPay
     /// </summary>
     [JsonPropertyName("rate")]
     public required decimal Rate { get; set; }
+}
+
+/// <summary>
+/// Retroactivo de un aumento: la diferencia de salario de los días ya pagados con el anterior, como percepción 001 (clave RET) gravada, que paga ISR con el sueldo del periodo (art. 96 de la LISR). Las cuotas IMSS de la diferencia las cubre la modificación de salario con su fecha en el SUA; el recibo no retiene la parte del trabajador (art. 38 de la LSS).
+/// </summary>
+public sealed partial class PreviewPayrollReceiptParamsIncidentsRetroactive
+{
+    /// <summary>
+    /// Día desde el que rige el aumento (YYYY-MM-DD), antes del periodo y hasta un año antes.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public required string From { get; set; }
+
+    /// <summary>
+    /// Salario diario que tenía el empleado antes del aumento. El de ahora es el del empleado: cámbielo antes con PATCH /v1/employees/{id}.
+    /// </summary>
+    [JsonPropertyName("previous_salary")]
+    public required decimal PreviousSalary { get; set; }
+
+    /// <summary>
+    /// Días que se pagaron con el salario anterior desde from. Si no lo manda, los de los periodos ya pagados desde ese día.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal? Days { get; set; }
 }
 
 /// <summary>
