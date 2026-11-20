@@ -240,6 +240,21 @@ public sealed partial class FiscalistoClient
     /// <summary>Cumplimiento SAT.</summary>
     public MaterialityInvoicesResource MaterialityInvoices => _materialityInvoices ??= new MaterialityInvoicesResource(this);
 
+    private SatReviewsResource? _satReviews;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public SatReviewsResource SatReviews => _satReviews ??= new SatReviewsResource(this);
+
+    private SatRiskCheckResource? _satRiskCheck;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public SatRiskCheckResource SatRiskCheck => _satRiskCheck ??= new SatRiskCheckResource(this);
+
+    private TaxDiscrepancyResource? _taxDiscrepancy;
+
+    /// <summary>Cumplimiento SAT.</summary>
+    public TaxDiscrepancyResource TaxDiscrepancy => _taxDiscrepancy ??= new TaxDiscrepancyResource(this);
+
     private WarehousesResource? _warehouses;
 
     /// <summary>Inventario.</summary>
@@ -3698,6 +3713,162 @@ public sealed class MaterialityInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<MaterialityInvoiceList> ListAsync(ListMaterialityInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<MaterialityInvoiceList>("GET", "/v1/materiality_invoices", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.SatReviews</c>.
+/// </summary>
+public sealed class SatReviewsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatReviewsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Registrar una revisión del SAT
+    /// </summary>
+    /// <remarks>
+    /// Como «Registrar oficio» en Revisiones del SAT: una carta invitación, requerimiento u oficio que el SAT mandó al RFC del emisor, con la fecha en que se lo notificaron. Fiscalisto calcula el plazo en días hábiles desde que surte efectos la notificación (sin sábados, domingos ni los inhábiles del SAT) y avisa por correo 5, 3 y 1 día hábil antes. Sin requests, lleva lo que el SAT suele pedir en ese tipo. No responde nada al SAT. No usa timbres.
+    /// <br/>
+    /// <c>POST /v1/sat_reviews</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/create-sat-review"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatReview> CreateAsync(CreateSatReviewParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatReview>("POST", "/v1/sat_reviews", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar revisiones del SAT
+    /// </summary>
+    /// <remarks>
+    /// Las revisiones del RFC del emisor, primero las que siguen abiertas, después las más recientes, cada una con su plazo y lo que pide. Una página, hasta 500.
+    /// <br/>
+    /// <c>GET /v1/sat_reviews</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/list-sat-reviews"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatReviewList> ListAsync(ListSatReviewsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatReviewList>("GET", "/v1/sat_reviews", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver una revisión del SAT
+    /// </summary>
+    /// <remarks>
+    /// Una revisión con cada oficio y su plazo, lo que pide con cuánto de eso tiene Fiscalisto (ready de total) y su última respuesta armada.
+    /// <br/>
+    /// <c>GET /v1/sat_reviews/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-sat-review"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatReview> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatReview>("GET", $"/v1/sat_reviews/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una revisión del SAT
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda. notices y requests reemplazan la lista: mande todos sus oficios (con answered_on en el que ya respondió) y todo lo que pide (con done en lo que ya tiene).
+    /// <br/>
+    /// <c>POST /v1/sat_reviews/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/update-sat-review"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatReview> UpdateAsync(string id, UpdateSatReviewParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatReview>("POST", $"/v1/sat_reviews/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una revisión del SAT
+    /// </summary>
+    /// <remarks>
+    /// Borra de Fiscalisto el seguimiento, sus avisos y los enlaces de sus asesores; su trámite en el SAT sigue igual. No se puede deshacer.
+    /// <br/>
+    /// <c>DELETE /v1/sat_reviews/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/delete-sat-review"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/sat_reviews/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Armar la respuesta
+    /// </summary>
+    /// <remarks>
+    /// Como «Armar respuesta»: arma en segundo plano un ZIP con lo que la revisión pide: los XML y la relación de CFDI del periodo, el papel de trabajo, la contabilidad electrónica con el número de orden, las declaraciones, los documentos subidos en la app y un índice de qué archivo responde a cada cosa. Contesta la revisión con answer.status processing; consulte GET /v1/sat_reviews/{id} hasta que sea completed y descárguelo con GET /v1/sat_reviews/{id}/answer. Una a la vez (answer_running). No usa timbres.
+    /// <br/>
+    /// <c>POST /v1/sat_reviews/{id}/answer</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/arm-sat-review-answer"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatReview> ArmAnswerAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatReview>("POST", $"/v1/sat_reviews/{Uri.EscapeDataString(id)}/answer", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Descargar la respuesta
+    /// </summary>
+    /// <remarks>
+    /// El ZIP de la última respuesta armada, cuando answer.status es completed (si no, answer_not_ready). Se guarda 30 días.
+    /// <br/>
+    /// <c>GET /v1/sat_reviews/{id}/answer</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/download-sat-review-answer"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> DownloadAnswerAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", $"/v1/sat_reviews/{Uri.EscapeDataString(id)}/answer", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.SatRiskCheck</c>.
+/// </summary>
+public sealed class SatRiskCheckResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SatRiskCheckResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Revisar como el SAT
+    /// </summary>
+    /// <remarks>
+    /// Como «Revise como el SAT»: lo que los sistemas del SAT cruzan para mandar cartas invitación y escoger a quién revisar (plazos de revisiones abiertas, Buzón Tributario, CFDI contra declaraciones, declaraciones omitidas, opinión de cumplimiento, listas del SAT, proveedores en 69-B, materialidad, depósitos sin aclarar, discrepancia fiscal y vigencia de la e.firma), con lo que Fiscalisto ya leyó. No consulta al SAT y no usa timbres.
+    /// <br/>
+    /// <c>GET /v1/sat_risk_check</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-sat-risk-check"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatRiskCheck> GetAsync(GetSatRiskCheckParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatRiskCheck>("GET", "/v1/sat_risk_check", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Cumplimiento SAT: <c>fiscalisto.TaxDiscrepancy</c>.
+/// </summary>
+public sealed class TaxDiscrepancyResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TaxDiscrepancyResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Calcular la discrepancia fiscal
+    /// </summary>
+    /// <remarks>
+    /// Como «Discrepancia fiscal» (personas físicas, art. 91 LISR): gastos con CFDI a su nombre y depósitos en sus cuentas del año, menos traspasos entre sus cuentas, préstamos y devoluciones, contra los ingresos declarados; lo que queda es lo que el SAT presumiría ingreso. Un emisor persona moral contesta parameter_invalid. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/tax_discrepancy</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/get-tax-discrepancy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TaxDiscrepancy> GetAsync(GetTaxDiscrepancyParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TaxDiscrepancy>("GET", "/v1/tax_discrepancy", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>

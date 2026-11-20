@@ -10656,6 +10656,156 @@ public sealed partial class CreateSatDownloadParams
 }
 
 /// <summary>
+/// Los campos de «Registrar una revisión del SAT».
+/// </summary>
+public sealed partial class CreateSatReviewParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Qué le llegó: invitation_letter, return_clarification, missing_returns, desk_audit (revisión de gabinete), field_audit (visita domiciliaria), electronic_audit, supplier_69b, presumption_69b, csd_restriction, tax_discrepancy, refund u other.
+    /// <br/>
+    /// Valores: invitation_letter, return_clarification, missing_returns, desk_audit, field_audit, electronic_audit, supplier_69b, presumption_69b, csd_restriction, tax_discrepancy, refund, other.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Sus oficios con su fecha de notificación: el que la abrió y los que siguieron (prórroga, segundo requerimiento, observaciones…).
+    /// </summary>
+    [JsonPropertyName("notices")]
+    public required List<CreateSatReviewParamsNoticesItem> Notices { get; set; }
+
+    /// <summary>
+    /// Lo que el oficio pide entregar. Sin esto, lo que el SAT suele pedir en ese tipo.
+    /// </summary>
+    [JsonPropertyName("requests")]
+    public List<CreateSatReviewParamsRequestsItem>? Requests { get; set; }
+
+    /// <summary>
+    /// open (por atender, por omisión), answered, concluded (sin observaciones), assessed (con crédito fiscal), in_defense o closed. Mientras está open, answered, assessed o in_defense, Fiscalisto cuenta sus plazos y avisa.
+    /// <br/>
+    /// Valores: open, answered, concluded, assessed, in_defense, closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// El número del oficio, como viene en él (por ejemplo 500-05-2026-1234).
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// El número de orden (ABC1234567/26) o de trámite (AB123456789012) si pide la contabilidad electrónica: va en sus pólizas.
+    /// </summary>
+    [JsonPropertyName("order_number")]
+    public string? OrderNumber { get; set; }
+
+    /// <summary>
+    /// La autoridad que lo firma (por ejemplo «ADAF de Occidente»).
+    /// </summary>
+    [JsonPropertyName("authority")]
+    public string? Authority { get; set; }
+
+    /// <summary>
+    /// Primer día del periodo que revisa. Con period_end, Fiscalisto arma lo suyo.
+    /// </summary>
+    [JsonPropertyName("period_start")]
+    public string? PeriodStart { get; set; }
+
+    /// <summary>
+    /// Último día del periodo que revisa (a lo más 7 ejercicios).
+    /// </summary>
+    [JsonPropertyName("period_end")]
+    public string? PeriodEnd { get; set; }
+
+    /// <summary>
+    /// El monto que señala el SAT, en pesos, si señala uno.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Sus notas.
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateSatReviewParamsNoticesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateSatReviewParamsNoticesItem
+{
+    /// <summary>
+    /// Qué oficio es, de los de su tipo (en desk_audit: solicitud, observaciones o resolucion); por omisión, el primero, el que abre la revisión. Otro contesta con los de su tipo.
+    /// </summary>
+    [JsonPropertyName("step")]
+    public string? Step { get; set; }
+
+    /// <summary>
+    /// El día en que se lo notificaron (en el Buzón, el día en que lo abrió o el quinto día hábil después del aviso, lo que pase primero). No puede ser futuro.
+    /// </summary>
+    [JsonPropertyName("notified_on")]
+    public required string NotifiedOn { get; set; }
+
+    /// <summary>
+    /// Los días hábiles que da el oficio, solo cuando no son los de la ley (una carta invitación con fecha, «otro» oficio).
+    /// </summary>
+    [JsonPropertyName("business_days")]
+    public long? BusinessDays { get; set; }
+
+    /// <summary>
+    /// true si pidió la prórroga (o presentó el aviso) que la ley permite en ese oficio: suma sus días al plazo.
+    /// </summary>
+    [JsonPropertyName("extension")]
+    public bool? Extension { get; set; }
+
+    /// <summary>
+    /// El día en que lo respondió; null mientras no.
+    /// </summary>
+    [JsonPropertyName("answered_on")]
+    public string? AnsweredOn { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateSatReviewParamsRequestsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateSatReviewParamsRequestsItem
+{
+    /// <summary>
+    /// Qué pide (vea requests en la guía).
+    /// <br/>
+    /// Valores: working_paper, tax_discrepancy, issued_invoices, received_invoices, retentions, tax_returns, electronic_accounting, materiality, bank_statements, contracts, inventory, assets_and_staff, articles_and_power, written_answer, other.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Cómo lo dice el oficio, si quiere sus palabras; con other, obligatorio.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// true cuando ya lo tiene listo.
+    /// </summary>
+    [JsonPropertyName("done")]
+    public bool? Done { get; set; }
+
+    /// <summary>
+    /// Una nota suya.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ajustar existencias».
 /// </summary>
 public sealed partial class CreateStockAdjustmentParams
@@ -17834,6 +17984,18 @@ public sealed partial class GetSatDeclarationCalendarParams
 }
 
 /// <summary>
+/// Los campos de «Revisar como el SAT».
+/// </summary>
+public sealed partial class GetSatRiskCheckParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver la determinación de impuestos de un mes».
 /// </summary>
 public sealed partial class GetTaxDeterminationParams
@@ -17843,6 +18005,30 @@ public sealed partial class GetTaxDeterminationParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Calcular la discrepancia fiscal».
+/// </summary>
+public sealed partial class GetTaxDiscrepancyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El ejercicio (por omisión, el año pasado).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// Los ingresos de su declaración anual, si tiene ingresos que Fiscalisto no ve (rentas, intereses, otro patrón): reemplazan los que calcula.
+    /// </summary>
+    [JsonPropertyName("declared_income")]
+    public decimal? DeclaredIncome { get; set; }
 }
 
 /// <summary>
@@ -25276,6 +25462,26 @@ public sealed partial class ListSatRetentionsParams
     /// </summary>
     [JsonPropertyName("month")]
     public long? Month { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar revisiones del SAT».
+/// </summary>
+public sealed partial class ListSatReviewsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de este estado: open, answered, concluded, assessed, in_defense o closed.
+    /// <br/>
+    /// Valores: open, answered, concluded, assessed, in_defense, closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
 }
 
 /// <summary>
@@ -33917,6 +34123,456 @@ public sealed partial class SatRetentionWithheldTaxesItem
 }
 
 /// <summary>
+/// Una carta invitación, requerimiento u oficio del SAT al RFC del emisor: su plazo en días hábiles desde que surte efectos la notificación (sin los inhábiles del SAT), lo que pide, cuánto de eso tiene Fiscalisto y su última respuesta armada.
+/// </summary>
+public sealed partial class SatReview
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor cuyo RFC recibió el oficio.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Qué le llegó (invitation_letter, desk_audit, field_audit…).
+    /// <br/>
+    /// Valores: invitation_letter, return_clarification, missing_returns, desk_audit, field_audit, electronic_audit, supplier_69b, presumption_69b, csd_restriction, tax_discrepancy, refund, other.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre como lo muestra la app («Revisión de gabinete»).
+    /// </summary>
+    [JsonPropertyName("type_name")]
+    public string TypeName { get; set; } = default!;
+
+    /// <summary>
+    /// open (por atender), answered, concluded (sin observaciones), assessed (con crédito fiscal), in_defense o closed.
+    /// <br/>
+    /// Valores: open, answered, concluded, assessed, in_defense, closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Su estado como lo muestra la app («Por atender»).
+    /// </summary>
+    [JsonPropertyName("status_name")]
+    public string StatusName { get; set; } = default!;
+
+    /// <summary>
+    /// El número del oficio, o null.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// El número de orden o de trámite que va en las pólizas de la contabilidad electrónica, o null.
+    /// </summary>
+    [JsonPropertyName("order_number")]
+    public string? OrderNumber { get; set; }
+
+    /// <summary>
+    /// La autoridad que lo firma, o null.
+    /// </summary>
+    [JsonPropertyName("authority")]
+    public string? Authority { get; set; }
+
+    /// <summary>
+    /// Primer día del periodo revisado, o null.
+    /// </summary>
+    [JsonPropertyName("period_start")]
+    public string? PeriodStart { get; set; }
+
+    /// <summary>
+    /// Último día del periodo revisado, o null.
+    /// </summary>
+    [JsonPropertyName("period_end")]
+    public string? PeriodEnd { get; set; }
+
+    /// <summary>
+    /// El monto que señala el SAT, en pesos, o null.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// El último día para responder el oficio pendiente (el más reciente sin responder), o null si la ley no da plazo o ya respondió todos.
+    /// </summary>
+    [JsonPropertyName("due_on")]
+    public string? DueOn { get; set; }
+
+    /// <summary>
+    /// Días hábiles que le quedan: 0 es hoy, negativo ya pasó. null sin plazo.
+    /// </summary>
+    [JsonPropertyName("business_days_left")]
+    public long? BusinessDaysLeft { get; set; }
+
+    /// <summary>
+    /// El día en que el SAT debe terminar la revisión (12 meses en gabinete y visita, 6 en electrónica), o null.
+    /// </summary>
+    [JsonPropertyName("sat_must_conclude_by")]
+    public string? SatMustConcludeBy { get; set; }
+
+    /// <summary>
+    /// Sus oficios, del primero al último, cada uno con su plazo.
+    /// </summary>
+    [JsonPropertyName("notices")]
+    public List<SatReviewNoticesItem> Notices { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que el oficio pide entregar y qué tan listo está.
+    /// </summary>
+    [JsonPropertyName("requests")]
+    public List<SatReviewRequestsItem> Requests { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas de requests están listas («Ya tiene N de M»).
+    /// </summary>
+    [JsonPropertyName("ready")]
+    public long Ready { get; set; }
+
+    /// <summary>
+    /// Cuántas pide.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public long Total { get; set; }
+
+    /// <summary>
+    /// La última respuesta armada (POST /v1/sat_reviews/{id}/answer), o null. Se descarga con GET /v1/sat_reviews/{id}/answer.
+    /// </summary>
+    [JsonPropertyName("answer")]
+    public SatReviewAnswer? Answer { get; set; }
+
+    /// <summary>
+    /// Sus notas, o null.
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+
+    /// <summary>
+    /// Cuándo se registró.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Su último cambio.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string UpdatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatReviewAnswer&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatReviewAnswer
+{
+    /// <summary>
+    /// processing, completed (se descarga), failed o expired.
+    /// <br/>
+    /// Valores: processing, completed, failed, expired.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El tamaño del ZIP, ya completo.
+    /// </summary>
+    [JsonPropertyName("size_bytes")]
+    public long? SizeBytes { get; set; }
+
+    /// <summary>
+    /// Por qué falló, o null.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+
+    /// <summary>
+    /// Cuándo se pidió.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo quedó lista, o null.
+    /// </summary>
+    [JsonPropertyName("completed_at")]
+    public string? CompletedAt { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo se descarga, o null.
+    /// </summary>
+    [JsonPropertyName("expires_at")]
+    public string? ExpiresAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SatReviewList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SatReview> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatReviewNoticesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatReviewNoticesItem
+{
+    /// <summary>
+    /// Qué oficio es, de los de su tipo.
+    /// </summary>
+    [JsonPropertyName("step")]
+    public string Step { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre («Solicitud de información»).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El día en que se lo notificaron.
+    /// </summary>
+    [JsonPropertyName("notified_on")]
+    public string NotifiedOn { get; set; } = default!;
+
+    /// <summary>
+    /// El día en que surte efectos (el hábil siguiente).
+    /// </summary>
+    [JsonPropertyName("effective_on")]
+    public string EffectiveOn { get; set; } = default!;
+
+    /// <summary>
+    /// Los días hábiles que da, con la prórroga si la pidió; null si la ley no da plazo.
+    /// </summary>
+    [JsonPropertyName("business_days")]
+    public long? BusinessDays { get; set; }
+
+    /// <summary>
+    /// Si pidió la prórroga o presentó el aviso.
+    /// </summary>
+    [JsonPropertyName("extension")]
+    public bool Extension { get; set; }
+
+    /// <summary>
+    /// Su último día para responder, o null.
+    /// </summary>
+    [JsonPropertyName("due_on")]
+    public string? DueOn { get; set; }
+
+    /// <summary>
+    /// Días hábiles que le quedan (0 es hoy, negativo ya pasó), o null.
+    /// </summary>
+    [JsonPropertyName("business_days_left")]
+    public long? BusinessDaysLeft { get; set; }
+
+    /// <summary>
+    /// El día en que lo respondió, o null.
+    /// </summary>
+    [JsonPropertyName("answered_on")]
+    public string? AnsweredOn { get; set; }
+
+    /// <summary>
+    /// El artículo que da el plazo («art. 53 inciso c) CFF»).
+    /// </summary>
+    [JsonPropertyName("law")]
+    public string Law { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuándo puede pedir un acuerdo conclusivo en Prodecon (art. 69-C CFF), cuando aplica.
+    /// </summary>
+    [JsonPropertyName("conclusive_agreement_until")]
+    public string? ConclusiveAgreementUntil { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatReviewRequestsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatReviewRequestsItem
+{
+    /// <summary>
+    /// Qué pide.
+    /// <br/>
+    /// Valores: working_paper, tax_discrepancy, issued_invoices, received_invoices, retentions, tax_returns, electronic_accounting, materiality, bank_statements, contracts, inventory, assets_and_staff, articles_and_power, written_answer, other.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo se llama (o como lo dice el oficio).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// fiscalisto: lo arma la respuesta con sus datos; you: se sube (contratos, escrito…).
+    /// <br/>
+    /// Valores: fiscalisto, you.
+    /// </summary>
+    [JsonPropertyName("made_by")]
+    public string MadeBy { get; set; } = default!;
+
+    /// <summary>
+    /// Si lo marcó como listo.
+    /// </summary>
+    [JsonPropertyName("done")]
+    public bool Done { get; set; }
+
+    /// <summary>
+    /// Su nota, o null.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Lo que Fiscalisto tiene para eso en el periodo («412 CFDI»), o null.
+    /// </summary>
+    [JsonPropertyName("have")]
+    public string? Have { get; set; }
+
+    /// <summary>
+    /// Cuántos documentos subió para eso en la app.
+    /// </summary>
+    [JsonPropertyName("documents")]
+    public long Documents { get; set; }
+
+    /// <summary>
+    /// Listo: lo marcó, Fiscalisto lo arma con lo que tiene, o subió al menos un documento.
+    /// </summary>
+    [JsonPropertyName("ready")]
+    public bool Ready { get; set; }
+}
+
+/// <summary>
+/// Revise como el SAT: lo que los sistemas del SAT cruzan para mandar cartas invitación y escoger a quién revisar, con lo que Fiscalisto ya leyó del emisor. No consulta al SAT.
+/// </summary>
+public sealed partial class SatRiskCheck
+{
+    /// <summary>
+    /// Siempre sat_risk_check.
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su RFC.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas revisiones salen para atender ya.
+    /// </summary>
+    [JsonPropertyName("critical")]
+    public long Critical { get; set; }
+
+    /// <summary>
+    /// Cuántas salen para revisar.
+    /// </summary>
+    [JsonPropertyName("warning")]
+    public long Warning { get; set; }
+
+    /// <summary>
+    /// Cada cruce, los que hay que atender primero.
+    /// </summary>
+    [JsonPropertyName("checks")]
+    public List<SatRiskCheckChecksItem> Checks { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatRiskCheckChecksItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatRiskCheckChecksItem
+{
+    /// <summary>
+    /// Qué revisa: revisiones, buzon, cruces, omisiones, opinion, listas, efos, materialidad, depositos, discrepancia o efirma.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// ok, warning (revisar), critical (atender ya) o unknown (Fiscalisto aún no lo lee).
+    /// <br/>
+    /// Valores: ok, warning, critical, unknown.
+    /// </summary>
+    [JsonPropertyName("result")]
+    public string Result { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que encontró, en una línea.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// El detalle, con cifras.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string Detail { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué le importa al SAT.
+    /// </summary>
+    [JsonPropertyName("why")]
+    public string Why { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Guardar el presupuesto de un año».
 /// </summary>
 public sealed partial class SaveBudgetParams
@@ -35286,6 +35942,164 @@ public sealed partial class TaxDetermination
     /// </summary>
     [JsonPropertyName("manual_entry")]
     public string? ManualEntry { get; set; }
+}
+
+/// <summary>
+/// La discrepancia fiscal de una persona física en un año (art. 91 LISR): lo que gastó y recibió en sus cuentas contra lo que declaró.
+/// </summary>
+public sealed partial class TaxDiscrepancy
+{
+    /// <summary>
+    /// Siempre tax_discrepancy.
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…), una persona física.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su RFC (13 caracteres).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Gastos con CFDI a su nombre (recibidos, sin cancelados, menos notas de crédito).
+    /// </summary>
+    [JsonPropertyName("spending")]
+    public decimal Spending { get; set; }
+
+    /// <summary>
+    /// Depósitos en sus cuentas (de los estados de cuenta en Conciliación).
+    /// </summary>
+    [JsonPropertyName("deposits")]
+    public decimal Deposits { get; set; }
+
+    /// <summary>
+    /// Traspasos entre sus cuentas, que la ley deja fuera (art. 91 LISR).
+    /// </summary>
+    [JsonPropertyName("own_transfers")]
+    public decimal OwnTransfers { get; set; }
+
+    /// <summary>
+    /// Préstamos que clasificó.
+    /// </summary>
+    [JsonPropertyName("loans")]
+    public decimal Loans { get; set; }
+
+    /// <summary>
+    /// Devoluciones que clasificó.
+    /// </summary>
+    [JsonPropertyName("refunds")]
+    public decimal Refunds { get; set; }
+
+    /// <summary>
+    /// Erogaciones: gastos más depósitos, menos traspasos.
+    /// </summary>
+    [JsonPropertyName("outflows")]
+    public decimal Outflows { get; set; }
+
+    /// <summary>
+    /// Los ingresos declarados que se restan.
+    /// </summary>
+    [JsonPropertyName("declared_income")]
+    public decimal DeclaredIncome { get; set; }
+
+    /// <summary>
+    /// De dónde salen: tax_returns (sus declaraciones), payroll (sus recibos de nómina), declared_income (el que mandó) o none.
+    /// <br/>
+    /// Valores: tax_returns, payroll, declared_income, none.
+    /// </summary>
+    [JsonPropertyName("declared_income_source")]
+    public string DeclaredIncomeSource { get; set; } = default!;
+
+    /// <summary>
+    /// Erogaciones menos préstamos, devoluciones e ingresos declarados, si es positivo: lo que el SAT presumiría ingreso.
+    /// </summary>
+    [JsonPropertyName("discrepancy")]
+    public decimal Discrepancy { get; set; }
+
+    /// <summary>
+    /// Depósitos sin clasificar en Conciliación («Por aclarar»): cada uno que explique baja la discrepancia.
+    /// </summary>
+    [JsonPropertyName("unclassified_deposits")]
+    public decimal UnclassifiedDeposits { get; set; }
+
+    /// <summary>
+    /// Si sus préstamos pasan de $600,000 en el año: solo cuentan si los informó en su declaración anual (art. 90 LISR).
+    /// </summary>
+    [JsonPropertyName("loans_to_report")]
+    public bool LoansToReport { get; set; }
+
+    /// <summary>
+    /// Si hay estados de cuenta del año; sin ellos solo cuentan los gastos con CFDI.
+    /// </summary>
+    [JsonPropertyName("bank_statements")]
+    public bool BankStatements { get; set; }
+
+    /// <summary>
+    /// El cálculo mes por mes.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public List<TaxDiscrepancyMonthsItem> Months { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;TaxDiscrepancyMonthsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TaxDiscrepancyMonthsItem
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Sus gastos con CFDI a su nombre.
+    /// </summary>
+    [JsonPropertyName("spending")]
+    public decimal Spending { get; set; }
+
+    /// <summary>
+    /// Los depósitos en sus cuentas.
+    /// </summary>
+    [JsonPropertyName("deposits")]
+    public decimal Deposits { get; set; }
+
+    /// <summary>
+    /// Los traspasos entre sus cuentas.
+    /// </summary>
+    [JsonPropertyName("own_transfers")]
+    public decimal OwnTransfers { get; set; }
+
+    /// <summary>
+    /// Los préstamos que clasificó.
+    /// </summary>
+    [JsonPropertyName("loans")]
+    public decimal Loans { get; set; }
+
+    /// <summary>
+    /// Los ingresos declarados del mes.
+    /// </summary>
+    [JsonPropertyName("declared_income")]
+    public decimal DeclaredIncome { get; set; }
 }
 
 /// <summary>
@@ -39100,6 +39914,150 @@ public sealed partial class UpdateSatInvoiceParams
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar una revisión del SAT».
+/// </summary>
+public sealed partial class UpdateSatReviewParams
+{
+    /// <summary>
+    /// Qué le llegó (vea type al crearla).
+    /// <br/>
+    /// Valores: invitation_letter, return_clarification, missing_returns, desk_audit, field_audit, electronic_audit, supplier_69b, presumption_69b, csd_restriction, tax_discrepancy, refund, other.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Todos sus oficios: reemplaza los que tenía.
+    /// </summary>
+    [JsonPropertyName("notices")]
+    public List<UpdateSatReviewParamsNoticesItem>? Notices { get; set; }
+
+    /// <summary>
+    /// Todo lo que pide, con done para marcar lo que ya tiene: reemplaza la lista.
+    /// </summary>
+    [JsonPropertyName("requests")]
+    public List<UpdateSatReviewParamsRequestsItem>? Requests { get; set; }
+
+    /// <summary>
+    /// open (por atender, por omisión), answered, concluded (sin observaciones), assessed (con crédito fiscal), in_defense o closed. Mientras está open, answered, assessed o in_defense, Fiscalisto cuenta sus plazos y avisa.
+    /// <br/>
+    /// Valores: open, answered, concluded, assessed, in_defense, closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// El número del oficio, como viene en él (por ejemplo 500-05-2026-1234).
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// El número de orden (ABC1234567/26) o de trámite (AB123456789012) si pide la contabilidad electrónica: va en sus pólizas.
+    /// </summary>
+    [JsonPropertyName("order_number")]
+    public string? OrderNumber { get; set; }
+
+    /// <summary>
+    /// La autoridad que lo firma (por ejemplo «ADAF de Occidente»).
+    /// </summary>
+    [JsonPropertyName("authority")]
+    public string? Authority { get; set; }
+
+    /// <summary>
+    /// Primer día del periodo que revisa. Con period_end, Fiscalisto arma lo suyo.
+    /// </summary>
+    [JsonPropertyName("period_start")]
+    public string? PeriodStart { get; set; }
+
+    /// <summary>
+    /// Último día del periodo que revisa (a lo más 7 ejercicios).
+    /// </summary>
+    [JsonPropertyName("period_end")]
+    public string? PeriodEnd { get; set; }
+
+    /// <summary>
+    /// El monto que señala el SAT, en pesos, si señala uno.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Sus notas.
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSatReviewParamsNoticesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSatReviewParamsNoticesItem
+{
+    /// <summary>
+    /// Qué oficio es, de los de su tipo (en desk_audit: solicitud, observaciones o resolucion); por omisión, el primero, el que abre la revisión. Otro contesta con los de su tipo.
+    /// </summary>
+    [JsonPropertyName("step")]
+    public string? Step { get; set; }
+
+    /// <summary>
+    /// El día en que se lo notificaron (en el Buzón, el día en que lo abrió o el quinto día hábil después del aviso, lo que pase primero). No puede ser futuro.
+    /// </summary>
+    [JsonPropertyName("notified_on")]
+    public required string NotifiedOn { get; set; }
+
+    /// <summary>
+    /// Los días hábiles que da el oficio, solo cuando no son los de la ley (una carta invitación con fecha, «otro» oficio).
+    /// </summary>
+    [JsonPropertyName("business_days")]
+    public long? BusinessDays { get; set; }
+
+    /// <summary>
+    /// true si pidió la prórroga (o presentó el aviso) que la ley permite en ese oficio: suma sus días al plazo.
+    /// </summary>
+    [JsonPropertyName("extension")]
+    public bool? Extension { get; set; }
+
+    /// <summary>
+    /// El día en que lo respondió; null mientras no.
+    /// </summary>
+    [JsonPropertyName("answered_on")]
+    public string? AnsweredOn { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSatReviewParamsRequestsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSatReviewParamsRequestsItem
+{
+    /// <summary>
+    /// Qué pide (vea requests en la guía).
+    /// <br/>
+    /// Valores: working_paper, tax_discrepancy, issued_invoices, received_invoices, retentions, tax_returns, electronic_accounting, materiality, bank_statements, contracts, inventory, assets_and_staff, articles_and_power, written_answer, other.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Cómo lo dice el oficio, si quiere sus palabras; con other, obligatorio.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// true cuando ya lo tiene listo.
+    /// </summary>
+    [JsonPropertyName("done")]
+    public bool? Done { get; set; }
+
+    /// <summary>
+    /// Una nota suya.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }
 
 /// <summary>
