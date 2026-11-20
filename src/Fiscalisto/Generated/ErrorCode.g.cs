@@ -252,6 +252,18 @@ public static class ErrorCode
     /// <summary>Mandó un campo o un parámetro de la URL que no existe (casi siempre un nombre mal escrito, como legalName en vez de legal_name, o ?statuss= en vez de ?status=). Nunca se ignora en silencio.</summary>
     public const string ParameterUnknown = "parameter_unknown";
 
+    /// <summary>El pago no se puede preparar o cambiar así (una factura ya pagada o en otro pago, un proveedor sin cuenta aprobada, una regla que no deja pagar, un límite, o ya salió). El mensaje dice por qué, renglón por renglón.</summary>
+    public const string PayoutInvalid = "payout_invalid";
+
+    /// <summary>El pago se preparó en la app: se cancela ahí.</summary>
+    public const string PayoutNotFromApi = "payout_not_from_api";
+
+    /// <summary>La empresa no deja que la API prepare pagos: se enciende en la app, en Pagos › Configurar pagos.</summary>
+    public const string PayoutsApiDisabled = "payouts_api_disabled";
+
+    /// <summary>El RFC del emisor no paga a proveedores con Fiscalisto: se conecta Fintoc en la app, en Pagos.</summary>
+    public const string PayoutsNotEnabled = "payouts_not_enabled";
+
     /// <summary>El emisor pide aprobar la prenómina antes de timbrar, y este recibo no está en la prenómina aprobada del periodo con estos importes y fecha de pago (no se ha pedido, espera aprobación, se rechazó o el recibo cambió). No se timbró: pídala con POST /v1/payroll_approvals y espere a que una persona la apruebe en la app.</summary>
     public const string PayrollApprovalRequired = "payroll_approval_required";
 

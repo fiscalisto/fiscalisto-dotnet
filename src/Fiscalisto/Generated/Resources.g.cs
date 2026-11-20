@@ -360,6 +360,26 @@ public sealed partial class FiscalistoClient
     /// <summary>Portal de proveedores.</summary>
     public SupplierInvoicesResource SupplierInvoices => _supplierInvoices ??= new SupplierInvoicesResource(this);
 
+    private PayableInvoicesResource? _payableInvoices;
+
+    /// <summary>Pagos a proveedores.</summary>
+    public PayableInvoicesResource PayableInvoices => _payableInvoices ??= new PayableInvoicesResource(this);
+
+    private PayoutsResource? _payouts;
+
+    /// <summary>Pagos a proveedores.</summary>
+    public PayoutsResource Payouts => _payouts ??= new PayoutsResource(this);
+
+    private PayeeAccountsResource? _payeeAccounts;
+
+    /// <summary>Pagos a proveedores.</summary>
+    public PayeeAccountsResource PayeeAccounts => _payeeAccounts ??= new PayeeAccountsResource(this);
+
+    private PayoutMandatesResource? _payoutMandates;
+
+    /// <summary>Pagos a proveedores.</summary>
+    public PayoutMandatesResource PayoutMandates => _payoutMandates ??= new PayoutMandatesResource(this);
+
     private SatDeclarationsResource? _satDeclarations;
 
     /// <summary>Declaraciones del SAT.</summary>
@@ -5223,6 +5243,150 @@ public sealed class SupplierInvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SupplierInvoice> MarkPaidAsync(string id, MarkSupplierInvoicePaidParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<SupplierInvoice>("POST", $"/v1/supplier_invoices/{Uri.EscapeDataString(id)}/mark_paid", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Pagos a proveedores: <c>fiscalisto.PayableInvoices</c>.
+/// </summary>
+public sealed class PayableInvoicesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayableInvoicesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar lo que falta por pagar
+    /// </summary>
+    /// <remarks>
+    /// Las facturas recibidas con algo por pagar, como Pagos › Por pagar, las más recientes primero; con uuid, esas facturas (pagadas o no). Lo pagado cuenta complementos, notas de crédito, pagos de Fiscalisto y pagos registrados a mano. Si el emisor no paga con Fintoc, 400 payouts_not_enabled.
+    /// <br/>
+    /// <c>GET /v1/payable_invoices</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/list-payable-invoices"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayableInvoiceList> ListAsync(ListPayableInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayableInvoiceList>("GET", "/v1/payable_invoices", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Pagos a proveedores: <c>fiscalisto.Payouts</c>.
+/// </summary>
+public sealed class PayoutsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayoutsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Preparar un pago a proveedores
+    /// </summary>
+    /// <remarks>
+    /// Un pago en borrador con estas facturas, revisado como en la app: las reglas antes de pagar, los límites y las cuentas aprobadas de cada proveedor. Las de un proveedor van en una transferencia. Nunca sale solo: alguien del equipo lo abre en app_url y lo firma con su llave de acceso. Solo si la empresa lo permite en Pagos › Configurar pagos (si no, 403 payouts_api_disabled); lo que no se puede pagar contesta 400 payout_invalid con el motivo. Pide Idempotency-Key: si la respuesta se pierde, repítala con el mismo valor y contesta el mismo pago, nunca uno nuevo.
+    /// <br/>
+    /// <c>POST /v1/payouts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/create-payout"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Payout> CreateAsync(CreatePayoutParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Payout>("POST", "/v1/payouts", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar pagos a proveedores
+    /// </summary>
+    /// <remarks>
+    /// Los pagos del emisor, hechos en la app o por la API, los más recientes primero, con sus transferencias.
+    /// <br/>
+    /// <c>GET /v1/payouts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/list-payouts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Payout>> ListAsync(ListPayoutsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Payout>("/v1/payouts", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar pagos a proveedores: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Payout> ListAutoPagingAsync(ListPayoutsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Payout>("/v1/payouts", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un pago a proveedores
+    /// </summary>
+    /// <remarks>
+    /// Con sus firmas, cada transferencia, su clave de rastreo y su CEP cuando llega.
+    /// <br/>
+    /// <c>GET /v1/payouts/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/get-payout"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Payout> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Payout>("GET", $"/v1/payouts/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cancelar un pago a proveedores
+    /// </summary>
+    /// <remarks>
+    /// Uno que preparó la API, mientras no ha salido nada (draft, pending_approval o approved): sus facturas vuelven a Por pagar y llega payout.canceled. Uno preparado en la app se cancela en la app (400 payout_not_from_api).
+    /// <br/>
+    /// <c>POST /v1/payouts/{id}/cancel</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/cancel-payout"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Payout> CancelAsync(string id, CancelPayoutParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Payout>("POST", $"/v1/payouts/{Uri.EscapeDataString(id)}/cancel", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Pagos a proveedores: <c>fiscalisto.PayeeAccounts</c>.
+/// </summary>
+public sealed class PayeeAccountsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayeeAccountsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar cuentas de proveedores
+    /// </summary>
+    /// <remarks>
+    /// Las cuentas a las que se les paga a sus proveedores, verificadas con el banco, y si ya se les puede pagar. Solo lectura: agregar o cambiar una CLABE se hace en la app, con su espera y su aprobación.
+    /// <br/>
+    /// <c>GET /v1/payee_accounts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/list-payee-accounts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayeeAccountList> ListAsync(ListPayeeAccountsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayeeAccountList>("GET", "/v1/payee_accounts", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Pagos a proveedores: <c>fiscalisto.PayoutMandates</c>.
+/// </summary>
+public sealed class PayoutMandatesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayoutMandatesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar pagos recurrentes
+    /// </summary>
+    /// <remarks>
+    /// Los pagos recurrentes firmados en la app (o por firmar): a qué cuenta, cuánto como máximo, qué día y qué meses, y los pagos que ya hicieron. Solo lectura.
+    /// <br/>
+    /// <c>GET /v1/payout_mandates</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/list-payout-mandates"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayoutMandateList> ListAsync(ListPayoutMandatesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayoutMandateList>("GET", "/v1/payout_mandates", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>
