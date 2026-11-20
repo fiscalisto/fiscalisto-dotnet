@@ -100,6 +100,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public EmployeesResource Employees => _employees ??= new EmployeesResource(this);
 
+    private VacationRequestsResource? _vacationRequests;
+
+    /// <summary>Nómina.</summary>
+    public VacationRequestsResource VacationRequests => _vacationRequests ??= new VacationRequestsResource(this);
+
     private PayrollReceiptsResource? _payrollReceipts;
 
     /// <summary>Nómina.</summary>
@@ -2042,6 +2047,100 @@ public sealed class EmployeesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<byte[]> VacationCertificateAsync(string id, GetEmployeeVacationCertificateParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestBytesAsync("GET", $"/v1/employees/{Uri.EscapeDataString(id)}/vacations/certificate", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Portal del empleado
+    /// </summary>
+    /// <remarks>
+    /// El enlace personal del empleado (sin cuenta) para ver, descargar y firmar de recibido sus recibos de nómina, ver sus vacaciones y pedir días; los celulares ligados y los recibos que firmó.
+    /// <br/>
+    /// <c>GET /v1/employees/{id}/portal</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee-portal"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeePortal> PortalAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeePortal>("GET", $"/v1/employees/{Uri.EscapeDataString(id)}/portal", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Activar, cambiar o apagar el portal
+    /// </summary>
+    /// <remarks>
+    /// enable crea el enlace (o deja el que tiene), renew hace uno nuevo (el anterior deja de funcionar y sus celulares se desligan) y disable lo apaga. Lo firmado se queda. Con send_email se lo manda a su correo.
+    /// <br/>
+    /// <c>POST /v1/employees/{id}/portal</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-employee-portal"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeePortal> UpdatePortalAsync(string id, UpdateEmployeePortalParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeePortal>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}/portal", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.VacationRequests</c>.
+/// </summary>
+public sealed class VacationRequestsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal VacationRequestsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar solicitudes de vacaciones
+    /// </summary>
+    /// <remarks>
+    /// Los días que los empleados pidieron desde su enlace, las más recientes primero.
+    /// <br/>
+    /// <c>GET /v1/vacation_requests</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-vacation-requests"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<VacationRequestList> ListAsync(ListVacationRequestsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<VacationRequestList>("GET", "/v1/vacation_requests", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver una solicitud de vacaciones
+    /// </summary>
+    /// <remarks>
+    /// Una solicitud de vacaciones con su estado.
+    /// <br/>
+    /// <c>GET /v1/vacation_requests/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-vacation-request"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<VacationRequest> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<VacationRequest>("GET", $"/v1/vacation_requests/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Aprobar una solicitud de vacaciones
+    /// </summary>
+    /// <remarks>
+    /// La aprueba con los días calculados o los que mande en days. Los días aprobados se sugieren en las Incidencias del recibo del periodo; no se agregan solos.
+    /// <br/>
+    /// <c>POST /v1/vacation_requests/{id}/approve</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/approve-vacation-request"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<VacationRequest> ApproveAsync(string id, ApproveVacationRequestParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<VacationRequest>("POST", $"/v1/vacation_requests/{Uri.EscapeDataString(id)}/approve", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Rechazar una solicitud de vacaciones
+    /// </summary>
+    /// <remarks>
+    /// La rechaza; note (por qué) es obligatoria y el empleado la ve.
+    /// <br/>
+    /// <c>POST /v1/vacation_requests/{id}/reject</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/reject-vacation-request"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<VacationRequest> RejectAsync(string id, RejectVacationRequestParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<VacationRequest>("POST", $"/v1/vacation_requests/{Uri.EscapeDataString(id)}/reject", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

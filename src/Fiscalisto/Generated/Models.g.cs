@@ -994,6 +994,24 @@ public sealed partial class ApproveExpenseReportParams
 }
 
 /// <summary>
+/// Los campos de «Aprobar una solicitud de vacaciones».
+/// </summary>
+public sealed partial class ApproveVacationRequestParams
+{
+    /// <summary>
+    /// Los días que descuenta de sus vacaciones, si no son los que se calcularon (sin domingos ni festivos), por ejemplo sin los sábados de quien descansa.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal? Days { get; set; }
+
+    /// <summary>
+    /// Una nota que el empleado ve en su enlace.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Una marca de entrada o salida de Asistencia (registro electrónico de jornada, LFT art. 132).
 /// </summary>
 public sealed partial class AttendanceMark
@@ -2015,7 +2033,7 @@ public sealed partial class BooksLogEntryActor
     public string? Name { get; set; }
 
     /// <summary>
-    /// &lt;c&gt;label&lt;/c&gt;.
+    /// El nombre y el id de la llave de la API, o el del asistente («ChatGPT»); null para un usuario del panel.
     /// </summary>
     [JsonPropertyName("label")]
     public string? Label { get; set; }
@@ -14963,6 +14981,78 @@ public sealed partial class EmployeeList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// El portal del empleado: su enlace y los recibos que firmó de recibido.
+/// </summary>
+public sealed partial class EmployeePortal
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su enlace personal (sin cuenta) para ver, descargar y firmar de recibido sus recibos y pedir vacaciones; null si está apagado.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+
+    /// <summary>
+    /// Cuándo se hizo el enlace.
+    /// </summary>
+    [JsonPropertyName("enabled_at")]
+    public string? EnabledAt { get; set; }
+
+    /// <summary>
+    /// Los celulares ligados: el primero que lo abre y los que lo abren en la hora siguiente, hasta 3.
+    /// </summary>
+    [JsonPropertyName("phones")]
+    public long Phones { get; set; }
+
+    /// <summary>
+    /// La última vez que lo abrió.
+    /// </summary>
+    [JsonPropertyName("last_seen_at")]
+    public string? LastSeenAt { get; set; }
+
+    /// <summary>
+    /// Los recibos que firmó de recibido desde su enlace (con el día, su celular y su IP guardados), los más recientes primero.
+    /// </summary>
+    [JsonPropertyName("signed_receipts")]
+    public List<EmployeePortalSignedReceiptsItem> SignedReceipts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;EmployeePortalSignedReceiptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EmployeePortalSignedReceiptsItem
+{
+    /// <summary>
+    /// El folio fiscal del recibo.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo lo firmó de recibido.
+    /// </summary>
+    [JsonPropertyName("signed_at")]
+    public string SignedAt { get; set; } = default!;
 }
 
 /// <summary>
@@ -28001,6 +28091,38 @@ public sealed partial class ListTicketsParams
 }
 
 /// <summary>
+/// Los campos de «Listar solicitudes de vacaciones».
+/// </summary>
+public sealed partial class ListVacationRequestsParams
+{
+    /// <summary>
+    /// Solo las de este empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// pending, approved, rejected o canceled.
+    /// <br/>
+    /// Valores: pending, approved, rejected, canceled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Cuántas, de 1 a 500. Por omisión 100.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver las existencias de un almacén».
 /// </summary>
 public sealed partial class ListWarehouseStockParams
@@ -32944,6 +33066,18 @@ public sealed partial class RejectQuoteParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Rechazar una solicitud de vacaciones».
+/// </summary>
+public sealed partial class RejectVacationRequestParams
+{
+    /// <summary>
+    /// Por qué no se aprueba: el empleado lo ve en su enlace.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public required string Note { get; set; }
 }
 
 /// <summary>
@@ -40263,6 +40397,26 @@ public sealed partial class UpdateEmployeeParams
 }
 
 /// <summary>
+/// Los campos de «Activar, cambiar o apagar el portal».
+/// </summary>
+public sealed partial class UpdateEmployeePortalParams
+{
+    /// <summary>
+    /// enable: crea el enlace (o deja el que tiene); renew: uno nuevo (el anterior deja de funcionar y sus celulares se desligan); disable: lo apaga (lo firmado se queda).
+    /// <br/>
+    /// Valores: enable, renew, disable.
+    /// </summary>
+    [JsonPropertyName("action")]
+    public required string Action { get; set; }
+
+    /// <summary>
+    /// Con enable o renew, le manda el enlace al correo del empleado. Falla si el empleado no tiene correo.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Saldo de vacaciones antes de Fiscalisto».
 /// </summary>
 public sealed partial class UpdateEmployeeVacationsParams
@@ -43788,6 +43942,122 @@ public sealed partial class Usage
     /// </summary>
     [JsonPropertyName("over_allowance")]
     public string OverAllowance { get; set; } = default!;
+}
+
+/// <summary>
+/// Días de vacaciones que un empleado pidió desde su enlace.
+/// </summary>
+public sealed partial class VacationRequest
+{
+    /// <summary>
+    /// vrq_…
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del empleado.
+    /// </summary>
+    [JsonPropertyName("employee_name")]
+    public string? EmployeeName { get; set; }
+
+    /// <summary>
+    /// El primer día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string From { get; set; } = default!;
+
+    /// <summary>
+    /// El último día (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string To { get; set; } = default!;
+
+    /// <summary>
+    /// Los días que descuenta de sus vacaciones: los laborables entre las fechas (sin domingos ni días de descanso obligatorio), o los que se aprobaron.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal Days { get; set; }
+
+    /// <summary>
+    /// La nota del empleado.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// pending, por revisar; approved, aprobada; rejected, rechazada; canceled, el empleado la retiró.
+    /// <br/>
+    /// Valores: pending, approved, rejected, canceled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se aprobó o rechazó.
+    /// </summary>
+    [JsonPropertyName("decided_at")]
+    public string? DecidedAt { get; set; }
+
+    /// <summary>
+    /// La nota de quien la decidió: el empleado la ve.
+    /// </summary>
+    [JsonPropertyName("decision_note")]
+    public string? DecisionNote { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class VacationRequestList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<VacationRequest> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
