@@ -415,6 +415,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public BookDepreciationRatesResource BookDepreciationRates => _bookDepreciationRates ??= new BookDepreciationRatesResource(this);
 
+    private ChartTemplatesResource? _chartTemplates;
+
+    /// <summary>Contabilidad.</summary>
+    public ChartTemplatesResource ChartTemplates => _chartTemplates ??= new ChartTemplatesResource(this);
+
+    private AccountRenumberingsResource? _accountRenumberings;
+
+    /// <summary>Contabilidad.</summary>
+    public AccountRenumberingsResource AccountRenumberings => _accountRenumberings ??= new AccountRenumberingsResource(this);
+
     private EntryTemplatesResource? _entryTemplates;
 
     /// <summary>Contabilidad.</summary>
@@ -5900,6 +5910,68 @@ public sealed class BookDepreciationRatesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<BookDepreciationRate> SaveAsync(SaveBookDepreciationRateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<BookDepreciationRate>("POST", "/v1/accounting/book_depreciation_rates", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.ChartTemplates</c>.
+/// </summary>
+public sealed class ChartTemplatesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ChartTemplatesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar los catálogos por giro
+    /// </summary>
+    /// <remarks>
+    /// Los catálogos por giro (comercio, restaurante, construcción, servicios profesionales, manufactura, transporte, arrendamiento, agropecuario) con las cuentas que agregaría cada uno a su catálogo y cuáles ya tiene.
+    /// <br/>
+    /// <c>GET /v1/accounting/chart_templates</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-chart-templates"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ChartTemplateList> ListAsync(ListChartTemplatesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ChartTemplateList>("GET", "/v1/accounting/chart_templates", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Agregar las cuentas de un giro
+    /// </summary>
+    /// <remarks>
+    /// Agrega a su catálogo las cuentas del giro que faltan, cada una bajo su código agrupador. Un código que ya tiene cuenta la conserva y nada se borra ni se renombra, así que se puede llamar otra vez sin duplicar.
+    /// <br/>
+    /// <c>POST /v1/accounting/chart_templates/{id}/apply</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/apply-chart-template"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ChartTemplateResult> ApplyAsync(string id, ApplyChartTemplateParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ChartTemplateResult>("POST", $"/v1/accounting/chart_templates/{Uri.EscapeDataString(id)}/apply", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.AccountRenumberings</c>.
+/// </summary>
+public sealed class AccountRenumberingsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal AccountRenumberingsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Renumerar el catálogo
+    /// </summary>
+    /// <remarks>
+    /// Cambia el número de todas las cuentas a la vez: con separator y widths (cada nivel rellenado con ceros) o con mapping (el número nuevo de cada una). Las pólizas, saldos iniciales y presupuestos siguen en las mismas cuentas. Si alguna no puede tomar su número (un nivel que no cabe, el de una cuenta de mayor, dos cuentas en un número) no cambia ninguna y contesta parameter_invalid; con dry_run solo dice qué cambiaría. Las subcuentas de banco conservan el suyo.
+    /// <br/>
+    /// <c>POST /v1/accounting/account_renumberings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/renumber-accounts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AccountRenumbering> CreateAsync(RenumberAccountsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AccountRenumbering>("POST", "/v1/accounting/account_renumberings", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

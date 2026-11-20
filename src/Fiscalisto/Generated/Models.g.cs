@@ -104,6 +104,84 @@ public sealed partial class AccountKey
 }
 
 /// <summary>
+/// Una renumeración del catálogo: cada cuenta que cambia de número (o no puede) con el de antes y el nuevo.
+/// </summary>
+public sealed partial class AccountRenumbering
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// true si solo dijo qué cambiaría.
+    /// </summary>
+    [JsonPropertyName("dry_run")]
+    public bool DryRun { get; set; }
+
+    /// <summary>
+    /// Cuántas cuentas cambian de número.
+    /// </summary>
+    [JsonPropertyName("changes")]
+    public long Changes { get; set; }
+
+    /// <summary>
+    /// Cuántas no pueden tomar su número nuevo (si hay, no cambia ninguna).
+    /// </summary>
+    [JsonPropertyName("problems")]
+    public long Problems { get; set; }
+
+    /// <summary>
+    /// Las cuentas que cambian o no pueden.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<AccountRenumberingAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AccountRenumberingAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AccountRenumberingAccountsItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su número antes.
+    /// </summary>
+    [JsonPropertyName("previous_number")]
+    public string PreviousNumber { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué no puede tomar el número nuevo, o null.
+    /// </summary>
+    [JsonPropertyName("problem")]
+    public string? Problem { get; set; }
+}
+
+/// <summary>
 /// Un movimiento de banco que ninguna factura explica (un retiro, o un depósito clasificado como préstamo, traspaso o devolución) y su póliza de ingresos o egresos contra Bancos, cuando ya se registró.
 /// </summary>
 public sealed partial class AccountingBankMovement
@@ -817,6 +895,18 @@ public sealed partial class ApplyAdvanceParamsRemainder
     /// </summary>
     [JsonPropertyName("payment_form")]
     public string? PaymentForm { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar las cuentas de un giro».
+/// </summary>
+public sealed partial class ApplyChartTemplateParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -3481,6 +3571,186 @@ public sealed partial class CfdiVerificationXml
     /// </summary>
     [JsonPropertyName("currency")]
     public string? Currency { get; set; }
+}
+
+/// <summary>
+/// Un catálogo por giro: las cuentas que usa un negocio de ese tipo además de las que la app ya lleva.
+/// </summary>
+public sealed partial class ChartTemplate
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del giro.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Para qué negocio es.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Las cuentas del giro.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<ChartTemplateAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ChartTemplateAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ChartTemplateAccountsItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// true si su código agrupador ya tiene cuenta en su catálogo (number y name son los de esa); no se agrega.
+    /// </summary>
+    [JsonPropertyName("in_chart")]
+    public bool InChart { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ChartTemplateList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ChartTemplate> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que agregó un catálogo por giro y lo que ya estaba.
+/// </summary>
+public sealed partial class ChartTemplateResult
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El giro.
+    /// </summary>
+    [JsonPropertyName("chart_template")]
+    public string ChartTemplate { get; set; } = default!;
+
+    /// <summary>
+    /// Las cuentas que se agregaron.
+    /// </summary>
+    [JsonPropertyName("added")]
+    public List<ChartTemplateResultAddedItem> Added { get; set; } = default!;
+
+    /// <summary>
+    /// Las que ya estaban (su código ya tenía cuenta).
+    /// </summary>
+    [JsonPropertyName("existing")]
+    public List<ChartTemplateResultExistingItem> Existing { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ChartTemplateResultAddedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ChartTemplateResultAddedItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ChartTemplateResultExistingItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ChartTemplateResultExistingItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
 }
 
 /// <summary>
@@ -25057,6 +25327,18 @@ public sealed partial class ListBranchesParams
 }
 
 /// <summary>
+/// Los campos de «Listar los catálogos por giro».
+/// </summary>
+public sealed partial class ListChartTemplatesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar centros de costo».
 /// </summary>
 public sealed partial class ListCostCentersParams
@@ -31630,6 +31912,62 @@ public sealed partial class RejectQuoteParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Renumerar el catálogo».
+/// </summary>
+public sealed partial class RenumberAccountsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Lo que separa los niveles: «-» (601-48), «.» (601.48) o «» (60148).
+    /// <br/>
+    /// Valores: -, ., .
+    /// </summary>
+    [JsonPropertyName("separator")]
+    public string? Separator { get; set; }
+
+    /// <summary>
+    /// Los dígitos de cada nivel, rellenados con ceros a la izquierda: [4, 3] hace 601-48 0601-048. Los niveles que no lleva conservan los suyos.
+    /// </summary>
+    [JsonPropertyName("widths")]
+    public List<long>? Widths { get; set; }
+
+    /// <summary>
+    /// En vez de separator y widths: el número nuevo de cada cuenta que cambia, por ejemplo los del sistema de su contador.
+    /// </summary>
+    [JsonPropertyName("mapping")]
+    public List<RenumberAccountsParamsMappingItem>? Mapping { get; set; }
+
+    /// <summary>
+    /// true: dice qué cambiaría, sin cambiar nada.
+    /// </summary>
+    [JsonPropertyName("dry_run")]
+    public bool? DryRun { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RenumberAccountsParamsMappingItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RenumberAccountsParamsMappingItem
+{
+    /// <summary>
+    /// El número de hoy.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public required string From { get; set; }
+
+    /// <summary>
+    /// Su número nuevo.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public required string To { get; set; }
 }
 
 /// <summary>
