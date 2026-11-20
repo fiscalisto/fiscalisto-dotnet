@@ -19890,6 +19890,48 @@ public sealed partial class GetOpeningBalancesParams
 }
 
 /// <summary>
+/// Los campos de «Acumulados de nómina».
+/// </summary>
+public sealed partial class GetPayrollAccumulatedParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El año: 2026 (por omisión, el actual).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// Un empleado (emp_…): solo sus recibos.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Costo de la nómina».
+/// </summary>
+public sealed partial class GetPayrollCostParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El año: 2026 (por omisión, el actual).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver las cuotas patronales de un mes».
 /// </summary>
 public sealed partial class GetPayrollProvisionParams
@@ -29259,6 +29301,212 @@ public sealed partial class OpeningBalancesLinesItem
 }
 
 /// <summary>
+/// Los acumulados de nómina del año: por concepto, mes por mes, y por empleado.
+/// </summary>
+public sealed partial class PayrollAccumulated
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// iss_…
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Año (Ejercicio).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public decimal Year { get; set; }
+
+    /// <summary>
+    /// El empleado que pidió (emp_…), o null.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Los recibos vigentes con fecha de pago en el año.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public decimal Receipts { get; set; }
+
+    /// <summary>
+    /// Percepciones, luego deducciones y otros pagos, por clave del SAT.
+    /// </summary>
+    [JsonPropertyName("concepts")]
+    public List<PayrollAccumulatedConceptsItem> Concepts { get; set; } = default!;
+
+    /// <summary>
+    /// Cada empleado, de más a menos percepciones.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<PayrollAccumulatedEmployeesItem> Employees { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollAccumulatedConceptsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollAccumulatedConceptsItem
+{
+    /// <summary>
+    /// percepcion, deduccion u otro_pago.
+    /// <br/>
+    /// Valores: percepcion, deduccion, otro_pago.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// c_TipoPercepcion, c_TipoDeduccion o c_TipoOtroPago.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// La clave del patrón.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// El concepto de la línea de captura (ISR, IVA…) como lo da el SAT.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// El importe de cada mes, de enero (posición 0) a diciembre. Percepciones: gravado más exento.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public List<decimal> Months { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Percepciones: lo gravado.
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal? Taxed { get; set; }
+
+    /// <summary>
+    /// Percepciones: lo exento.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal? Exempt { get; set; }
+
+    /// <summary>
+    /// Cuántos recibos lo llevan.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public decimal Receipts { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollAccumulatedEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollAccumulatedEmployeesItem
+{
+    /// <summary>
+    /// emp_…, o null.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC del empleado.
+    /// </summary>
+    [JsonPropertyName("rfc")]
+    public string Rfc { get; set; } = default!;
+
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Sus recibos en el año.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public decimal Receipts { get; set; }
+
+    /// <summary>
+    /// El total de sus percepciones del año, gravado más exento.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public decimal Perceptions { get; set; }
+
+    /// <summary>
+    /// Monto gravado (MontoTotGrav). Por omisión, operation menos exempt.
+    /// </summary>
+    [JsonPropertyName("taxed")]
+    public decimal Taxed { get; set; }
+
+    /// <summary>
+    /// Monto exento (MontoTotExent). Por omisión 0.
+    /// </summary>
+    [JsonPropertyName("exempt")]
+    public decimal Exempt { get; set; }
+
+    /// <summary>
+    /// ISR retenido (deducción 002).
+    /// </summary>
+    [JsonPropertyName("isr_withheld")]
+    public decimal IsrWithheld { get; set; }
+
+    /// <summary>
+    /// IMSS retenido (deducción 001).
+    /// </summary>
+    [JsonPropertyName("imss_withheld")]
+    public decimal ImssWithheld { get; set; }
+
+    /// <summary>
+    /// Las demás deducciones (Infonavit, préstamos, fondo de ahorro…).
+    /// </summary>
+    [JsonPropertyName("other_deductions")]
+    public decimal OtherDeductions { get; set; }
+
+    /// <summary>
+    /// El total de sus otros pagos del año (el subsidio entregado entre ellos).
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public decimal OtherPayments { get; set; }
+
+    /// <summary>
+    /// Subsidio para el empleo causado (otro pago 002).
+    /// </summary>
+    [JsonPropertyName("employment_subsidy")]
+    public decimal EmploymentSubsidy { get; set; }
+
+    /// <summary>
+    /// Su neto del año.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public decimal Net { get; set; }
+}
+
+/// <summary>
 /// El archivo para pagar la nómina desde el portal del banco (no cobra nada).
 /// </summary>
 public sealed partial class PayrollBankFile
@@ -29656,6 +29904,156 @@ public sealed partial class PayrollBatchReceiptsItemError
     /// </summary>
     [JsonPropertyName("message")]
     public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que cuesta la nómina del año mes por mes: lo pagado más las cuotas del patrón y el impuesto sobre nómina.
+/// </summary>
+public sealed partial class PayrollCost
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// iss_…
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Año (Ejercicio).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public decimal Year { get; set; }
+
+    /// <summary>
+    /// Si las cuotas del patrón y el ISN del año se pueden calcular.
+    /// </summary>
+    [JsonPropertyName("rates_loaded")]
+    public bool RatesLoaded { get; set; }
+
+    /// <summary>
+    /// Cada mes con recibos, del más antiguo al más reciente.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public List<PayrollCostMonthsItem> Months { get; set; } = default!;
+
+    /// <summary>
+    /// Totales (Totales).
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public PayrollCostTotals Totals { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollCostMonthsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollCostMonthsItem
+{
+    /// <summary>
+    /// 2026-11
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Los recibos con fecha de pago en el mes.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public decimal Receipts { get; set; }
+
+    /// <summary>
+    /// Los empleados con recibo en el mes.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public decimal Employees { get; set; }
+
+    /// <summary>
+    /// Percepciones y otros pagos de los recibos, sin el subsidio para el empleo.
+    /// </summary>
+    [JsonPropertyName("paid")]
+    public decimal Paid { get; set; }
+
+    /// <summary>
+    /// Cuotas del patrón al IMSS, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("imss")]
+    public decimal? Imss { get; set; }
+
+    /// <summary>
+    /// Retiro y cesantía y vejez del patrón, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("sar")]
+    public decimal? Sar { get; set; }
+
+    /// <summary>
+    /// Aportación al Infonavit, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("infonavit")]
+    public decimal? Infonavit { get; set; }
+
+    /// <summary>
+    /// Impuesto sobre nómina, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("payroll_tax")]
+    public decimal? PayrollTax { get; set; }
+
+    /// <summary>
+    /// Lo pagado más las cuotas y el ISN, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+}
+
+/// <summary>
+/// Totales (Totales).
+/// </summary>
+public sealed partial class PayrollCostTotals
+{
+    /// <summary>
+    /// Lo pagado a los empleados en el año.
+    /// </summary>
+    [JsonPropertyName("paid")]
+    public decimal Paid { get; set; }
+
+    /// <summary>
+    /// Cuotas del patrón al IMSS, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("imss")]
+    public decimal? Imss { get; set; }
+
+    /// <summary>
+    /// Retiro y cesantía y vejez del patrón, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("sar")]
+    public decimal? Sar { get; set; }
+
+    /// <summary>
+    /// Aportación al Infonavit, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("infonavit")]
+    public decimal? Infonavit { get; set; }
+
+    /// <summary>
+    /// Impuesto sobre nómina, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("payroll_tax")]
+    public decimal? PayrollTax { get; set; }
+
+    /// <summary>
+    /// El costo total, o null si las tasas del año aún no están cargadas.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
 }
 
 /// <summary>

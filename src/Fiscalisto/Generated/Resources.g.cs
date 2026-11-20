@@ -150,6 +150,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollTaxesResource PayrollTaxes => _payrollTaxes ??= new PayrollTaxesResource(this);
 
+    private PayrollReportsResource? _payrollReports;
+
+    /// <summary>Nómina.</summary>
+    public PayrollReportsResource PayrollReports => _payrollReports ??= new PayrollReportsResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -2649,6 +2654,44 @@ public sealed class PayrollTaxesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollTaxSettings> UpdateSettingsAsync(UpdatePayrollTaxSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollTaxSettings>("POST", "/v1/payroll_taxes/settings", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollReports</c>.
+/// </summary>
+public sealed class PayrollReportsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollReportsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Acumulados de nómina
+    /// </summary>
+    /// <remarks>
+    /// Los acumulados del año de los recibos de nómina timbrados vigentes (ordinarios y extraordinarios, por fecha de pago), como «Nómina › Reportes» de la app: cada percepción, deducción y otro pago por su clave del SAT y la del patrón, mes por mes, y los totales de cada empleado (percepciones gravadas y exentas, ISR e IMSS retenidos, subsidio para el empleo causado y neto). Con employee, solo los de ese empleado.
+    /// <br/>
+    /// <c>GET /v1/payroll_reports/accumulated</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-payroll-accumulated"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollAccumulated> AccumulatedAsync(GetPayrollAccumulatedParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollAccumulated>("GET", "/v1/payroll_reports/accumulated", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Costo de la nómina
+    /// </summary>
+    /// <remarks>
+    /// Lo que cuesta la nómina del año mes por mes: lo pagado a los empleados (percepciones y otros pagos de los recibos timbrados, sin el subsidio para el empleo) más las cuotas del patrón al IMSS, SAR e Infonavit y el impuesto sobre nómina, calculados como GET /v1/accounting/payroll_provisions/{month}. En un año cuyas tasas aún no están cargadas (rates_loaded false), esas columnas y total vienen en null.
+    /// <br/>
+    /// <c>GET /v1/payroll_reports/cost</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-payroll-cost"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollCost> CostAsync(GetPayrollCostParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollCost>("GET", "/v1/payroll_reports/cost", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>
