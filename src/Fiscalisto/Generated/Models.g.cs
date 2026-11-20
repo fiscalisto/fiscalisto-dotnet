@@ -7003,7 +7003,7 @@ public sealed partial class CreatePayrollReceiptParams
     public long? DisabilityDays { get; set; }
 
     /// <summary>
-    /// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+    /// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos, descansos y festivos trabajados, vacaciones, premios y comisiones. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
     /// </summary>
     [JsonPropertyName("incidents")]
     public CreatePayrollReceiptParamsIncidents? Incidents { get; set; }
@@ -7034,7 +7034,7 @@ public sealed partial class CreatePayrollReceiptParams
 }
 
 /// <summary>
-/// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+/// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos, descansos y festivos trabajados, vacaciones, premios y comisiones. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
 /// </summary>
 public sealed partial class CreatePayrollReceiptParamsIncidents
 {
@@ -7063,13 +7063,25 @@ public sealed partial class CreatePayrollReceiptParamsIncidents
     public long? Sundays { get; set; }
 
     /// <summary>
+    /// Días de descanso semanal que trabajó sin descansar otro en su lugar: salario doble por cada uno además del día (LFT art. 73). Exentos con las horas extra: la mitad, hasta 5 UMA por semana entre ambos; todo si gana el salario mínimo (LISR art. 93 fr. I).
+    /// </summary>
+    [JsonPropertyName("rest_days_worked")]
+    public long? RestDaysWorked { get; set; }
+
+    /// <summary>
+    /// Días de descanso obligatorio que trabajó (1 de enero, 1 de mayo, 16 de septiembre, 25 de diciembre, los lunes del art. 74 y la jornada electoral): salario doble por cada uno además del día (LFT art. 75), exento como rest_days_worked.
+    /// </summary>
+    [JsonPropertyName("holidays_worked")]
+    public long? HolidaysWorked { get; set; }
+
+    /// <summary>
     /// Días de vacaciones que disfrutó en el periodo (se pagan como sueldo dentro de days): su prima vacacional con el porcentaje del empleado, exenta hasta 15 UMA en el año.
     /// </summary>
     [JsonPropertyName("vacation_days")]
     public decimal? VacationDays { get; set; }
 
     /// <summary>
-    /// Premios y bonos del periodo, gravados.
+    /// Premios, comisiones y bonos del periodo, gravados.
     /// </summary>
     [JsonPropertyName("bonuses")]
     public List<CreatePayrollReceiptParamsIncidentsBonusesItem>? Bonuses { get; set; }
@@ -7081,9 +7093,9 @@ public sealed partial class CreatePayrollReceiptParamsIncidents
 public sealed partial class CreatePayrollReceiptParamsIncidentsBonusesItem
 {
     /// <summary>
-    /// 010 premio de puntualidad, 049 premio de asistencia, 038 otro bono (c_TipoPercepcion).
+    /// 010 premio de puntualidad, 049 premio de asistencia, 028 comisiones, 038 otro bono (c_TipoPercepcion).
     /// <br/>
-    /// Valores: 010, 049, 038.
+    /// Valores: 010, 049, 028, 038.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
@@ -27442,7 +27454,7 @@ public sealed partial class PreviewPayrollReceiptParams
     public long? DisabilityDays { get; set; }
 
     /// <summary>
-    /// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+    /// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos, descansos y festivos trabajados, vacaciones, premios y comisiones. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
     /// </summary>
     [JsonPropertyName("incidents")]
     public PreviewPayrollReceiptParamsIncidents? Incidents { get; set; }
@@ -27467,7 +27479,7 @@ public sealed partial class PreviewPayrollReceiptParams
 }
 
 /// <summary>
-/// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos trabajados, vacaciones y premios. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
+/// Incidencias del periodo, como en Nómina › Emitir recibos: horas extra, domingos, descansos y festivos trabajados, vacaciones, premios y comisiones. Fiscalisto calcula sus importes, su parte exenta y el ISR con el sueldo.
 /// </summary>
 public sealed partial class PreviewPayrollReceiptParamsIncidents
 {
@@ -27496,13 +27508,25 @@ public sealed partial class PreviewPayrollReceiptParamsIncidents
     public long? Sundays { get; set; }
 
     /// <summary>
+    /// Días de descanso semanal que trabajó sin descansar otro en su lugar: salario doble por cada uno además del día (LFT art. 73). Exentos con las horas extra: la mitad, hasta 5 UMA por semana entre ambos; todo si gana el salario mínimo (LISR art. 93 fr. I).
+    /// </summary>
+    [JsonPropertyName("rest_days_worked")]
+    public long? RestDaysWorked { get; set; }
+
+    /// <summary>
+    /// Días de descanso obligatorio que trabajó (1 de enero, 1 de mayo, 16 de septiembre, 25 de diciembre, los lunes del art. 74 y la jornada electoral): salario doble por cada uno además del día (LFT art. 75), exento como rest_days_worked.
+    /// </summary>
+    [JsonPropertyName("holidays_worked")]
+    public long? HolidaysWorked { get; set; }
+
+    /// <summary>
     /// Días de vacaciones que disfrutó en el periodo (se pagan como sueldo dentro de days): su prima vacacional con el porcentaje del empleado, exenta hasta 15 UMA en el año.
     /// </summary>
     [JsonPropertyName("vacation_days")]
     public decimal? VacationDays { get; set; }
 
     /// <summary>
-    /// Premios y bonos del periodo, gravados.
+    /// Premios, comisiones y bonos del periodo, gravados.
     /// </summary>
     [JsonPropertyName("bonuses")]
     public List<PreviewPayrollReceiptParamsIncidentsBonusesItem>? Bonuses { get; set; }
@@ -27514,9 +27538,9 @@ public sealed partial class PreviewPayrollReceiptParamsIncidents
 public sealed partial class PreviewPayrollReceiptParamsIncidentsBonusesItem
 {
     /// <summary>
-    /// 010 premio de puntualidad, 049 premio de asistencia, 038 otro bono (c_TipoPercepcion).
+    /// 010 premio de puntualidad, 049 premio de asistencia, 028 comisiones, 038 otro bono (c_TipoPercepcion).
     /// <br/>
-    /// Valores: 010, 049, 038.
+    /// Valores: 010, 049, 028, 038.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
