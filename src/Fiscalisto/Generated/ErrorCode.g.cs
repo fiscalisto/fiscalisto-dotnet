@@ -348,6 +348,9 @@ public static class ErrorCode
     /// <summary>No existe esa ruta. Revise la dirección y la versión (/v1).</summary>
     public const string RouteNotFound = "route_not_found";
 
+    /// <summary>La regla no se puede guardar así: el mensaje dice por qué (una acción que no va con su trigger, como cost_center en una orden de compra; una etiqueta, etapa o centro de costo que no existe; un campo o un valor que no va con su operador; más de 200 reglas).</summary>
+    public const string RuleInvalid = "rule_invalid";
+
     /// <summary>El pedido está en borrador: confírmelo primero con POST /v1/sales_orders/{id}/confirm.</summary>
     public const string SalesOrderDraft = "sales_order_draft";
 

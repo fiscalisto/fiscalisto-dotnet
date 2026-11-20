@@ -180,6 +180,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Sucursales.</summary>
     public BranchesResource Branches => _branches ??= new BranchesResource(this);
 
+    private RulesResource? _rules;
+
+    /// <summary>Reglas.</summary>
+    public RulesResource Rules => _rules ??= new RulesResource(this);
+
     private CostCentersResource? _costCenters;
 
     /// <summary>Centros de costo.</summary>
@@ -3061,6 +3066,140 @@ public sealed class BranchesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Branch> DeleteLogoAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Branch>("DELETE", $"/v1/branches/{Uri.EscapeDataString(id)}/logo", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Reglas: <c>fiscalisto.Rules</c>.
+/// </summary>
+public sealed class RulesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal RulesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una regla
+    /// </summary>
+    /// <remarks>
+    /// Cuando pasa trigger, si se cumplen conditions, hace actions. Corre desde ese momento con lo que llegue; no cambia lo que ya existe. Va al final del orden de su empresa. Lo que no se puede guardar contesta rule_invalid con el porqué (una acción que no va con su trigger, una etiqueta o centro de costo que no existe).
+    /// <br/>
+    /// <c>POST /v1/rules</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/create-rule"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Rule> CreateAsync(CreateRuleParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Rule>("POST", "/v1/rules", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar reglas
+    /// </summary>
+    /// <remarks>
+    /// En el orden en que corren, también las que están en pausa (enabled: false).
+    /// <br/>
+    /// <c>GET /v1/rules</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/list-rules"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Rule>> ListAsync(ListRulesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Rule>("/v1/rules", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar reglas: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Rule> ListAutoPagingAsync(ListRulesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Rule>("/v1/rules", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ordenar las reglas
+    /// </summary>
+    /// <remarks>
+    /// rules de la primera a la última; las que no mande siguen después, en su orden. Importa cuando una tiene stop_after o dos ponen cosas distintas: corren de arriba abajo.
+    /// <br/>
+    /// <c>POST /v1/rules/order</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/order-rules"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RuleList> OrderAsync(OrderRulesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RuleList>("POST", "/v1/rules/order", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver una regla
+    /// </summary>
+    /// <remarks>
+    /// Una regla de la empresa del emisor.
+    /// <br/>
+    /// <c>GET /v1/rules/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/get-rule"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Rule> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Rule>("GET", $"/v1/rules/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una regla
+    /// </summary>
+    /// <remarks>
+    /// Solo lo que mande cambia; conditions y actions se reemplazan completos. enabled: false la pone en pausa. Lo que ya hizo se queda.
+    /// <br/>
+    /// <c>POST /v1/rules/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/update-rule"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Rule> UpdateAsync(string id, UpdateRuleParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Rule>("POST", $"/v1/rules/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una regla
+    /// </summary>
+    /// <remarks>
+    /// Deja de correr. Lo que ya puso (centros de costo, etiquetas, etapas) se queda; para dejarla de usar un tiempo, mejor enabled: false.
+    /// <br/>
+    /// <c>DELETE /v1/rules/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/delete-rule"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/rules/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Probar una regla
+    /// </summary>
+    /// <remarks>
+    /// Lo que haría con una factura (uuid) o con las más recientes de su trigger, sin cambiar nada: cada condición con lo que tiene el registro y si se cumple.
+    /// <br/>
+    /// <c>POST /v1/rules/{id}/test</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/test-rule"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RuleTestList> TestAsync(string id, TestRuleParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RuleTestList>("POST", $"/v1/rules/{Uri.EscapeDataString(id)}/test", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Historial de una regla
+    /// </summary>
+    /// <remarks>
+    /// Cada vez que corrió, la más reciente primero: sobre qué factura u orden, qué hizo (did) o por qué no pudo (error). Se guardan 180 días.
+    /// <br/>
+    /// <c>GET /v1/rules/{id}/runs</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/list-rule-runs"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<RuleRun>> ListRunsAsync(string id, ListRuleRunsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<RuleRun>($"/v1/rules/{Uri.EscapeDataString(id)}/runs", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Historial de una regla: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<RuleRun> ListRunsAutoPagingAsync(string id, ListRuleRunsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<RuleRun>($"/v1/rules/{Uri.EscapeDataString(id)}/runs", @params, options, cancellationToken);
 }
 
 /// <summary>

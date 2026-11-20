@@ -13020,6 +13020,246 @@ public sealed partial class CreateRoleParams
 }
 
 /// <summary>
+/// Los campos de «Crear una regla».
+/// </summary>
+public sealed partial class CreateRuleParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cómo se llama en Ajustes › Reglas. Sin él, se nombra por lo que hace.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
+    /// <br/>
+    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// </summary>
+    [JsonPropertyName("trigger")]
+    public required string Trigger { get; set; }
+
+    /// <summary>
+    /// Si: lo que tiene que cumplir. Sin condiciones, corre siempre.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public CreateRuleParamsConditions? Conditions { get; set; }
+
+    /// <summary>
+    /// Entonces: de 1 a 8, en este orden.
+    /// </summary>
+    [JsonPropertyName("actions")]
+    public required List<CreateRuleParamsActionsItem> Actions { get; set; }
+
+    /// <summary>
+    /// true: corre una sola vez por factura u orden. Por omisión true, salvo purchase_order.saved.
+    /// </summary>
+    [JsonPropertyName("once_per_record")]
+    public bool? OncePerRecord { get; set; }
+
+    /// <summary>
+    /// true: si se cumple, las reglas que siguen no corren para ese registro.
+    /// </summary>
+    [JsonPropertyName("stop_after")]
+    public bool? StopAfter { get; set; }
+
+    /// <summary>
+    /// false la deja en pausa.
+    /// </summary>
+    [JsonPropertyName("enabled")]
+    public bool? Enabled { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsActionsItem
+{
+    /// <summary>
+    /// tag (órdenes): poner la etiqueta `tag`; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
+    /// <br/>
+    /// Valores: tag, cost_center, stage, close, notify.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// tag: la etiqueta.
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public long? Tag { get; set; }
+
+    /// <summary>
+    /// tag: quitarla si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Si: lo que tiene que cumplir. Sin condiciones, corre siempre.
+/// </summary>
+public sealed partial class CreateRuleParamsConditions
+{
+    /// <summary>
+    /// all: se cumplen todas (las condiciones y los grupos); any: basta con una.
+    /// <br/>
+    /// Valores: all, any.
+    /// </summary>
+    [JsonPropertyName("match")]
+    public string? Match { get; set; }
+
+    /// <summary>
+    /// Las condiciones sueltas.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public List<CreateRuleParamsConditionsConditionsItem>? Conditions { get; set; }
+
+    /// <summary>
+    /// Condiciones que van juntas, con su propio all / any (un nivel).
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<CreateRuleParamsConditionsGroupsItem>? Groups { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsConditionsConditionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsConditionsConditionsItem
+{
+    /// <summary>
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// </summary>
+    [JsonPropertyName("field")]
+    public required string Field { get; set; }
+
+    /// <summary>
+    /// Listas: is (alguno de values), not (ninguno), set, unset. Montos (MXN): gte, lte, between (value y to). Texto: contains, not_contains, starts (text; sin importar acentos ni mayúsculas), set, unset. Sí/no: yes, no.
+    /// <br/>
+    /// Valores: is, not, gte, lte, between, contains, not_contains, starts, yes, no, set, unset.
+    /// </summary>
+    [JsonPropertyName("operator")]
+    public required string Operator { get; set; }
+
+    /// <summary>
+    /// Para is / not: RFC, claves del SAT, ccn_…, whs_… o mem_….
+    /// </summary>
+    [JsonPropertyName("values")]
+    public List<string>? Values { get; set; }
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Para between: el monto hasta.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public decimal? To { get; set; }
+
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsConditionsGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsConditionsGroupsItem
+{
+    /// <summary>
+    /// Cómo se juntan las del grupo.
+    /// <br/>
+    /// Valores: all, any.
+    /// </summary>
+    [JsonPropertyName("match")]
+    public required string Match { get; set; }
+
+    /// <summary>
+    /// Las condiciones del grupo.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public required List<CreateRuleParamsConditionsGroupsItemConditionsItem> Conditions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsConditionsGroupsItemConditionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsConditionsGroupsItemConditionsItem
+{
+    /// <summary>
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// </summary>
+    [JsonPropertyName("field")]
+    public required string Field { get; set; }
+
+    /// <summary>
+    /// Listas: is (alguno de values), not (ninguno), set, unset. Montos (MXN): gte, lte, between (value y to). Texto: contains, not_contains, starts (text; sin importar acentos ni mayúsculas), set, unset. Sí/no: yes, no.
+    /// <br/>
+    /// Valores: is, not, gte, lte, between, contains, not_contains, starts, yes, no, set, unset.
+    /// </summary>
+    [JsonPropertyName("operator")]
+    public required string Operator { get; set; }
+
+    /// <summary>
+    /// Para is / not: RFC, claves del SAT, ccn_…, whs_… o mem_….
+    /// </summary>
+    [JsonPropertyName("values")]
+    public List<string>? Values { get; set; }
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Para between: el monto hasta.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public decimal? To { get; set; }
+
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Registrar una entrega».
 /// </summary>
 public sealed partial class CreateSalesOrderDeliveryParams
@@ -29307,6 +29547,54 @@ public sealed partial class ListRolesParams
 }
 
 /// <summary>
+/// Los campos de «Historial de una regla».
+/// </summary>
+public sealed partial class ListRuleRunsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar reglas».
+/// </summary>
+public sealed partial class ListRulesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de este trigger, por ejemplo invoice.received.
+    /// </summary>
+    [JsonPropertyName("trigger")]
+    public string? Trigger { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar pedidos».
 /// </summary>
 public sealed partial class ListSalesOrdersParams
@@ -31172,6 +31460,24 @@ public sealed partial class OpeningBalancesLinesItem
     /// </summary>
     [JsonPropertyName("credit")]
     public decimal Credit { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ordenar las reglas».
+/// </summary>
+public sealed partial class OrderRulesParams
+{
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Las reglas (rul_…), de la primera a la última.
+    /// </summary>
+    [JsonPropertyName("rules")]
+    public required List<string> Rules { get; set; }
 }
 
 /// <summary>
@@ -37411,6 +37717,522 @@ public sealed partial class RollWebhookSecretParams
 }
 
 /// <summary>
+/// Una regla de la empresa: cuando pasa algo (trigger), si se cumplen sus condiciones, hace sus acciones. Las mismas de Ajustes › Reglas en la app.
+/// </summary>
+public sealed partial class Rule
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo corre.
+    /// <br/>
+    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// </summary>
+    [JsonPropertyName("trigger")]
+    public string Trigger { get; set; } = default!;
+
+    /// <summary>
+    /// Si: lo que tiene que cumplir la factura u orden. Sin condiciones, corre siempre.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public RuleConditions Conditions { get; set; } = default!;
+
+    /// <summary>
+    /// Entonces: lo que hace, en este orden.
+    /// </summary>
+    [JsonPropertyName("actions")]
+    public List<RuleActionsItem> Actions { get; set; } = default!;
+
+    /// <summary>
+    /// true: corre una sola vez por factura u orden.
+    /// </summary>
+    [JsonPropertyName("once_per_record")]
+    public bool OncePerRecord { get; set; }
+
+    /// <summary>
+    /// true: si se cumple, las reglas que siguen no corren para ese registro.
+    /// </summary>
+    [JsonPropertyName("stop_after")]
+    public bool StopAfter { get; set; }
+
+    /// <summary>
+    /// false: en pausa.
+    /// </summary>
+    [JsonPropertyName("enabled")]
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    /// Su lugar en el orden en que corren (1 primero).
+    /// </summary>
+    [JsonPropertyName("position")]
+    public long Position { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo cambió por última vez, ISO 8601 (-06:00).
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RuleActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleActionsItem
+{
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: tag, cost_center, stage, close, notify.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// tag: la etiqueta.
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public long? Tag { get; set; }
+
+    /// <summary>
+    /// tag: se quita si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Si: lo que tiene que cumplir la factura u orden. Sin condiciones, corre siempre.
+/// </summary>
+public sealed partial class RuleConditions
+{
+    /// <summary>
+    /// all: se cumplen todas; any: basta con una.
+    /// <br/>
+    /// Valores: all, any.
+    /// </summary>
+    [JsonPropertyName("match")]
+    public string Match { get; set; } = default!;
+
+    /// <summary>
+    /// Las condiciones sueltas.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public List<RuleConditionsConditionsItem> Conditions { get; set; } = default!;
+
+    /// <summary>
+    /// Condiciones que van juntas, con su propio match.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<RuleConditionsGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;RuleConditionsConditionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleConditionsConditionsItem
+{
+    /// <summary>
+    /// Qué se revisa (supplier, total, metodo, category…).
+    /// </summary>
+    [JsonPropertyName("field")]
+    public string Field { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo se compara.
+    /// <br/>
+    /// Valores: is, not, gte, lte, between, contains, not_contains, starts, yes, no, set, unset.
+    /// </summary>
+    [JsonPropertyName("operator")]
+    public string Operator { get; set; } = default!;
+
+    /// <summary>
+    /// Para is / not: los valores (RFC, claves, ccn_…).
+    /// </summary>
+    [JsonPropertyName("values")]
+    public List<string>? Values { get; set; }
+
+    /// <summary>
+    /// Para gte, lte y between: el monto en pesos.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Para between: el monto hasta.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public decimal? To { get; set; }
+
+    /// <summary>
+    /// Para contains, not_contains y starts.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RuleConditionsGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleConditionsGroupsItem
+{
+    /// <summary>
+    /// Cómo se juntan las del grupo.
+    /// <br/>
+    /// Valores: all, any.
+    /// </summary>
+    [JsonPropertyName("match")]
+    public string Match { get; set; } = default!;
+
+    /// <summary>
+    /// Las condiciones del grupo.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public List<RuleConditionsGroupsItemConditionsItem> Conditions { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;RuleConditionsGroupsItemConditionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleConditionsGroupsItemConditionsItem
+{
+    /// <summary>
+    /// Qué se revisa (supplier, total, metodo, category…).
+    /// </summary>
+    [JsonPropertyName("field")]
+    public string Field { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo se compara.
+    /// <br/>
+    /// Valores: is, not, gte, lte, between, contains, not_contains, starts, yes, no, set, unset.
+    /// </summary>
+    [JsonPropertyName("operator")]
+    public string Operator { get; set; } = default!;
+
+    /// <summary>
+    /// Para is / not: los valores (RFC, claves, ccn_…).
+    /// </summary>
+    [JsonPropertyName("values")]
+    public List<string>? Values { get; set; }
+
+    /// <summary>
+    /// Para gte, lte y between: el monto en pesos.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Para between: el monto hasta.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public decimal? To { get; set; }
+
+    /// <summary>
+    /// Para contains, not_contains y starts.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class RuleList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Rule> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una vez que la regla corrió sobre una factura u orden.
+/// </summary>
+public sealed partial class RuleRun
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// La regla (rul_…).
+    /// </summary>
+    [JsonPropertyName("rule")]
+    public string Rule { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo corre.
+    /// <br/>
+    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// </summary>
+    [JsonPropertyName("trigger")]
+    public string Trigger { get; set; } = default!;
+
+    /// <summary>
+    /// La factura u orden, en palabras.
+    /// </summary>
+    [JsonPropertyName("record")]
+    public string Record { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es el registro.
+    /// <br/>
+    /// Valores: invoice, purchase_order.
+    /// </summary>
+    [JsonPropertyName("record_type")]
+    public string RecordType { get; set; } = default!;
+
+    /// <summary>
+    /// done: hizo cambios; nothing: ya estaba así; failed: no pudo (ver error).
+    /// <br/>
+    /// Valores: done, nothing, failed.
+    /// </summary>
+    [JsonPropertyName("outcome")]
+    public string Outcome { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que hizo, en palabras.
+    /// </summary>
+    [JsonPropertyName("did")]
+    public List<string> Did { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué no pudo, o null.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class RuleRunList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<RuleRun> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que la regla haría con una factura u orden (sin cambiar nada).
+/// </summary>
+public sealed partial class RuleTest
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// La factura u orden, en palabras.
+    /// </summary>
+    [JsonPropertyName("record")]
+    public string Record { get; set; } = default!;
+
+    /// <summary>
+    /// El folio fiscal, para una factura.
+    /// </summary>
+    [JsonPropertyName("invoice_uuid")]
+    public string? InvoiceUuid { get; set; }
+
+    /// <summary>
+    /// La orden de compra.
+    /// </summary>
+    [JsonPropertyName("purchase_order")]
+    public long? PurchaseOrder { get; set; }
+
+    /// <summary>
+    /// Si se cumplen sus condiciones.
+    /// </summary>
+    [JsonPropertyName("matches")]
+    public bool Matches { get; set; }
+
+    /// <summary>
+    /// Ya corrió sobre este registro y no lo hará de nuevo.
+    /// </summary>
+    [JsonPropertyName("already_ran")]
+    public bool AlreadyRan { get; set; }
+
+    /// <summary>
+    /// Cada condición con lo que tiene el registro.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public List<RuleTestConditionsItem> Conditions { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que haría, en palabras (nada cambia).
+    /// </summary>
+    [JsonPropertyName("would_do")]
+    public List<string> WouldDo { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;RuleTestConditionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleTestConditionsItem
+{
+    /// <summary>
+    /// La condición, en palabras.
+    /// </summary>
+    [JsonPropertyName("condition")]
+    public string Condition { get; set; } = default!;
+
+    /// <summary>
+    /// Si se cumple.
+    /// </summary>
+    [JsonPropertyName("holds")]
+    public bool Holds { get; set; }
+
+    /// <summary>
+    /// Lo que tiene el registro.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public string Actual { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class RuleTestList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<RuleTest> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Un pedido de venta: lo que su cliente pidió, cómo se entrega (remisiones) y cómo se factura y se cobra.
 /// </summary>
 public sealed partial class SalesOrder
@@ -43081,6 +43903,24 @@ public sealed partial class TestDataReset
 }
 
 /// <summary>
+/// Los campos de «Probar una regla».
+/// </summary>
+public sealed partial class TestRuleParams
+{
+    /// <summary>
+    /// El folio fiscal (UUID) de una factura; sin él, las más recientes.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string? Uuid { get; set; }
+
+    /// <summary>
+    /// Cuántas de las más recientes (10 por omisión).
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Mandar un evento de prueba».
 /// </summary>
 public sealed partial class TestWebhookEndpointParams
@@ -46188,6 +47028,240 @@ public sealed partial class UpdateRoleParams
     /// </summary>
     [JsonPropertyName("name")]
     public string? Name { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar una regla».
+/// </summary>
+public sealed partial class UpdateRuleParams
+{
+    /// <summary>
+    /// Cómo se llama en Ajustes › Reglas. Sin él, se nombra por lo que hace.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
+    /// <br/>
+    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// </summary>
+    [JsonPropertyName("trigger")]
+    public string? Trigger { get; set; }
+
+    /// <summary>
+    /// Si: lo que tiene que cumplir. Sin condiciones, corre siempre.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public UpdateRuleParamsConditions? Conditions { get; set; }
+
+    /// <summary>
+    /// Entonces: de 1 a 8, en este orden.
+    /// </summary>
+    [JsonPropertyName("actions")]
+    public List<UpdateRuleParamsActionsItem>? Actions { get; set; }
+
+    /// <summary>
+    /// true: corre una sola vez por factura u orden. Por omisión true, salvo purchase_order.saved.
+    /// </summary>
+    [JsonPropertyName("once_per_record")]
+    public bool? OncePerRecord { get; set; }
+
+    /// <summary>
+    /// true: si se cumple, las reglas que siguen no corren para ese registro.
+    /// </summary>
+    [JsonPropertyName("stop_after")]
+    public bool? StopAfter { get; set; }
+
+    /// <summary>
+    /// false la deja en pausa.
+    /// </summary>
+    [JsonPropertyName("enabled")]
+    public bool? Enabled { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsActionsItem
+{
+    /// <summary>
+    /// tag (órdenes): poner la etiqueta `tag`; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
+    /// <br/>
+    /// Valores: tag, cost_center, stage, close, notify.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// tag: la etiqueta.
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public long? Tag { get; set; }
+
+    /// <summary>
+    /// tag: quitarla si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Si: lo que tiene que cumplir. Sin condiciones, corre siempre.
+/// </summary>
+public sealed partial class UpdateRuleParamsConditions
+{
+    /// <summary>
+    /// all: se cumplen todas (las condiciones y los grupos); any: basta con una.
+    /// <br/>
+    /// Valores: all, any.
+    /// </summary>
+    [JsonPropertyName("match")]
+    public string? Match { get; set; }
+
+    /// <summary>
+    /// Las condiciones sueltas.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public List<UpdateRuleParamsConditionsConditionsItem>? Conditions { get; set; }
+
+    /// <summary>
+    /// Condiciones que van juntas, con su propio all / any (un nivel).
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<UpdateRuleParamsConditionsGroupsItem>? Groups { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsConditionsConditionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsConditionsConditionsItem
+{
+    /// <summary>
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// </summary>
+    [JsonPropertyName("field")]
+    public required string Field { get; set; }
+
+    /// <summary>
+    /// Listas: is (alguno de values), not (ninguno), set, unset. Montos (MXN): gte, lte, between (value y to). Texto: contains, not_contains, starts (text; sin importar acentos ni mayúsculas), set, unset. Sí/no: yes, no.
+    /// <br/>
+    /// Valores: is, not, gte, lte, between, contains, not_contains, starts, yes, no, set, unset.
+    /// </summary>
+    [JsonPropertyName("operator")]
+    public required string Operator { get; set; }
+
+    /// <summary>
+    /// Para is / not: RFC, claves del SAT, ccn_…, whs_… o mem_….
+    /// </summary>
+    [JsonPropertyName("values")]
+    public List<string>? Values { get; set; }
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Para between: el monto hasta.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public decimal? To { get; set; }
+
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsConditionsGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsConditionsGroupsItem
+{
+    /// <summary>
+    /// Cómo se juntan las del grupo.
+    /// <br/>
+    /// Valores: all, any.
+    /// </summary>
+    [JsonPropertyName("match")]
+    public required string Match { get; set; }
+
+    /// <summary>
+    /// Las condiciones del grupo.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public required List<UpdateRuleParamsConditionsGroupsItemConditionsItem> Conditions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsConditionsGroupsItemConditionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsConditionsGroupsItemConditionsItem
+{
+    /// <summary>
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// </summary>
+    [JsonPropertyName("field")]
+    public required string Field { get; set; }
+
+    /// <summary>
+    /// Listas: is (alguno de values), not (ninguno), set, unset. Montos (MXN): gte, lte, between (value y to). Texto: contains, not_contains, starts (text; sin importar acentos ni mayúsculas), set, unset. Sí/no: yes, no.
+    /// <br/>
+    /// Valores: is, not, gte, lte, between, contains, not_contains, starts, yes, no, set, unset.
+    /// </summary>
+    [JsonPropertyName("operator")]
+    public required string Operator { get; set; }
+
+    /// <summary>
+    /// Para is / not: RFC, claves del SAT, ccn_…, whs_… o mem_….
+    /// </summary>
+    [JsonPropertyName("values")]
+    public List<string>? Values { get; set; }
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Para between: el monto hasta.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public decimal? To { get; set; }
+
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
 }
 
 /// <summary>
