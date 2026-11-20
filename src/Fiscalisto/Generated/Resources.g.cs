@@ -2103,6 +2103,20 @@ public sealed class EmployeesResource
         => _client.RequestBytesAsync("GET", $"/v1/employees/{Uri.EscapeDataString(id)}/vacations/certificate", null, @params, options, false, cancellationToken);
 
     /// <summary>
+    /// Constancia de sueldos
+    /// </summary>
+    /// <remarks>
+    /// El PDF de lo que se le pagó al empleado en un año, de sus recibos de nómina vigentes por fecha de pago: cada percepción con su parte gravada y exenta, las deducciones (ISR retenido, IMSS y otras), los otros pagos con el subsidio para el empleo causado, y el neto. Resume sus CFDI de nómina, que son el comprobante de lo pagado y retenido (LISR art. 99 fr. III); no los sustituye. El empleado la baja también desde su portal.
+    /// <br/>
+    /// <c>GET /v1/employees/{id}/pay_statement</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee-pay-statement"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PayStatementAsync(string id, GetEmployeePayStatementParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/employees/{Uri.EscapeDataString(id)}/pay_statement", null, @params, options, false, cancellationToken);
+
+    /// <summary>
     /// Portal del empleado
     /// </summary>
     /// <remarks>

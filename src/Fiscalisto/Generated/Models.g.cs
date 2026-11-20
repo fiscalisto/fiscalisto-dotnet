@@ -2373,6 +2373,18 @@ public sealed partial class AttendanceReport
     public string OvertimePolicy { get; set; } = default!;
 
     /// <summary>
+    /// La jornada ordinaria de la semana al último día del periodo: la de la ley (48 en 2026, 46 en 2027, 44 en 2028, 42 en 2029 y 40 desde 2030; LFT art. 59 y transitorio segundo del decreto DOF 01-05-2026) o la de la empresa si es menor. Lo trabajado de más en la semana son horas extra.
+    /// </summary>
+    [JsonPropertyName("ordinary_week_hours")]
+    public long OrdinaryWeekHours { get; set; }
+
+    /// <summary>
+    /// La jornada semanal que fijó la empresa en Horario y reglas, o null si sigue la de la ley.
+    /// </summary>
+    [JsonPropertyName("weekly_hours")]
+    public long? WeeklyHours { get; set; }
+
+    /// <summary>
     /// Cada empleado del emisor en el periodo.
     /// </summary>
     [JsonPropertyName("employees")]
@@ -2463,13 +2475,13 @@ public sealed partial class AttendanceReportEmployeesItem
     public long FlaggedMarks { get; set; }
 
     /// <summary>
-    /// Horas extra que se pagan dobles (hasta 9 por semana en 2026, 12 desde 2027).
+    /// Horas extra que se pagan dobles: hasta 9 por semana en 2026 y 2027, 10 en 2028, 11 en 2029 y 12 desde 2030 (LFT art. 66 y transitorio cuarto del decreto DOF 01-05-2026).
     /// </summary>
     [JsonPropertyName("overtime_double_minutes")]
     public long OvertimeDoubleMinutes { get; set; }
 
     /// <summary>
-    /// Horas extra que se pagan triples (las que pasan del límite de la semana).
+    /// Horas extra que se pagan triples: las que pasan de las dobles de la semana, hasta 4 por semana (LFT art. 68).
     /// </summary>
     [JsonPropertyName("overtime_triple_minutes")]
     public long OvertimeTripleMinutes { get; set; }
@@ -2479,6 +2491,12 @@ public sealed partial class AttendanceReportEmployeesItem
     /// </summary>
     [JsonPropertyName("overtime_minutes")]
     public long OvertimeMinutes { get; set; }
+
+    /// <summary>
+    /// De las dobles y triples, los minutos de su horario que pasan de la jornada ordinaria de la semana (ordinary_week_hours, LFT art. 59): un horario de 48 horas en 2027 da 2 horas extra cada semana.
+    /// </summary>
+    [JsonPropertyName("week_excess_minutes")]
+    public long WeekExcessMinutes { get; set; }
 
     /// <summary>
     /// Minutos de más que nadie autorizó: quedan en el registro y no cuentan para la nómina.
@@ -2583,6 +2601,12 @@ public sealed partial class AttendanceReportEmployeesItemDaysItem
     /// </summary>
     [JsonPropertyName("rejected_overtime_minutes")]
     public long RejectedOvertimeMinutes { get; set; }
+
+    /// <summary>
+    /// Minutos de su horario de ese día que pasan de la jornada ordinaria de la semana (ordinary_week_hours, LFT art. 59): son horas extra por ley aunque estén en su horario, y cuentan para la nómina.
+    /// </summary>
+    [JsonPropertyName("week_excess_minutes")]
+    public long WeekExcessMinutes { get; set; }
 
     /// <summary>
     /// La nota del día que puso la empresa, o null.
@@ -21265,6 +21289,18 @@ public sealed partial class GetElectronicAccountingParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Constancia de sueldos».
+/// </summary>
+public sealed partial class GetEmployeePayStatementParams
+{
+    /// <summary>
+    /// El año (AAAA), desde 2014.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required string Year { get; set; }
 }
 
 /// <summary>
@@ -40952,7 +40988,7 @@ public sealed partial class SaveAnnualReturnParamsTaxAccountsMovementsItem
     public required decimal Amount { get; set; }
 
     /// <summary>
-    /// Un dividendo o reembolso: de qué CUFIN sale primero (por omisión cufin, la de 2014 en adelante).
+    /// Un dividendo o reembolso: de qué CUFIN sale primero (por omisión cufin, la de 2014 en adelante). Un dividend_received: a cuál se suma (cufin_2013 si viene de utilidades de quien paga generadas hasta 2013, regla 3.23.6 de la RMF).
     /// <br/>
     /// Valores: cufin, cufin_2013.
     /// </summary>
