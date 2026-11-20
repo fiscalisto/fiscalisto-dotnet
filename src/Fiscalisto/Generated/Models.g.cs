@@ -2326,6 +2326,248 @@ public sealed partial class CancelSatRetentionParams
 }
 
 /// <summary>
+/// El estado de flujos de efectivo (NIF B-2, método indirecto) del mes o de enero al mes, leído de la balanza: cada cuenta va a operación, inversión o financiamiento por su código agrupador.
+/// </summary>
+public sealed partial class CashFlow
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El mes solo (month) o de enero al mes (year_to_date).
+    /// <br/>
+    /// Valores: month, year_to_date.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public string Period { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad (o pérdida) antes de impuestos del periodo.
+    /// </summary>
+    [JsonPropertyName("net_income")]
+    public decimal NetIncome { get; set; }
+
+    /// <summary>
+    /// Actividades de operación.
+    /// </summary>
+    [JsonPropertyName("operating")]
+    public CashFlowOperating Operating { get; set; } = default!;
+
+    /// <summary>
+    /// Actividades de inversión: activos fijos, terrenos, diferidos e inversiones permanentes.
+    /// </summary>
+    [JsonPropertyName("investing")]
+    public CashFlowInvesting Investing { get; set; } = default!;
+
+    /// <summary>
+    /// Actividades de financiamiento: préstamos bancarios, dividendos, aportaciones y capital.
+    /// </summary>
+    [JsonPropertyName("financing")]
+    public CashFlowFinancing Financing { get; set; } = default!;
+
+    /// <summary>
+    /// Aumento (o disminución) neto de efectivo.
+    /// </summary>
+    [JsonPropertyName("net_change")]
+    public decimal NetChange { get; set; }
+
+    /// <summary>
+    /// Caja, bancos e inversiones (101 a 103) al inicio del periodo.
+    /// </summary>
+    [JsonPropertyName("cash_beginning")]
+    public decimal CashBeginning { get; set; }
+
+    /// <summary>
+    /// Caja, bancos e inversiones al cierre del periodo.
+    /// </summary>
+    [JsonPropertyName("cash_end")]
+    public decimal CashEnd { get; set; }
+
+    /// <summary>
+    /// cash_end − (cash_beginning + net_change): 0 cuando la balanza cuadra.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal Difference { get; set; }
+}
+
+/// <summary>
+/// Actividades de financiamiento: préstamos bancarios, dividendos, aportaciones y capital.
+/// </summary>
+public sealed partial class CashFlowFinancing
+{
+    /// <summary>
+    /// Cada grupo de cuentas que cambió.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<CashFlowFinancingLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// El flujo neto de la actividad.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashFlowFinancingLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashFlowFinancingLinesItem
+{
+    /// <summary>
+    /// El código agrupador del SAT (su primer nivel, o 202.01 a 202.12).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el código agrupador.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que su cambio sumó al efectivo (positivo) o le quitó (negativo).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Actividades de inversión: activos fijos, terrenos, diferidos e inversiones permanentes.
+/// </summary>
+public sealed partial class CashFlowInvesting
+{
+    /// <summary>
+    /// Cada grupo de cuentas que cambió.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<CashFlowInvestingLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// El flujo neto de la actividad.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashFlowInvestingLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashFlowInvestingLinesItem
+{
+    /// <summary>
+    /// El código agrupador del SAT (su primer nivel, o 202.01 a 202.12).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el código agrupador.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que su cambio sumó al efectivo (positivo) o le quitó (negativo).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Actividades de operación.
+/// </summary>
+public sealed partial class CashFlowOperating
+{
+    /// <summary>
+    /// Lo que se suma porque no salió efectivo: depreciación (171), deterioro (172) y amortización (183).
+    /// </summary>
+    [JsonPropertyName("non_cash")]
+    public List<CashFlowOperatingNonCashItem> NonCash { get; set; } = default!;
+
+    /// <summary>
+    /// El cambio en clientes, inventarios, proveedores, impuestos y demás cuentas de operación.
+    /// </summary>
+    [JsonPropertyName("working_capital")]
+    public List<CashFlowOperatingWorkingCapitalItem> WorkingCapital { get; set; } = default!;
+
+    /// <summary>
+    /// El flujo neto de actividades de operación.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashFlowOperatingNonCashItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashFlowOperatingNonCashItem
+{
+    /// <summary>
+    /// El código agrupador del SAT (su primer nivel, o 202.01 a 202.12).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el código agrupador.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que su cambio sumó al efectivo (positivo) o le quitó (negativo).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CashFlowOperatingWorkingCapitalItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CashFlowOperatingWorkingCapitalItem
+{
+    /// <summary>
+    /// El código agrupador del SAT (su primer nivel, o 202.01 a 202.12).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el código agrupador.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que su cambio sumó al efectivo (positivo) o le quitó (negativo).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
 /// El flujo de efectivo de las próximas 13 semanas: lo que le deben (con lo que cada cliente suele tardar), lo que debe a proveedores, la nómina, las declaraciones, las facturas recurrentes y sus movimientos previstos, desde el saldo que usted dio. Una estimación: no cambia nada.
 /// </summary>
 public sealed partial class CashForecast
@@ -3912,6 +4154,480 @@ public sealed partial class CompanyReportYearsItem
 }
 
 /// <summary>
+/// El estado de resultados y el balance general de un mes junto a los del mes anterior o del mismo mes del año anterior, con la variación y su porcentaje.
+/// </summary>
+public sealed partial class ComparativeStatements
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El mes con que se compara (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("compared_to")]
+    public string ComparedTo { get; set; } = default!;
+
+    /// <summary>
+    /// El estado de resultados comparativo.
+    /// </summary>
+    [JsonPropertyName("income_statement")]
+    public ComparativeStatementsIncomeStatement IncomeStatement { get; set; } = default!;
+
+    /// <summary>
+    /// El balance general al cierre de cada mes.
+    /// </summary>
+    [JsonPropertyName("balance_sheet")]
+    public List<ComparativeStatementsBalanceSheetItem> BalanceSheet { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ComparativeStatementsBalanceSheetItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ComparativeStatementsBalanceSheetItem
+{
+    /// <summary>
+    /// La sección.
+    /// <br/>
+    /// Valores: assets, liabilities, equity.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Cada grupo de cuentas.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<ComparativeStatementsBalanceSheetItemLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// El total de la sección.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public ComparativeStatementsBalanceSheetItemTotal Total { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ComparativeStatementsBalanceSheetItemLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ComparativeStatementsBalanceSheetItemLinesItem
+{
+    /// <summary>
+    /// El código agrupador (primer nivel).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
+/// El total de la sección.
+/// </summary>
+public sealed partial class ComparativeStatementsBalanceSheetItemTotal
+{
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
+/// El estado de resultados comparativo.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatement
+{
+    /// <summary>
+    /// Del mes contra el mes comparado.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public ComparativeStatementsIncomeStatementMonth Month { get; set; } = default!;
+
+    /// <summary>
+    /// De enero al mes contra enero al mes comparado.
+    /// </summary>
+    [JsonPropertyName("year_to_date")]
+    public ComparativeStatementsIncomeStatementYearToDate YearToDate { get; set; } = default!;
+}
+
+/// <summary>
+/// Del mes contra el mes comparado.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementMonth
+{
+    /// <summary>
+    /// Cada sección del estado de resultados. Costos y gastos en positivo: un aumento es más gasto.
+    /// </summary>
+    [JsonPropertyName("sections")]
+    public List<ComparativeStatementsIncomeStatementMonthSectionsItem> Sections { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad antes de impuestos.
+    /// </summary>
+    [JsonPropertyName("income_before_taxes")]
+    public ComparativeStatementsIncomeStatementMonthIncomeBeforeTaxes IncomeBeforeTaxes { get; set; } = default!;
+}
+
+/// <summary>
+/// La utilidad antes de impuestos.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementMonthIncomeBeforeTaxes
+{
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ComparativeStatementsIncomeStatementMonthSectionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementMonthSectionsItem
+{
+    /// <summary>
+    /// La sección.
+    /// <br/>
+    /// Valores: ingresos, costos, gastos, financiamiento, otros.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Cada grupo de cuentas.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<ComparativeStatementsIncomeStatementMonthSectionsItemLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// El total de la sección.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public ComparativeStatementsIncomeStatementMonthSectionsItemTotal Total { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ComparativeStatementsIncomeStatementMonthSectionsItemLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementMonthSectionsItemLinesItem
+{
+    /// <summary>
+    /// El código agrupador (primer nivel).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
+/// El total de la sección.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementMonthSectionsItemTotal
+{
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
+/// De enero al mes contra enero al mes comparado.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementYearToDate
+{
+    /// <summary>
+    /// Cada sección del estado de resultados. Costos y gastos en positivo: un aumento es más gasto.
+    /// </summary>
+    [JsonPropertyName("sections")]
+    public List<ComparativeStatementsIncomeStatementYearToDateSectionsItem> Sections { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad antes de impuestos.
+    /// </summary>
+    [JsonPropertyName("income_before_taxes")]
+    public ComparativeStatementsIncomeStatementYearToDateIncomeBeforeTaxes IncomeBeforeTaxes { get; set; } = default!;
+}
+
+/// <summary>
+/// La utilidad antes de impuestos.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementYearToDateIncomeBeforeTaxes
+{
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ComparativeStatementsIncomeStatementYearToDateSectionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementYearToDateSectionsItem
+{
+    /// <summary>
+    /// La sección.
+    /// <br/>
+    /// Valores: ingresos, costos, gastos, financiamiento, otros.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Cada grupo de cuentas.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<ComparativeStatementsIncomeStatementYearToDateSectionsItemLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// El total de la sección.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public ComparativeStatementsIncomeStatementYearToDateSectionsItemTotal Total { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ComparativeStatementsIncomeStatementYearToDateSectionsItemLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementYearToDateSectionsItemLinesItem
+{
+    /// <summary>
+    /// El código agrupador (primer nivel).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
+/// El total de la sección.
+/// </summary>
+public sealed partial class ComparativeStatementsIncomeStatementYearToDateSectionsItemTotal
+{
+    /// <summary>
+    /// El importe del periodo.
+    /// </summary>
+    [JsonPropertyName("current")]
+    public decimal Current { get; set; }
+
+    /// <summary>
+    /// El del periodo con que se compara.
+    /// </summary>
+    [JsonPropertyName("previous")]
+    public decimal Previous { get; set; }
+
+    /// <summary>
+    /// current − previous.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public decimal Change { get; set; }
+
+    /// <summary>
+    /// change entre previous, en porcentaje (null cuando previous es 0).
+    /// </summary>
+    [JsonPropertyName("change_percent")]
+    public decimal? ChangePercent { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Terminar una orden de producción».
 /// </summary>
 public sealed partial class CompleteProductionOrderParams
@@ -4141,25 +4857,25 @@ public sealed partial class CostCenterResults
     public bool Livemode { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…).
+    /// El emisor.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// Un solo mes, del 1 al 12 (MesIni y MesFin iguales).
+    /// El mes (AAAA-MM).
     /// </summary>
     [JsonPropertyName("month")]
     public string Month { get; set; } = default!;
 
     /// <summary>
-    /// El mes.
+    /// Cada centro de costo en el mes.
     /// </summary>
     [JsonPropertyName("month_results")]
     public List<CostCenterResultsMonthResultsItem> MonthResults { get; set; } = default!;
 
     /// <summary>
-    /// De enero al mes.
+    /// Cada centro de costo de enero al mes.
     /// </summary>
     [JsonPropertyName("year_to_date")]
     public List<CostCenterResultsYearToDateItem> YearToDate { get; set; } = default!;
@@ -12680,6 +13396,102 @@ public sealed partial class EmployeeVacationsYearsItem
 }
 
 /// <summary>
+/// El estado de cambios en el capital contable (NIF B-4) de enero al mes.
+/// </summary>
+public sealed partial class EquityChanges
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Cada cuenta de capital con saldo o movimiento.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<EquityChangesAccountsItem> Accounts { get; set; } = default!;
+
+    /// <summary>
+    /// El resultado del ejercicio, de enero al mes.
+    /// </summary>
+    [JsonPropertyName("net_income")]
+    public decimal NetIncome { get; set; }
+
+    /// <summary>
+    /// El capital contable al 1 de enero.
+    /// </summary>
+    [JsonPropertyName("beginning")]
+    public decimal Beginning { get; set; }
+
+    /// <summary>
+    /// Los movimientos de capital de enero al mes.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public decimal Movements { get; set; }
+
+    /// <summary>
+    /// El capital contable al cierre: beginning + movements + net_income, igual al del balance general más el resultado del ejercicio.
+    /// </summary>
+    [JsonPropertyName("ending")]
+    public decimal Ending { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;EquityChangesAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EquityChangesAccountsItem
+{
+    /// <summary>
+    /// El código agrupador (301 capital social, 304 resultados de ejercicios anteriores…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Al 1 de enero.
+    /// </summary>
+    [JsonPropertyName("beginning")]
+    public decimal Beginning { get; set; }
+
+    /// <summary>
+    /// Aportaciones, retiros, dividendos y traspasos de enero al mes.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public decimal Movements { get; set; }
+
+    /// <summary>
+    /// Al cierre del mes.
+    /// </summary>
+    [JsonPropertyName("ending")]
+    public decimal Ending { get; set; }
+}
+
+/// <summary>
 /// Todos los errores tienen esta forma.
 /// </summary>
 public sealed partial class Error
@@ -15100,6 +15912,154 @@ public sealed partial class ExtraordinaryPayrollReceiptPreviewTotals
 }
 
 /// <summary>
+/// Razones financieras al cierre de un mes: de su balance general y de sus resultados de enero al mes.
+/// </summary>
+public sealed partial class FinancialRatios
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Liquidez, endeudamiento, rentabilidad y rotación.
+    /// </summary>
+    [JsonPropertyName("ratios")]
+    public List<FinancialRatiosRatiosItem> Ratios { get; set; } = default!;
+
+    /// <summary>
+    /// Las cifras de que salen.
+    /// </summary>
+    [JsonPropertyName("inputs")]
+    public FinancialRatiosInputs Inputs { get; set; } = default!;
+}
+
+/// <summary>
+/// Las cifras de que salen.
+/// </summary>
+public sealed partial class FinancialRatiosInputs
+{
+    /// <summary>
+    /// Activo circulante (101 a 121).
+    /// </summary>
+    [JsonPropertyName("current_assets")]
+    public decimal CurrentAssets { get; set; }
+
+    /// <summary>
+    /// Pasivo a corto plazo (201 a 218).
+    /// </summary>
+    [JsonPropertyName("current_liabilities")]
+    public decimal CurrentLiabilities { get; set; }
+
+    /// <summary>
+    /// Inventario (115, menos su estimación 116).
+    /// </summary>
+    [JsonPropertyName("inventory")]
+    public decimal Inventory { get; set; }
+
+    /// <summary>
+    /// Clientes (105, menos incobrables 108).
+    /// </summary>
+    [JsonPropertyName("receivables")]
+    public decimal Receivables { get; set; }
+
+    /// <summary>
+    /// Proveedores (201).
+    /// </summary>
+    [JsonPropertyName("payables")]
+    public decimal Payables { get; set; }
+
+    /// <summary>
+    /// Activo total.
+    /// </summary>
+    [JsonPropertyName("total_assets")]
+    public decimal TotalAssets { get; set; }
+
+    /// <summary>
+    /// Pasivo total.
+    /// </summary>
+    [JsonPropertyName("total_liabilities")]
+    public decimal TotalLiabilities { get; set; }
+
+    /// <summary>
+    /// Capital contable con el resultado del ejercicio.
+    /// </summary>
+    [JsonPropertyName("equity")]
+    public decimal Equity { get; set; }
+
+    /// <summary>
+    /// Ingresos de enero al mes.
+    /// </summary>
+    [JsonPropertyName("revenue_year_to_date")]
+    public decimal RevenueYearToDate { get; set; }
+
+    /// <summary>
+    /// Utilidad antes de impuestos de enero al mes.
+    /// </summary>
+    [JsonPropertyName("income_before_taxes_year_to_date")]
+    public decimal IncomeBeforeTaxesYearToDate { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;FinancialRatiosRatiosItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class FinancialRatiosRatiosItem
+{
+    /// <summary>
+    /// La razón.
+    /// <br/>
+    /// Valores: liquidez, prueba_acida, endeudamiento, apalancamiento, margen_bruto, margen_operacion, margen_neto, rendimiento_capital, rendimiento_activo, dias_cobro, dias_pago, dias_inventario.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su valor (null cuando no hay con qué dividir).
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Veces, porcentaje o días.
+    /// <br/>
+    /// Valores: times, percent, days.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string Unit { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo se calcula.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+}
+
+/// <summary>
 /// El estado de resultados y el balance general de un mes, leídos de su balanza.
 /// </summary>
 public sealed partial class FinancialStatements
@@ -16254,6 +17214,32 @@ public sealed partial class GetBudgetParams
 }
 
 /// <summary>
+/// Los campos de «Ver el estado de flujos de efectivo».
+/// </summary>
+public sealed partial class GetCashFlowParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// month (solo el mes) o year_to_date (de enero al mes, por omisión).
+    /// <br/>
+    /// Valores: month, year_to_date.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public string? Period { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver el flujo de efectivo».
 /// </summary>
 public sealed partial class GetCashForecastParams
@@ -16337,6 +17323,32 @@ public sealed partial class GetCompanyReportParams
     /// </summary>
     [JsonPropertyName("version")]
     public string? Version { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Comparar los estados financieros con otro mes».
+/// </summary>
+public sealed partial class GetComparativeStatementsParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// previous_year (el mismo mes del año anterior, por omisión) o previous_month.
+    /// <br/>
+    /// Valores: previous_year, previous_month.
+    /// </summary>
+    [JsonPropertyName("compare_to")]
+    public string? CompareTo { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -16522,10 +17534,46 @@ public sealed partial class GetEmployeeVacationsParams
 }
 
 /// <summary>
+/// Los campos de «Ver el estado de cambios en el capital contable».
+/// </summary>
+public sealed partial class GetEquityChangesParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver la política».
 /// </summary>
 public sealed partial class GetExpensePolicyParams
 {
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver las razones financieras».
+/// </summary>
+public sealed partial class GetFinancialRatiosParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>

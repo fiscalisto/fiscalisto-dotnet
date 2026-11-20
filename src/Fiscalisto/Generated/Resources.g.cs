@@ -5002,6 +5002,62 @@ public sealed class AccountingResource
         => _client.RequestAsync<FinancialStatements>("GET", "/v1/accounting/financial_statements", null, @params, options, false, cancellationToken);
 
     /// <summary>
+    /// Ver el estado de flujos de efectivo
+    /// </summary>
+    /// <remarks>
+    /// El estado de flujos de efectivo (NIF B-2, método indirecto) del mes o de enero al mes: la utilidad, la depreciación y amortización que se suman, el cambio en capital de trabajo, y las actividades de inversión y de financiamiento, hasta el efectivo al cierre. Cada cuenta va a su actividad por su código agrupador; difference es 0 cuando la balanza cuadra. Como Estados financieros › Flujo de efectivo en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/cash_flow</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-cash-flow"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CashFlow> CashFlowAsync(GetCashFlowParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CashFlow>("GET", "/v1/accounting/cash_flow", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver el estado de cambios en el capital contable
+    /// </summary>
+    /// <remarks>
+    /// El estado de cambios en el capital contable (NIF B-4) de enero al mes: cada cuenta de capital del 1 de enero al cierre, con sus aportaciones, retiros, dividendos y traspasos, y el resultado del ejercicio. Como Estados financieros › Capital contable en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/equity_changes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-equity-changes"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EquityChanges> EquityChangesAsync(GetEquityChangesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EquityChanges>("GET", "/v1/accounting/equity_changes", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Comparar los estados financieros con otro mes
+    /// </summary>
+    /// <remarks>
+    /// El estado de resultados (del mes y de enero al mes) y el balance general junto a los del mismo mes del año anterior (compare_to=previous_year, por omisión) o del mes anterior (previous_month), con la variación y su porcentaje por grupo de cuentas. Como Estados financieros › Comparativo en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/comparative_statements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-comparative-statements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ComparativeStatements> ComparativeStatementsAsync(GetComparativeStatementsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ComparativeStatements>("GET", "/v1/accounting/comparative_statements", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver las razones financieras
+    /// </summary>
+    /// <remarks>
+    /// Liquidez, prueba ácida, endeudamiento, apalancamiento, márgenes, rendimiento sobre capital y sobre activo, y días de cobro, de pago y de inventario al cierre del mes, con las cifras de que salen. Rentabilidad y rotación usan los resultados de enero al mes. Como Estados financieros › Razones financieras en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/financial_ratios</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-financial-ratios"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<FinancialRatios> FinancialRatiosAsync(GetFinancialRatiosParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<FinancialRatios>("GET", "/v1/accounting/financial_ratios", null, @params, options, false, cancellationToken);
+
+    /// <summary>
     /// Cruzar lo declarado con lo facturado
     /// </summary>
     /// <remarks>
