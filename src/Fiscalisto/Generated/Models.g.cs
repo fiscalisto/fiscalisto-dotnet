@@ -18296,6 +18296,30 @@ public sealed partial class GetElectronicAccountingParams
 }
 
 /// <summary>
+/// Los campos de «Constancia de vacaciones».
+/// </summary>
+public sealed partial class GetEmployeeVacationCertificateParams
+{
+    /// <summary>
+    /// El día en que empezará a disfrutarlas (AAAA-MM-DD), con enjoy_to.
+    /// </summary>
+    [JsonPropertyName("enjoy_from")]
+    public string? EnjoyFrom { get; set; }
+
+    /// <summary>
+    /// El día en que terminan (AAAA-MM-DD), con enjoy_from.
+    /// </summary>
+    [JsonPropertyName("enjoy_to")]
+    public string? EnjoyTo { get; set; }
+
+    /// <summary>
+    /// El día de la constancia (AAAA-MM-DD); por omisión hoy.
+    /// </summary>
+    [JsonPropertyName("as_of")]
+    public string? AsOf { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Vacaciones de un empleado».
 /// </summary>
 public sealed partial class GetEmployeeVacationsParams

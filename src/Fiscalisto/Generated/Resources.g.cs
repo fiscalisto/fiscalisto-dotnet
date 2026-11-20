@@ -2008,6 +2008,20 @@ public sealed class EmployeesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<EmployeeVacations> UpdateVacationsAsync(string id, UpdateEmployeeVacationsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<EmployeeVacations>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}/vacations", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Constancia de vacaciones
+    /// </summary>
+    /// <remarks>
+    /// El PDF de la constancia que el artículo 81 de la LFT pide entregar cada año: su antigüedad al último aniversario, los días de vacaciones que le corresponden (artículo 76) con su prima vacacional, cuándo disfrutarlos (las fechas que mande, o los seis meses siguientes al aniversario) y los días pendientes de años anteriores con cuándo prescriben, con espacio para las firmas. Antes de su primer aniversario dice cuándo lo cumple y cuántos días le tocarán.
+    /// <br/>
+    /// <c>GET /v1/employees/{id}/vacations/certificate</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee-vacation-certificate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> VacationCertificateAsync(string id, GetEmployeeVacationCertificateParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/employees/{Uri.EscapeDataString(id)}/vacations/certificate", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>
