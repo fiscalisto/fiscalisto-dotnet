@@ -28963,6 +28963,40 @@ public sealed partial class MarkPurchaseReceiptInvoicedParams
 }
 
 /// <summary>
+/// Los campos de «Marcar como pagada una factura recibida».
+/// </summary>
+public sealed partial class MarkSatInvoicePaidParams
+{
+    /// <summary>
+    /// El día en que se pagó (AAAA-MM-DD, no después de hoy). En una PPD, si no se indica, queda sin fecha; en una PUE, la fecha de la factura.
+    /// </summary>
+    [JsonPropertyName("paid_on")]
+    public string? PaidOn { get; set; }
+
+    /// <summary>
+    /// Solo PPD: con qué se pagó, clave c_FormaPago (01 efectivo, 02 cheque nominativo, 03 transferencia…). Una PUE ya dice la suya.
+    /// <br/>
+    /// Valores: 12, 13, 14, 15, 17, 23, 24, 25, 26, 27, 28, 29, 30, 31, 01, 02, 03, 04, 05, 06, 08.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// De dónde salió el dinero: petty_cash (caja chica), reimbursement (lo pagó una persona y se le reembolsó), bank u other. Obligatorio en una PUE.
+    /// <br/>
+    /// Valores: petty_cash, reimbursement, bank, other.
+    /// </summary>
+    [JsonPropertyName("money_source")]
+    public string? MoneySource { get; set; }
+
+    /// <summary>
+    /// Una nota, hasta 500 caracteres.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Marcar pagada una factura de proveedor».
 /// </summary>
 public sealed partial class MarkSupplierInvoicePaidParams
@@ -37100,6 +37134,12 @@ public sealed partial class SatInvoice
     public string? SatStatus { get; set; }
 
     /// <summary>
+    /// Solo recibidas, marcadas con mark_paid, en la app o por una regla: without_complement true en una PPD pagada sin complemento de pago (el SAT la sigue viendo sin pagar); false en una PUE, donde solo se anotó de dónde salió el dinero.
+    /// </summary>
+    [JsonPropertyName("paid_otherwise")]
+    public SatInvoicePaidOtherwise? PaidOtherwise { get; set; }
+
+    /// <summary>
     /// Su centro de costo (ccn_…), o null. Póngalo o cámbielo con POST /v1/sat_invoices/{id}.
     /// </summary>
     [JsonPropertyName("cost_center")]
@@ -37182,6 +37222,44 @@ public sealed partial class SatInvoiceList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SatInvoicePaidOtherwise&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatInvoicePaidOtherwise
+{
+    /// <summary>
+    /// true: una PPD pagada sin complemento, fuera de Por pagar. false: una PUE, ya pagada, con su origen del dinero.
+    /// </summary>
+    [JsonPropertyName("without_complement")]
+    public bool WithoutComplement { get; set; }
+
+    /// <summary>
+    /// El día en que se pagó (AAAA-MM-DD), si se dijo.
+    /// </summary>
+    [JsonPropertyName("paid_on")]
+    public string? PaidOn { get; set; }
+
+    /// <summary>
+    /// Con qué se pagó: clave c_FormaPago (01 efectivo, 03 transferencia…).
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// De dónde salió el dinero: petty_cash (caja chica), reimbursement (una persona, que después se le reembolsó), bank u other.
+    /// <br/>
+    /// Valores: petty_cash, reimbursement, bank, other.
+    /// </summary>
+    [JsonPropertyName("money_source")]
+    public string? MoneySource { get; set; }
+
+    /// <summary>
+    /// true cuando la marcó una regla de Ajustes › Pagos sin complemento.
+    /// </summary>
+    [JsonPropertyName("by_rule")]
+    public bool ByRule { get; set; }
 }
 
 /// <summary>

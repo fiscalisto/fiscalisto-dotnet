@@ -4919,6 +4919,34 @@ public sealed class SatInvoicesResource
         => _client.RequestAsync<SatInvoice>("POST", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
+    /// Marcar como pagada una factura recibida
+    /// </summary>
+    /// <remarks>
+    /// Una factura PPD recibida que la empresa pagó (en efectivo, de caja chica, con un reembolso…) y cuyo proveedor no emitió el complemento de pago: sale de Por pagar como pagada sin complemento, con cuándo, cómo y de dónde se pagó. El SAT la sigue viendo sin pagar: el IVA no se acredita ni el gasto se deduce hasta que llegue el complemento. En una PUE recibida, que ya está pagada, solo anota de dónde salió el dinero (money_source). Lo marcado se ve en paid_otherwise.
+    /// <br/>
+    /// <c>POST /v1/sat_invoices/{id}/mark_paid</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/mark-sat-invoice-paid"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatInvoice> MarkPaidAsync(string id, MarkSatInvoicePaidParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatInvoice>("POST", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/mark_paid", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar la marca de pagada
+    /// </summary>
+    /// <remarks>
+    /// Deshace mark_paid (o lo que marcó una regla de Pagos sin complemento): una PPD vuelve a Por pagar y una PUE pierde su origen del dinero. Una regla ya no la vuelve a marcar.
+    /// <br/>
+    /// <c>POST /v1/sat_invoices/{id}/mark_unpaid</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/descargas-del-sat/mark-sat-invoice-unpaid"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SatInvoice> MarkUnpaidAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SatInvoice>("POST", $"/v1/sat_invoices/{Uri.EscapeDataString(id)}/mark_unpaid", null, null, options, true, cancellationToken);
+
+    /// <summary>
     /// Descargar el XML de una factura del SAT
     /// </summary>
     /// <remarks>
