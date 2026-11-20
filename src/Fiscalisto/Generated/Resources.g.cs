@@ -1930,6 +1930,34 @@ public sealed class EmployeesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/employees/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Vacaciones de un empleado
+    /// </summary>
+    /// <remarks>
+    /// Los días de vacaciones de cada año de servicio (artículo 76 de la LFT: 12 el primero, dos más cada año hasta 20 y luego dos más cada cinco), los que tomó (los días de vacaciones de sus recibos timbrados, restados del año más antiguo que le quede), hasta cuándo dárselos (seis meses después del aniversario, artículo 81) y cuándo prescriben (un año después, artículo 516). pending_days son los de años cumplidos que no han prescrito: los que paga el finiquito.
+    /// <br/>
+    /// <c>GET /v1/employees/{id}/vacations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee-vacations"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeVacations> VacationsAsync(string id, GetEmployeeVacationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeVacations>("GET", $"/v1/employees/{Uri.EscapeDataString(id)}/vacations", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Saldo de vacaciones antes de Fiscalisto
+    /// </summary>
+    /// <remarks>
+    /// Guarda lo que el empleado tenía en un día según sus registros: los días que le quedaban de años cumplidos y los que ya había tomado del año en curso. Los recibos timbrados antes de ese día no se cuentan. opening_date null lo quita.
+    /// <br/>
+    /// <c>POST /v1/employees/{id}/vacations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-employee-vacations"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeVacations> UpdateVacationsAsync(string id, UpdateEmployeeVacationsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeVacations>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}/vacations", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

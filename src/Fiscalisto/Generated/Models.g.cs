@@ -5361,10 +5361,16 @@ public sealed partial class CreateExtraordinaryPayrollReceiptParams
     public bool? TwentyDaysPerYear { get; set; }
 
     /// <summary>
-    /// finiquito: los días de vacaciones del año de servicio en curso que ya tomó.
+    /// finiquito: los días de vacaciones del año de servicio en curso que ya tomó. Por omisión, los de sus recibos timbrados (GET /v1/employees/{id}/vacations).
     /// </summary>
     [JsonPropertyName("vacation_days_taken")]
     public decimal? VacationDaysTaken { get; set; }
+
+    /// <summary>
+    /// finiquito: los días de vacaciones de años de servicio cumplidos que no disfrutó ni han prescrito; se pagan con su prima vacacional. Por omisión, pending_days de sus vacaciones.
+    /// </summary>
+    [JsonPropertyName("vacation_days_owed")]
+    public decimal? VacationDaysOwed { get; set; }
 
     /// <summary>
     /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
@@ -12022,6 +12028,200 @@ public sealed partial class EmployeeList
 }
 
 /// <summary>
+/// Las vacaciones de un empleado por año de servicio (LFT 76, 81 y 516).
+/// </summary>
+public sealed partial class EmployeeVacations
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// El día del saldo.
+    /// </summary>
+    [JsonPropertyName("as_of")]
+    public string AsOf { get; set; } = default!;
+
+    /// <summary>
+    /// Los días de años de servicio cumplidos que le quedan y no han prescrito: los que paga el finiquito.
+    /// </summary>
+    [JsonPropertyName("pending_days")]
+    public decimal PendingDays { get; set; }
+
+    /// <summary>
+    /// El año de servicio en curso.
+    /// </summary>
+    [JsonPropertyName("current_year")]
+    public EmployeeVacationsCurrentYear CurrentYear { get; set; } = default!;
+
+    /// <summary>
+    /// Cada año de servicio cumplido, del más antiguo al más reciente.
+    /// </summary>
+    [JsonPropertyName("years")]
+    public List<EmployeeVacationsYearsItem> Years { get; set; } = default!;
+
+    /// <summary>
+    /// El saldo de antes de Fiscalisto, o null.
+    /// </summary>
+    [JsonPropertyName("opening")]
+    public EmployeeVacationsOpening? Opening { get; set; }
+
+    /// <summary>
+    /// Los días de vacaciones de sus recibos timbrados.
+    /// </summary>
+    [JsonPropertyName("taken")]
+    public List<EmployeeVacationsTakenItem> Taken { get; set; } = default!;
+}
+
+/// <summary>
+/// El año de servicio en curso.
+/// </summary>
+public sealed partial class EmployeeVacationsCurrentYear
+{
+    /// <summary>
+    /// Su número: 1 el primer año de servicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Su aniversario.
+    /// </summary>
+    [JsonPropertyName("completes_on")]
+    public string CompletesOn { get; set; } = default!;
+
+    /// <summary>
+    /// Los días que le tocan al cumplirlo.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal Days { get; set; }
+
+    /// <summary>
+    /// Los que ya tomó por adelantado.
+    /// </summary>
+    [JsonPropertyName("taken_in_advance")]
+    public decimal TakenInAdvance { get; set; }
+
+    /// <summary>
+    /// Su parte proporcional al día del saldo, menos lo adelantado.
+    /// </summary>
+    [JsonPropertyName("accrued_days")]
+    public decimal AccruedDays { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;EmployeeVacationsOpening&lt;/c&gt;.
+/// </summary>
+public sealed partial class EmployeeVacationsOpening
+{
+    /// <summary>
+    /// El día del saldo inicial.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Los de años cumplidos.
+    /// </summary>
+    [JsonPropertyName("pending_days")]
+    public decimal PendingDays { get; set; }
+
+    /// <summary>
+    /// Los tomados del año en curso.
+    /// </summary>
+    [JsonPropertyName("taken_days")]
+    public decimal TakenDays { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;EmployeeVacationsTakenItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EmployeeVacationsTakenItem
+{
+    /// <summary>
+    /// El fin del periodo del recibo.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Los días de vacaciones que pagó.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal Days { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;EmployeeVacationsYearsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EmployeeVacationsYearsItem
+{
+    /// <summary>
+    /// El año de servicio; 0 es el saldo de antes de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// El aniversario que lo cumple.
+    /// </summary>
+    [JsonPropertyName("owed_from")]
+    public string OwedFrom { get; set; } = default!;
+
+    /// <summary>
+    /// Los días que le tocan (artículo 76).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal Days { get; set; }
+
+    /// <summary>
+    /// Los que ya tomó.
+    /// </summary>
+    [JsonPropertyName("taken_days")]
+    public decimal TakenDays { get; set; }
+
+    /// <summary>
+    /// Los que le quedan.
+    /// </summary>
+    [JsonPropertyName("remaining_days")]
+    public decimal RemainingDays { get; set; }
+
+    /// <summary>
+    /// El último día para dárselos (artículo 81).
+    /// </summary>
+    [JsonPropertyName("grant_by")]
+    public string GrantBy { get; set; } = default!;
+
+    /// <summary>
+    /// El día en que prescriben (artículo 516).
+    /// </summary>
+    [JsonPropertyName("prescribes_on")]
+    public string PrescribesOn { get; set; } = default!;
+
+    /// <summary>
+    /// taken, disfrutadas; pending, por disfrutar; late, pasó el plazo para darlas y no han prescrito; prescribed, prescritas.
+    /// <br/>
+    /// Valores: taken, pending, late, prescribed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+}
+
+/// <summary>
 /// Todos los errores tienen esta forma.
 /// </summary>
 public sealed partial class Error
@@ -15813,6 +16013,18 @@ public sealed partial class GetElectronicAccountingParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Vacaciones de un empleado».
+/// </summary>
+public sealed partial class GetEmployeeVacationsParams
+{
+    /// <summary>
+    /// El día del saldo (AAAA-MM-DD); por omisión hoy, o su último día si ya salió.
+    /// </summary>
+    [JsonPropertyName("as_of")]
+    public string? AsOf { get; set; }
 }
 
 /// <summary>
@@ -26676,10 +26888,16 @@ public sealed partial class PreviewExtraordinaryPayrollReceiptParams
     public bool? TwentyDaysPerYear { get; set; }
 
     /// <summary>
-    /// finiquito: los días de vacaciones del año de servicio en curso que ya tomó.
+    /// finiquito: los días de vacaciones del año de servicio en curso que ya tomó. Por omisión, los de sus recibos timbrados (GET /v1/employees/{id}/vacations).
     /// </summary>
     [JsonPropertyName("vacation_days_taken")]
     public decimal? VacationDaysTaken { get; set; }
+
+    /// <summary>
+    /// finiquito: los días de vacaciones de años de servicio cumplidos que no disfrutó ni han prescrito; se pagan con su prima vacacional. Por omisión, pending_days de sus vacaciones.
+    /// </summary>
+    [JsonPropertyName("vacation_days_owed")]
+    public decimal? VacationDaysOwed { get; set; }
 
     /// <summary>
     /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
@@ -35008,6 +35226,30 @@ public sealed partial class UpdateEmployeeParams
     /// </summary>
     [JsonPropertyName("exit_reason")]
     public string? ExitReason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Saldo de vacaciones antes de Fiscalisto».
+/// </summary>
+public sealed partial class UpdateEmployeeVacationsParams
+{
+    /// <summary>
+    /// El día del saldo, según sus registros de antes de Fiscalisto; null lo quita. Los recibos timbrados antes de ese día no se cuentan.
+    /// </summary>
+    [JsonPropertyName("opening_date")]
+    public string? OpeningDate { get; set; }
+
+    /// <summary>
+    /// Los días que ese día le quedaban de años de servicio cumplidos.
+    /// </summary>
+    [JsonPropertyName("opening_pending_days")]
+    public decimal? OpeningPendingDays { get; set; }
+
+    /// <summary>
+    /// Los días del año de servicio en curso que ya había tomado ese día.
+    /// </summary>
+    [JsonPropertyName("opening_taken_days")]
+    public decimal? OpeningTakenDays { get; set; }
 }
 
 /// <summary>
