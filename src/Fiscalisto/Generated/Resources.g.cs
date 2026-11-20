@@ -135,6 +135,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public VariableSalariesResource VariableSalaries => _variableSalaries ??= new VariableSalariesResource(this);
 
+    private AnnualAdjustmentsResource? _annualAdjustments;
+
+    /// <summary>Nómina.</summary>
+    public AnnualAdjustmentsResource AnnualAdjustments => _annualAdjustments ??= new AnnualAdjustmentsResource(this);
+
+    private PayrollTaxesResource? _payrollTaxes;
+
+    /// <summary>Nómina.</summary>
+    public PayrollTaxesResource PayrollTaxes => _payrollTaxes ??= new PayrollTaxesResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -2328,6 +2338,82 @@ public sealed class VariableSalariesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<VariableSalary> ApplyAsync(ApplyVariableSalaryParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<VariableSalary>("POST", "/v1/variable_salaries", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.AnnualAdjustments</c>.
+/// </summary>
+public sealed class AnnualAdjustmentsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal AnnualAdjustmentsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ajuste anual del ISR
+    /// </summary>
+    /// <remarks>
+    /// El ISR del ejercicio de cada empleado (tarifa del artículo 152 sobre lo gravado de sus recibos timbrados del año, menos el subsidio para el empleo del año) contra lo que le retuvieron (artículo 97 de la Ley del ISR). balance positivo es a cargo del empleado; negativo, a su favor. excluded dice por qué no se le calcula. No cambia nada: aplíquelo con POST /v1/annual_adjustments.
+    /// <br/>
+    /// <c>GET /v1/annual_adjustments</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-annual-adjustment"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AnnualAdjustment> GetAsync(GetAnnualAdjustmentParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AnnualAdjustment>("GET", "/v1/annual_adjustments", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Aplicar el ajuste anual
+    /// </summary>
+    /// <remarks>
+    /// action apply: la diferencia de cada empleado va en sus siguientes recibos ordinarios pagados desde el 1 de enero del año siguiente: a cargo como Deducción 101 (hasta su neto; el resto, en el siguiente), a favor como OtroPago 004 con CompensacionSaldosAFavor. Repetirlo no hace nada. undo la quita mientras ningún recibo timbrado la lleve. files_own_return y no_own_return marcan si el empleado presentará su propia declaración anual.
+    /// <br/>
+    /// <c>POST /v1/annual_adjustments</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-annual-adjustment"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AnnualAdjustment> UpdateAsync(UpdateAnnualAdjustmentParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AnnualAdjustment>("POST", "/v1/annual_adjustments", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollTaxes</c>.
+/// </summary>
+public sealed class PayrollTaxesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollTaxesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Impuesto sobre nómina del mes
+    /// </summary>
+    /// <remarks>
+    /// El impuesto sobre nómina de cada estado: la suma de los recibos timbrados con fecha de pago en el mes, por el estado donde trabaja cada empleado (ClaveEntFed), menos las percepciones de excluded_perception_types, por la tasa del estado y sus sobretasas. Se declara y paga en el portal de finanzas de cada estado.
+    /// <br/>
+    /// <c>GET /v1/payroll_taxes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-payroll-tax"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollTax> GetAsync(GetPayrollTaxParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollTax>("GET", "/v1/payroll_taxes", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Qué no grava el impuesto sobre nómina
+    /// </summary>
+    /// <remarks>
+    /// Las percepciones que no suman a la base (por omisión, las que casi todos los estados dejan fuera: PTU, reembolsos, indemnizaciones, primas de antigüedad, jubilaciones, cuotas de seguridad social pagadas por el patrón y viáticos) y la opción de tasa de cada estado que la tiene, guardadas para el emisor. Lo que no mande se queda como estaba.
+    /// <br/>
+    /// <c>POST /v1/payroll_taxes/settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-payroll-tax-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollTaxSettings> UpdateSettingsAsync(UpdatePayrollTaxSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollTaxSettings>("POST", "/v1/payroll_taxes/settings", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

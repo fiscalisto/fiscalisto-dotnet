@@ -416,6 +416,152 @@ public sealed partial class AdvanceTestClockParams
 }
 
 /// <summary>
+/// El ajuste anual del ISR de un ejercicio (artículo 97 de la Ley del ISR): el ISR del año de cada empleado contra lo retenido.
+/// </summary>
+public sealed partial class AnnualAdjustment
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Desde cuándo lo llevan los recibos: el 1 de enero del año siguiente.
+    /// </summary>
+    [JsonPropertyName("applies_from")]
+    public string AppliesFrom { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha de pago del último recibo timbrado del año.
+    /// </summary>
+    [JsonPropertyName("last_payment_date")]
+    public string? LastPaymentDate { get; set; }
+
+    /// <summary>
+    /// Cada empleado que trabajó en el año.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<AnnualAdjustmentEmployeesItem> Employees { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualAdjustmentEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualAdjustmentEmployeesItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de empleado.
+    /// </summary>
+    [JsonPropertyName("employee_number")]
+    public string EmployeeNumber { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("employee_name")]
+    public string EmployeeName { get; set; } = default!;
+
+    /// <summary>
+    /// Todo lo que le pagaron sus recibos del año, gravado y exento: si pasa de $400,000 presenta su propia declaración.
+    /// </summary>
+    [JsonPropertyName("income")]
+    public decimal Income { get; set; }
+
+    /// <summary>
+    /// Lo gravado del año.
+    /// </summary>
+    [JsonPropertyName("taxable_income")]
+    public decimal TaxableIncome { get; set; }
+
+    /// <summary>
+    /// El ISR del ejercicio: la tarifa del artículo 152 sobre taxable_income.
+    /// </summary>
+    [JsonPropertyName("annual_tax")]
+    public decimal AnnualTax { get; set; }
+
+    /// <summary>
+    /// El subsidio para el empleo que le correspondió en el año.
+    /// </summary>
+    [JsonPropertyName("employment_subsidy")]
+    public decimal EmploymentSubsidy { get; set; }
+
+    /// <summary>
+    /// annual_tax menos employment_subsidy, nunca negativo.
+    /// </summary>
+    [JsonPropertyName("tax_due")]
+    public decimal TaxDue { get; set; }
+
+    /// <summary>
+    /// El ISR que le retuvieron sus recibos del año.
+    /// </summary>
+    [JsonPropertyName("tax_withheld")]
+    public decimal TaxWithheld { get; set; }
+
+    /// <summary>
+    /// tax_due menos tax_withheld: positivo a cargo, negativo a favor.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// Por qué no se le calcula (artículo 97): started, entró después del 1 de enero; left, salió antes del 1 de diciembre; income, ganó más de $400,000; files_own, presenta su declaración.
+    /// <br/>
+    /// Valores: started, left, income, files_own.
+    /// </summary>
+    [JsonPropertyName("excluded")]
+    public string? Excluded { get; set; }
+
+    /// <summary>
+    /// Si avisó por escrito que presentará su declaración anual.
+    /// </summary>
+    [JsonPropertyName("files_own_return")]
+    public bool FilesOwnReturn { get; set; }
+
+    /// <summary>
+    /// Los meses sin recibo timbrado: falta alguno de otro sistema.
+    /// </summary>
+    [JsonPropertyName("missing_months")]
+    public List<long> MissingMonths { get; set; } = default!;
+
+    /// <summary>
+    /// La diferencia aplicada (positiva a cargo, negativa a favor), o null.
+    /// </summary>
+    [JsonPropertyName("applied_amount")]
+    public decimal? AppliedAmount { get; set; }
+
+    /// <summary>
+    /// Lo que de applied_amount aún no lleva ningún recibo timbrado.
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public decimal? Remaining { get; set; }
+}
+
+/// <summary>
 /// El cuerpo de POST /v1/invoices (la factura de lo vendido) con method y remainder.
 /// </summary>
 public sealed partial class ApplyAdvanceParams
@@ -679,7 +825,7 @@ public sealed partial class ApplyAdvanceParamsRemainder
 public sealed partial class ApplyVariableSalaryParams
 {
     /// <summary>
-    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// El emisor (iss_…); por omisión, el único de la cuenta.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -15276,6 +15422,24 @@ public sealed partial class GeneralLedgerAccountsItemMovementsItem
 }
 
 /// <summary>
+/// Los campos de «Ajuste anual del ISR».
+/// </summary>
+public sealed partial class GetAnnualAdjustmentParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El ejercicio: 2026.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required long Year { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver la asistencia de un periodo».
 /// </summary>
 public sealed partial class GetAttendanceParams
@@ -15685,6 +15849,24 @@ public sealed partial class GetOpeningBalancesParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Impuesto sobre nómina del mes».
+/// </summary>
+public sealed partial class GetPayrollTaxParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El mes: 2026-11.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
 }
 
 /// <summary>
@@ -25173,6 +25355,252 @@ public sealed partial class PayrollReceiptPreviewWarningsItem
 }
 
 /// <summary>
+/// El impuesto sobre nómina de un mes, por estado.
+/// </summary>
+public sealed partial class PayrollTax
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes: 2026-11.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que paga en todos los estados.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Cada estado con recibos del mes, de mayor a menor base.
+    /// </summary>
+    [JsonPropertyName("states")]
+    public List<PayrollTaxStatesItem> States { get; set; } = default!;
+
+    /// <summary>
+    /// Las percepciones del mes.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public List<PayrollTaxPerceptionsItem> Perceptions { get; set; } = default!;
+
+    /// <summary>
+    /// Las percepciones que no suman a la base.
+    /// </summary>
+    [JsonPropertyName("excluded_perception_types")]
+    public List<string> ExcludedPerceptionTypes { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollTaxPerceptionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollTaxPerceptionsItem
+{
+    /// <summary>
+    /// c_TipoPercepcion.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre en el catálogo del SAT.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que pagó en el mes.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Si no suma a la base.
+    /// </summary>
+    [JsonPropertyName("excluded")]
+    public bool Excluded { get; set; }
+}
+
+/// <summary>
+/// Qué no grava el impuesto sobre nómina del emisor y sus opciones de tasa.
+/// </summary>
+public sealed partial class PayrollTaxSettings
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Las percepciones que no suman a la base; null, las comunes.
+    /// </summary>
+    [JsonPropertyName("excluded_perception_types")]
+    public List<string>? ExcludedPerceptionTypes { get; set; }
+
+    /// <summary>
+    /// La opción de tasa de cada estado, por su c_Estado.
+    /// </summary>
+    [JsonPropertyName("state_options")]
+    public Dictionary<string, string> StateOptions { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollTaxStatesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollTaxStatesItem
+{
+    /// <summary>
+    /// El estado donde trabajan (c_Estado de ClaveEntFed): CMX.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string State { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Los empleados con recibo.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public long Employees { get; set; }
+
+    /// <summary>
+    /// Los recibos timbrados.
+    /// </summary>
+    [JsonPropertyName("receipts")]
+    public long Receipts { get; set; }
+
+    /// <summary>
+    /// Lo que pagaron sus percepciones, gravado y exento.
+    /// </summary>
+    [JsonPropertyName("paid")]
+    public decimal Paid { get; set; }
+
+    /// <summary>
+    /// Lo de excluded_perception_types: no suma a la base.
+    /// </summary>
+    [JsonPropertyName("excluded")]
+    public decimal Excluded { get; set; }
+
+    /// <summary>
+    /// paid menos excluded.
+    /// </summary>
+    [JsonPropertyName("base")]
+    public decimal Base { get; set; }
+
+    /// <summary>
+    /// La tasa (0.03 es 3%); en Sinaloa, la efectiva de su tabla.
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public decimal Rate { get; set; }
+
+    /// <summary>
+    /// El impuesto sobre nómina: base por rate.
+    /// </summary>
+    [JsonPropertyName("tax")]
+    public decimal Tax { get; set; }
+
+    /// <summary>
+    /// Las sobretasas del estado sobre el impuesto o la base.
+    /// </summary>
+    [JsonPropertyName("surcharges")]
+    public List<PayrollTaxStatesItemSurchargesItem> Surcharges { get; set; } = default!;
+
+    /// <summary>
+    /// tax más surcharges.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// La opción de tasa elegida, en los estados que la tienen.
+    /// </summary>
+    [JsonPropertyName("option")]
+    public string? Option { get; set; }
+
+    /// <summary>
+    /// Las opciones de tasa del estado (tamaño de la empresa), o null.
+    /// </summary>
+    [JsonPropertyName("options")]
+    public List<PayrollTaxStatesItemOptionsItem>? Options { get; set; }
+
+    /// <summary>
+    /// El artículo que lo cobra.
+    /// </summary>
+    [JsonPropertyName("law")]
+    public string? Law { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollTaxStatesItemOptionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollTaxStatesItemOptionsItem
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// La opción, como la muestra la app.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollTaxStatesItemSurchargesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollTaxStatesItemSurchargesItem
+{
+    /// <summary>
+    /// La sobretasa.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
 /// Algo que una persona puede hacer en la empresa.
 /// </summary>
 public sealed partial class Permission
@@ -33429,6 +33857,38 @@ public sealed partial class UpdateAccountParams
 }
 
 /// <summary>
+/// Los campos de «Aplicar el ajuste anual».
+/// </summary>
+public sealed partial class UpdateAnnualAdjustmentParams
+{
+    /// <summary>
+    /// El emisor (iss_…); por omisión, el único de la cuenta.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El ejercicio: 2026.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required long Year { get; set; }
+
+    /// <summary>
+    /// apply: aplica la diferencia en sus siguientes recibos (desde enero del año siguiente). undo: la quita si ningún recibo timbrado la lleva. files_own_return: avisó por escrito que presentará su declaración anual (artículo 97, c): no se le calcula. no_own_return: lo deshace.
+    /// <br/>
+    /// Valores: apply, undo, files_own_return, no_own_return.
+    /// </summary>
+    [JsonPropertyName("action")]
+    public required string Action { get; set; }
+
+    /// <summary>
+    /// Los empleados (emp_…).
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public required List<string> Employees { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar una sucursal».
 /// </summary>
 public sealed partial class UpdateBranchParams
@@ -34626,6 +35086,30 @@ public sealed partial class UpdateMemberParams
     /// </summary>
     [JsonPropertyName("branches")]
     public List<string>? Branches { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Qué no grava el impuesto sobre nómina».
+/// </summary>
+public sealed partial class UpdatePayrollTaxSettingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…); por omisión, el único de la cuenta.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Las percepciones (c_TipoPercepcion) que no suman a la base, como las deja fuera la ley de su estado. Reemplaza la lista entera.
+    /// </summary>
+    [JsonPropertyName("excluded_perception_types")]
+    public List<string>? ExcludedPerceptionTypes { get; set; }
+
+    /// <summary>
+    /// La opción de tasa de cada estado que la tiene, por su c_Estado: {"BCN": "hasta50"}.
+    /// </summary>
+    [JsonPropertyName("state_options")]
+    public Dictionary<string, string>? StateOptions { get; set; }
 }
 
 /// <summary>
