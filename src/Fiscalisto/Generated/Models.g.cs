@@ -7472,6 +7472,54 @@ public sealed partial class CreateEmployeeParams
 }
 
 /// <summary>
+/// Los campos de «Aumento de sueldo».
+/// </summary>
+public sealed partial class CreateEmployeeRaiseParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Los empleados (emp_…). Sin employees, todos los que trabajan en effective_date.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<string>? Employees { get; set; }
+
+    /// <summary>
+    /// Aumento en porcentaje: 5 es 5%.
+    /// </summary>
+    [JsonPropertyName("percent")]
+    public decimal? Percent { get; set; }
+
+    /// <summary>
+    /// Aumento en pesos por día.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Un salario diario nuevo, igual para todos.
+    /// </summary>
+    [JsonPropertyName("daily_salary")]
+    public decimal? DailySalary { get; set; }
+
+    /// <summary>
+    /// Desde cuándo rige, hoy o antes (por omisión, hoy). Es la fecha de la modificación de salario.
+    /// </summary>
+    [JsonPropertyName("effective_date")]
+    public string? EffectiveDate { get; set; }
+
+    /// <summary>
+    /// true: dice cómo quedaría cada empleado, sin guardar nada.
+    /// </summary>
+    [JsonPropertyName("dry_run")]
+    public bool? DryRun { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Guardar una póliza modelo».
 /// </summary>
 public sealed partial class CreateEntryTemplateParams
@@ -15053,6 +15101,108 @@ public sealed partial class EmployeePortalSignedReceiptsItem
     /// </summary>
     [JsonPropertyName("signed_at")]
     public string SignedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Un aumento de sueldo para varios empleados, con la modificación de salario de cada uno para el IMSS.
+/// </summary>
+public sealed partial class EmployeeRaise
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// iss_…
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// false con dry_run: no se guardó nada.
+    /// </summary>
+    [JsonPropertyName("applied")]
+    public bool Applied { get; set; }
+
+    /// <summary>
+    /// Desde cuándo rige: la fecha de la modificación de salario.
+    /// </summary>
+    [JsonPropertyName("effective_date")]
+    public string EffectiveDate { get; set; } = default!;
+
+    /// <summary>
+    /// El último día para presentar las modificaciones al IMSS (5 días hábiles).
+    /// </summary>
+    [JsonPropertyName("imss_deadline")]
+    public string ImssDeadline { get; set; } = default!;
+
+    /// <summary>
+    /// Cada empleado del aumento.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<EmployeeRaiseEmployeesItem> Employees { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;EmployeeRaiseEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EmployeeRaiseEmployeesItem
+{
+    /// <summary>
+    /// emp_…
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de empleado.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su salario diario antes.
+    /// </summary>
+    [JsonPropertyName("daily_salary_before")]
+    public decimal DailySalaryBefore { get; set; }
+
+    /// <summary>
+    /// Su salario diario nuevo.
+    /// </summary>
+    [JsonPropertyName("daily_salary")]
+    public decimal DailySalary { get; set; }
+
+    /// <summary>
+    /// Su SDI antes (la parte fija).
+    /// </summary>
+    [JsonPropertyName("integrated_daily_salary_before")]
+    public decimal IntegratedDailySalaryBefore { get; set; }
+
+    /// <summary>
+    /// Su SDI nuevo, con el mismo factor de integración.
+    /// </summary>
+    [JsonPropertyName("integrated_daily_salary")]
+    public decimal IntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// Por qué no puede recibir el aumento, o null.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
 }
 
 /// <summary>
