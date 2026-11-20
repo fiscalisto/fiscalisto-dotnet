@@ -399,6 +399,12 @@ public static class ErrorCode
     /// <summary>La factura del proveedor no admite eso en su estado (por ejemplo, programar una que no está aprobada, una fecha de pago pasada o marcar pagada una ya pagada), o el SAT la reporta cancelada. El mensaje dice por qué.</summary>
     public const string SupplierInvoiceInvalid = "supplier_invoice_invalid";
 
+    /// <summary>Ya hay una etiqueta con ese nombre (sin importar mayúsculas ni acentos): el mensaje trae su id (tag_…).</summary>
+    public const string TagExists = "tag_exists";
+
+    /// <summary>La empresa llegó a 200 etiquetas: borre las que ya no use.</summary>
+    public const string TagLimit = "tag_limit";
+
     /// <summary>El cambio da, quita o toca un permiso delicado (equipo, credenciales, seguridad o plan), o nombra a un propietario: pide confirmar la identidad de quien lo hace, y eso se hace en la app, en Ajustes › Miembros o Ajustes › Roles.</summary>
     public const string TeamChangeRequiresApp = "team_change_requires_app";
 

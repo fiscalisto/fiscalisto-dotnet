@@ -190,6 +190,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Centros de costo.</summary>
     public CostCentersResource CostCenters => _costCenters ??= new CostCentersResource(this);
 
+    private TagsResource? _tags;
+
+    /// <summary>Etiquetas.</summary>
+    public TagsResource Tags => _tags ??= new TagsResource(this);
+
     private PriceListsResource? _priceLists;
 
     /// <summary>Listas de precios.</summary>
@@ -3289,6 +3294,92 @@ public sealed class CostCentersResource
 }
 
 /// <summary>
+/// Etiquetas: <c>fiscalisto.Tags</c>.
+/// </summary>
+public sealed class TagsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TagsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una etiqueta
+    /// </summary>
+    /// <remarks>
+    /// Una palabra suya para juntar facturas y órdenes de compra: una obra, un evento, un cliente, «Urgente». Es la misma lista de Etiquetas en la app. Un nombre que ya existe (sin importar mayúsculas ni acentos) contesta tag_exists con su id. Hasta 200 por empresa.
+    /// <br/>
+    /// <c>POST /v1/tags</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/etiquetas/create-tag"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Tag> CreateAsync(CreateTagParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Tag>("POST", "/v1/tags", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar etiquetas
+    /// </summary>
+    /// <remarks>
+    /// Las etiquetas del emisor, las más recientes primero, con cuántas órdenes de compra y facturas lleva cada una.
+    /// <br/>
+    /// <c>GET /v1/tags</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/etiquetas/list-tags"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Tag>> ListAsync(ListTagsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Tag>("/v1/tags", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar etiquetas: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Tag> ListAutoPagingAsync(ListTagsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Tag>("/v1/tags", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una etiqueta
+    /// </summary>
+    /// <remarks>
+    /// Una etiqueta del emisor.
+    /// <br/>
+    /// <c>GET /v1/tags/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/etiquetas/get-tag"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Tag> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Tag>("GET", $"/v1/tags/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una etiqueta
+    /// </summary>
+    /// <remarks>
+    /// Cambia su nombre o su color; se ve así en todas sus facturas y órdenes. Un nombre que ya tiene otra contesta tag_exists.
+    /// <br/>
+    /// <c>POST /v1/tags/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/etiquetas/update-tag"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Tag> UpdateAsync(string id, UpdateTagParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Tag>("POST", $"/v1/tags/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una etiqueta
+    /// </summary>
+    /// <remarks>
+    /// Se quita de sus facturas y órdenes de compra, que no cambian en nada más, y se borran sus etiquetas automáticas. No se puede deshacer.
+    /// <br/>
+    /// <c>DELETE /v1/tags/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/etiquetas/delete-tag"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/tags/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
 /// Listas de precios: <c>fiscalisto.PriceLists</c>.
 /// </summary>
 public sealed class PriceListsResource
@@ -5129,7 +5220,7 @@ public sealed class SatInvoicesResource
     /// Actualizar una factura del SAT
     /// </summary>
     /// <remarks>
-    /// Lo que se puede cambiar de un CFDI del SAT sin tocarlo: su centro de costo (cost_center, o null para quitárselo), para ver sus gastos por obra, proyecto o área.
+    /// Lo que se puede cambiar de un CFDI del SAT sin tocarlo: su centro de costo (cost_center, o null para quitárselo), para ver sus gastos por obra, proyecto o área, y sus etiquetas (tags, exactamente las que manda: ids tag_… o nombres; un nombre nuevo crea la etiqueta).
     /// <br/>
     /// <c>POST /v1/sat_invoices/{id}</c>
     /// <br/>

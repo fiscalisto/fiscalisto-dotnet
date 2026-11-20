@@ -14290,6 +14290,32 @@ public sealed partial class CreateStoreConnectionParamsSettings
 }
 
 /// <summary>
+/// Los campos de «Crear una etiqueta».
+/// </summary>
+public sealed partial class CreateTagParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cómo la llama su equipo, por ejemplo «Obra Norte». No se repite (sin importar mayúsculas ni acentos).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Su color: info (azul), positive (verde), warning (ámbar), critical (rojo) o muted (gris). Por omisión, el siguiente de la lista.
+    /// <br/>
+    /// Valores: info, positive, warning, critical, muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Registrar la determinación de impuestos de un mes».
 /// </summary>
 public sealed partial class CreateTaxDeterminationParams
@@ -29874,6 +29900,12 @@ public sealed partial class ListSatInvoicesParams
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Solo las que llevan esta etiqueta (tag_…).
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public string? Tag { get; set; }
 }
 
 /// <summary>
@@ -30182,6 +30214,30 @@ public sealed partial class ListSupplierInvoicesParams
     /// </summary>
     [JsonPropertyName("received_since")]
     public string? ReceivedSince { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar etiquetas».
+/// </summary>
+public sealed partial class ListTagsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -40366,6 +40422,12 @@ public sealed partial class SatInvoice
     public string? CostCenter { get; set; }
 
     /// <summary>
+    /// Sus etiquetas, por nombre. automatic: true en las que puso una regla (la orden de compra a la que se vinculó o una regla de Ajustes › Reglas). Cámbielas con POST /v1/sat_invoices/{id}.
+    /// </summary>
+    [JsonPropertyName("tags")]
+    public List<SatInvoiceTagsItem> Tags { get; set; } = default!;
+
+    /// <summary>
     /// La descarga (sdl_…) que la trajo, o null.
     /// </summary>
     [JsonPropertyName("sat_download")]
@@ -40480,6 +40542,36 @@ public sealed partial class SatInvoicePaidOtherwise
     /// </summary>
     [JsonPropertyName("by_rule")]
     public bool ByRule { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SatInvoiceTagsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SatInvoiceTagsItem
+{
+    /// <summary>
+    /// La etiqueta (tag_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su color.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string Color { get; set; } = default!;
+
+    /// <summary>
+    /// true si la puso una regla (su orden de compra o Ajustes › Reglas), no una persona.
+    /// </summary>
+    [JsonPropertyName("automatic")]
+    public bool Automatic { get; set; }
 }
 
 /// <summary>
@@ -43276,6 +43368,98 @@ public sealed partial class SupplierInvoiceWarningsItem
     /// </summary>
     [JsonPropertyName("message")]
     public string Message { get; set; } = default!;
+}
+
+/// <summary>
+/// Una etiqueta del emisor: una palabra suya para juntar facturas y órdenes de compra.
+/// </summary>
+public sealed partial class Tag
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor de la etiqueta.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo la llama su equipo, por ejemplo «Obra Norte».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su color: info, positive, warning, critical o muted.
+    /// <br/>
+    /// Valores: info, positive, warning, critical, muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string Color { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas órdenes de compra la llevan.
+    /// </summary>
+    [JsonPropertyName("purchase_orders")]
+    public long PurchaseOrders { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas la llevan, emitidas y recibidas.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class TagList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Tag> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -47784,6 +47968,12 @@ public sealed partial class UpdateSatInvoiceParams
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Sus etiquetas, exactamente estas (hasta 10): ids (tag_…) o nombres; un nombre nuevo crea la etiqueta. [] se las quita. Una que puso una regla y no manda se queda quitada.
+    /// </summary>
+    [JsonPropertyName("tags")]
+    public List<string>? Tags { get; set; }
 }
 
 /// <summary>
@@ -48796,6 +48986,26 @@ public sealed partial class UpdateStoreConnectionParamsSettings
     /// </summary>
     [JsonPropertyName("notify_buyer")]
     public bool? NotifyBuyer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar una etiqueta».
+/// </summary>
+public sealed partial class UpdateTagParams
+{
+    /// <summary>
+    /// Cómo la llama su equipo, por ejemplo «Obra Norte». No se repite (sin importar mayúsculas ni acentos).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Su color: info (azul), positive (verde), warning (ámbar), critical (rojo) o muted (gris). Por omisión, el siguiente de la lista.
+    /// <br/>
+    /// Valores: info, positive, warning, critical, muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
 }
 
 /// <summary>
