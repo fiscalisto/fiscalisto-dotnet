@@ -425,6 +425,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public AccountRenumberingsResource AccountRenumberings => _accountRenumberings ??= new AccountRenumberingsResource(this);
 
+    private ConsolidationEliminationsResource? _consolidationEliminations;
+
+    /// <summary>Contabilidad.</summary>
+    public ConsolidationEliminationsResource ConsolidationEliminations => _consolidationEliminations ??= new ConsolidationEliminationsResource(this);
+
     private EntryTemplatesResource? _entryTemplates;
 
     /// <summary>Contabilidad.</summary>
@@ -5348,6 +5353,20 @@ public sealed class AccountingResource
         => _client.RequestAsync<LedgerAccount>("POST", "/v1/accounting/accounts", @params, null, options, true, cancellationToken);
 
     /// <summary>
+    /// Ver los estados financieros consolidados
+    /// </summary>
+    /// <remarks>
+    /// El estado de resultados y el balance general de varios RFC del espacio del emisor sumados cuenta por cuenta (comparten el catálogo), menos las eliminaciones del mes (POST /v1/accounting/consolidation_eliminations), con la hoja de consolidación (el saldo de cada cuenta en cada RFC, lo eliminado y el consolidado) y lo que los RFC se facturaron entre ellos sin impuestos. Los libros de cada RFC no cambian. Un emisor con un solo RFC contesta parameter_invalid en rfcs.
+    /// <br/>
+    /// <c>GET /v1/accounting/consolidated_statements</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-consolidated-statements"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ConsolidatedStatements> ConsolidatedStatementsAsync(GetConsolidatedStatementsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ConsolidatedStatements>("GET", "/v1/accounting/consolidated_statements", null, @params, options, false, cancellationToken);
+
+    /// <summary>
     /// Descargar la contabilidad electrónica
     /// </summary>
     /// <remarks>
@@ -5972,6 +5991,72 @@ public sealed class AccountRenumberingsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<AccountRenumbering> CreateAsync(RenumberAccountsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<AccountRenumbering>("POST", "/v1/accounting/account_renumberings", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.ConsolidationEliminations</c>.
+/// </summary>
+public sealed class ConsolidationEliminationsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ConsolidationEliminationsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar las eliminaciones de consolidación de un mes
+    /// </summary>
+    /// <remarks>
+    /// Las eliminaciones capturadas para el mes: lo que el consolidado resta al cierre de ese mes (ventas, saldos e inversiones entre los RFC).
+    /// <br/>
+    /// <c>GET /v1/accounting/consolidation_eliminations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-consolidation-eliminations"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ConsolidationEliminationList> ListAsync(ListConsolidationEliminationsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ConsolidationEliminationList>("GET", "/v1/accounting/consolidation_eliminations", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Capturar una eliminación de consolidación
+    /// </summary>
+    /// <remarks>
+    /// Guarda una eliminación del mes entre los RFC que dice: renglones de cargo y abono que cuadran, sobre cuentas de su catálogo. Cada mes lleva sus eliminaciones completas a esa fecha (las ventas entre ellos del año hasta ese mes y los saldos entre ellos al cierre), como una hoja de consolidación. Solo cambia el consolidado, nunca los libros de un RFC.
+    /// <br/>
+    /// <c>POST /v1/accounting/consolidation_eliminations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-consolidation-elimination"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ConsolidationElimination> CreateAsync(CreateConsolidationEliminationParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ConsolidationElimination>("POST", "/v1/accounting/consolidation_eliminations", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una eliminación de consolidación
+    /// </summary>
+    /// <remarks>
+    /// La reemplaza con lo que manda.
+    /// <br/>
+    /// <c>POST /v1/accounting/consolidation_eliminations/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-consolidation-elimination"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ConsolidationElimination> UpdateAsync(string id, UpdateConsolidationEliminationParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ConsolidationElimination>("POST", $"/v1/accounting/consolidation_eliminations/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una eliminación de consolidación
+    /// </summary>
+    /// <remarks>
+    /// Solo cambia el consolidado: los libros de cada RFC siguen igual.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/consolidation_eliminations/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-consolidation-elimination"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/accounting/consolidation_eliminations/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

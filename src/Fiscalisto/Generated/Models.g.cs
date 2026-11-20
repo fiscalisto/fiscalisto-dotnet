@@ -5086,6 +5086,754 @@ public sealed partial class ComplianceOpinion
 }
 
 /// <summary>
+/// Los estados financieros consolidados de varios RFC de un mes: sus balanzas sumadas cuenta por cuenta menos las eliminaciones del mes.
+/// </summary>
+public sealed partial class ConsolidatedStatements
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Los RFC que consolida.
+    /// </summary>
+    [JsonPropertyName("rfcs")]
+    public List<string> Rfcs { get; set; } = default!;
+
+    /// <summary>
+    /// El estado de resultados consolidado: del mes y de enero al mes.
+    /// </summary>
+    [JsonPropertyName("income_statement")]
+    public ConsolidatedStatementsIncomeStatement IncomeStatement { get; set; } = default!;
+
+    /// <summary>
+    /// El balance general consolidado al cierre del mes.
+    /// </summary>
+    [JsonPropertyName("balance_sheet")]
+    public ConsolidatedStatementsBalanceSheet BalanceSheet { get; set; } = default!;
+
+    /// <summary>
+    /// La hoja de consolidación: cada cuenta en cada RFC, lo eliminado y el consolidado.
+    /// </summary>
+    [JsonPropertyName("worksheet")]
+    public List<ConsolidatedStatementsWorksheetItem> Worksheet { get; set; } = default!;
+
+    /// <summary>
+    /// Las eliminaciones del mes que se aplicaron.
+    /// </summary>
+    [JsonPropertyName("eliminations")]
+    public List<ConsolidationElimination> Eliminations { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que los RFC se facturaron entre ellos en el año: lo que normalmente se elimina.
+    /// </summary>
+    [JsonPropertyName("intercompany")]
+    public List<ConsolidatedStatementsIntercompanyItem> Intercompany { get; set; } = default!;
+}
+
+/// <summary>
+/// El balance general consolidado al cierre del mes.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheet
+{
+    /// <summary>
+    /// El activo: su total y sus grupos.
+    /// </summary>
+    [JsonPropertyName("assets")]
+    public ConsolidatedStatementsBalanceSheetAssets Assets { get; set; } = default!;
+
+    /// <summary>
+    /// El pasivo: su total y sus grupos.
+    /// </summary>
+    [JsonPropertyName("liabilities")]
+    public ConsolidatedStatementsBalanceSheetLiabilities Liabilities { get; set; } = default!;
+
+    /// <summary>
+    /// El capital contable sin el resultado del ejercicio: su total y sus grupos.
+    /// </summary>
+    [JsonPropertyName("equity")]
+    public ConsolidatedStatementsBalanceSheetEquity Equity { get; set; } = default!;
+
+    /// <summary>
+    /// El resultado del ejercicio hasta el mes, parte del capital.
+    /// </summary>
+    [JsonPropertyName("net_income_year_to_date")]
+    public decimal NetIncomeYearToDate { get; set; }
+
+    /// <summary>
+    /// Pasivo más capital más el resultado del ejercicio.
+    /// </summary>
+    [JsonPropertyName("liabilities_and_equity")]
+    public decimal LiabilitiesAndEquity { get; set; }
+
+    /// <summary>
+    /// Activo menos pasivo y capital: 0 cuando los libros cuadran.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal Difference { get; set; }
+}
+
+/// <summary>
+/// El activo: su total y sus grupos.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetAssets
+{
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<ConsolidatedStatementsBalanceSheetAssetsGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsBalanceSheetAssetsGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetAssetsGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<ConsolidatedStatementsBalanceSheetAssetsGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsBalanceSheetAssetsGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetAssetsGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El capital contable sin el resultado del ejercicio: su total y sus grupos.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetEquity
+{
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<ConsolidatedStatementsBalanceSheetEquityGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsBalanceSheetEquityGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetEquityGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<ConsolidatedStatementsBalanceSheetEquityGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsBalanceSheetEquityGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetEquityGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El pasivo: su total y sus grupos.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetLiabilities
+{
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<ConsolidatedStatementsBalanceSheetLiabilitiesGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsBalanceSheetLiabilitiesGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetLiabilitiesGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<ConsolidatedStatementsBalanceSheetLiabilitiesGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsBalanceSheetLiabilitiesGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsBalanceSheetLiabilitiesGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El estado de resultados consolidado: del mes y de enero al mes.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatement
+{
+    /// <summary>
+    /// El estado de resultados del mes.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public ConsolidatedStatementsIncomeStatementMonth Month { get; set; } = default!;
+
+    /// <summary>
+    /// El estado de resultados de enero al mes.
+    /// </summary>
+    [JsonPropertyName("year_to_date")]
+    public ConsolidatedStatementsIncomeStatementYearToDate YearToDate { get; set; } = default!;
+}
+
+/// <summary>
+/// El estado de resultados del mes.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementMonth
+{
+    /// <summary>
+    /// Ingresos, costos, gastos, financiamiento y otros, cada uno con su total.
+    /// </summary>
+    [JsonPropertyName("sections")]
+    public List<ConsolidatedStatementsIncomeStatementMonthSectionsItem> Sections { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad (o pérdida, negativa) antes de impuestos del mes.
+    /// </summary>
+    [JsonPropertyName("net_income")]
+    public decimal NetIncome { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsIncomeStatementMonthSectionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementMonthSectionsItem
+{
+    /// <summary>
+    /// La sección: ingresos, costos, gastos, financiamiento u otros.
+    /// <br/>
+    /// Valores: ingresos, costos, gastos, financiamiento, otros.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<ConsolidatedStatementsIncomeStatementMonthSectionsItemGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsIncomeStatementMonthSectionsItemGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementMonthSectionsItemGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<ConsolidatedStatementsIncomeStatementMonthSectionsItemGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsIncomeStatementMonthSectionsItemGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementMonthSectionsItemGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// El estado de resultados de enero al mes.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementYearToDate
+{
+    /// <summary>
+    /// Ingresos, costos, gastos, financiamiento y otros, cada uno con su total.
+    /// </summary>
+    [JsonPropertyName("sections")]
+    public List<ConsolidatedStatementsIncomeStatementYearToDateSectionsItem> Sections { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad (o pérdida, negativa) antes de impuestos de enero al mes.
+    /// </summary>
+    [JsonPropertyName("net_income")]
+    public decimal NetIncome { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsIncomeStatementYearToDateSectionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementYearToDateSectionsItem
+{
+    /// <summary>
+    /// La sección: ingresos, costos, gastos, financiamiento u otros.
+    /// <br/>
+    /// Valores: ingresos, costos, gastos, financiamiento, otros.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// Su monto por el primer nivel del código agrupador.
+    /// </summary>
+    [JsonPropertyName("groups")]
+    public List<ConsolidatedStatementsIncomeStatementYearToDateSectionsItemGroupsItem> Groups { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsIncomeStatementYearToDateSectionsItemGroupsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementYearToDateSectionsItemGroupsItem
+{
+    /// <summary>
+    /// El primer nivel del código agrupador (401, 601…).
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Las cuentas del grupo con su monto.
+    /// </summary>
+    [JsonPropertyName("accounts")]
+    public List<ConsolidatedStatementsIncomeStatementYearToDateSectionsItemGroupsItemAccountsItem> Accounts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsIncomeStatementYearToDateSectionsItemGroupsItemAccountsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIncomeStatementYearToDateSectionsItemGroupsItemAccountsItem
+{
+    /// <summary>
+    /// Número de empleado (NumEmpleado).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsIntercompanyItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsIntercompanyItem
+{
+    /// <summary>
+    /// El RFC que facturó.
+    /// </summary>
+    [JsonPropertyName("issuer_rfc")]
+    public string IssuerRfc { get; set; } = default!;
+
+    /// <summary>
+    /// El RFC que recibió.
+    /// </summary>
+    [JsonPropertyName("receiver_rfc")]
+    public string ReceiverRfc { get; set; } = default!;
+
+    /// <summary>
+    /// Lo facturado en el mes, sin impuestos, en pesos (egresos restan).
+    /// </summary>
+    [JsonPropertyName("month_amount")]
+    public decimal MonthAmount { get; set; }
+
+    /// <summary>
+    /// Lo facturado de enero al mes, sin impuestos, en pesos.
+    /// </summary>
+    [JsonPropertyName("year_to_date_amount")]
+    public decimal YearToDateAmount { get; set; }
+
+    /// <summary>
+    /// Cuántos CFDI en el año.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidatedStatementsWorksheetItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidatedStatementsWorksheetItem
+{
+    /// <summary>
+    /// El número de la cuenta.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su saldo final en cada RFC, por RFC (las acreedoras en positivo).
+    /// </summary>
+    [JsonPropertyName("by_rfc")]
+    public Dictionary<string, JsonElement> ByRfc { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que las eliminaciones le suman (positivo) o restan.
+    /// </summary>
+    [JsonPropertyName("eliminations")]
+    public decimal Eliminations { get; set; }
+
+    /// <summary>
+    /// Su saldo final consolidado.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+}
+
+/// <summary>
+/// Una eliminación de consolidación: lo que el consolidado de varios RFC resta al cierre de un mes (ventas, saldos o inversiones entre ellos). Nunca cambia los libros de un RFC.
+/// </summary>
+public sealed partial class ConsolidationElimination
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes (AAAA-MM) a cuyo cierre se elimina.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Su concepto.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Los RFC entre los que es: se aplica cuando todos están en el consolidado.
+    /// </summary>
+    [JsonPropertyName("rfcs")]
+    public List<string> Rfcs { get; set; } = default!;
+
+    /// <summary>
+    /// Sus renglones de cargo y abono.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<ConsolidationEliminationLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ConsolidationEliminationLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ConsolidationEliminationLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ConsolidationEliminationList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ConsolidationElimination> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Un centro de costo del emisor: una obra, proyecto, sucursal o área por la que separa sus ingresos y gastos.
 /// </summary>
 public sealed partial class CostCenter
@@ -5885,6 +6633,66 @@ public sealed partial class CreateCashForecastItemParams
     /// </summary>
     [JsonPropertyName("until")]
     public string? Until { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Capturar una eliminación de consolidación».
+/// </summary>
+public sealed partial class CreateConsolidationEliminationParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El mes (AAAA-MM) a cuyo cierre se elimina.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// El concepto: «Ventas entre empresas del grupo».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// Los RFC entre los que es, del espacio del emisor: se aplica cuando todos están en el consolidado.
+    /// </summary>
+    [JsonPropertyName("rfcs")]
+    public required List<string> Rfcs { get; set; }
+
+    /// <summary>
+    /// Sus renglones: los cargos suman lo mismo que los abonos.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<CreateConsolidationEliminationParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateConsolidationEliminationParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateConsolidationEliminationParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal? Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal? Credit { get; set; }
 }
 
 /// <summary>
@@ -18414,6 +19222,30 @@ public sealed partial class GetComparativeStatementsParams
 }
 
 /// <summary>
+/// Los campos de «Ver los estados financieros consolidados».
+/// </summary>
+public sealed partial class GetConsolidatedStatementsParams
+{
+    /// <summary>
+    /// Los RFC que consolida, separados por coma (de 2 a 20).
+    /// </summary>
+    [JsonPropertyName("rfcs")]
+    public required string Rfcs { get; set; }
+
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver el estado de resultados por centro de costo».
 /// </summary>
 public sealed partial class GetCostCenterResultsParams
@@ -25331,6 +26163,24 @@ public sealed partial class ListBranchesParams
 /// </summary>
 public sealed partial class ListChartTemplatesParams
 {
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar las eliminaciones de consolidación de un mes».
+/// </summary>
+public sealed partial class ListConsolidationEliminationsParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -38694,6 +39544,60 @@ public sealed partial class UpdateCashForecastParamsStartingBalance
     /// </summary>
     [JsonPropertyName("date")]
     public string? Date { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar una eliminación de consolidación».
+/// </summary>
+public sealed partial class UpdateConsolidationEliminationParams
+{
+    /// <summary>
+    /// El mes (AAAA-MM) a cuyo cierre se elimina.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// El concepto: «Ventas entre empresas del grupo».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// Los RFC entre los que es, del espacio del emisor: se aplica cuando todos están en el consolidado.
+    /// </summary>
+    [JsonPropertyName("rfcs")]
+    public required List<string> Rfcs { get; set; }
+
+    /// <summary>
+    /// Sus renglones: los cargos suman lo mismo que los abonos.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<UpdateConsolidationEliminationParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateConsolidationEliminationParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateConsolidationEliminationParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal? Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal? Credit { get; set; }
 }
 
 /// <summary>
