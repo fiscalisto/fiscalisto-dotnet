@@ -29029,6 +29029,170 @@ public sealed partial class MemberList
 }
 
 /// <summary>
+/// Neto a bruto: el salario diario cuyo recibo ordinario de un periodo completo paga un neto, sin faltas, incidencias ni descuentos como Infonavit o préstamos. No guarda nada.
+/// </summary>
+public sealed partial class NetToGross
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…) cuyas prestaciones usó, o null.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// 02 semanal, 03 catorcenal, 04 quincenal o 05 mensual.
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public string Periodicity { get; set; } = default!;
+
+    /// <summary>
+    /// El neto que pidió.
+    /// </summary>
+    [JsonPropertyName("net_requested")]
+    public decimal NetRequested { get; set; }
+
+    /// <summary>
+    /// El salario diario cuyo recibo paga al menos ese neto (redondeado al centavo hacia arriba).
+    /// </summary>
+    [JsonPropertyName("daily_salary")]
+    public decimal DailySalary { get; set; }
+
+    /// <summary>
+    /// Su salario diario integrado (SDI) con el factor de sus prestaciones.
+    /// </summary>
+    [JsonPropertyName("integrated_daily_salary")]
+    public decimal IntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// El periodo con que se calculó (el actual de la periodicidad).
+    /// </summary>
+    [JsonPropertyName("period")]
+    public NetToGrossPeriod Period { get; set; } = default!;
+
+    /// <summary>
+    /// Los días pagados de un periodo completo.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal Days { get; set; }
+
+    /// <summary>
+    /// Total de percepciones del recibo.
+    /// </summary>
+    [JsonPropertyName("perceptions")]
+    public decimal Perceptions { get; set; }
+
+    /// <summary>
+    /// Total de deducciones (ISR, IMSS, fondo de ahorro).
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public decimal Deductions { get; set; }
+
+    /// <summary>
+    /// ISR retenido.
+    /// </summary>
+    [JsonPropertyName("taxes_withheld")]
+    public decimal TaxesWithheld { get; set; }
+
+    /// <summary>
+    /// Otros pagos.
+    /// </summary>
+    [JsonPropertyName("other_payments")]
+    public decimal OtherPayments { get; set; }
+
+    /// <summary>
+    /// El neto del recibo con ese salario.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public decimal Net { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Neto a bruto».
+/// </summary>
+public sealed partial class NetToGrossParams
+{
+    /// <summary>
+    /// El neto que quiere pagar por un periodo completo, en pesos.
+    /// </summary>
+    [JsonPropertyName("net")]
+    public required decimal Net { get; set; }
+
+    /// <summary>
+    /// Un empleado (emp_…): toma su periodicidad, zona y prestaciones (aguinaldo, prima vacacional, antigüedad, vales y fondo de ahorro), y su factor SDI ÷ salario si los tiene.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// 02 semanal, 03 catorcenal, 04 quincenal o 05 mensual. Sin employee, obligatoria.
+    /// <br/>
+    /// Valores: 02, 03, 04, 05.
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public string? Periodicity { get; set; }
+
+    /// <summary>
+    /// En la zona libre de la frontera norte (su salario mínimo).
+    /// </summary>
+    [JsonPropertyName("border_zone")]
+    public bool? BorderZone { get; set; }
+
+    /// <summary>
+    /// Fecha de ingreso: los días de vacaciones de su antigüedad.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// Días de aguinaldo al año (al menos 15).
+    /// </summary>
+    [JsonPropertyName("aguinaldo_days")]
+    public long? AguinaldoDays { get; set; }
+
+    /// <summary>
+    /// Prima vacacional como fracción (al menos 0.25).
+    /// </summary>
+    [JsonPropertyName("vacation_premium")]
+    public decimal? VacationPremium { get; set; }
+
+    /// <summary>
+    /// Vales de despensa al mes.
+    /// </summary>
+    [JsonPropertyName("pantry_vouchers")]
+    public decimal? PantryVouchers { get; set; }
+
+    /// <summary>
+    /// Fondo de ahorro como fracción del salario (hasta 0.13).
+    /// </summary>
+    [JsonPropertyName("savings_fund_rate")]
+    public decimal? SavingsFundRate { get; set; }
+}
+
+/// <summary>
+/// El periodo con que se calculó (el actual de la periodicidad).
+/// </summary>
+public sealed partial class NetToGrossPeriod
+{
+    /// <summary>
+    /// Primer día del periodo (FechaInicialPago), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// Último día del periodo (FechaFinalPago), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+}
+
+/// <summary>
 /// Los saldos iniciales del emisor: con qué saldo empieza cada cuenta el día en que empiezan sus libros.
 /// </summary>
 public sealed partial class OpeningBalances
@@ -30208,7 +30372,7 @@ public sealed partial class PayrollReceiptPreviewTotals
 public sealed partial class PayrollReceiptPreviewWarningsItem
 {
     /// <summary>
-    /// finiquito_not_included: el empleado se fue en el periodo y el recibo no trae su finiquito; absences_over_monthly_limit: con este recibo pasa de 7 faltas en el mes y las de más cotizan como días trabajados (para dejar de cotizar, presente su aviso de baja); payroll_rates_pending: aún no se cargan los valores (ISR, subsidio, salario mínimo, UMA) de una fecha próxima.
+    /// finiquito_not_included: el empleado se fue en el periodo y el recibo no trae su finiquito; absences_over_monthly_limit: con este recibo pasa de 7 faltas en el mes y las de más cotizan como días trabajados (para dejar de cotizar, presente su aviso de baja); payroll_rates_pending: aún no se cargan los valores (ISR, subsidio, salario mínimo, UMA) de una fecha próxima; net_changed_vs_previous: el neto cambia 10% o más (y al menos $100) contra el recibo ordinario anterior del empleado; salary_changed_vs_previous: cambió su salario diario integrado desde ese recibo (presente la modificación al IMSS); low_net: las deducciones le dejan menos del 30% de sus percepciones.
     /// </summary>
     [JsonPropertyName("code")]
     public string Code { get; set; } = default!;

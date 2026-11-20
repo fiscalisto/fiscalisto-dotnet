@@ -2167,6 +2167,20 @@ public sealed class PayrollReceiptsResource
         => _client.RequestAsync<Invoice>("POST", "/v1/payroll_receipts", @params, null, options, true, cancellationToken);
 
     /// <summary>
+    /// Neto a bruto
+    /// </summary>
+    /// <remarks>
+    /// El salario diario y el SDI cuyo recibo ordinario de un periodo completo paga el neto que pide, con el ISR y el IMSS de hoy, como «Calcular desde el neto» en cada empleado de la app. Con employee toma su periodicidad y prestaciones; sin él, las que mande o las de la ley. Sin faltas, incidencias ni descuentos como Infonavit o préstamos. No guarda nada: para usarlo, actualice al empleado.
+    /// <br/>
+    /// <c>POST /v1/payroll/net_to_gross</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/net-to-gross"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<NetToGross> NetToGrossAsync(NetToGrossParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<NetToGross>("POST", "/v1/payroll/net_to_gross", @params, null, options, true, cancellationToken);
+
+    /// <summary>
     /// Calcular un recibo sin timbrar
     /// </summary>
     /// <remarks>
