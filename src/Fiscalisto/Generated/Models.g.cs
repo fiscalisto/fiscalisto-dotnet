@@ -674,6 +674,30 @@ public sealed partial class ApplyAdvanceParamsRemainder
 }
 
 /// <summary>
+/// Los campos de «Aplicar el salario variable de un bimestre».
+/// </summary>
+public sealed partial class ApplyVariableSalaryParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El bimestre: AAAA-B, de 1 (enero–febrero) a 6 (noviembre–diciembre).
+    /// </summary>
+    [JsonPropertyName("bimester")]
+    public required string Bimester { get; set; }
+
+    /// <summary>
+    /// Los empleados (emp_…) a los que se aplica.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public required List<string> Employees { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Autorizar o rechazar horas extra».
 /// </summary>
 public sealed partial class ApproveAttendanceOvertimeParams
@@ -4547,6 +4571,76 @@ public sealed partial class CreateCustomerParamsForeign
     /// </summary>
     [JsonPropertyName("tax_id")]
     public required string TaxId { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar un descuento a un empleado».
+/// </summary>
+public sealed partial class CreateEmployeeDeductionParams
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// infonavit (deducción 010), fonacot (011), pension (pensión alimenticia, 007), prestamo (préstamo del patrón, 004), anticipo (anticipo de salarios, 012), caja (caja de ahorro, 018) o sindical (cuota sindical, 019).
+    /// <br/>
+    /// Valores: infonavit, fonacot, pension, prestamo, anticipo, caja, sindical.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// Cómo se calcula. infonavit: percent_sbc (porcentaje del SBC por día), fixed_month (cuota fija al mes) o vsm (factor de VSM al mes, por la UMI de 100.81), como dice el aviso de retención. fonacot: fixed_month (la retención mensual de la cédula). pension: percent_net (del neto después de ISR e IMSS), percent_gross (de todas las percepciones) o fixed_month. prestamo, anticipo y caja: fixed_period (monto por recibo). sindical: percent_salary (del sueldo) o fixed_period.
+    /// <br/>
+    /// Valores: percent_sbc, fixed_month, vsm, percent_net, percent_gross, fixed_period, percent_salary.
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public required string Mode { get; set; }
+
+    /// <summary>
+    /// El porcentaje (de más de 0 a 100), el factor de VSM o el monto en pesos, según mode.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public required decimal Value { get; set; }
+
+    /// <summary>
+    /// Solo prestamo y anticipo: el monto prestado. Se descuenta hasta pagarlo; no puede pasar de un mes de salario (artículo 110 de la LFT).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// El número de crédito de Infonavit o Fonacot, el expediente o una nota.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// Solo pension, y obligatorio: a quién se paga.
+    /// </summary>
+    [JsonPropertyName("beneficiary")]
+    public string? Beneficiary { get; set; }
+
+    /// <summary>
+    /// Desde qué día se descuenta (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public required string StartDate { get; set; }
+
+    /// <summary>
+    /// Hasta qué día (incluido). Sin él, hasta que se borre (o se pague el préstamo).
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Solo pension: también se descuenta del aguinaldo, la PTU y el finiquito (por omisión, true).
+    /// </summary>
+    [JsonPropertyName("extraordinary")]
+    public bool? Extraordinary { get; set; }
 }
 
 /// <summary>
@@ -11405,10 +11499,22 @@ public sealed partial class Employee
     public decimal DailySalary { get; set; }
 
     /// <summary>
-    /// Salario diario integrado (SalarioDiarioIntegrado): no menor al salario diario.
+    /// El SDI de los elementos fijos (cuota diaria con aguinaldo, prima vacacional y demás prestaciones fijas).
     /// </summary>
     [JsonPropertyName("integrated_daily_salary")]
     public decimal IntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// La parte variable del SDI desde variable_salary_from: lo que las horas extra triples, la prima dominical y los premios del bimestre anterior suman por día (artículo 30 de la LSS). Se fija con POST /v1/variable_salaries; los recibos usan integrated_daily_salary más esta.
+    /// </summary>
+    [JsonPropertyName("variable_integrated_daily_salary")]
+    public decimal VariableIntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// Desde cuándo aplica variable_integrated_daily_salary (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("variable_salary_from")]
+    public string? VariableSalaryFrom { get; set; }
 
     /// <summary>
     /// Tipo de contrato (TipoContrato), c_TipoContrato. Por omisión 01, por tiempo indeterminado.
@@ -11535,6 +11641,148 @@ public sealed partial class Employee
     /// </summary>
     [JsonPropertyName("created_at")]
     public string CreatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Un descuento que se repite en cada recibo ordinario de un empleado: Infonavit, Fonacot, pensión alimenticia, préstamo, caja de ahorro o cuota sindical. Cada recibo lo toma con los límites de la Ley Federal del Trabajo.
+/// </summary>
+public sealed partial class EmployeeDeduction
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// infonavit, fonacot, pension (pensión alimenticia), prestamo, anticipo (de salarios), caja (de ahorro) o sindical.
+    /// <br/>
+    /// Valores: infonavit, fonacot, pension, prestamo, anticipo, caja, sindical.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// La clave del SAT con que va en el recibo (c_TipoDeduccion): 010, 011, 007, 004, 012, 018 o 019.
+    /// </summary>
+    [JsonPropertyName("deduction_type")]
+    public string DeductionType { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo se calcula (vea POST /v1/employee_deductions).
+    /// <br/>
+    /// Valores: percent_sbc, fixed_month, vsm, percent_net, percent_gross, fixed_period, percent_salary.
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = default!;
+
+    /// <summary>
+    /// El porcentaje, el factor de VSM o el monto.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal Value { get; set; }
+
+    /// <summary>
+    /// El monto de un préstamo o anticipo.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// Lo que ya descontaron los recibos timbrados.
+    /// </summary>
+    [JsonPropertyName("paid")]
+    public decimal Paid { get; set; }
+
+    /// <summary>
+    /// Lo que falta de un préstamo o anticipo.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal? Balance { get; set; }
+
+    /// <summary>
+    /// El número de crédito, el expediente o una nota.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// A quién se paga una pensión.
+    /// </summary>
+    [JsonPropertyName("beneficiary")]
+    public string? Beneficiary { get; set; }
+
+    /// <summary>
+    /// Desde qué día se descuenta.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string StartDate { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta qué día, o null.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Una pensión que también se descuenta del aguinaldo, la PTU y el finiquito.
+    /// </summary>
+    [JsonPropertyName("extraordinary")]
+    public bool Extraordinary { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class EmployeeDeductionList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<EmployeeDeduction> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
@@ -15563,6 +15811,24 @@ public sealed partial class GetTrialBalanceParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Salario variable de un bimestre».
+/// </summary>
+public sealed partial class GetVariableSalaryParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// AAAA-B: 2026-5 es septiembre–octubre de 2026.
+    /// </summary>
+    [JsonPropertyName("bimester")]
+    public required string Bimester { get; set; }
 }
 
 /// <summary>
@@ -21592,6 +21858,24 @@ public sealed partial class ListCustomersParams
     /// </summary>
     [JsonPropertyName("tax_id")]
     public string? TaxId { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar descuentos».
+/// </summary>
+public sealed partial class ListEmployeeDeductionsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo los de este empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
 }
 
 /// <summary>
@@ -33575,6 +33859,70 @@ public sealed partial class UpdateCustomerParamsForeign
 }
 
 /// <summary>
+/// Los campos de «Cambiar un descuento».
+/// </summary>
+public sealed partial class UpdateEmployeeDeductionParams
+{
+    /// <summary>
+    /// infonavit (deducción 010), fonacot (011), pension (pensión alimenticia, 007), prestamo (préstamo del patrón, 004), anticipo (anticipo de salarios, 012), caja (caja de ahorro, 018) o sindical (cuota sindical, 019).
+    /// <br/>
+    /// Valores: infonavit, fonacot, pension, prestamo, anticipo, caja, sindical.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// Cómo se calcula. infonavit: percent_sbc (porcentaje del SBC por día), fixed_month (cuota fija al mes) o vsm (factor de VSM al mes, por la UMI de 100.81), como dice el aviso de retención. fonacot: fixed_month (la retención mensual de la cédula). pension: percent_net (del neto después de ISR e IMSS), percent_gross (de todas las percepciones) o fixed_month. prestamo, anticipo y caja: fixed_period (monto por recibo). sindical: percent_salary (del sueldo) o fixed_period.
+    /// <br/>
+    /// Valores: percent_sbc, fixed_month, vsm, percent_net, percent_gross, fixed_period, percent_salary.
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public string? Mode { get; set; }
+
+    /// <summary>
+    /// El porcentaje (de más de 0 a 100), el factor de VSM o el monto en pesos, según mode.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Solo prestamo y anticipo: el monto prestado. Se descuenta hasta pagarlo; no puede pasar de un mes de salario (artículo 110 de la LFT).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal? Total { get; set; }
+
+    /// <summary>
+    /// El número de crédito de Infonavit o Fonacot, el expediente o una nota.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string? Reference { get; set; }
+
+    /// <summary>
+    /// Solo pension, y obligatorio: a quién se paga.
+    /// </summary>
+    [JsonPropertyName("beneficiary")]
+    public string? Beneficiary { get; set; }
+
+    /// <summary>
+    /// Desde qué día se descuenta (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// Hasta qué día (incluido). Sin él, hasta que se borre (o se pague el préstamo).
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Solo pension: también se descuenta del aguinaldo, la PTU y el finiquito (por omisión, true).
+    /// </summary>
+    [JsonPropertyName("extraordinary")]
+    public bool? Extraordinary { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar un empleado».
 /// </summary>
 public sealed partial class UpdateEmployeeParams
@@ -36990,6 +37338,168 @@ public sealed partial class ValidateTaxIdParams
     /// </summary>
     [JsonPropertyName("cif_id")]
     public string? CifId { get; set; }
+}
+
+/// <summary>
+/// La parte variable del SDI de un bimestre (artículo 30 de la LSS): las horas extra triples, la prima dominical, otros ingresos y lo que los premios de puntualidad y asistencia pasan del 10% del SBC, entre los días trabajados.
+/// </summary>
+public sealed partial class VariableSalary
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// AAAA-B: 1 es enero–febrero, 6 noviembre–diciembre.
+    /// </summary>
+    [JsonPropertyName("bimester")]
+    public string Bimester { get; set; } = default!;
+
+    /// <summary>
+    /// El primer día del bimestre.
+    /// </summary>
+    [JsonPropertyName("period_start")]
+    public string PeriodStart { get; set; } = default!;
+
+    /// <summary>
+    /// El último día del bimestre.
+    /// </summary>
+    [JsonPropertyName("period_end")]
+    public string PeriodEnd { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo aplica: el primer día del bimestre siguiente.
+    /// </summary>
+    [JsonPropertyName("effective_date")]
+    public string EffectiveDate { get; set; } = default!;
+
+    /// <summary>
+    /// El último día para presentar la modificación en IDSE: el quinto día hábil del mes (artículo 34 de la LSS).
+    /// </summary>
+    [JsonPropertyName("deadline")]
+    public string Deadline { get; set; } = default!;
+
+    /// <summary>
+    /// Cada empleado con ingresos variables, o con una parte variable que cambia.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<VariableSalaryEmployeesItem> Employees { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;VariableSalaryEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class VariableSalaryEmployeesItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de empleado.
+    /// </summary>
+    [JsonPropertyName("employee_number")]
+    public string EmployeeNumber { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("employee_name")]
+    public string EmployeeName { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se integra del bimestre (artículo 27 de la LSS).
+    /// </summary>
+    [JsonPropertyName("variable_income")]
+    public decimal VariableIncome { get; set; }
+
+    /// <summary>
+    /// Los días de salario devengado: los del bimestre menos faltas e incapacidades.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public decimal Days { get; set; }
+
+    /// <summary>
+    /// variable_income entre days.
+    /// </summary>
+    [JsonPropertyName("daily_variable")]
+    public decimal DailyVariable { get; set; }
+
+    /// <summary>
+    /// El SDI de los elementos fijos.
+    /// </summary>
+    [JsonPropertyName("fixed_integrated_daily_salary")]
+    public decimal FixedIntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// La parte variable que tiene hoy.
+    /// </summary>
+    [JsonPropertyName("current_variable")]
+    public decimal CurrentVariable { get; set; }
+
+    /// <summary>
+    /// El SDI desde effective_date: el fijo más daily_variable.
+    /// </summary>
+    [JsonPropertyName("new_integrated_daily_salary")]
+    public decimal NewIntegratedDailySalary { get; set; }
+
+    /// <summary>
+    /// Si cambia lo que tiene.
+    /// </summary>
+    [JsonPropertyName("changes")]
+    public bool Changes { get; set; }
+
+    /// <summary>
+    /// Si ya se aplicó este bimestre.
+    /// </summary>
+    [JsonPropertyName("applied")]
+    public bool Applied { get; set; }
+
+    /// <summary>
+    /// De dónde sale variable_income.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<VariableSalaryEmployeesItemLinesItem> Lines { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;VariableSalaryEmployeesItemLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class VariableSalaryEmployeesItemLinesItem
+{
+    /// <summary>
+    /// El tipo de percepción (019, 020, 010, 049, 038).
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Qué es.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se integra.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
 }
 
 /// <summary>

@@ -125,6 +125,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public ImssFilesResource ImssFiles => _imssFiles ??= new ImssFilesResource(this);
 
+    private EmployeeDeductionsResource? _employeeDeductions;
+
+    /// <summary>Nómina.</summary>
+    public EmployeeDeductionsResource EmployeeDeductions => _employeeDeductions ??= new EmployeeDeductionsResource(this);
+
+    private VariableSalariesResource? _variableSalaries;
+
+    /// <summary>Nómina.</summary>
+    public VariableSalariesResource VariableSalaries => _variableSalaries ??= new VariableSalariesResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -2200,6 +2210,124 @@ public sealed class ImssFilesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<ImssFiles> CreateAsync(CreateImssFilesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<ImssFiles>("POST", "/v1/imss_files", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.EmployeeDeductions</c>.
+/// </summary>
+public sealed class EmployeeDeductionsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal EmployeeDeductionsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Agregar un descuento a un empleado
+    /// </summary>
+    /// <remarks>
+    /// Infonavit, Fonacot, pensión alimenticia, préstamo o anticipo del patrón, caja de ahorro o cuota sindical. Cada recibo ordinario desde start_date lo toma solo (POST /v1/payroll_receipts), con los límites de la Ley Federal del Trabajo: Infonavit por cada día del periodo aunque haya faltas, más $15 de seguro de daños por bimestre; Fonacot hasta el 20% del sueldo; préstamos, anticipos y caja hasta el 30% de lo que el sueldo excede del salario mínimo; del salario mínimo solo la pensión, Infonavit (20%) y Fonacot (10%). La pensión va primero, y lo que no alcanza del neto no se descuenta.
+    /// <br/>
+    /// <c>POST /v1/employee_deductions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-employee-deduction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeDeduction> CreateAsync(CreateEmployeeDeductionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeDeduction>("POST", "/v1/employee_deductions", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar descuentos
+    /// </summary>
+    /// <remarks>
+    /// Los descuentos vigentes del emisor, o de un empleado con employee.
+    /// <br/>
+    /// <c>GET /v1/employee_deductions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-employee-deductions"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeDeductionList> ListAsync(ListEmployeeDeductionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeDeductionList>("GET", "/v1/employee_deductions", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver un descuento
+    /// </summary>
+    /// <remarks>
+    /// El descuento con lo que ya tomaron los recibos (paid) y lo que falta de un préstamo (balance).
+    /// <br/>
+    /// <c>GET /v1/employee_deductions/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee-deduction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeDeduction> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeDeduction>("GET", $"/v1/employee_deductions/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un descuento
+    /// </summary>
+    /// <remarks>
+    /// Desde el siguiente recibo; los timbrados se quedan como están.
+    /// <br/>
+    /// <c>POST /v1/employee_deductions/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-employee-deduction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeDeduction> UpdateAsync(string id, UpdateEmployeeDeductionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeDeduction>("POST", $"/v1/employee_deductions/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar un descuento
+    /// </summary>
+    /// <remarks>
+    /// Los recibos siguientes ya no lo toman; los timbrados lo conservan.
+    /// <br/>
+    /// <c>DELETE /v1/employee_deductions/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-employee-deduction"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/employee_deductions/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.VariableSalaries</c>.
+/// </summary>
+public sealed class VariableSalariesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal VariableSalariesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Salario variable de un bimestre
+    /// </summary>
+    /// <remarks>
+    /// Lo que las horas extra triples, la prima dominical, otros ingresos y lo que los premios de puntualidad y asistencia pasan del 10% del SBC suman al SDI de cada empleado, de los recibos timbrados del bimestre, entre sus días trabajados (artículos 27 y 30 de la LSS). Las horas dobles no cuentan. No cambia nada: aplíquelo con POST /v1/variable_salaries.
+    /// <br/>
+    /// <c>GET /v1/variable_salaries</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-variable-salary"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<VariableSalary> GetAsync(GetVariableSalaryParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<VariableSalary>("GET", "/v1/variable_salaries", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Aplicar el salario variable de un bimestre
+    /// </summary>
+    /// <remarks>
+    /// A los empleados que diga: su parte variable del SDI desde el primer día del bimestre siguiente (los recibos de periodos anteriores siguen con la que tenían) y la modificación de salario pendiente de presentar en IDSE (GET /v1/imss_movements), a más tardar el quinto día hábil del mes (artículo 34 de la LSS). Repetirlo no hace nada.
+    /// <br/>
+    /// <c>POST /v1/variable_salaries</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/apply-variable-salary"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<VariableSalary> ApplyAsync(ApplyVariableSalaryParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<VariableSalary>("POST", "/v1/variable_salaries", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
