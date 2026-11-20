@@ -1914,6 +1914,144 @@ public sealed partial class BookDepreciationRate
 }
 
 /// <summary>
+/// Un cambio en la contabilidad (bitácora): una póliza, los saldos iniciales, el catálogo, el cierre de un mes, una eliminación, una póliza modelo o la baja de un activo; quién lo hizo y cómo estaba antes y después. No se edita ni se borra.
+/// </summary>
+public sealed partial class BooksLogEntry
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se hizo el cambio.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Qué cambió: una póliza a mano (manual_journal_entry), los saldos iniciales, una cuenta, el catálogo completo (una importación o una renumeración), el cierre del mes (period_close), una eliminación de consolidación, una póliza modelo o la baja de un activo fijo.
+    /// <br/>
+    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string Subject { get; set; } = default!;
+
+    /// <summary>
+    /// El id de lo que cambió cuando tiene uno en la API (mje_, cel_, mjt_); null en los demás.
+    /// </summary>
+    [JsonPropertyName("subject_id")]
+    public string? SubjectId { get; set; }
+
+    /// <summary>
+    /// created, updated, deleted, restored (deshecho), imported, closed (se cerró el mes) o reopened (se reabrió).
+    /// <br/>
+    /// Valores: created, updated, deleted, restored, imported, closed, reopened.
+    /// </summary>
+    [JsonPropertyName("action")]
+    public string Action { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que cambió, para leerlo: «Póliza de diario del 2026-03-15: Préstamo».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Quién: un usuario del panel (user, con su nombre), una llave de la API (api_key, con su nombre en label) o un asistente por MCP (assistant: su nombre en label y el del usuario en name).
+    /// </summary>
+    [JsonPropertyName("actor")]
+    public BooksLogEntryActor Actor { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo estaba (con los nombres de campo en español de la bitácora); null cuando no existía.
+    /// </summary>
+    [JsonPropertyName("before")]
+    public JsonElement? Before { get; set; }
+
+    /// <summary>
+    /// Cómo quedó; null cuando se borró.
+    /// </summary>
+    [JsonPropertyName("after")]
+    public JsonElement? After { get; set; }
+}
+
+/// <summary>
+/// Quién: un usuario del panel (user, con su nombre), una llave de la API (api_key, con su nombre en label) o un asistente por MCP (assistant: su nombre en label y el del usuario en name).
+/// </summary>
+public sealed partial class BooksLogEntryActor
+{
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: user, api_key, assistant.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// &lt;c&gt;label&lt;/c&gt;.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string? Label { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class BooksLogEntryList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<BooksLogEntry> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Una sucursal del emisor: otro lugar desde donde factura, con su código postal (LugarExpedicion), su dirección en el PDF, sus series y, si quiere, su propia marca (nombre comercial, logo, color y estilo del PDF).
 /// </summary>
 public sealed partial class Branch
@@ -26120,6 +26258,50 @@ public sealed partial class ListBankTransactionsParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar la bitácora de la contabilidad».
+/// </summary>
+public sealed partial class ListBooksLogParams
+{
+    /// <summary>
+    /// Solo los cambios de una cosa: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template o fixed_asset.
+    /// <br/>
+    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string? Subject { get; set; }
+
+    /// <summary>
+    /// Desde este día (AAAA-MM-DD, hora de la Ciudad de México).
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Hasta este día, incluido.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>

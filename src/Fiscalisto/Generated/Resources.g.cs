@@ -425,6 +425,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public AccountRenumberingsResource AccountRenumberings => _accountRenumberings ??= new AccountRenumberingsResource(this);
 
+    private BooksLogResource? _booksLog;
+
+    /// <summary>Contabilidad.</summary>
+    public BooksLogResource BooksLog => _booksLog ??= new BooksLogResource(this);
+
     private ConsolidationEliminationsResource? _consolidationEliminations;
 
     /// <summary>Contabilidad.</summary>
@@ -5991,6 +5996,36 @@ public sealed class AccountRenumberingsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<AccountRenumbering> CreateAsync(RenumberAccountsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<AccountRenumbering>("POST", "/v1/accounting/account_renumberings", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.BooksLog</c>.
+/// </summary>
+public sealed class BooksLogResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal BooksLogResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar la bitácora de la contabilidad
+    /// </summary>
+    /// <remarks>
+    /// Cada cambio a la contabilidad del RFC del emisor, del más reciente al más antiguo: pólizas a mano (también las que hacen el cierre del mes, la revaluación y los bancos), saldos iniciales, cuentas y el catálogo (que comparten los RFC del espacio), cierres y reaperturas de mes, eliminaciones de consolidación, pólizas modelo y bajas de activos. Cada uno dice quién lo hizo (un usuario, una llave de la API o un asistente) y cómo estaba antes y después. Guardar algo sin cambios no deja registro.
+    /// <br/>
+    /// <c>GET /v1/accounting/books_log</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-books-log"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<BooksLogEntry>> ListAsync(ListBooksLogParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<BooksLogEntry>("/v1/accounting/books_log", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar la bitácora de la contabilidad: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<BooksLogEntry> ListAutoPagingAsync(ListBooksLogParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<BooksLogEntry>("/v1/accounting/books_log", @params, options, cancellationToken);
 }
 
 /// <summary>
