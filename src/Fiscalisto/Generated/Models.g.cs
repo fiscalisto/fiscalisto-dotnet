@@ -640,6 +640,1152 @@ public sealed partial class AnnualAdjustmentEmployeesItem
 }
 
 /// <summary>
+/// La declaración anual de una persona moral del régimen general, desde su contabilidad: un papel de trabajo para su contador.
+/// </summary>
+public sealed partial class AnnualReturn
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// El último mes calculado.
+    /// </summary>
+    [JsonPropertyName("through_month")]
+    public long ThroughMonth { get; set; }
+
+    /// <summary>
+    /// true si es una estimación: el año sigue o through_month es menor que 12.
+    /// </summary>
+    [JsonPropertyName("estimated")]
+    public bool Estimated { get; set; }
+
+    /// <summary>
+    /// La utilidad contable (negativa si es pérdida) antes de la conciliación.
+    /// </summary>
+    [JsonPropertyName("book_profit")]
+    public decimal BookProfit { get; set; }
+
+    /// <summary>
+    /// Las partidas de la conciliación contable-fiscal.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<AnnualReturnItemsItem> Items { get; set; } = default!;
+
+    /// <summary>
+    /// Los ingresos acumulables.
+    /// </summary>
+    [JsonPropertyName("taxable_income")]
+    public decimal TaxableIncome { get; set; }
+
+    /// <summary>
+    /// Los ingresos nominales del artículo 14: los acumulables sin el ajuste anual por inflación acumulable.
+    /// </summary>
+    [JsonPropertyName("nominal_income")]
+    public decimal NominalIncome { get; set; }
+
+    /// <summary>
+    /// Las deducciones autorizadas, después del límite del artículo 78-B.
+    /// </summary>
+    [JsonPropertyName("deductions")]
+    public decimal Deductions { get; set; }
+
+    /// <summary>
+    /// true si le aplican los límites del Capítulo X (desde 2027: más de $50 millones de ingresos, con utilidad fiscal y sin excepción del artículo 78-E).
+    /// </summary>
+    [JsonPropertyName("subject_to_78a")]
+    public bool SubjectTo78a { get; set; }
+
+    /// <summary>
+    /// El límite del artículo 78-B; null si no aplica.
+    /// </summary>
+    [JsonPropertyName("limit_78b")]
+    public AnnualReturnLimit78b? Limit78b { get; set; }
+
+    /// <summary>
+    /// La PTU pagada en el ejercicio (artículo 9).
+    /// </summary>
+    [JsonPropertyName("ptu_paid")]
+    public decimal PtuPaid { get; set; }
+
+    /// <summary>
+    /// La utilidad fiscal (0 si hubo pérdida).
+    /// </summary>
+    [JsonPropertyName("tax_profit")]
+    public decimal TaxProfit { get; set; }
+
+    /// <summary>
+    /// La pérdida fiscal (0 si hubo utilidad).
+    /// </summary>
+    [JsonPropertyName("tax_loss")]
+    public decimal TaxLoss { get; set; }
+
+    /// <summary>
+    /// La pérdida de este año actualizada al último mes del ejercicio (artículo 57), lista para el siguiente.
+    /// </summary>
+    [JsonPropertyName("new_loss")]
+    public AnnualReturnNewLoss? NewLoss { get; set; }
+
+    /// <summary>
+    /// Las pérdidas de ejercicios anteriores, de la más vieja a la más nueva.
+    /// </summary>
+    [JsonPropertyName("losses")]
+    public AnnualReturnLosses Losses { get; set; } = default!;
+
+    /// <summary>
+    /// El resultado fiscal.
+    /// </summary>
+    [JsonPropertyName("tax_result")]
+    public decimal TaxResult { get; set; }
+
+    /// <summary>
+    /// El ISR del ejercicio: 30% del resultado fiscal.
+    /// </summary>
+    [JsonPropertyName("income_tax")]
+    public decimal IncomeTax { get; set; }
+
+    /// <summary>
+    /// Los pagos provisionales del ejercicio.
+    /// </summary>
+    [JsonPropertyName("provisional_payments")]
+    public decimal ProvisionalPayments { get; set; }
+
+    /// <summary>
+    /// Los meses sin pago provisional capturado ni leído del SAT.
+    /// </summary>
+    [JsonPropertyName("missing_provisional_months")]
+    public List<long> MissingProvisionalMonths { get; set; } = default!;
+
+    /// <summary>
+    /// El ISR que le retuvieron.
+    /// </summary>
+    [JsonPropertyName("withheld_tax")]
+    public decimal WithheldTax { get; set; }
+
+    /// <summary>
+    /// Positivo: ISR a cargo. Negativo: saldo a favor.
+    /// </summary>
+    [JsonPropertyName("balance")]
+    public decimal Balance { get; set; }
+
+    /// <summary>
+    /// El coeficiente de utilidad para los pagos provisionales del año siguiente (artículo 14), al diezmilésimo. null sin utilidad fiscal: se usa el del último ejercicio que la tuvo, de hasta cinco años atrás.
+    /// </summary>
+    [JsonPropertyName("profit_ratio")]
+    public decimal? ProfitRatio { get; set; }
+
+    /// <summary>
+    /// La base de la PTU.
+    /// </summary>
+    [JsonPropertyName("ptu")]
+    public AnnualReturnPtu Ptu { get; set; } = default!;
+
+    /// <summary>
+    /// El ISR del artículo 10 (dividendos que no salieron de la CUFIN, de este año y los dos anteriores) acreditado contra el ISR del ejercicio; ya restado en balance.
+    /// </summary>
+    [JsonPropertyName("dividend_tax_credited")]
+    public decimal DividendTaxCredited { get; set; }
+
+    /// <summary>
+    /// La utilidad fiscal neta.
+    /// </summary>
+    [JsonPropertyName("net_tax_profit")]
+    public AnnualReturnNetTaxProfit NetTaxProfit { get; set; } = default!;
+
+    /// <summary>
+    /// La CUFIN (artículo 77) y la CUCA (artículo 78) del año, con sus dividendos y movimientos de capital.
+    /// </summary>
+    [JsonPropertyName("tax_accounts")]
+    public AnnualReturnTaxAccounts TaxAccounts { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que pasa al año siguiente: las pérdidas que quedan (con la de este año) y desde 2027 las deducciones pendientes del artículo 78-B.
+    /// </summary>
+    [JsonPropertyName("next_year")]
+    public AnnualReturnNextYear NextYear { get; set; } = default!;
+
+    /// <summary>
+    /// Lo capturado con POST /v1/accounting/annual_returns/{year}.
+    /// </summary>
+    [JsonPropertyName("captured")]
+    public AnnualReturnCaptured Captured { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo capturado con POST /v1/accounting/annual_returns/{year}.
+/// </summary>
+public sealed partial class AnnualReturnCaptured
+{
+    /// <summary>
+    /// Las pérdidas capturadas.
+    /// </summary>
+    [JsonPropertyName("losses")]
+    public List<AnnualReturnCapturedLossesItem> Losses { get; set; } = default!;
+
+    /// <summary>
+    /// Las deducciones pendientes capturadas.
+    /// </summary>
+    [JsonPropertyName("pending_deductions")]
+    public List<AnnualReturnCapturedPendingDeductionsItem> PendingDeductions { get; set; } = default!;
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<AnnualReturnCapturedItemsItem> Items { get; set; } = default!;
+
+    /// <summary>
+    /// true si está en una excepción del artículo 78-E.
+    /// </summary>
+    [JsonPropertyName("exception_78e")]
+    public bool Exception78e { get; set; }
+
+    /// <summary>
+    /// Mes inicial (MesIni), 1 a 12.
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public long FromMonth { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnCapturedItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnCapturedItemsItem
+{
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// taxable_income (ingreso fiscal no contable, suma), non_deductible_expense (gasto contable no deducible, suma), tax_deduction (deducción fiscal no contable, resta) o non_taxable_income (ingreso contable no acumulable, resta).
+    /// <br/>
+    /// Valores: taxable_income, non_deductible_expense, tax_deduction, non_taxable_income.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// true si resta de la utilidad fiscal neta.
+    /// </summary>
+    [JsonPropertyName("reduces_net_tax_profit")]
+    public bool ReducesNetTaxProfit { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnCapturedLossesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnCapturedLossesItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnCapturedPendingDeductionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnCapturedPendingDeductionsItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que pasó al año siguiente de la declaración anual.
+/// </summary>
+public sealed partial class AnnualReturnCarryForward
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El ejercicio del que salen.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// El ejercicio al que pasan.
+    /// </summary>
+    [JsonPropertyName("to_year")]
+    public long ToYear { get; set; }
+
+    /// <summary>
+    /// Las pérdidas que pasaron.
+    /// </summary>
+    [JsonPropertyName("losses")]
+    public List<AnnualReturnCarryForwardLossesItem> Losses { get; set; } = default!;
+
+    /// <summary>
+    /// Las deducciones pendientes del artículo 78-B que pasaron.
+    /// </summary>
+    [JsonPropertyName("pending_deductions")]
+    public List<AnnualReturnCarryForwardPendingDeductionsItem> PendingDeductions { get; set; } = default!;
+
+    /// <summary>
+    /// La suma de las pérdidas que pasaron.
+    /// </summary>
+    [JsonPropertyName("total_losses")]
+    public decimal TotalLosses { get; set; }
+
+    /// <summary>
+    /// true si se pusieron en los pagos provisionales del año siguiente (no tenían pérdidas en Impuestos).
+    /// </summary>
+    [JsonPropertyName("provisional_payments_updated")]
+    public bool ProvisionalPaymentsUpdated { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnCarryForwardLossesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnCarryForwardLossesItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnCarryForwardPendingDeductionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnCarryForwardPendingDeductionsItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnItemsItem
+{
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// taxable_income (ingreso fiscal no contable, suma), non_deductible_expense (gasto contable no deducible, suma), tax_deduction (deducción fiscal no contable, resta) o non_taxable_income (ingreso contable no acumulable, resta).
+    /// <br/>
+    /// Valores: taxable_income, non_deductible_expense, tax_deduction, non_taxable_income.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// El artículo de la ley.
+    /// </summary>
+    [JsonPropertyName("legal_basis")]
+    public string LegalBasis { get; set; } = default!;
+
+    /// <summary>
+    /// De dónde sale: books (cuentas de los libros por su código agrupador), cfdi, payroll (nómina), calculation (ajuste por inflación, deducción de inversiones) o captured.
+    /// <br/>
+    /// Valores: books, cfdi, payroll, calculation, captured.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// true si resta de la utilidad fiscal neta (artículo 77).
+    /// </summary>
+    [JsonPropertyName("reduces_net_tax_profit")]
+    public bool ReducesNetTaxProfit { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnLimit78b&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnLimit78b
+{
+    /// <summary>
+    /// Las deducciones del año más las pendientes de años anteriores.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// El 96.67% de los ingresos acumulables.
+    /// </summary>
+    [JsonPropertyName("threshold")]
+    public decimal Threshold { get; set; }
+
+    /// <summary>
+    /// I: total hasta threshold, se deduce el 99%. II: total mayor, se deduce threshold.
+    /// <br/>
+    /// Valores: I, II.
+    /// </summary>
+    [JsonPropertyName("fraction")]
+    public string Fraction { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se deduce.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public decimal Limit { get; set; }
+
+    /// <summary>
+    /// Las deducciones pendientes de años anteriores, aplicadas primero.
+    /// </summary>
+    [JsonPropertyName("pending_deductions")]
+    public List<AnnualReturnLimit78bPendingDeductionsItem> PendingDeductions { get; set; } = default!;
+
+    /// <summary>
+    /// Lo de este año que pasa a los 20 ejercicios siguientes.
+    /// </summary>
+    [JsonPropertyName("not_deducted")]
+    public decimal NotDeducted { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnLimit78bPendingDeductionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnLimit78bPendingDeductionsItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que quedaba, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+
+    /// <summary>
+    /// El factor de actualización hasta junio del año (artículo 57, cuarto párrafo; CFF 17-A), al diezmilésimo y nunca menor que 1; 1 si el año no aplica nada.
+    /// </summary>
+    [JsonPropertyName("factor")]
+    public decimal Factor { get; set; }
+
+    /// <summary>
+    /// amount por factor.
+    /// </summary>
+    [JsonPropertyName("updated_amount")]
+    public decimal UpdatedAmount { get; set; }
+
+    /// <summary>
+    /// Lo aplicado este año.
+    /// </summary>
+    [JsonPropertyName("applied")]
+    public decimal Applied { get; set; }
+
+    /// <summary>
+    /// Lo que queda para los años siguientes.
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public decimal Remaining { get; set; }
+
+    /// <summary>
+    /// AAAA-MM hasta el que está remaining.
+    /// </summary>
+    [JsonPropertyName("remaining_updated_to")]
+    public string RemainingUpdatedTo { get; set; } = default!;
+
+    /// <summary>
+    /// El último ejercicio en que se puede aplicar.
+    /// </summary>
+    [JsonPropertyName("last_year")]
+    public long LastYear { get; set; }
+
+    /// <summary>
+    /// true si pasó su plazo: se perdió.
+    /// </summary>
+    [JsonPropertyName("expired")]
+    public bool Expired { get; set; }
+
+    /// <summary>
+    /// true si algún INPC aún no se publica.
+    /// </summary>
+    [JsonPropertyName("estimated")]
+    public bool Estimated { get; set; }
+}
+
+/// <summary>
+/// Las pérdidas de ejercicios anteriores, de la más vieja a la más nueva.
+/// </summary>
+public sealed partial class AnnualReturnLosses
+{
+    /// <summary>
+    /// Lo aplicado de pérdidas anteriores.
+    /// </summary>
+    [JsonPropertyName("applied")]
+    public decimal Applied { get; set; }
+
+    /// <summary>
+    /// Lo más que se podía aplicar: la utilidad fiscal, o la mitad con el artículo 78-C.
+    /// </summary>
+    [JsonPropertyName("cap")]
+    public decimal Cap { get; set; }
+
+    /// <summary>
+    /// El plazo para aplicarlas: 10 años, o 20 con el Capítulo X.
+    /// </summary>
+    [JsonPropertyName("term_years")]
+    public long TermYears { get; set; }
+
+    /// <summary>
+    /// Cada pérdida, con lo que se aplicó.
+    /// </summary>
+    [JsonPropertyName("rows")]
+    public List<AnnualReturnLossesRowsItem> Rows { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnLossesRowsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnLossesRowsItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que quedaba, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+
+    /// <summary>
+    /// El factor de actualización hasta junio del año (artículo 57, cuarto párrafo; CFF 17-A), al diezmilésimo y nunca menor que 1; 1 si el año no aplica nada.
+    /// </summary>
+    [JsonPropertyName("factor")]
+    public decimal Factor { get; set; }
+
+    /// <summary>
+    /// amount por factor.
+    /// </summary>
+    [JsonPropertyName("updated_amount")]
+    public decimal UpdatedAmount { get; set; }
+
+    /// <summary>
+    /// Lo aplicado este año.
+    /// </summary>
+    [JsonPropertyName("applied")]
+    public decimal Applied { get; set; }
+
+    /// <summary>
+    /// Lo que queda para los años siguientes.
+    /// </summary>
+    [JsonPropertyName("remaining")]
+    public decimal Remaining { get; set; }
+
+    /// <summary>
+    /// AAAA-MM hasta el que está remaining.
+    /// </summary>
+    [JsonPropertyName("remaining_updated_to")]
+    public string RemainingUpdatedTo { get; set; } = default!;
+
+    /// <summary>
+    /// El último ejercicio en que se puede aplicar.
+    /// </summary>
+    [JsonPropertyName("last_year")]
+    public long LastYear { get; set; }
+
+    /// <summary>
+    /// true si pasó su plazo: se perdió.
+    /// </summary>
+    [JsonPropertyName("expired")]
+    public bool Expired { get; set; }
+
+    /// <summary>
+    /// true si algún INPC aún no se publica.
+    /// </summary>
+    [JsonPropertyName("estimated")]
+    public bool Estimated { get; set; }
+}
+
+/// <summary>
+/// La utilidad fiscal neta.
+/// </summary>
+public sealed partial class AnnualReturnNetTaxProfit
+{
+    /// <summary>
+    /// Las partidas no deducibles que restan.
+    /// </summary>
+    [JsonPropertyName("non_deductibles")]
+    public decimal NonDeductibles { get; set; }
+
+    /// <summary>
+    /// dividend_tax_credited entre 0.4286, que resta de la utilidad fiscal neta (artículo 10, fracción II).
+    /// </summary>
+    [JsonPropertyName("dividend_tax_reduction")]
+    public decimal DividendTaxReduction { get; set; }
+
+    /// <summary>
+    /// La utilidad fiscal neta del ejercicio (artículo 77); negativa, disminuye la CUFIN.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnNewLoss&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnNewLoss
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que pasa al año siguiente: las pérdidas que quedan (con la de este año) y desde 2027 las deducciones pendientes del artículo 78-B.
+/// </summary>
+public sealed partial class AnnualReturnNextYear
+{
+    /// <summary>
+    /// Las pérdidas que quedan.
+    /// </summary>
+    [JsonPropertyName("losses")]
+    public List<AnnualReturnNextYearLossesItem> Losses { get; set; } = default!;
+
+    /// <summary>
+    /// Las deducciones pendientes del artículo 78-B.
+    /// </summary>
+    [JsonPropertyName("pending_deductions")]
+    public List<AnnualReturnNextYearPendingDeductionsItem> PendingDeductions { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnNextYearLossesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnNextYearLossesItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnNextYearPendingDeductionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnNextYearPendingDeductionsItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// La base de la PTU.
+/// </summary>
+public sealed partial class AnnualReturnPtu
+{
+    /// <summary>
+    /// La renta gravable (artículo 9, cuarto párrafo).
+    /// </summary>
+    [JsonPropertyName("taxable_base")]
+    public decimal TaxableBase { get; set; }
+
+    /// <summary>
+    /// El 10% para los trabajadores.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// La CUFIN (artículo 77) y la CUCA (artículo 78) del año, con sus dividendos y movimientos de capital.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccounts
+{
+    /// <summary>
+    /// true si no se han capturado los saldos al cierre del año anterior: se calcula desde cero.
+    /// </summary>
+    [JsonPropertyName("opening_missing")]
+    public bool OpeningMissing { get; set; }
+
+    /// <summary>
+    /// Los saldos al inicio del año.
+    /// </summary>
+    [JsonPropertyName("opening")]
+    public AnnualReturnTaxAccountsOpening Opening { get; set; } = default!;
+
+    /// <summary>
+    /// Cada movimiento del año, en orden de fecha.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public List<AnnualReturnTaxAccountsMovementsItem> Movements { get; set; } = default!;
+
+    /// <summary>
+    /// El ISR del artículo 10 de los movimientos del año.
+    /// </summary>
+    [JsonPropertyName("dividend_tax")]
+    public decimal DividendTax { get; set; }
+
+    /// <summary>
+    /// Los saldos al 31 de diciembre, actualizados y con la utilidad fiscal neta del año.
+    /// </summary>
+    [JsonPropertyName("year_end")]
+    public AnnualReturnTaxAccountsYearEnd YearEnd { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que una utilidad fiscal neta negativa de años anteriores restó a la de este año.
+    /// </summary>
+    [JsonPropertyName("negative_net_tax_profit_applied")]
+    public decimal NegativeNetTaxProfitApplied { get; set; }
+
+    /// <summary>
+    /// Lo que pasa al año siguiente además de los saldos.
+    /// </summary>
+    [JsonPropertyName("next_year")]
+    public AnnualReturnTaxAccountsNextYear NextYear { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnTaxAccountsMovementsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccountsMovementsItem
+{
+    /// <summary>
+    /// El día del movimiento.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de movimiento.
+    /// <br/>
+    /// Valores: dividend_paid, dividend_received, capital_contribution, capital_reduction.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Lo pagado, recibido o aportado.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// De qué CUFIN sale primero.
+    /// <br/>
+    /// Valores: cufin, cufin_2013.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// true si es a una persona física o del extranjero.
+    /// </summary>
+    [JsonPropertyName("individual")]
+    public bool Individual { get; set; }
+
+    /// <summary>
+    /// El factor con que se actualizó la cuenta al mes del movimiento (artículos 77 y 78).
+    /// </summary>
+    [JsonPropertyName("factor")]
+    public decimal Factor { get; set; }
+
+    /// <summary>
+    /// true si algún INPC aún no se publica.
+    /// </summary>
+    [JsonPropertyName("estimated")]
+    public bool Estimated { get; set; }
+
+    /// <summary>
+    /// La utilidad distribuida: el dividendo, o la del artículo 78 en un reembolso.
+    /// </summary>
+    [JsonPropertyName("distributed_profit")]
+    public decimal DistributedProfit { get; set; }
+
+    /// <summary>
+    /// Lo que sale de la CUFIN de 2014 en adelante.
+    /// </summary>
+    [JsonPropertyName("from_cufin")]
+    public decimal FromCufin { get; set; }
+
+    /// <summary>
+    /// Lo que sale de la CUFIN hasta 2013.
+    /// </summary>
+    [JsonPropertyName("from_cufin_2013")]
+    public decimal FromCufin2013 { get; set; }
+
+    /// <summary>
+    /// Lo que no sale de la CUFIN: paga el ISR del artículo 10.
+    /// </summary>
+    [JsonPropertyName("not_from_cufin")]
+    public decimal NotFromCufin { get; set; }
+
+    /// <summary>
+    /// El ISR del artículo 10: not_from_cufin × 1.4286 × 30%.
+    /// </summary>
+    [JsonPropertyName("dividend_tax")]
+    public decimal DividendTax { get; set; }
+
+    /// <summary>
+    /// El día 17 del mes siguiente, cuando se entera (artículo 10).
+    /// </summary>
+    [JsonPropertyName("dividend_tax_due")]
+    public string? DividendTaxDue { get; set; }
+
+    /// <summary>
+    /// El 10% a retener a una persona física (artículo 140), sobre lo de 2014 en adelante.
+    /// </summary>
+    [JsonPropertyName("withholding")]
+    public decimal Withholding { get; set; }
+
+    /// <summary>
+    /// capital_reduction: la CUCA por acción a esa fecha.
+    /// </summary>
+    [JsonPropertyName("cuca_per_share")]
+    public decimal? CucaPerShare { get; set; }
+
+    /// <summary>
+    /// capital_reduction: lo que sale de la CUCA.
+    /// </summary>
+    [JsonPropertyName("from_cuca")]
+    public decimal FromCuca { get; set; }
+
+    /// <summary>
+    /// capital_reduction: la utilidad distribuida de la fracción I.
+    /// </summary>
+    [JsonPropertyName("distributed_profit_fraction_i")]
+    public decimal DistributedProfitFractionI { get; set; }
+
+    /// <summary>
+    /// capital_reduction: la de la fracción II, que después cuenta como aportación.
+    /// </summary>
+    [JsonPropertyName("distributed_profit_fraction_ii")]
+    public decimal DistributedProfitFractionIi { get; set; }
+
+    /// <summary>
+    /// Los saldos después del movimiento.
+    /// </summary>
+    [JsonPropertyName("balances")]
+    public AnnualReturnTaxAccountsMovementsItemBalances Balances { get; set; } = default!;
+}
+
+/// <summary>
+/// Los saldos después del movimiento.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccountsMovementsItemBalances
+{
+    /// <summary>
+    /// La CUFIN de 2014 en adelante.
+    /// </summary>
+    [JsonPropertyName("cufin")]
+    public decimal Cufin { get; set; }
+
+    /// <summary>
+    /// La CUFIN hasta 2013.
+    /// </summary>
+    [JsonPropertyName("cufin_2013")]
+    public decimal Cufin2013 { get; set; }
+
+    /// <summary>
+    /// La cuenta de capital de aportación.
+    /// </summary>
+    [JsonPropertyName("cuca")]
+    public decimal Cuca { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUFIN.
+    /// </summary>
+    [JsonPropertyName("cufin_updated_to")]
+    public string CufinUpdatedTo { get; set; } = default!;
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUCA.
+    /// </summary>
+    [JsonPropertyName("cuca_updated_to")]
+    public string CucaUpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que pasa al año siguiente además de los saldos.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccountsNextYear
+{
+    /// <summary>
+    /// El ISR del artículo 10 que se acredita en los años siguientes (fracción I).
+    /// </summary>
+    [JsonPropertyName("pending_dividend_tax")]
+    public List<AnnualReturnTaxAccountsNextYearPendingDividendTaxItem> PendingDividendTax { get; set; } = default!;
+
+    /// <summary>
+    /// Una utilidad fiscal neta negativa que la CUFIN no alcanzó (artículo 77, quinto párrafo).
+    /// </summary>
+    [JsonPropertyName("negative_net_tax_profit")]
+    public AnnualReturnTaxAccountsNextYearNegativeNetTaxProfit? NegativeNetTaxProfit { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnTaxAccountsNextYearNegativeNetTaxProfit&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccountsNextYearNegativeNetTaxProfit
+{
+    /// <summary>
+    /// Lo que falta disminuir.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public string UpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AnnualReturnTaxAccountsNextYearPendingDividendTaxItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccountsNextYearPendingDividendTaxItem
+{
+    /// <summary>
+    /// El año en que se pagó.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Lo que falta acreditar.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Los saldos al inicio del año.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccountsOpening
+{
+    /// <summary>
+    /// La CUFIN de 2014 en adelante.
+    /// </summary>
+    [JsonPropertyName("cufin")]
+    public decimal Cufin { get; set; }
+
+    /// <summary>
+    /// La CUFIN hasta 2013.
+    /// </summary>
+    [JsonPropertyName("cufin_2013")]
+    public decimal Cufin2013 { get; set; }
+
+    /// <summary>
+    /// La cuenta de capital de aportación.
+    /// </summary>
+    [JsonPropertyName("cuca")]
+    public decimal Cuca { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUFIN.
+    /// </summary>
+    [JsonPropertyName("cufin_updated_to")]
+    public string CufinUpdatedTo { get; set; } = default!;
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUCA.
+    /// </summary>
+    [JsonPropertyName("cuca_updated_to")]
+    public string CucaUpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
+/// Los saldos al 31 de diciembre, actualizados y con la utilidad fiscal neta del año.
+/// </summary>
+public sealed partial class AnnualReturnTaxAccountsYearEnd
+{
+    /// <summary>
+    /// La CUFIN de 2014 en adelante.
+    /// </summary>
+    [JsonPropertyName("cufin")]
+    public decimal Cufin { get; set; }
+
+    /// <summary>
+    /// La CUFIN hasta 2013.
+    /// </summary>
+    [JsonPropertyName("cufin_2013")]
+    public decimal Cufin2013 { get; set; }
+
+    /// <summary>
+    /// La cuenta de capital de aportación.
+    /// </summary>
+    [JsonPropertyName("cuca")]
+    public decimal Cuca { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUFIN.
+    /// </summary>
+    [JsonPropertyName("cufin_updated_to")]
+    public string CufinUpdatedTo { get; set; } = default!;
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUCA.
+    /// </summary>
+    [JsonPropertyName("cuca_updated_to")]
+    public string CucaUpdatedTo { get; set; } = default!;
+}
+
+/// <summary>
 /// El cuerpo de POST /v1/invoices (la factura de lo vendido) con method y remainder.
 /// </summary>
 public sealed partial class ApplyAdvanceParams
@@ -2641,6 +3787,18 @@ public sealed partial class CancelSatRetentionParams
     /// </summary>
     [JsonPropertyName("substitution")]
     public string? Substitution { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Llevar las pérdidas que quedan al año siguiente».
+/// </summary>
+public sealed partial class CarryForwardAnnualReturnParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -19625,6 +20783,24 @@ public sealed partial class GetAnnualAdjustmentParams
     /// </summary>
     [JsonPropertyName("year")]
     public required long Year { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Calcular la declaración anual de una persona moral».
+/// </summary>
+public sealed partial class GetAnnualReturnParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El último mes, de 1 a 12, para estimar el año en curso. Por omisión 12 en un año pasado y el mes actual en el año en curso.
+    /// </summary>
+    [JsonPropertyName("through_month")]
+    public long? ThroughMonth { get; set; }
 }
 
 /// <summary>
@@ -38642,6 +39818,270 @@ public sealed partial class SatRiskCheckChecksItem
     /// </summary>
     [JsonPropertyName("why")]
     public string Why { get; set; } = default!;
+}
+
+/// <summary>
+/// Los campos de «Capturar lo que los libros no dicen de la declaración anual».
+/// </summary>
+public sealed partial class SaveAnnualReturnParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Las pérdidas fiscales de ejercicios anteriores pendientes de aplicar (artículo 57), una por ejercicio. Reemplaza las capturadas.
+    /// </summary>
+    [JsonPropertyName("losses")]
+    public required List<SaveAnnualReturnParamsLossesItem> Losses { get; set; }
+
+    /// <summary>
+    /// Desde 2027: las deducciones que el límite del artículo 78-B dejó para los 20 ejercicios siguientes.
+    /// </summary>
+    [JsonPropertyName("pending_deductions")]
+    public List<SaveAnnualReturnParamsPendingDeductionsItem>? PendingDeductions { get; set; }
+
+    /// <summary>
+    /// Las partidas de la conciliación que los libros, los CFDI y la nómina no dicen.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<SaveAnnualReturnParamsItemsItem>? Items { get; set; }
+
+    /// <summary>
+    /// true si está en una de las excepciones del artículo 78-E: no le aplican los límites de los artículos 78-A a 78-D.
+    /// </summary>
+    [JsonPropertyName("exception_78e")]
+    public bool? Exception78e { get; set; }
+
+    /// <summary>
+    /// El primer mes del ejercicio: 1, o el mes en que empezó si fue en el año.
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public long? FromMonth { get; set; }
+
+    /// <summary>
+    /// La CUFIN y la CUCA (artículos 77 y 78): saldos iniciales y movimientos del año. Sin este campo se quedan los guardados.
+    /// </summary>
+    [JsonPropertyName("tax_accounts")]
+    public SaveAnnualReturnParamsTaxAccounts? TaxAccounts { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveAnnualReturnParamsItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveAnnualReturnParamsItemsItem
+{
+    /// <summary>
+    /// Concepto del pago (ConceptoPago), c_TipoContribuyenteSujetoRetencion.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public required string Concept { get; set; }
+
+    /// <summary>
+    /// taxable_income (ingreso fiscal no contable), non_deductible_expense (gasto contable no deducible), tax_deduction (deducción fiscal no contable) o non_taxable_income (ingreso contable no acumulable, como dividendos de personas morales mexicanas).
+    /// <br/>
+    /// Valores: taxable_income, non_deductible_expense, tax_deduction, non_taxable_income.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// true en un gasto no deducible que resta de la utilidad fiscal neta (artículo 77).
+    /// </summary>
+    [JsonPropertyName("reduces_net_tax_profit")]
+    public bool? ReducesNetTaxProfit { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveAnnualReturnParamsLossesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveAnnualReturnParamsLossesItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización: diciembre de su ejercicio si aún no se aplica nada.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public required string UpdatedTo { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveAnnualReturnParamsPendingDeductionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveAnnualReturnParamsPendingDeductionsItem
+{
+    /// <summary>
+    /// El ejercicio en que nació.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required long Year { get; set; }
+
+    /// <summary>
+    /// Lo que queda por aplicar, actualizado hasta updated_to.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de su última actualización: diciembre de su ejercicio si aún no se aplica nada.
+    /// </summary>
+    [JsonPropertyName("updated_to")]
+    public required string UpdatedTo { get; set; }
+}
+
+/// <summary>
+/// La CUFIN y la CUCA (artículos 77 y 78): saldos iniciales y movimientos del año. Sin este campo se quedan los guardados.
+/// </summary>
+public sealed partial class SaveAnnualReturnParamsTaxAccounts
+{
+    /// <summary>
+    /// Los saldos al cierre del año anterior; null si no se conocen. carry_forward los pone en el año siguiente.
+    /// </summary>
+    [JsonPropertyName("opening")]
+    public SaveAnnualReturnParamsTaxAccountsOpening? Opening { get; set; }
+
+    /// <summary>
+    /// Los dividendos, aportaciones y reembolsos del año.
+    /// </summary>
+    [JsonPropertyName("movements")]
+    public List<SaveAnnualReturnParamsTaxAccountsMovementsItem>? Movements { get; set; }
+
+    /// <summary>
+    /// El ISR del artículo 10 pagado en los dos años anteriores que falta acreditar.
+    /// </summary>
+    [JsonPropertyName("pending_dividend_tax")]
+    public List<SaveAnnualReturnParamsTaxAccountsPendingDividendTaxItem>? PendingDividendTax { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveAnnualReturnParamsTaxAccountsMovementsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveAnnualReturnParamsTaxAccountsMovementsItem
+{
+    /// <summary>
+    /// El día en que se pagó o se recibió, en este año.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// dividend_paid (dividendo pagado), dividend_received (de otra persona moral mexicana, suma a la CUFIN), capital_contribution (aportación, suma a la CUCA) o capital_reduction (reembolso o reducción de capital, artículo 78).
+    /// <br/>
+    /// Valores: dividend_paid, dividend_received, capital_contribution, capital_reduction.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Un dividendo o reembolso: de qué CUFIN sale primero (por omisión cufin, la de 2014 en adelante).
+    /// <br/>
+    /// Valores: cufin, cufin_2013.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// true si se paga a una persona física o a un residente en el extranjero: se le retiene el 10% (artículo 140).
+    /// </summary>
+    [JsonPropertyName("individual")]
+    public bool? Individual { get; set; }
+
+    /// <summary>
+    /// capital_reduction: las acciones que se reembolsan.
+    /// </summary>
+    [JsonPropertyName("shares")]
+    public decimal? Shares { get; set; }
+
+    /// <summary>
+    /// capital_reduction: el total de acciones a esa fecha.
+    /// </summary>
+    [JsonPropertyName("total_shares")]
+    public decimal? TotalShares { get; set; }
+
+    /// <summary>
+    /// capital_reduction: el capital contable del estado de posición financiera aprobado, actualizado (artículo 78, fracción II).
+    /// </summary>
+    [JsonPropertyName("equity")]
+    public decimal? Equity { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveAnnualReturnParamsTaxAccountsOpening&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveAnnualReturnParamsTaxAccountsOpening
+{
+    /// <summary>
+    /// La CUFIN de utilidades de 2014 en adelante al cierre del año anterior.
+    /// </summary>
+    [JsonPropertyName("cufin")]
+    public required decimal Cufin { get; set; }
+
+    /// <summary>
+    /// La CUFIN de utilidades hasta 2013 (transitorio 2014, fr. XXX): sus dividendos no pagan el 10% de las personas físicas.
+    /// </summary>
+    [JsonPropertyName("cufin_2013")]
+    public decimal? Cufin2013 { get; set; }
+
+    /// <summary>
+    /// La cuenta de capital de aportación (artículo 78).
+    /// </summary>
+    [JsonPropertyName("cuca")]
+    public required decimal Cuca { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUFIN, antes de este año.
+    /// </summary>
+    [JsonPropertyName("cufin_updated_to")]
+    public required string CufinUpdatedTo { get; set; }
+
+    /// <summary>
+    /// AAAA-MM de la última actualización de la CUCA, antes de este año.
+    /// </summary>
+    [JsonPropertyName("cuca_updated_to")]
+    public required string CucaUpdatedTo { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveAnnualReturnParamsTaxAccountsPendingDividendTaxItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveAnnualReturnParamsTaxAccountsPendingDividendTaxItem
+{
+    /// <summary>
+    /// Año (Ejercicio).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required long Year { get; set; }
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
 }
 
 /// <summary>
