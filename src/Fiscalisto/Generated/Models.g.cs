@@ -1752,6 +1752,66 @@ public sealed partial class BankTransactionSuggestedMatch
 }
 
 /// <summary>
+/// La tasa anual y el valor residual con que los libros deprecian un activo o un tipo de activo desde un mes (NIF C-6), aparte de la deducción fiscal.
+/// </summary>
+public sealed partial class BookDepreciationRate
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El activo fijo que lleva la tasa, o null si es de un tipo.
+    /// </summary>
+    [JsonPropertyName("fixed_asset")]
+    public string? FixedAsset { get; set; }
+
+    /// <summary>
+    /// El tipo de activo (uso CFDI) que la lleva, o null si es de un activo.
+    /// </summary>
+    [JsonPropertyName("cfdi_use")]
+    public string? CfdiUse { get; set; }
+
+    /// <summary>
+    /// El mes (AAAA-MM) desde el que aplica.
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public string FromMonth { get; set; } = default!;
+
+    /// <summary>
+    /// La tasa anual contable, o null si se quitó.
+    /// </summary>
+    [JsonPropertyName("annual_rate")]
+    public decimal? AnnualRate { get; set; }
+
+    /// <summary>
+    /// El valor residual como fracción del monto original, o null si se quitó.
+    /// </summary>
+    [JsonPropertyName("residual_rate")]
+    public decimal? ResidualRate { get; set; }
+
+    /// <summary>
+    /// true si quitó la tasa de ese mes.
+    /// </summary>
+    [JsonPropertyName("removed")]
+    public bool Removed { get; set; }
+}
+
+/// <summary>
 /// Una sucursal del emisor: otro lugar desde donde factura, con su código postal (LugarExpedicion), su dirección en el PDF, sus series y, si quiere, su propia marca (nombre comercial, logo, color y estilo del PDF).
 /// </summary>
 public sealed partial class Branch
@@ -7821,6 +7881,12 @@ public sealed partial class CreatePayrollReceiptParamsIncidents
     public decimal? VacationDays { get; set; }
 
     /// <summary>
+    /// Si la empresa paga los disability_days del recibo: percepción 014 con su nodo Incapacidad. Exenta como previsión social con el límite de 7 UMA al año (art. 93 de la LISR); la de un riesgo de trabajo, toda.
+    /// </summary>
+    [JsonPropertyName("disability_pay")]
+    public CreatePayrollReceiptParamsIncidentsDisabilityPay? DisabilityPay { get; set; }
+
+    /// <summary>
     /// Premios, comisiones y bonos del periodo, gravados.
     /// </summary>
     [JsonPropertyName("bonuses")]
@@ -7851,6 +7917,26 @@ public sealed partial class CreatePayrollReceiptParamsIncidentsBonusesItem
     /// </summary>
     [JsonPropertyName("concept")]
     public string? Concept { get; set; }
+}
+
+/// <summary>
+/// Si la empresa paga los disability_days del recibo: percepción 014 con su nodo Incapacidad. Exenta como previsión social con el límite de 7 UMA al año (art. 93 de la LISR); la de un riesgo de trabajo, toda.
+/// </summary>
+public sealed partial class CreatePayrollReceiptParamsIncidentsDisabilityPay
+{
+    /// <summary>
+    /// Tipo de incapacidad (c_TipoIncapacidad): 01 riesgo de trabajo, 02 enfermedad general, 03 maternidad, 04 licencia por cuidados médicos de hijos con cáncer.
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Lo que paga la empresa de cada día de incapacidad, como fracción del salario diario: 1 todo; 0.4 lo que completa el 60% que paga el IMSS.
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
 }
 
 /// <summary>
@@ -12760,6 +12846,114 @@ public sealed partial class Deleted
 }
 
 /// <summary>
+/// La depreciación contable del año contra la deducción de inversiones (artículos 31 y 34 de la Ley del ISR) de cada activo, para la conciliación contable-fiscal.
+/// </summary>
+public sealed partial class DepreciationReconciliation
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El año.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Cada activo con depreciación contable o deducción fiscal en el año.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<DepreciationReconciliationItemsItem> Items { get; set; } = default!;
+
+    /// <summary>
+    /// La depreciación contable del año de todos los activos.
+    /// </summary>
+    [JsonPropertyName("book_depreciation")]
+    public decimal BookDepreciation { get; set; }
+
+    /// <summary>
+    /// La deducción de inversiones del año, actualizada.
+    /// </summary>
+    [JsonPropertyName("tax_deduction")]
+    public decimal TaxDeduction { get; set; }
+
+    /// <summary>
+    /// tax_deduction menos book_depreciation: la partida de la conciliación contable-fiscal.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal Difference { get; set; }
+
+    /// <summary>
+    /// Los meses cuyo INPC no se ha publicado, estimados con el último (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("inpc_estimated_months")]
+    public List<string> InpcEstimatedMonths { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;DepreciationReconciliationItemsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class DepreciationReconciliationItemsItem
+{
+    /// <summary>
+    /// El activo fijo (fxa_… o fxc_…), o null si no tiene registro contable.
+    /// </summary>
+    [JsonPropertyName("fixed_asset")]
+    public string? FixedAsset { get; set; }
+
+    /// <summary>
+    /// Qué es.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Su tipo por uso CFDI (I01 a I08).
+    /// </summary>
+    [JsonPropertyName("cfdi_use")]
+    public string? CfdiUse { get; set; }
+
+    /// <summary>
+    /// Su depreciación contable del año.
+    /// </summary>
+    [JsonPropertyName("book_depreciation")]
+    public decimal BookDepreciation { get; set; }
+
+    /// <summary>
+    /// Su deducción fiscal del año, actualizada con el INPC.
+    /// </summary>
+    [JsonPropertyName("tax_deduction")]
+    public decimal TaxDeduction { get; set; }
+
+    /// <summary>
+    /// El factor de actualización de la deducción fiscal (1 sin actualizar).
+    /// </summary>
+    [JsonPropertyName("inflation_factor")]
+    public decimal InflationFactor { get; set; }
+
+    /// <summary>
+    /// tax_deduction menos book_depreciation.
+    /// </summary>
+    [JsonPropertyName("difference")]
+    public decimal Difference { get; set; }
+}
+
+/// <summary>
 /// La DIOT de un mes: lo pagado a cada proveedor, por tipo de operación.
 /// </summary>
 public sealed partial class Diot
@@ -16875,10 +17069,22 @@ public sealed partial class FixedAsset
     public decimal Cost { get; set; }
 
     /// <summary>
-    /// Su tasa anual de depreciación (0.3 es 30%).
+    /// Su tasa anual de depreciación contable (0.3 es 30%): la del artículo 34 de la LISR o la que fijó con POST /v1/accounting/book_depreciation_rates.
     /// </summary>
     [JsonPropertyName("annual_rate")]
     public decimal AnnualRate { get; set; }
+
+    /// <summary>
+    /// Su valor residual como fracción del monto original; 0 por omisión.
+    /// </summary>
+    [JsonPropertyName("residual_rate")]
+    public decimal ResidualRate { get; set; }
+
+    /// <summary>
+    /// La tasa del artículo 34 de la LISR, la de su deducción fiscal.
+    /// </summary>
+    [JsonPropertyName("tax_annual_rate")]
+    public decimal TaxAnnualRate { get; set; }
 
     /// <summary>
     /// Lo que se deprecia cada mes mientras dura.
@@ -17610,6 +17816,18 @@ public sealed partial class GetCrossChecksParams
     [JsonPropertyName("year")]
     public long? Year { get; set; }
 
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Comparar la depreciación contable con la fiscal».
+/// </summary>
+public sealed partial class GetDepreciationReconciliationParams
+{
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -29104,6 +29322,12 @@ public sealed partial class PreviewPayrollReceiptParamsIncidents
     public decimal? VacationDays { get; set; }
 
     /// <summary>
+    /// Si la empresa paga los disability_days del recibo: percepción 014 con su nodo Incapacidad. Exenta como previsión social con el límite de 7 UMA al año (art. 93 de la LISR); la de un riesgo de trabajo, toda.
+    /// </summary>
+    [JsonPropertyName("disability_pay")]
+    public PreviewPayrollReceiptParamsIncidentsDisabilityPay? DisabilityPay { get; set; }
+
+    /// <summary>
     /// Premios, comisiones y bonos del periodo, gravados.
     /// </summary>
     [JsonPropertyName("bonuses")]
@@ -29134,6 +29358,26 @@ public sealed partial class PreviewPayrollReceiptParamsIncidentsBonusesItem
     /// </summary>
     [JsonPropertyName("concept")]
     public string? Concept { get; set; }
+}
+
+/// <summary>
+/// Si la empresa paga los disability_days del recibo: percepción 014 con su nodo Incapacidad. Exenta como previsión social con el límite de 7 UMA al año (art. 93 de la LISR); la de un riesgo de trabajo, toda.
+/// </summary>
+public sealed partial class PreviewPayrollReceiptParamsIncidentsDisabilityPay
+{
+    /// <summary>
+    /// Tipo de incapacidad (c_TipoIncapacidad): 01 riesgo de trabajo, 02 enfermedad general, 03 maternidad, 04 licencia por cuidados médicos de hijos con cáncer.
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Lo que paga la empresa de cada día de incapacidad, como fracción del salario diario: 1 todo; 0.4 lo que completa el 60% que paga el IMSS.
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
 }
 
 /// <summary>
@@ -34894,6 +35138,50 @@ public sealed partial class SatRiskCheckChecksItem
     /// </summary>
     [JsonPropertyName("why")]
     public string Why { get; set; } = default!;
+}
+
+/// <summary>
+/// Los campos de «Fijar la tasa de depreciación contable».
+/// </summary>
+public sealed partial class SaveBookDepreciationRateParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El activo fijo (fxa_… o fxc_…) que lleva su propia tasa. Mande este o cfdi_use.
+    /// </summary>
+    [JsonPropertyName("fixed_asset")]
+    public string? FixedAsset { get; set; }
+
+    /// <summary>
+    /// El tipo de activo (uso CFDI I01–I08) cuyos activos toman la tasa. Mande este o fixed_asset.
+    /// <br/>
+    /// Valores: I01, I02, I03, I04, I05, I06, I07, I08.
+    /// </summary>
+    [JsonPropertyName("cfdi_use")]
+    public string? CfdiUse { get; set; }
+
+    /// <summary>
+    /// El mes, AAAA-MM y abierto, desde el que aplica.
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public required string FromMonth { get; set; }
+
+    /// <summary>
+    /// La tasa anual de los libros (0.2 son 5 años de vida útil). null quita la de ese mes y regresa a la anterior.
+    /// </summary>
+    [JsonPropertyName("annual_rate")]
+    public decimal? AnnualRate { get; set; }
+
+    /// <summary>
+    /// El valor residual como fracción del monto original (NIF C-6); 0 si no se manda.
+    /// </summary>
+    [JsonPropertyName("residual_rate")]
+    public decimal? ResidualRate { get; set; }
 }
 
 /// <summary>

@@ -405,6 +405,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public InflationAccountsResource InflationAccounts => _inflationAccounts ??= new InflationAccountsResource(this);
 
+    private DepreciationReconciliationsResource? _depreciationReconciliations;
+
+    /// <summary>Contabilidad.</summary>
+    public DepreciationReconciliationsResource DepreciationReconciliations => _depreciationReconciliations ??= new DepreciationReconciliationsResource(this);
+
+    private BookDepreciationRatesResource? _bookDepreciationRates;
+
+    /// <summary>Contabilidad.</summary>
+    public BookDepreciationRatesResource BookDepreciationRates => _bookDepreciationRates ??= new BookDepreciationRatesResource(this);
+
     private CostCenterResultsResource? _costCenterResults;
 
     /// <summary>Contabilidad.</summary>
@@ -5823,6 +5833,54 @@ public sealed class InflationAccountsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<InflationAccounts> SaveAsync(SaveInflationAccountsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<InflationAccounts>("POST", "/v1/accounting/inflation_accounts", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.DepreciationReconciliations</c>.
+/// </summary>
+public sealed class DepreciationReconciliationsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal DepreciationReconciliationsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Comparar la depreciación contable con la fiscal
+    /// </summary>
+    /// <remarks>
+    /// La depreciación contable del año de cada activo fijo contra su deducción fiscal (artículo 34 de la Ley del ISR, actualizada con el INPC del artículo 31) y la diferencia, que es partida de la conciliación contable-fiscal de la declaración anual. Las notas de crédito sobre un activo van en su propio renglón. Como Activos fijos › Contable contra fiscal en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/depreciation_reconciliations/{year}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-depreciation-reconciliation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<DepreciationReconciliation> GetAsync(string year, GetDepreciationReconciliationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<DepreciationReconciliation>("GET", $"/v1/accounting/depreciation_reconciliations/{Uri.EscapeDataString(year)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.BookDepreciationRates</c>.
+/// </summary>
+public sealed class BookDepreciationRatesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal BookDepreciationRatesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Fijar la tasa de depreciación contable
+    /// </summary>
+    /// <remarks>
+    /// Fija la tasa anual y el valor residual con que los libros deprecian un activo (fixed_asset) o todos los de un tipo (cfdi_use) desde from_month en adelante (NIF C-6); la del activo gana sobre la de su tipo. Los meses anteriores no cambian, y la deducción fiscal sigue con la tasa del artículo 34. annual_rate null quita la de ese mes. Un mes cerrado contesta parameter_invalid en from_month.
+    /// <br/>
+    /// <c>POST /v1/accounting/book_depreciation_rates</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/save-book-depreciation-rate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<BookDepreciationRate> SaveAsync(SaveBookDepreciationRateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<BookDepreciationRate>("POST", "/v1/accounting/book_depreciation_rates", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
