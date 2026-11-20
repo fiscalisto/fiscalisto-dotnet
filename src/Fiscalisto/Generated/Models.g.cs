@@ -6023,6 +6023,30 @@ public sealed partial class CreateEmployeeParams
     public required decimal IntegratedDailySalary { get; set; }
 
     /// <summary>
+    /// Días de aguinaldo al año: al menos 15 (LFT art. 87), que es el valor por omisión.
+    /// </summary>
+    [JsonPropertyName("aguinaldo_days")]
+    public decimal? AguinaldoDays { get; set; }
+
+    /// <summary>
+    /// Prima vacacional como fracción del salario de sus vacaciones: al menos 0.25 (LFT art. 80), el valor por omisión.
+    /// </summary>
+    [JsonPropertyName("vacation_premium")]
+    public decimal? VacationPremium { get; set; }
+
+    /// <summary>
+    /// Vales de despensa al mes (percepción 029), por los días pagados de cada recibo ordinario: exentos como previsión social con el límite del artículo 93 de la LISR. 0 por omisión.
+    /// </summary>
+    [JsonPropertyName("pantry_vouchers")]
+    public decimal? PantryVouchers { get; set; }
+
+    /// <summary>
+    /// Fondo de ahorro: fracción del sueldo de cada recibo que aporta la empresa y el trabajador por igual, hasta 0.13 (LISR art. 27 fr. XI). Va como percepción 005 y como deducciones 004 (claves FAT y FAE) de ambas aportaciones. 0 por omisión.
+    /// </summary>
+    [JsonPropertyName("savings_fund_rate")]
+    public decimal? SavingsFundRate { get; set; }
+
+    /// <summary>
     /// Tipo de contrato (TipoContrato), c_TipoContrato. Por omisión 01, por tiempo indeterminado.
     /// <br/>
     /// Valores: 01, 02, 03, 04, 05, 06, 07, 08.
@@ -10749,7 +10773,7 @@ public sealed partial class CreateSatReviewParamsNoticesItem
     public string? Step { get; set; }
 
     /// <summary>
-    /// El día en que se lo notificaron (en el Buzón, el día en que lo abrió o el quinto día hábil después del aviso, lo que pase primero). No puede ser futuro.
+    /// El día en que se lo notificaron (en el Buzón, el día en que lo abrió o, si no lo abrió, el cuarto día hábil después del aviso). No puede ser futuro.
     /// </summary>
     [JsonPropertyName("notified_on")]
     public required string NotifiedOn { get; set; }
@@ -13051,6 +13075,30 @@ public sealed partial class Employee
     /// </summary>
     [JsonPropertyName("variable_salary_from")]
     public string? VariableSalaryFrom { get; set; }
+
+    /// <summary>
+    /// Días de aguinaldo al año (al menos 15).
+    /// </summary>
+    [JsonPropertyName("aguinaldo_days")]
+    public decimal AguinaldoDays { get; set; }
+
+    /// <summary>
+    /// Prima vacacional, fracción del salario de las vacaciones (al menos 0.25).
+    /// </summary>
+    [JsonPropertyName("vacation_premium")]
+    public decimal VacationPremium { get; set; }
+
+    /// <summary>
+    /// Vales de despensa al mes que lleva cada recibo ordinario (percepción 029).
+    /// </summary>
+    [JsonPropertyName("pantry_vouchers")]
+    public decimal PantryVouchers { get; set; }
+
+    /// <summary>
+    /// Fracción del sueldo que aportan al fondo de ahorro la empresa y el trabajador por igual (percepción 005).
+    /// </summary>
+    [JsonPropertyName("savings_fund_rate")]
+    public decimal SavingsFundRate { get; set; }
 
     /// <summary>
     /// Tipo de contrato (TipoContrato), c_TipoContrato. Por omisión 01, por tiempo indeterminado.
@@ -37532,6 +37580,30 @@ public sealed partial class UpdateEmployeeParams
     public decimal? IntegratedDailySalary { get; set; }
 
     /// <summary>
+    /// Días de aguinaldo al año: al menos 15 (LFT art. 87), que es el valor por omisión.
+    /// </summary>
+    [JsonPropertyName("aguinaldo_days")]
+    public decimal? AguinaldoDays { get; set; }
+
+    /// <summary>
+    /// Prima vacacional como fracción del salario de sus vacaciones: al menos 0.25 (LFT art. 80), el valor por omisión.
+    /// </summary>
+    [JsonPropertyName("vacation_premium")]
+    public decimal? VacationPremium { get; set; }
+
+    /// <summary>
+    /// Vales de despensa al mes (percepción 029), por los días pagados de cada recibo ordinario: exentos como previsión social con el límite del artículo 93 de la LISR. 0 por omisión.
+    /// </summary>
+    [JsonPropertyName("pantry_vouchers")]
+    public decimal? PantryVouchers { get; set; }
+
+    /// <summary>
+    /// Fondo de ahorro: fracción del sueldo de cada recibo que aporta la empresa y el trabajador por igual, hasta 0.13 (LISR art. 27 fr. XI). Va como percepción 005 y como deducciones 004 (claves FAT y FAE) de ambas aportaciones. 0 por omisión.
+    /// </summary>
+    [JsonPropertyName("savings_fund_rate")]
+    public decimal? SavingsFundRate { get; set; }
+
+    /// <summary>
     /// Tipo de contrato (TipoContrato), c_TipoContrato. Por omisión 01, por tiempo indeterminado.
     /// <br/>
     /// Valores: 01, 02, 03, 04, 05, 06, 07, 08.
@@ -40004,7 +40076,7 @@ public sealed partial class UpdateSatReviewParamsNoticesItem
     public string? Step { get; set; }
 
     /// <summary>
-    /// El día en que se lo notificaron (en el Buzón, el día en que lo abrió o el quinto día hábil después del aviso, lo que pase primero). No puede ser futuro.
+    /// El día en que se lo notificaron (en el Buzón, el día en que lo abrió o, si no lo abrió, el cuarto día hábil después del aviso). No puede ser futuro.
     /// </summary>
     [JsonPropertyName("notified_on")]
     public required string NotifiedOn { get; set; }
