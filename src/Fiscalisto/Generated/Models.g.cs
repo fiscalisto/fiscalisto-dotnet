@@ -1964,6 +1964,284 @@ public sealed partial class BranchSeries
 }
 
 /// <summary>
+/// El presupuesto de un año (de toda la empresa o de un centro de costo) por cuenta de resultados y mes, y cómo va lo real contra él: el mes y de enero a ese mes.
+/// </summary>
+public sealed partial class Budget
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Año (Ejercicio).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// El mes de la comparación: el que pidió, el actual en el año en curso, 12 en uno pasado (0 en uno futuro).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public long Month { get; set; }
+
+    /// <summary>
+    /// El centro de costo (ccn_…) del presupuesto, o null: toda la empresa.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Lo presupuestado por cuenta, como se guardó.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<BudgetLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Cada cuenta con presupuesto o con movimiento: lo presupuestado contra lo real.
+    /// </summary>
+    [JsonPropertyName("comparison")]
+    public List<BudgetComparisonItem> Comparison { get; set; } = default!;
+
+    /// <summary>
+    /// La utilidad antes de impuestos.
+    /// </summary>
+    [JsonPropertyName("income_before_taxes")]
+    public BudgetIncomeBeforeTaxes IncomeBeforeTaxes { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;BudgetComparisonItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class BudgetComparisonItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Su parte del estado de resultados.
+    /// <br/>
+    /// Valores: revenue, cost_of_sales, operating_expenses, financing, other.
+    /// </summary>
+    [JsonPropertyName("section")]
+    public string Section { get; set; } = default!;
+
+    /// <summary>
+    /// El mes.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public BudgetComparisonItemMonth Month { get; set; } = default!;
+
+    /// <summary>
+    /// De enero al mes.
+    /// </summary>
+    [JsonPropertyName("year_to_date")]
+    public BudgetComparisonItemYearToDate YearToDate { get; set; } = default!;
+
+    /// <summary>
+    /// Lo presupuestado en todo el año.
+    /// </summary>
+    [JsonPropertyName("annual_budget")]
+    public decimal AnnualBudget { get; set; }
+}
+
+/// <summary>
+/// El mes.
+/// </summary>
+public sealed partial class BudgetComparisonItemMonth
+{
+    /// <summary>
+    /// El mes: lo presupuestado.
+    /// </summary>
+    [JsonPropertyName("budget")]
+    public decimal Budget { get; set; }
+
+    /// <summary>
+    /// El mes: lo real, de sus pólizas.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public decimal Actual { get; set; }
+
+    /// <summary>
+    /// Real menos presupuesto.
+    /// </summary>
+    [JsonPropertyName("variance")]
+    public decimal Variance { get; set; }
+
+    /// <summary>
+    /// La variación como porcentaje del presupuesto (null sin presupuesto).
+    /// </summary>
+    [JsonPropertyName("variance_percent")]
+    public decimal? VariancePercent { get; set; }
+
+    /// <summary>
+    /// true si lo real deja al menos la utilidad presupuestada: más ingresos o menos gastos.
+    /// </summary>
+    [JsonPropertyName("favorable")]
+    public bool Favorable { get; set; }
+}
+
+/// <summary>
+/// De enero al mes.
+/// </summary>
+public sealed partial class BudgetComparisonItemYearToDate
+{
+    /// <summary>
+    /// De enero al mes: lo presupuestado.
+    /// </summary>
+    [JsonPropertyName("budget")]
+    public decimal Budget { get; set; }
+
+    /// <summary>
+    /// De enero al mes: lo real, de sus pólizas.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public decimal Actual { get; set; }
+
+    /// <summary>
+    /// Real menos presupuesto.
+    /// </summary>
+    [JsonPropertyName("variance")]
+    public decimal Variance { get; set; }
+
+    /// <summary>
+    /// La variación como porcentaje del presupuesto (null sin presupuesto).
+    /// </summary>
+    [JsonPropertyName("variance_percent")]
+    public decimal? VariancePercent { get; set; }
+
+    /// <summary>
+    /// true si lo real deja al menos la utilidad presupuestada: más ingresos o menos gastos.
+    /// </summary>
+    [JsonPropertyName("favorable")]
+    public bool Favorable { get; set; }
+}
+
+/// <summary>
+/// La utilidad antes de impuestos.
+/// </summary>
+public sealed partial class BudgetIncomeBeforeTaxes
+{
+    /// <summary>
+    /// El mes.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public BudgetIncomeBeforeTaxesMonth Month { get; set; } = default!;
+
+    /// <summary>
+    /// De enero al mes.
+    /// </summary>
+    [JsonPropertyName("year_to_date")]
+    public BudgetIncomeBeforeTaxesYearToDate YearToDate { get; set; } = default!;
+
+    /// <summary>
+    /// Presupuestada en todo el año.
+    /// </summary>
+    [JsonPropertyName("annual_budget")]
+    public decimal AnnualBudget { get; set; }
+}
+
+/// <summary>
+/// El mes.
+/// </summary>
+public sealed partial class BudgetIncomeBeforeTaxesMonth
+{
+    /// <summary>
+    /// Presupuestada.
+    /// </summary>
+    [JsonPropertyName("budget")]
+    public decimal Budget { get; set; }
+
+    /// <summary>
+    /// Real.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public decimal Actual { get; set; }
+}
+
+/// <summary>
+/// De enero al mes.
+/// </summary>
+public sealed partial class BudgetIncomeBeforeTaxesYearToDate
+{
+    /// <summary>
+    /// Presupuestada.
+    /// </summary>
+    [JsonPropertyName("budget")]
+    public decimal Budget { get; set; }
+
+    /// <summary>
+    /// Real.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public decimal Actual { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;BudgetLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class BudgetLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// Enero a diciembre.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public List<decimal> Months { get; set; } = default!;
+
+    /// <summary>
+    /// La suma de los 12 meses.
+    /// </summary>
+    [JsonPropertyName("annual")]
+    public decimal Annual { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cancelar una factura».
 /// </summary>
 public sealed partial class CancelInvoiceParams
@@ -3843,6 +4121,168 @@ public sealed partial class CostCenterList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// El estado de resultados por centro de costo: lo que cada uno dejó de utilidad, de las facturas que se le pusieron y de los renglones de póliza que lo llevan. Juntos suman el estado de resultados de la empresa.
+/// </summary>
+public sealed partial class CostCenterResults
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Un solo mes, del 1 al 12 (MesIni y MesFin iguales).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El mes.
+    /// </summary>
+    [JsonPropertyName("month_results")]
+    public List<CostCenterResultsMonthResultsItem> MonthResults { get; set; } = default!;
+
+    /// <summary>
+    /// De enero al mes.
+    /// </summary>
+    [JsonPropertyName("year_to_date")]
+    public List<CostCenterResultsYearToDateItem> YearToDate { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CostCenterResultsMonthResultsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CostCenterResultsMonthResultsItem
+{
+    /// <summary>
+    /// El centro de costo (ccn_…), o null: lo que no tiene centro.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("cost_center_name")]
+    public string? CostCenterName { get; set; }
+
+    /// <summary>
+    /// Ingresos.
+    /// </summary>
+    [JsonPropertyName("revenue")]
+    public decimal Revenue { get; set; }
+
+    /// <summary>
+    /// Costo de ventas, en negativo.
+    /// </summary>
+    [JsonPropertyName("cost_of_sales")]
+    public decimal CostOfSales { get; set; }
+
+    /// <summary>
+    /// Gastos de operación, en negativo.
+    /// </summary>
+    [JsonPropertyName("operating_expenses")]
+    public decimal OperatingExpenses { get; set; }
+
+    /// <summary>
+    /// Resultado integral de financiamiento.
+    /// </summary>
+    [JsonPropertyName("financing")]
+    public decimal Financing { get; set; }
+
+    /// <summary>
+    /// Otros ingresos y gastos.
+    /// </summary>
+    [JsonPropertyName("other")]
+    public decimal Other { get; set; }
+
+    /// <summary>
+    /// Utilidad (o pérdida) antes de impuestos.
+    /// </summary>
+    [JsonPropertyName("income_before_taxes")]
+    public decimal IncomeBeforeTaxes { get; set; }
+
+    /// <summary>
+    /// Utilidad entre ingresos, en porcentaje (null sin ingresos).
+    /// </summary>
+    [JsonPropertyName("margin_percent")]
+    public decimal? MarginPercent { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CostCenterResultsYearToDateItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CostCenterResultsYearToDateItem
+{
+    /// <summary>
+    /// El centro de costo (ccn_…), o null: lo que no tiene centro.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("cost_center_name")]
+    public string? CostCenterName { get; set; }
+
+    /// <summary>
+    /// Ingresos.
+    /// </summary>
+    [JsonPropertyName("revenue")]
+    public decimal Revenue { get; set; }
+
+    /// <summary>
+    /// Costo de ventas, en negativo.
+    /// </summary>
+    [JsonPropertyName("cost_of_sales")]
+    public decimal CostOfSales { get; set; }
+
+    /// <summary>
+    /// Gastos de operación, en negativo.
+    /// </summary>
+    [JsonPropertyName("operating_expenses")]
+    public decimal OperatingExpenses { get; set; }
+
+    /// <summary>
+    /// Resultado integral de financiamiento.
+    /// </summary>
+    [JsonPropertyName("financing")]
+    public decimal Financing { get; set; }
+
+    /// <summary>
+    /// Otros ingresos y gastos.
+    /// </summary>
+    [JsonPropertyName("other")]
+    public decimal Other { get; set; }
+
+    /// <summary>
+    /// Utilidad (o pérdida) antes de impuestos.
+    /// </summary>
+    [JsonPropertyName("income_before_taxes")]
+    public decimal IncomeBeforeTaxes { get; set; }
+
+    /// <summary>
+    /// Utilidad entre ingresos, en porcentaje (null sin ingresos).
+    /// </summary>
+    [JsonPropertyName("margin_percent")]
+    public decimal? MarginPercent { get; set; }
 }
 
 /// <summary>
@@ -6059,6 +6499,12 @@ public sealed partial class CreateManualEntryParamsLinesItem
     /// </summary>
     [JsonPropertyName("credit")]
     public decimal? Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…, GET /v1/cost_centers), opcional: los resultados por centro de costo y los presupuestos lo leen.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>
@@ -15772,6 +16218,30 @@ public sealed partial class GetAttendanceParams
 }
 
 /// <summary>
+/// Los campos de «Ver el presupuesto de un año contra lo real».
+/// </summary>
+public sealed partial class GetBudgetParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El centro de costo (ccn_…). Sin él, toda la empresa.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// El mes de la comparación, de 1 a 12. Por omisión el actual en el año en curso, 12 en uno pasado.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public long? Month { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver el flujo de efectivo».
 /// </summary>
 public sealed partial class GetCashForecastParams
@@ -15855,6 +16325,18 @@ public sealed partial class GetCompanyReportParams
     /// </summary>
     [JsonPropertyName("version")]
     public string? Version { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver el estado de resultados por centro de costo».
+/// </summary>
+public sealed partial class GetCostCenterResultsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -16435,6 +16917,12 @@ public sealed partial class ImportManualEntriesParamsEntriesItemLinesItem
     /// </summary>
     [JsonPropertyName("credit")]
     public decimal? Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…, GET /v1/cost_centers), opcional: los resultados por centro de costo y los presupuestos lo leen.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>
@@ -24226,6 +24714,12 @@ public sealed partial class ManualJournalEntryLinesItem
     /// </summary>
     [JsonPropertyName("credit")]
     public decimal Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…), o null.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>
@@ -32351,6 +32845,48 @@ public sealed partial class SatRetentionWithheldTaxesItem
 }
 
 /// <summary>
+/// Los campos de «Guardar el presupuesto de un año».
+/// </summary>
+public sealed partial class SaveBudgetParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El centro de costo (ccn_…) del presupuesto. Sin él, el de toda la empresa. Cada centro tiene el suyo.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Las cuentas del presupuesto. Reemplaza todo el presupuesto de ese año (y centro): una cuenta que no mande sale; una lista vacía lo borra.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<SaveBudgetParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SaveBudgetParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SaveBudgetParamsLinesItem
+{
+    /// <summary>
+    /// El número de una cuenta de resultados (código agrupador 4 a 7) de su catálogo, por ejemplo 601-84.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// Los 12 meses, de enero a diciembre, en pesos y en la naturaleza de la cuenta: un ingreso como ingreso, un gasto como gasto.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public required List<decimal> Months { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Programar el pago de una factura de proveedor».
 /// </summary>
 public sealed partial class ScheduleSupplierInvoiceParams
@@ -35748,6 +36284,12 @@ public sealed partial class UpdateManualEntryParamsLinesItem
     /// </summary>
     [JsonPropertyName("credit")]
     public decimal? Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…, GET /v1/cost_centers), opcional: los resultados por centro de costo y los presupuestos lo leen.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
 }
 
 /// <summary>

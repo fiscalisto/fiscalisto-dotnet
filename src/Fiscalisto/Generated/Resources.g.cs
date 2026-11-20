@@ -375,6 +375,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public CostOfSalesResource CostOfSales => _costOfSales ??= new CostOfSalesResource(this);
 
+    private BudgetsResource? _budgets;
+
+    /// <summary>Contabilidad.</summary>
+    public BudgetsResource Budgets => _budgets ??= new BudgetsResource(this);
+
+    private CostCenterResultsResource? _costCenterResults;
+
+    /// <summary>Contabilidad.</summary>
+    public CostCenterResultsResource CostCenterResults => _costCenterResults ??= new CostCenterResultsResource(this);
+
     private PayrollProvisionsResource? _payrollProvisions;
 
     /// <summary>Contabilidad.</summary>
@@ -5490,6 +5500,68 @@ public sealed class CostOfSalesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<CostOfSales> DeleteAsync(string month, DeleteCostOfSalesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<CostOfSales>("DELETE", $"/v1/accounting/cost_of_sales/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.Budgets</c>.
+/// </summary>
+public sealed class BudgetsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal BudgetsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver el presupuesto de un año contra lo real
+    /// </summary>
+    /// <remarks>
+    /// El presupuesto del año por cuenta de resultados y mes, y la comparación con lo real de sus pólizas: el mes y de enero a ese mes, con la variación, su porcentaje y si es favorable (deja más utilidad que lo planeado). Con cost_center, el presupuesto y lo real de ese centro de costo; sin él, de toda la empresa. Como Estados financieros › Presupuesto en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/budgets/{year}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-budget"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Budget> GetAsync(string year, GetBudgetParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Budget>("GET", $"/v1/accounting/budgets/{Uri.EscapeDataString(year)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Guardar el presupuesto de un año
+    /// </summary>
+    /// <remarks>
+    /// Reemplaza el presupuesto del año (de toda la empresa, o del centro de costo de cost_center) con las cuentas que mande: cada una con sus 12 meses en la naturaleza de la cuenta. Solo cuentas de resultados (códigos agrupadores 4 a 7); una cuenta dos veces contesta parameter_invalid en lines. Una lista vacía borra el presupuesto.
+    /// <br/>
+    /// <c>POST /v1/accounting/budgets/{year}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/save-budget"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Budget> SaveAsync(string year, SaveBudgetParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Budget>("POST", $"/v1/accounting/budgets/{Uri.EscapeDataString(year)}", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.CostCenterResults</c>.
+/// </summary>
+public sealed class CostCenterResultsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CostCenterResultsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver el estado de resultados por centro de costo
+    /// </summary>
+    /// <remarks>
+    /// Lo que cada centro de costo dejó de utilidad en el mes y de enero a ese mes: sus ingresos, costo de ventas, gastos y otros, de las facturas que se le pusieron (POST /v1/cost_centers/{id}/invoices) y de los renglones de póliza a mano que lo llevan (lines[].cost_center). Lo que no tiene centro va con cost_center null; todos suman el estado de resultados de la empresa.
+    /// <br/>
+    /// <c>GET /v1/accounting/cost_center_results/{month}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-cost-center-results"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<CostCenterResults> GetAsync(string month, GetCostCenterResultsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<CostCenterResults>("GET", $"/v1/accounting/cost_center_results/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>
