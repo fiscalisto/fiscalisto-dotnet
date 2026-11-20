@@ -820,6 +820,18 @@ public sealed partial class ApplyAdvanceParamsRemainder
 }
 
 /// <summary>
+/// Los campos de «Calcular los renglones de una póliza modelo».
+/// </summary>
+public sealed partial class ApplyEntryTemplateParams
+{
+    /// <summary>
+    /// El total de la póliza: cada porcentaje se calcula sobre él, al centavo.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public required decimal Total { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Aplicar el salario variable de un bimestre».
 /// </summary>
 public sealed partial class ApplyVariableSalaryParams
@@ -6226,6 +6238,90 @@ public sealed partial class CreateEmployeeParams
 }
 
 /// <summary>
+/// Los campos de «Guardar una póliza modelo».
+/// </summary>
+public sealed partial class CreateEntryTemplateParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El nombre del modelo, único en el emisor: «Compra con IVA al 16%».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// El concepto de las pólizas que se hacen con él.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// adjustment (ajuste), accrual (provisión), reclassification (reclasificación) u other.
+    /// <br/>
+    /// Valores: adjustment, accrual, reclassification, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// El tipo de póliza: journal (diario), income (ingresos) o expense (egresos).
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string? JournalType { get; set; }
+
+    /// <summary>
+    /// Sus renglones: la cuenta, el lado y el porcentaje del total o el importe fijo.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<CreateEntryTemplateParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateEntryTemplateParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateEntryTemplateParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// Si el renglón es cargo (debit) o abono (credit).
+    /// <br/>
+    /// Valores: debit, credit.
+    /// </summary>
+    [JsonPropertyName("side")]
+    public required string Side { get; set; }
+
+    /// <summary>
+    /// El porcentaje del total que lleva (86.2069 es 86.2069%). Los de un lado suman hasta 100.
+    /// </summary>
+    [JsonPropertyName("percentage")]
+    public decimal? Percentage { get; set; }
+
+    /// <summary>
+    /// Un importe fijo, cuando no depende del total. Sin percentage ni amount, el renglón sale en 0 para escribirlo cada vez.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…, GET /v1/cost_centers), opcional.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Agregar un gasto».
 /// </summary>
 public sealed partial class CreateExpenseItemParams
@@ -7305,6 +7401,36 @@ public sealed partial class CreateManualEntryParamsLinesItem
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Un renglón en otra moneda: su clave ISO 4217 (USD, EUR…). Con ella van foreign_amount y exchange_rate, y debit o credit es su producto en pesos.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// El importe del renglón en su moneda.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// El tipo de cambio del renglón: pesos por una unidad de su moneda.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// El CFDI que documenta este renglón, aparte del de la póliza: así una póliza lleva varios.
+    /// </summary>
+    [JsonPropertyName("cfdi_uuid")]
+    public string? CfdiUuid { get; set; }
+
+    /// <summary>
+    /// El RFC de quien emitió o recibió el CFDI del renglón.
+    /// </summary>
+    [JsonPropertyName("cfdi_tax_id")]
+    public string? CfdiTaxId { get; set; }
 }
 
 /// <summary>
@@ -13788,6 +13914,238 @@ public sealed partial class EmployeeVacationsYearsItem
 }
 
 /// <summary>
+/// Una póliza modelo: las cuentas de una póliza que se captura seguido (una compra, una renta) con el porcentaje del total o el importe fijo de cada renglón, para hacerla otra vez con otro total.
+/// </summary>
+public sealed partial class EntryTemplate
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del modelo.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El concepto de las pólizas que se hacen con él.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// La clase de las pólizas que se hacen con él: adjustment, accrual, reclassification u other.
+    /// <br/>
+    /// Valores: adjustment, accrual, reclassification, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Su tipo de póliza: journal, income o expense.
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string JournalType { get; set; } = default!;
+
+    /// <summary>
+    /// Sus renglones: la cuenta, el lado y el porcentaje o el importe fijo.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<EntryTemplateLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// Los renglones de una póliza modelo para un total, listos para POST /v1/accounting/manual_entries. No se guarda nada.
+/// </summary>
+public sealed partial class EntryTemplateLines
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// La póliza modelo (mjt_…).
+    /// </summary>
+    [JsonPropertyName("entry_template")]
+    public string EntryTemplate { get; set; } = default!;
+
+    /// <summary>
+    /// El total con que se calcularon.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+
+    /// <summary>
+    /// El concepto del modelo.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// La clase de la póliza, la del modelo.
+    /// <br/>
+    /// Valores: adjustment, accrual, reclassification, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de póliza, el del modelo.
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string JournalType { get; set; } = default!;
+
+    /// <summary>
+    /// Los renglones, como los recibe POST /v1/accounting/manual_entries.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<EntryTemplateLinesLinesItem> Lines { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;EntryTemplateLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EntryTemplateLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// Si el renglón es cargo (debit) o abono (credit).
+    /// <br/>
+    /// Valores: debit, credit.
+    /// </summary>
+    [JsonPropertyName("side")]
+    public string Side { get; set; } = default!;
+
+    /// <summary>
+    /// El porcentaje del total que lleva, o null.
+    /// </summary>
+    [JsonPropertyName("percentage")]
+    public decimal? Percentage { get; set; }
+
+    /// <summary>
+    /// Su importe fijo, o null.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…), o null.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;EntryTemplateLinesLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EntryTemplateLinesLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El cargo, en pesos.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono, en pesos.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class EntryTemplateList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<EntryTemplate> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// El estado de cambios en el capital contable (NIF B-4) de enero al mes.
 /// </summary>
 public sealed partial class EquityChanges
@@ -18459,6 +18817,36 @@ public sealed partial class ImportManualEntriesParamsEntriesItemLinesItem
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Un renglón en otra moneda: su clave ISO 4217 (USD, EUR…). Con ella van foreign_amount y exchange_rate, y debit o credit es su producto en pesos.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// El importe del renglón en su moneda.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// El tipo de cambio del renglón: pesos por una unidad de su moneda.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// El CFDI que documenta este renglón, aparte del de la póliza: así una póliza lleva varios.
+    /// </summary>
+    [JsonPropertyName("cfdi_uuid")]
+    public string? CfdiUuid { get; set; }
+
+    /// <summary>
+    /// El RFC de quien emitió o recibió el CFDI del renglón.
+    /// </summary>
+    [JsonPropertyName("cfdi_tax_id")]
+    public string? CfdiTaxId { get; set; }
 }
 
 /// <summary>
@@ -24765,6 +25153,18 @@ public sealed partial class ListEmployeesParams
 }
 
 /// <summary>
+/// Los campos de «Listar las pólizas modelo».
+/// </summary>
+public sealed partial class ListEntryTemplatesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar eventos».
 /// </summary>
 public sealed partial class ListEventsParams
@@ -26528,6 +26928,36 @@ public sealed partial class ManualJournalEntryLinesItem
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Su moneda (ISO 4217) si es en otra, o null si es en pesos.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// Su importe en esa moneda, o null.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// Su tipo de cambio, o null.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// El UUID del CFDI de este renglón, o null.
+    /// </summary>
+    [JsonPropertyName("cfdi_uuid")]
+    public string? CfdiUuid { get; set; }
+
+    /// <summary>
+    /// El RFC de la otra parte de ese CFDI, o null.
+    /// </summary>
+    [JsonPropertyName("cfdi_tax_id")]
+    public string? CfdiTaxId { get; set; }
 }
 
 /// <summary>
@@ -38349,6 +38779,84 @@ public sealed partial class UpdateEmployeeVacationsParams
 }
 
 /// <summary>
+/// Los campos de «Cambiar una póliza modelo».
+/// </summary>
+public sealed partial class UpdateEntryTemplateParams
+{
+    /// <summary>
+    /// El nombre del modelo, único en el emisor: «Compra con IVA al 16%».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// El concepto de las pólizas que se hacen con él.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// adjustment (ajuste), accrual (provisión), reclassification (reclasificación) u other.
+    /// <br/>
+    /// Valores: adjustment, accrual, reclassification, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// El tipo de póliza: journal (diario), income (ingresos) o expense (egresos).
+    /// <br/>
+    /// Valores: journal, income, expense.
+    /// </summary>
+    [JsonPropertyName("journal_type")]
+    public string? JournalType { get; set; }
+
+    /// <summary>
+    /// Sus renglones: la cuenta, el lado y el porcentaje del total o el importe fijo.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<UpdateEntryTemplateParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateEntryTemplateParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateEntryTemplateParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// Si el renglón es cargo (debit) o abono (credit).
+    /// <br/>
+    /// Valores: debit, credit.
+    /// </summary>
+    [JsonPropertyName("side")]
+    public required string Side { get; set; }
+
+    /// <summary>
+    /// El porcentaje del total que lleva (86.2069 es 86.2069%). Los de un lado suman hasta 100.
+    /// </summary>
+    [JsonPropertyName("percentage")]
+    public decimal? Percentage { get; set; }
+
+    /// <summary>
+    /// Un importe fijo, cuando no depende del total. Sin percentage ni amount, el renglón sale en 0 para escribirlo cada vez.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…, GET /v1/cost_centers), opcional.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Actualizar un gasto».
 /// </summary>
 public sealed partial class UpdateExpenseItemParams
@@ -38850,6 +39358,36 @@ public sealed partial class UpdateManualEntryParamsLinesItem
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Un renglón en otra moneda: su clave ISO 4217 (USD, EUR…). Con ella van foreign_amount y exchange_rate, y debit o credit es su producto en pesos.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// El importe del renglón en su moneda.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// El tipo de cambio del renglón: pesos por una unidad de su moneda.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// El CFDI que documenta este renglón, aparte del de la póliza: así una póliza lleva varios.
+    /// </summary>
+    [JsonPropertyName("cfdi_uuid")]
+    public string? CfdiUuid { get; set; }
+
+    /// <summary>
+    /// El RFC de quien emitió o recibió el CFDI del renglón.
+    /// </summary>
+    [JsonPropertyName("cfdi_tax_id")]
+    public string? CfdiTaxId { get; set; }
 }
 
 /// <summary>

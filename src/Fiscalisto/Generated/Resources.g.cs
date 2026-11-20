@@ -415,6 +415,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public BookDepreciationRatesResource BookDepreciationRates => _bookDepreciationRates ??= new BookDepreciationRatesResource(this);
 
+    private EntryTemplatesResource? _entryTemplates;
+
+    /// <summary>Contabilidad.</summary>
+    public EntryTemplatesResource EntryTemplates => _entryTemplates ??= new EntryTemplatesResource(this);
+
     private CostCenterResultsResource? _costCenterResults;
 
     /// <summary>Contabilidad.</summary>
@@ -5881,6 +5886,86 @@ public sealed class BookDepreciationRatesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<BookDepreciationRate> SaveAsync(SaveBookDepreciationRateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<BookDepreciationRate>("POST", "/v1/accounting/book_depreciation_rates", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.EntryTemplates</c>.
+/// </summary>
+public sealed class EntryTemplatesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal EntryTemplatesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar las pólizas modelo
+    /// </summary>
+    /// <remarks>
+    /// Las pólizas modelo del emisor, por nombre: las cuentas de una póliza que captura seguido con el porcentaje del total de cada renglón. Como «Usar un modelo» en Nueva póliza.
+    /// <br/>
+    /// <c>GET /v1/accounting/entry_templates</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/list-entry-templates"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EntryTemplateList> ListAsync(ListEntryTemplatesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EntryTemplateList>("GET", "/v1/accounting/entry_templates", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Guardar una póliza modelo
+    /// </summary>
+    /// <remarks>
+    /// Guarda las cuentas de una póliza bajo un nombre, cada renglón en su lado con el porcentaje del total (percentage), un importe fijo (amount) o ninguno, para escribirlo cada vez. Los porcentajes de un lado suman hasta 100. El nombre es único en el emisor.
+    /// <br/>
+    /// <c>POST /v1/accounting/entry_templates</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/create-entry-template"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EntryTemplate> CreateAsync(CreateEntryTemplateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EntryTemplate>("POST", "/v1/accounting/entry_templates", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una póliza modelo
+    /// </summary>
+    /// <remarks>
+    /// La reemplaza con lo que manda. Las pólizas que ya se hicieron con ella no cambian.
+    /// <br/>
+    /// <c>POST /v1/accounting/entry_templates/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-entry-template"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EntryTemplate> UpdateAsync(string id, UpdateEntryTemplateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EntryTemplate>("POST", $"/v1/accounting/entry_templates/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una póliza modelo
+    /// </summary>
+    /// <remarks>
+    /// Las pólizas que ya se hicieron con ella no cambian.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/entry_templates/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/delete-entry-template"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/accounting/entry_templates/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Calcular los renglones de una póliza modelo
+    /// </summary>
+    /// <remarks>
+    /// Los renglones de la póliza modelo para un total: cada porcentaje al centavo, los importes fijos como están y 0 donde no hay ninguno. El centavo del redondeo va al renglón más grande de un lado que suma 100%, para que cuadre. Mándelos como lines en POST /v1/accounting/manual_entries; aquí no se guarda nada.
+    /// <br/>
+    /// <c>POST /v1/accounting/entry_templates/{id}/apply</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/apply-entry-template"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EntryTemplateLines> ApplyAsync(string id, ApplyEntryTemplateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EntryTemplateLines>("POST", $"/v1/accounting/entry_templates/{Uri.EscapeDataString(id)}/apply", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
