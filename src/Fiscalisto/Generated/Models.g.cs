@@ -13519,9 +13519,9 @@ public sealed partial class CreateRuleParams
     public string? Name { get; set; }
 
     /// <summary>
-    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), invoice.approved (se aprueba en el Portal de proveedores), invoice.rejected (se rechaza en el portal), purchase_order.saved, .approved, .rejected, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public required string Trigger { get; set; }
@@ -13563,9 +13563,9 @@ public sealed partial class CreateRuleParams
 public sealed partial class CreateRuleParamsActionsItem
 {
     /// <summary>
-    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…).
     /// <br/>
-    /// Valores: tag, cost_center, stage, close, notify, category.
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
@@ -39204,7 +39204,7 @@ public sealed partial class Rule
     /// <summary>
     /// Cuándo corre.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string Trigger { get; set; } = default!;
@@ -39266,7 +39266,7 @@ public sealed partial class RuleActionsItem
     /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
     /// <br/>
-    /// Valores: tag, cost_center, category, stage, close, notify.
+    /// Valores: tag, cost_center, category, stage, close, ask_approval, notify.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -39504,7 +39504,7 @@ public sealed partial class RuleRun
     /// <summary>
     /// Cuándo corre.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string Trigger { get; set; } = default!;
@@ -48984,9 +48984,9 @@ public sealed partial class UpdateRuleParams
     public string? Name { get; set; }
 
     /// <summary>
-    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), invoice.approved (se aprueba en el Portal de proveedores), invoice.rejected (se rechaza en el portal), purchase_order.saved, .approved, .rejected, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string? Trigger { get; set; }
@@ -49028,9 +49028,9 @@ public sealed partial class UpdateRuleParams
 public sealed partial class UpdateRuleParamsActionsItem
 {
     /// <summary>
-    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…).
     /// <br/>
-    /// Valores: tag, cost_center, stage, close, notify, category.
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
