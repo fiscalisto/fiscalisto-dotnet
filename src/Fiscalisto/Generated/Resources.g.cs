@@ -450,6 +450,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public FixedAssetsResource FixedAssets => _fixedAssets ??= new FixedAssetsResource(this);
 
+    private AccountingSettingsResource? _accountingSettings;
+
+    /// <summary>Contabilidad.</summary>
+    public AccountingSettingsResource AccountingSettings => _accountingSettings ??= new AccountingSettingsResource(this);
+
     private ClosedPeriodResource? _closedPeriod;
 
     /// <summary>Contabilidad.</summary>
@@ -6848,6 +6853,44 @@ public sealed class FixedAssetsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<FixedAsset> UndisposeAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<FixedAsset>("DELETE", $"/v1/accounting/fixed_assets/{Uri.EscapeDataString(id)}/disposal", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.AccountingSettings</c>.
+/// </summary>
+public sealed class AccountingSettingsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal AccountingSettingsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver cómo se lleva la contabilidad
+    /// </summary>
+    /// <remarks>
+    /// Si cada cliente y cada proveedor tiene su propia subcuenta (party_subaccounts), como Catálogo de cuentas › Subcuentas por cliente y proveedor en la app.
+    /// <br/>
+    /// <c>GET /v1/accounting/settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-accounting-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AccountingSettings> GetAsync(GetAccountingSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AccountingSettings>("GET", "/v1/accounting/settings", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar cómo se lleva la contabilidad
+    /// </summary>
+    /// <remarks>
+    /// Con party_subaccounts en true, lo que debe cada cliente va a su subcuenta de Clientes (105-01-0001, 105-01-0002…) y lo que se le debe a cada proveedor a la suya de Proveedores (201-01-0001…), numeradas una vez en el orden en que aparecen sus CFDI y con su nombre; la balanza, los auxiliares, las pólizas y la contabilidad electrónica las usan. En false, sus saldos vuelven a Clientes y Proveedores; los números se conservan si se vuelve a activar. Aplica a toda la empresa del emisor y va a la bitácora.
+    /// <br/>
+    /// <c>POST /v1/accounting/settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-accounting-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AccountingSettings> UpdateAsync(UpdateAccountingSettingsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AccountingSettings>("POST", "/v1/accounting/settings", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

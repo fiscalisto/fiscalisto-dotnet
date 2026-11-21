@@ -320,6 +320,36 @@ public sealed partial class AccountingBankMovementList
 }
 
 /// <summary>
+/// Cómo se lleva la contabilidad de la empresa del emisor: si cada cliente y cada proveedor tiene su propia subcuenta de Clientes o Proveedores.
+/// </summary>
+public sealed partial class AccountingSettings
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// true si cada cliente y cada proveedor tiene su subcuenta (105-01-0001…, 201-01-0001…); false si todos van a Clientes y Proveedores.
+    /// </summary>
+    [JsonPropertyName("party_subaccounts")]
+    public bool PartySubaccounts { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cambiar un renglón del flujo».
 /// </summary>
 public sealed partial class AdjustCashForecastParams
@@ -21973,6 +22003,18 @@ public sealed partial class GeneralLedgerAccountsItemMovementsItem
     /// </summary>
     [JsonPropertyName("balance")]
     public decimal Balance { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver cómo se lleva la contabilidad».
+/// </summary>
+public sealed partial class GetAccountingSettingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -46810,6 +46852,24 @@ public sealed partial class UpdateAccountParams
     /// </summary>
     [JsonPropertyName("api_version")]
     public required string ApiVersion { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar cómo se lleva la contabilidad».
+/// </summary>
+public sealed partial class UpdateAccountingSettingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// true: cada cliente con su subcuenta de Clientes (105-01-0001…) y cada proveedor con la suya de Proveedores (201-01-0001…); false: todos en Clientes y Proveedores.
+    /// </summary>
+    [JsonPropertyName("party_subaccounts")]
+    public required bool PartySubaccounts { get; set; }
 }
 
 /// <summary>
