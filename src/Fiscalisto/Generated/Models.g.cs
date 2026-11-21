@@ -22362,6 +22362,18 @@ public sealed partial class GetOpeningBalancesParams
 }
 
 /// <summary>
+/// Los campos de «Ver si los pagos están en pausa».
+/// </summary>
+public sealed partial class GetPayoutsPauseParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Acumulados de nómina».
 /// </summary>
 public sealed partial class GetPayrollAccumulatedParams
@@ -32473,6 +32485,24 @@ public sealed partial class OrderRulesParams
 }
 
 /// <summary>
+/// Los campos de «Pausar todos los pagos».
+/// </summary>
+public sealed partial class PausePayoutsParams
+{
+    /// <summary>
+    /// La empresa (iss_…); sin él, la de la llave.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Por qué se pausan los pagos; lo ve el equipo y llega en el aviso.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public required string Reason { get; set; }
+}
+
+/// <summary>
 /// Una factura recibida con lo que falta por pagar, como la muestra Pagos › Por pagar: lo pagado cuenta complementos, notas de crédito, pagos de Fiscalisto y pagos registrados a mano.
 /// </summary>
 public sealed partial class PayableInvoice
@@ -33294,6 +33324,54 @@ public sealed partial class PayoutTransferInvoicesItem
     /// </summary>
     [JsonPropertyName("description")]
     public string? Description { get; set; }
+}
+
+/// <summary>
+/// «Pausar todos los pagos» de la empresa: mientras está en pausa no sale ninguna transferencia (ni firmadas, ni reintentos, ni recurrentes). Se reanuda solo en la app, con las firmas de Quién firma.
+/// </summary>
+public sealed partial class PayoutsPause
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// true mientras los pagos están en pausa.
+    /// </summary>
+    [JsonPropertyName("paused")]
+    public bool Paused { get; set; }
+
+    /// <summary>
+    /// Desde cuándo están en pausa, o null.
+    /// </summary>
+    [JsonPropertyName("paused_at")]
+    public string? PausedAt { get; set; }
+
+    /// <summary>
+    /// Por qué se pausaron, o null.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// true si los pausó una llave de la API (no una persona en la app).
+    /// </summary>
+    [JsonPropertyName("paused_by_api")]
+    public bool PausedByApi { get; set; }
 }
 
 /// <summary>

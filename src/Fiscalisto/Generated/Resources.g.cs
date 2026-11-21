@@ -5857,7 +5857,7 @@ public sealed class PayoutsResource
     /// Preparar un pago a proveedores
     /// </summary>
     /// <remarks>
-    /// Un pago en borrador con estas facturas, revisado como en la app: las reglas antes de pagar, los límites y las cuentas aprobadas de cada proveedor. Las de un proveedor van en una transferencia. Nunca sale solo: alguien del equipo lo abre en app_url y lo firma con su llave de acceso. Solo si la empresa lo permite en Pagos › Configurar pagos (si no, 403 payouts_api_disabled); lo que no se puede pagar contesta 400 payout_invalid con el motivo. Pide Idempotency-Key: si la respuesta se pierde, repítala con el mismo valor y contesta el mismo pago, nunca uno nuevo.
+    /// Un pago en borrador con estas facturas, revisado como en la app: las reglas antes de pagar, los límites y las cuentas aprobadas de cada proveedor. Las de un proveedor van en una transferencia. Nunca sale solo: alguien del equipo lo abre en app_url y lo firma con su llave de acceso. Solo si la empresa lo permite en Pagos › Configurar pagos (si no, 403 payouts_api_disabled); lo que no se puede pagar contesta 400 payout_invalid con el motivo. Pide Idempotency-Key: si la respuesta se pierde, repítala con el mismo valor y contesta el mismo pago, nunca uno nuevo. La misma llave con otra solicitud (otras facturas, montos o día) contesta 409 idempotency_key_reused, aunque hayan pasado más de 24 horas.
     /// <br/>
     /// <c>POST /v1/payouts</c>
     /// <br/>
@@ -5886,6 +5886,34 @@ public sealed class PayoutsResource
     /// </summary>
     public IAsyncEnumerable<Payout> ListAutoPagingAsync(ListPayoutsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<Payout>("/v1/payouts", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver si los pagos están en pausa
+    /// </summary>
+    /// <remarks>
+    /// Si la empresa pausó todos sus pagos («Pausar todos los pagos»), desde cuándo y por qué.
+    /// <br/>
+    /// <c>GET /v1/payouts/pause</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/get-payouts-pause"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayoutsPause> GetPauseAsync(GetPayoutsPauseParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayoutsPause>("GET", "/v1/payouts/pause", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Pausar todos los pagos
+    /// </summary>
+    /// <remarks>
+    /// El freno de emergencia de la empresa, para una herramienta de seguridad o el botón de su ERP: al instante no sale ninguna transferencia (pagos firmados, reintentos ni recurrentes) y les llega el aviso a los administradores con el motivo. La API nunca reanuda: lo firman en la app las personas de Quién firma, cada una con su llave de acceso. Solo si la empresa deja que la API trabaje con sus pagos en Pagos › Configurar pagos (si no, 403 payouts_api_disabled). Pausar lo que ya está en pausa no cambia nada.
+    /// <br/>
+    /// <c>POST /v1/payouts/pause</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/pause-payouts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayoutsPause> PauseAsync(PausePayoutsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayoutsPause>("POST", "/v1/payouts/pause", @params, null, options, true, cancellationToken);
 
     /// <summary>
     /// Ver un pago a proveedores
