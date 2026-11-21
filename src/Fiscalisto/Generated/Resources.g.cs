@@ -4437,8 +4437,8 @@ public sealed class SatReviewsResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/cumplimiento-sat/download-sat-review-answer"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<string> DownloadAnswerAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestTextAsync("GET", $"/v1/sat_reviews/{Uri.EscapeDataString(id)}/answer", null, null, options, false, cancellationToken);
+    public Task<byte[]> DownloadAnswerAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/sat_reviews/{Uri.EscapeDataString(id)}/answer", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
@@ -5111,8 +5111,8 @@ public sealed class ExportsResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/exportaciones/download-export"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<string> DownloadAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestTextAsync("GET", $"/v1/exports/{Uri.EscapeDataString(id)}/download", null, null, options, false, cancellationToken);
+    public Task<byte[]> DownloadAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/exports/{Uri.EscapeDataString(id)}/download", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
@@ -6113,8 +6113,22 @@ public sealed class AccountingResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-electronic-accounting"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<string> ElectronicAccountingAsync(GetElectronicAccountingParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestTextAsync("GET", "/v1/accounting/electronic_accounting", null, @params, options, false, cancellationToken);
+    public Task<byte[]> ElectronicAccountingAsync(GetElectronicAccountingParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", "/v1/accounting/electronic_accounting", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar toda la contabilidad de un periodo
+    /// </summary>
+    /// <remarks>
+    /// Un ZIP para llevar los libros a otro sistema, de from_month a to_month (hasta 24 meses): el catálogo (1-catalogo, Excel con número, nombre, nivel, código agrupador y naturaleza), los saldos iniciales al primer día de from_month en deudor y acreedor (2-saldos-iniciales), las pólizas de todo el periodo para CONTPAQi Contabilidad (un TXT) y para Aspel COI (un Excel por mes), la balanza de comprobación de cada mes (una hoja por mes) y, en contabilidad-electronica, el catálogo (CT) y la balanza de cada mes (BN) en XML 1.3 del Anexo 24. LEEME.txt dice el orden en que se importa. Son los mismos libros de financial_statements y electronic_accounting.
+    /// <br/>
+    /// <c>GET /v1/accounting/books_export</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-books-export"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> BooksExportAsync(GetBooksExportParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", "/v1/accounting/books_export", null, @params, options, false, cancellationToken);
 
     /// <summary>
     /// Ver la DIOT de un mes

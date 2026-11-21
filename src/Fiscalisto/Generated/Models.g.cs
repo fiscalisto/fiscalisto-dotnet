@@ -21190,6 +21190,30 @@ public sealed partial class GetAttendanceParams
 }
 
 /// <summary>
+/// Los campos de «Descargar toda la contabilidad de un periodo».
+/// </summary>
+public sealed partial class GetBooksExportParams
+{
+    /// <summary>
+    /// El primer mes (AAAA-MM), de 2015-01 al mes actual.
+    /// </summary>
+    [JsonPropertyName("from_month")]
+    public required string FromMonth { get; set; }
+
+    /// <summary>
+    /// El último mes (AAAA-MM), hasta 24 meses después y no después del mes actual; por omisión, from_month.
+    /// </summary>
+    [JsonPropertyName("to_month")]
+    public string? ToMonth { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver el presupuesto de un año contra lo real».
 /// </summary>
 public sealed partial class GetBudgetParams
@@ -22899,7 +22923,7 @@ public sealed partial class Invoice
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// processing: el PAC no ha contestado (se resuelve sola; escuche invoice.stamped). valid: timbrada. pending: timbrada con una cancelación en espera del cliente. rejected: el SAT o el PAC no la aceptaron (ver error). canceled: cancelada.
+    /// processing: el PAC no ha contestado (se resuelve sola; escuche invoice.stamped). valid: timbrada. pending: timbrada, sin el UUID aún (se resuelve sola, como processing). Una cancelación en espera del cliente no cambia status: sigue valid, con cancellation.status pending. rejected: el SAT o el PAC no la aceptaron (ver error). canceled: cancelada.
     /// <br/>
     /// Valores: processing, pending, valid, rejected, canceled.
     /// </summary>
