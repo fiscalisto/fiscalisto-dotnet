@@ -3987,7 +3987,7 @@ public sealed partial class CandidateAnswersItem
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// Lo que respondió: un texto, o una lista en una pregunta de varias opciones; null si no respondió.
     /// </summary>
     [JsonPropertyName("value")]
     public JsonElement? Value { get; set; }
@@ -10447,6 +10447,14 @@ public sealed partial class CreatePayoutParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// En un pago programado con facturas en otra moneda: official (el tipo de cambio oficial; si al salir se movió más de la tolerancia de Configurar pagos, se detiene hasta firmarlo de nuevo) o fixed (sale al tipo de cambio de hoy, se mueva o no). Por omisión, lo que diga Configurar pagos.
+    /// <br/>
+    /// Valores: official, fixed.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public string? ExchangeRate { get; set; }
 
     /// <summary>
     /// Las facturas recibidas a pagar (de 1 a 500). Las de un mismo proveedor van en una sola transferencia a su cuenta aprobada.
@@ -32642,6 +32650,20 @@ public sealed partial class PayeeAccount
     public bool ThirdParty { get; set; }
 
     /// <summary>
+    /// Cómo se confió en la cuenta: bank (el banco confirmó el RFC del proveedor), by_hand (alguien la verificó a mano porque el RFC del banco solo cambiaba la homoclave o no venía), third_party (se autorizó como de un tercero), o null si aún no está aprobada.
+    /// <br/>
+    /// Valores: bank, by_hand, third_party.
+    /// </summary>
+    [JsonPropertyName("verification")]
+    public string? Verification { get; set; }
+
+    /// <summary>
+    /// Cómo la verificó a mano quien la aprobó, o null.
+    /// </summary>
+    [JsonPropertyName("verified_by_hand_reason")]
+    public string? VerifiedByHandReason { get; set; }
+
+    /// <summary>
     /// verifying (verificando con el banco), pending_approval (verificada, por aprobar), holder_mismatch (es de otra persona), failed (no existe o no recibe), approved, rejected o replaced (la sustituyó otra).
     /// <br/>
     /// Valores: verifying, pending_approval, holder_mismatch, failed, approved, rejected, replaced.
@@ -32752,6 +32774,14 @@ public sealed partial class Payout
     /// </summary>
     [JsonPropertyName("pay_on")]
     public string PayOn { get; set; } = default!;
+
+    /// <summary>
+    /// En un pago programado con facturas en otra moneda, cómo toma el tipo de cambio: official (el oficial; si al salir se movió más de la tolerancia de Configurar pagos, se detiene hasta firmarlo de nuevo) o fixed (sale al tipo de cambio con que se firmó). null en pesos o si sale hoy.
+    /// <br/>
+    /// Valores: official, fixed.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public string? ExchangeRate { get; set; }
 
     /// <summary>
     /// La suma de sus transferencias, en pesos.
@@ -36214,7 +36244,7 @@ public sealed partial class PortalSupplierList
 public sealed partial class PortalSupplierScore
 {
     /// <summary>
-    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// La calificación del proveedor, de 0 a 100, o null si aún no hay con qué calcularla.
     /// </summary>
     [JsonPropertyName("value")]
     public long? Value { get; set; }
@@ -37316,7 +37346,7 @@ public sealed partial class ProductionOrderComponentsItem
     public bool TracksStock { get; set; }
 
     /// <summary>
-    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// Lo que vale el componente usado (cantidad por costo), o null si no tiene costo.
     /// </summary>
     [JsonPropertyName("value")]
     public decimal? Value { get; set; }
