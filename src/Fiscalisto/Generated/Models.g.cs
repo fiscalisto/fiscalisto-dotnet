@@ -13695,7 +13695,7 @@ public sealed partial class CreateRuleParamsActionsItem
     public List<string>? Members { get; set; }
 
     /// <summary>
-    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200).
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200). Puede llevar las variables de `message`, menos las tablas.
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
@@ -13709,13 +13709,13 @@ public sealed partial class CreateRuleParamsActionsItem
     public string? Topic { get; set; }
 
     /// <summary>
-    /// email_supplier: el asunto. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
+    /// email_supplier: el asunto. Lleva las variables de `message`, menos las tablas.
     /// </summary>
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
 
     /// <summary>
-    /// email_supplier: el mensaje. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
+    /// email_supplier: el mensaje. Variables: {folio}, {total}, {fecha}, {empresa}, {rfc_empresa}, {proveedor}, {rfc_proveedor}, {subtotal}, {iva}, {retenciones} y {moneda}; de una factura también {uuid}, {metodo_pago}, {forma_pago}, {uso_cfdi}, {conceptos}, {categoria}, {saldo}, {orden}, {contrarecibo}, {fecha_promesa}, {hallazgos} y la tabla {tabla_conceptos}; de una orden {entrega}, {almacen}, {credito}, {comprador}, {nota}, {enlace} y la tabla {tabla_productos}; en invoice.rejected y purchase_order.rejected, {motivo_rechazo}; en los momentos de pagos {facturas}, la tabla {tabla_facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}, en payout.paid {rastreo} y {cep}, en payout.failed {motivo}. Un correo por pago (per payout) no lleva las de una sola factura. Cada {tabla_…} se dibuja como tabla, con las columnas de `columns`; un dato que el registro no tiene queda en blanco.
     /// </summary>
     [JsonPropertyName("message")]
     public string? Message { get; set; }
@@ -13729,13 +13729,25 @@ public sealed partial class CreateRuleParamsActionsItem
     public string? Per { get; set; }
 
     /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje, en su orden. tabla_facturas: folio, uuid, fecha, total, retenido, pagado; tabla_conceptos: clave, descripcion, cantidad, unidad, precio, importe; tabla_productos: producto, codigo, cantidad, recibido, pendiente, precio, importe. Sin columnas, las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public CreateRuleParamsActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo que reciben copia (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
     /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
     /// </summary>
     [JsonPropertyName("signatures")]
     public long? Signatures { get; set; }
 
     /// <summary>
-    /// extra_signature: por qué, para quien firma («Proveedor nuevo»).
+    /// extra_signature: por qué, para quien firma («Proveedor nuevo»). Puede llevar las variables de `message`, menos las tablas.
     /// </summary>
     [JsonPropertyName("reason")]
     public string? Reason { get; set; }
@@ -13745,6 +13757,30 @@ public sealed partial class CreateRuleParamsActionsItem
     /// </summary>
     [JsonPropertyName("findings")]
     public List<string>? Findings { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
 }
 
 /// <summary>
@@ -39806,6 +39842,18 @@ public sealed partial class RuleActionsItem
     public string? Per { get; set; }
 
     /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje; null: las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public RuleActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo con copia (mem_…).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
     /// review_findings: los hallazgos que da por revisados (sus códigos).
     /// </summary>
     [JsonPropertyName("findings")]
@@ -39842,6 +39890,30 @@ public sealed partial class RuleActionsItem
     /// </summary>
     [JsonPropertyName("days")]
     public long? Days { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RuleActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
 }
 
 /// <summary>
@@ -44232,6 +44304,12 @@ public sealed partial class SelfInvoicing
     /// </summary>
     [JsonPropertyName("customer_notes")]
     public bool CustomerNotes { get; set; }
+
+    /// <summary>
+    /// true: cuando un comprador no puede facturar por algo del emisor, se avisa por correo; false: solo queda en Alertas.
+    /// </summary>
+    [JsonPropertyName("failure_email")]
+    public bool FailureEmail { get; set; }
 
     /// <summary>
     /// ticket: la factura global lleva un concepto «Venta» por ticket, con su folio. summary: solo el monto total del periodo, uno por combinación de impuestos (NoIdentificacion «Resumen»), para una persona física en RESICO (regla 2.7.1.21 de la RMF 2026).
@@ -49630,7 +49708,7 @@ public sealed partial class UpdateRuleParamsActionsItem
     public List<string>? Members { get; set; }
 
     /// <summary>
-    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200).
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200). Puede llevar las variables de `message`, menos las tablas.
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
@@ -49644,13 +49722,13 @@ public sealed partial class UpdateRuleParamsActionsItem
     public string? Topic { get; set; }
 
     /// <summary>
-    /// email_supplier: el asunto. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
+    /// email_supplier: el asunto. Lleva las variables de `message`, menos las tablas.
     /// </summary>
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
 
     /// <summary>
-    /// email_supplier: el mensaje. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
+    /// email_supplier: el mensaje. Variables: {folio}, {total}, {fecha}, {empresa}, {rfc_empresa}, {proveedor}, {rfc_proveedor}, {subtotal}, {iva}, {retenciones} y {moneda}; de una factura también {uuid}, {metodo_pago}, {forma_pago}, {uso_cfdi}, {conceptos}, {categoria}, {saldo}, {orden}, {contrarecibo}, {fecha_promesa}, {hallazgos} y la tabla {tabla_conceptos}; de una orden {entrega}, {almacen}, {credito}, {comprador}, {nota}, {enlace} y la tabla {tabla_productos}; en invoice.rejected y purchase_order.rejected, {motivo_rechazo}; en los momentos de pagos {facturas}, la tabla {tabla_facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}, en payout.paid {rastreo} y {cep}, en payout.failed {motivo}. Un correo por pago (per payout) no lleva las de una sola factura. Cada {tabla_…} se dibuja como tabla, con las columnas de `columns`; un dato que el registro no tiene queda en blanco.
     /// </summary>
     [JsonPropertyName("message")]
     public string? Message { get; set; }
@@ -49664,13 +49742,25 @@ public sealed partial class UpdateRuleParamsActionsItem
     public string? Per { get; set; }
 
     /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje, en su orden. tabla_facturas: folio, uuid, fecha, total, retenido, pagado; tabla_conceptos: clave, descripcion, cantidad, unidad, precio, importe; tabla_productos: producto, codigo, cantidad, recibido, pendiente, precio, importe. Sin columnas, las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public UpdateRuleParamsActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo que reciben copia (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
     /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
     /// </summary>
     [JsonPropertyName("signatures")]
     public long? Signatures { get; set; }
 
     /// <summary>
-    /// extra_signature: por qué, para quien firma («Proveedor nuevo»).
+    /// extra_signature: por qué, para quien firma («Proveedor nuevo»). Puede llevar las variables de `message`, menos las tablas.
     /// </summary>
     [JsonPropertyName("reason")]
     public string? Reason { get; set; }
@@ -49680,6 +49770,30 @@ public sealed partial class UpdateRuleParamsActionsItem
     /// </summary>
     [JsonPropertyName("findings")]
     public List<string>? Findings { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
 }
 
 /// <summary>
@@ -50594,6 +50708,12 @@ public sealed partial class UpdateSelfInvoicingParams
     public bool? CustomerNotes { get; set; }
 
     /// <summary>
+    /// `true` (por omisión): cuando un comprador no puede facturar por algo del emisor (su CSD, sus datos, el PAC), se avisa por correo a los dueños y administradores. `false`: solo queda en Alertas, sin correo. Un error en los datos del comprador nunca avisa: el portal le dice cómo corregirlo.
+    /// </summary>
+    [JsonPropertyName("failure_email")]
+    public bool? FailureEmail { get; set; }
+
+    /// <summary>
     /// Los conceptos de la factura que se hace el comprador (Autofactura › Conceptos de la factura): desglosados o en uno solo, y si el comprador puede elegir. Mande solo lo que cambia; `null` regresa a desglosados sin elección.
     /// </summary>
     [JsonPropertyName("invoice_concepts")]
@@ -50972,6 +51092,12 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleTexts
     public UpdateSelfInvoicingParamsPortalStyleTextsSuccessMessage? SuccessMessage { get; set; }
 
     /// <summary>
+    /// Lo que dice el portal antes de su correo y teléfono cuando no se pudo facturar («¿Sigue con problemas?»); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("error_help")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsErrorHelp? ErrorHelp { get; set; }
+
+    /// <summary>
     /// El título de la elección de conceptos («Conceptos en su factura»; ver `invoice_concepts`); `null` vuelve al de Fiscalisto.
     /// </summary>
     [JsonPropertyName("concepts_title")]
@@ -51099,6 +51225,24 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsDetailLabel
 
     /// <summary>
     /// La casilla del detalle de los conceptos («Incluir el detalle en la descripción…»; ver `invoice_concepts.line_detail`) en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsErrorHelp&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsErrorHelp
+{
+    /// <summary>
+    /// Lo que dice el portal antes de su correo y teléfono cuando no se pudo facturar («¿Sigue con problemas?») en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// Lo que dice el portal antes de su correo y teléfono cuando no se pudo facturar («¿Sigue con problemas?») en inglés.
     /// </summary>
     [JsonPropertyName("en")]
     public string? En { get; set; }
