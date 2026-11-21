@@ -30056,6 +30056,14 @@ public sealed partial class ListSatInvoicesParams
     /// </summary>
     [JsonPropertyName("tag")]
     public string? Tag { get; set; }
+
+    /// <summary>
+    /// Solo las PUE recibidas en efectivo que la empresa pide confirmar: pending (nadie ha anotado de dónde salió el dinero) o confirmed.
+    /// <br/>
+    /// Valores: pending, confirmed.
+    /// </summary>
+    [JsonPropertyName("cash_confirmation")]
+    public string? CashConfirmation { get; set; }
 }
 
 /// <summary>
@@ -40956,6 +40964,14 @@ public sealed partial class SatInvoice
     /// </summary>
     [JsonPropertyName("paid_otherwise")]
     public SatInvoicePaidOtherwise? PaidOtherwise { get; set; }
+
+    /// <summary>
+    /// Solo en una PUE recibida pagada en efectivo cuando la empresa pide confirmar estos pagos (Ajustes › Pagos sin complemento): pending hasta que alguien anote de dónde salió el dinero (mark_paid con money_source), confirmed después. Null en las demás. Sus impuestos no cambian.
+    /// <br/>
+    /// Valores: pending, confirmed.
+    /// </summary>
+    [JsonPropertyName("cash_confirmation")]
+    public string? CashConfirmation { get; set; }
 
     /// <summary>
     /// Su centro de costo (ccn_…), o null. Póngalo o cámbielo con POST /v1/sat_invoices/{id}.
