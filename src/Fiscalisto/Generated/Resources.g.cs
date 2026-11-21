@@ -435,6 +435,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public ManualEntriesResource ManualEntries => _manualEntries ??= new ManualEntriesResource(this);
 
+    private AutomaticEntriesResource? _automaticEntries;
+
+    /// <summary>Contabilidad.</summary>
+    public AutomaticEntriesResource AutomaticEntries => _automaticEntries ??= new AutomaticEntriesResource(this);
+
     private OpeningBalancesResource? _openingBalances;
 
     /// <summary>Contabilidad.</summary>
@@ -6659,6 +6664,58 @@ public sealed class ManualEntriesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Deleted> UndoImportAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Deleted>("DELETE", $"/v1/accounting/manual_entry_imports/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.AutomaticEntries</c>.
+/// </summary>
+public sealed class AutomaticEntriesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal AutomaticEntriesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver la póliza de un CFDI
+    /// </summary>
+    /// <remarks>
+    /// La póliza que arma Fiscalisto para una factura, nota de crédito o recibo de nómina del emisor (por el UUID del CFDI), con su edición a mano si la tiene. Un pago no tiene una propia que se edite: se corrige con una póliza capturada.
+    /// <br/>
+    /// <c>GET /v1/accounting/automatic_entries/{uuid}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-automatic-entry"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AutomaticJournalEntry> GetAsync(string uuid, GetAutomaticEntryParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AutomaticJournalEntry>("GET", $"/v1/accounting/automatic_entries/{Uri.EscapeDataString(uuid)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Editar la póliza de un CFDI
+    /// </summary>
+    /// <remarks>
+    /// Sus renglones (y su concepto) en lugar de los que arma Fiscalisto, con las reglas de una póliza capturada: cuentas del catálogo y cargos que suman lo mismo que los abonos (entry_unbalanced). Se queda aunque el CFDI se vuelva a descargar, en su mes y en los saldos de los siguientes, y va a la bitácora. Un mes cerrado contesta period_closed. Los mismos renglones que la original quitan la edición.
+    /// <br/>
+    /// <c>POST /v1/accounting/automatic_entries/{uuid}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-automatic-entry"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AutomaticJournalEntry> UpdateAsync(string uuid, UpdateAutomaticEntryParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AutomaticJournalEntry>("POST", $"/v1/accounting/automatic_entries/{Uri.EscapeDataString(uuid)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Volver a la póliza original de un CFDI
+    /// </summary>
+    /// <remarks>
+    /// Quita la edición a mano: los libros vuelven a usar los renglones que arma Fiscalisto. Un mes cerrado contesta period_closed.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/automatic_entries/{uuid}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/revert-automatic-entry"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AutomaticJournalEntry> RevertAsync(string uuid, RevertAutomaticEntryParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AutomaticJournalEntry>("DELETE", $"/v1/accounting/automatic_entries/{Uri.EscapeDataString(uuid)}", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>

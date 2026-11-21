@@ -2702,6 +2702,170 @@ public sealed partial class AttendanceReportEmployeesItemWeeksDisputedItem
 }
 
 /// <summary>
+/// La póliza que Fiscalisto arma para un CFDI (factura, nota de crédito o recibo de nómina), con la edición a mano si la tiene: se queda aunque el CFDI se vuelva a descargar, hasta volver a la original.
+/// </summary>
+public sealed partial class AutomaticJournalEntry
+{
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El UUID del CFDI de la póliza.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// invoice: una factura o nota de crédito; payroll: un recibo de nómina.
+    /// <br/>
+    /// Valores: invoice, payroll.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha de la póliza: la del CFDI, o la del pago de la nómina.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Su concepto.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+
+    /// <summary>
+    /// Los renglones que usan los libros.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public List<AutomaticJournalEntryLinesItem> Lines { get; set; } = default!;
+
+    /// <summary>
+    /// true si se editó a mano.
+    /// </summary>
+    [JsonPropertyName("edited")]
+    public bool Edited { get; set; }
+
+    /// <summary>
+    /// Cuándo se editó por última vez, o null.
+    /// </summary>
+    [JsonPropertyName("edited_at")]
+    public string? EditedAt { get; set; }
+
+    /// <summary>
+    /// Editada: los renglones que arma Fiscalisto hoy para su CFDI.
+    /// </summary>
+    [JsonPropertyName("original_lines")]
+    public List<AutomaticJournalEntryOriginalLinesItem>? OriginalLines { get; set; }
+
+    /// <summary>
+    /// Editada: true si la póliza que arma su CFDI cambió desde que se editó (su cuenta o su categoría), para revisar que la edición siga bien.
+    /// </summary>
+    [JsonPropertyName("original_changed")]
+    public bool? OriginalChanged { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AutomaticJournalEntryLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AutomaticJournalEntryLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// El cargo, en pesos.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono, en pesos.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…), o null.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AutomaticJournalEntryOriginalLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AutomaticJournalEntryOriginalLinesItem
+{
+    /// <summary>
+    /// El número de cuenta.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string Account { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la cuenta.
+    /// </summary>
+    [JsonPropertyName("account_name")]
+    public string AccountName { get; set; } = default!;
+
+    /// <summary>
+    /// Su código agrupador del SAT.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string GroupingCode { get; set; } = default!;
+
+    /// <summary>
+    /// El cargo, en pesos.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal Debit { get; set; }
+
+    /// <summary>
+    /// El abono, en pesos.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…), o null.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+}
+
+/// <summary>
 /// Timbres de producción de la cuenta, por paquete, el que vence antes primero.
 /// </summary>
 public sealed partial class Balance
@@ -3175,7 +3339,7 @@ public sealed partial class BooksLogEntry
     /// <summary>
     /// Qué cambió: una póliza a mano (manual_journal_entry), los saldos iniciales, una cuenta, el catálogo completo (una importación o una renumeración), el cierre del mes (period_close), una eliminación de consolidación, una póliza modelo o la baja de un activo fijo.
     /// <br/>
-    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account.
+    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account, automatic_journal_entry.
     /// </summary>
     [JsonPropertyName("subject")]
     public string Subject { get; set; } = default!;
@@ -21878,6 +22042,18 @@ public sealed partial class GetAttendanceParams
 }
 
 /// <summary>
+/// Los campos de «Ver la póliza de un CFDI».
+/// </summary>
+public sealed partial class GetAutomaticEntryParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Descargar toda la contabilidad de un periodo».
 /// </summary>
 public sealed partial class GetBooksExportParams
@@ -29154,6 +29330,12 @@ public sealed partial class JournalEntry
     public decimal? ExchangeRate { get; set; }
 
     /// <summary>
+    /// Sus renglones se editaron a mano (POST /v1/accounting/automatic_entries/{uuid}).
+    /// </summary>
+    [JsonPropertyName("edited")]
+    public bool Edited { get; set; }
+
+    /// <summary>
     /// Los movimientos, en pesos: el cargo (debit) o abono (credit) a cada cuenta.
     /// </summary>
     [JsonPropertyName("lines")]
@@ -29446,9 +29628,9 @@ public sealed partial class ListBankTransactionsParams
 public sealed partial class ListBooksLogParams
 {
     /// <summary>
-    /// Solo los cambios de una cosa: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset o invoice_account (la cuenta de una factura).
+    /// Solo los cambios de una cosa: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account (la cuenta de una factura) o automatic_journal_entry (una póliza automática editada).
     /// <br/>
-    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account.
+    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account, automatic_journal_entry.
     /// </summary>
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
@@ -39557,6 +39739,18 @@ public sealed partial class ReturnExpenseReportParams
 }
 
 /// <summary>
+/// Los campos de «Volver a la póliza original de un CFDI».
+/// </summary>
+public sealed partial class RevertAutomaticEntryParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Un rol de la empresa: un nombre y sus permisos.
 /// </summary>
 public sealed partial class Role
@@ -46648,6 +46842,90 @@ public sealed partial class UpdateAnnualAdjustmentParams
     /// </summary>
     [JsonPropertyName("employees")]
     public required List<string> Employees { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Editar la póliza de un CFDI».
+/// </summary>
+public sealed partial class UpdateAutomaticEntryParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Su concepto. Sin él, queda el que tiene.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Sus cargos y abonos en lugar de los que arma Fiscalisto: cada renglón uno u otro; los cargos suman lo mismo que los abonos.
+    /// </summary>
+    [JsonPropertyName("lines")]
+    public required List<UpdateAutomaticEntryParamsLinesItem> Lines { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateAutomaticEntryParamsLinesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateAutomaticEntryParamsLinesItem
+{
+    /// <summary>
+    /// El número de la cuenta en su catálogo (GET /v1/accounting/accounts), por ejemplo 205-06.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public required string Account { get; set; }
+
+    /// <summary>
+    /// El cargo.
+    /// </summary>
+    [JsonPropertyName("debit")]
+    public decimal? Debit { get; set; }
+
+    /// <summary>
+    /// El abono.
+    /// </summary>
+    [JsonPropertyName("credit")]
+    public decimal? Credit { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…, GET /v1/cost_centers), opcional: los resultados por centro de costo y los presupuestos lo leen.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Un renglón en otra moneda: su clave ISO 4217 (USD, EUR…). Con ella van foreign_amount y exchange_rate, y debit o credit es su producto en pesos.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// El importe del renglón en su moneda.
+    /// </summary>
+    [JsonPropertyName("foreign_amount")]
+    public decimal? ForeignAmount { get; set; }
+
+    /// <summary>
+    /// El tipo de cambio del renglón: pesos por una unidad de su moneda.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// El CFDI que documenta este renglón, aparte del de la póliza: así una póliza lleva varios.
+    /// </summary>
+    [JsonPropertyName("cfdi_uuid")]
+    public string? CfdiUuid { get; set; }
+
+    /// <summary>
+    /// El RFC de quien emitió o recibió el CFDI del renglón.
+    /// </summary>
+    [JsonPropertyName("cfdi_tax_id")]
+    public string? CfdiTaxId { get; set; }
 }
 
 /// <summary>
