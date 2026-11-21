@@ -2951,7 +2951,7 @@ public sealed class PayrollOrgChartResource
     /// Abrir una vacante
     /// </summary>
     /// <remarks>
-    /// Un puesto sin persona todavía, bajo un jefe, en un departamento y una sucursal: sale en el organigrama, pero no cuenta como empleado. Contesta el organigrama.
+    /// Un puesto sin persona todavía, bajo un jefe, en un departamento y una sucursal, con el sueldo mensual que ofrece: sale en el organigrama, pero no cuenta como empleado. Queda en pending_approval hasta que alguien con el permiso «Aprobar la prenómina» la aprueba en la app (le llega un aviso); entonces se cubre con POST /v1/payroll_org_chart/vacancies/{id}/fill. Contesta el organigrama, con lo que costaría al mes (monthly_cost).
     /// <br/>
     /// <c>POST /v1/payroll_org_chart/vacancies</c>
     /// <br/>
@@ -2965,7 +2965,7 @@ public sealed class PayrollOrgChartResource
     /// Cambiar una vacante
     /// </summary>
     /// <remarks>
-    /// Cambia el puesto, departamento, jefe o sucursal de una vacante (vac_…).
+    /// Cambia el puesto, departamento, jefe, sucursal o sueldo de una vacante (vac_…); lo que no manda queda vacío. Cambiada, vuelve a pending_approval. Una ya cubierta contesta parameter_invalid.
     /// <br/>
     /// <c>POST /v1/payroll_org_chart/vacancies/{id}</c>
     /// <br/>
@@ -2988,6 +2988,20 @@ public sealed class PayrollOrgChartResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollOrgChart> DeleteVacancyAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollOrgChart>("DELETE", $"/v1/payroll_org_chart/vacancies/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cubrir una vacante
+    /// </summary>
+    /// <remarks>
+    /// La cubre con un empleado ya dado de alta (POST /v1/employees): queda con el jefe, el departamento y la sucursal de la vacante, y la vacante sale del organigrama (status filled). Una que espera aprobación o se rechazó contesta parameter_invalid. Falta su alta en el IMSS (GET /v1/imss_movements la propone).
+    /// <br/>
+    /// <c>POST /v1/payroll_org_chart/vacancies/{id}/fill</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/fill-payroll-vacancy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> FillVacancyAsync(string id, FillPayrollVacancyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("POST", $"/v1/payroll_org_chart/vacancies/{Uri.EscapeDataString(id)}/fill", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

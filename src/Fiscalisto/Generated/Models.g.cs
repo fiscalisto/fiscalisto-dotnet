@@ -10945,6 +10945,24 @@ public sealed partial class CreatePayrollVacancyParams
     /// </summary>
     [JsonPropertyName("opened_on")]
     public string? OpenedOn { get; set; }
+
+    /// <summary>
+    /// Sueldo mensual bruto que ofrece, desde (pesos); null si no lo dice.
+    /// </summary>
+    [JsonPropertyName("salary_min")]
+    public decimal? SalaryMin { get; set; }
+
+    /// <summary>
+    /// Sueldo mensual bruto que ofrece, hasta (pesos); null si no lo dice.
+    /// </summary>
+    [JsonPropertyName("salary_max")]
+    public decimal? SalaryMax { get; set; }
+
+    /// <summary>
+    /// Estado donde trabajará, como c_Estado (NLE, CMX…), para su impuesto sobre nómina; null para el de su jefe o el de la mayoría.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
 }
 
 /// <summary>
@@ -19960,6 +19978,18 @@ public sealed partial class ExtraordinaryPayrollReceiptPreviewTotals
 }
 
 /// <summary>
+/// Los campos de «Cubrir una vacante».
+/// </summary>
+public sealed partial class FillPayrollVacancyParams
+{
+    /// <summary>
+    /// Quien la ocupa (emp_…), ya dado de alta con POST /v1/employees: queda con el jefe, el departamento y la sucursal de la vacante.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+}
+
+/// <summary>
 /// Razones financieras al cierre de un mes: de su balance general y de sus resultados de enero al mes.
 /// </summary>
 public sealed partial class FinancialRatios
@@ -21981,6 +22011,12 @@ public sealed partial class GetPayrollOrgChartParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Un día pasado (YYYY-MM-DD): el organigrama como estaba al cierre de ese día, con los jefes, departamentos y sucursales que tenían (se guardan desde el 21 de noviembre de 2026).
+    /// </summary>
+    [JsonPropertyName("as_of")]
+    public string? AsOf { get; set; }
 }
 
 /// <summary>
@@ -33834,6 +33870,116 @@ public sealed partial class PayrollOrgChartVacanciesItem
     /// </summary>
     [JsonPropertyName("opened_on")]
     public string OpenedOn { get; set; } = default!;
+
+    /// <summary>
+    /// pending_approval espera el visto bueno de alguien con el permiso «Aprobar la prenómina» (las que abre una llave de API, y las que abre o cambia quien no lo tiene); approved ya se puede cubrir. En el organigrama salen solo estas dos.
+    /// <br/>
+    /// Valores: pending_approval, approved, rejected, filled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Sueldo mensual bruto que ofrece, desde.
+    /// </summary>
+    [JsonPropertyName("salary_min")]
+    public decimal? SalaryMin { get; set; }
+
+    /// <summary>
+    /// Sueldo mensual bruto que ofrece, hasta.
+    /// </summary>
+    [JsonPropertyName("salary_max")]
+    public decimal? SalaryMax { get; set; }
+
+    /// <summary>
+    /// Estado donde trabajará (c_Estado), si se dijo.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    /// <summary>
+    /// Lo que costaría a la empresa al mes: el sueldo, las cuotas patronales (primer año, prestaciones de ley, la prima de riesgo del emisor) y el impuesto sobre nómina de su estado. null sin sueldo.
+    /// </summary>
+    [JsonPropertyName("monthly_cost")]
+    public PayrollOrgChartVacanciesItemMonthlyCost MonthlyCost { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que costaría a la empresa al mes: el sueldo, las cuotas patronales (primer año, prestaciones de ley, la prima de riesgo del emisor) y el impuesto sobre nómina de su estado. null sin sueldo.
+/// </summary>
+public sealed partial class PayrollOrgChartVacanciesItemMonthlyCost
+{
+    /// <summary>
+    /// Con salary_min.
+    /// </summary>
+    [JsonPropertyName("min")]
+    public PayrollOrgChartVacanciesItemMonthlyCostMin? Min { get; set; }
+
+    /// <summary>
+    /// Con salary_max.
+    /// </summary>
+    [JsonPropertyName("max")]
+    public PayrollOrgChartVacanciesItemMonthlyCostMax? Max { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollOrgChartVacanciesItemMonthlyCostMax&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollOrgChartVacanciesItemMonthlyCostMax
+{
+    /// <summary>
+    /// El sueldo del mes.
+    /// </summary>
+    [JsonPropertyName("salary")]
+    public decimal Salary { get; set; }
+
+    /// <summary>
+    /// Lo que paga el patrón al IMSS, SAR e Infonavit al mes (cuotas obrero-patronales).
+    /// </summary>
+    [JsonPropertyName("employer_contributions")]
+    public decimal EmployerContributions { get; set; }
+
+    /// <summary>
+    /// El impuesto sobre nómina del estado al mes.
+    /// </summary>
+    [JsonPropertyName("payroll_tax")]
+    public decimal PayrollTax { get; set; }
+
+    /// <summary>
+    /// Lo que cuesta a la empresa al mes.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollOrgChartVacanciesItemMonthlyCostMin&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollOrgChartVacanciesItemMonthlyCostMin
+{
+    /// <summary>
+    /// El sueldo del mes.
+    /// </summary>
+    [JsonPropertyName("salary")]
+    public decimal Salary { get; set; }
+
+    /// <summary>
+    /// Lo que paga el patrón al IMSS, SAR e Infonavit al mes (cuotas obrero-patronales).
+    /// </summary>
+    [JsonPropertyName("employer_contributions")]
+    public decimal EmployerContributions { get; set; }
+
+    /// <summary>
+    /// El impuesto sobre nómina del estado al mes.
+    /// </summary>
+    [JsonPropertyName("payroll_tax")]
+    public decimal PayrollTax { get; set; }
+
+    /// <summary>
+    /// Lo que cuesta a la empresa al mes.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
 }
 
 /// <summary>
@@ -46536,6 +46682,24 @@ public sealed partial class UpdatePayrollVacancyParams
     /// </summary>
     [JsonPropertyName("opened_on")]
     public string? OpenedOn { get; set; }
+
+    /// <summary>
+    /// Sueldo mensual bruto que ofrece, desde (pesos); null si no lo dice.
+    /// </summary>
+    [JsonPropertyName("salary_min")]
+    public decimal? SalaryMin { get; set; }
+
+    /// <summary>
+    /// Sueldo mensual bruto que ofrece, hasta (pesos); null si no lo dice.
+    /// </summary>
+    [JsonPropertyName("salary_max")]
+    public decimal? SalaryMax { get; set; }
+
+    /// <summary>
+    /// Estado donde trabajará, como c_Estado (NLE, CMX…), para su impuesto sobre nómina; null para el de su jefe o el de la mayoría.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
 }
 
 /// <summary>
