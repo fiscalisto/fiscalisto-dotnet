@@ -10443,6 +10443,12 @@ public sealed partial class CreatePayoutParams
     public string? PayOn { get; set; }
 
     /// <summary>
+    /// El nombre del lote («Fletes»), para encontrarlo en la app entre los lotes abiertos. Sin nombre, la app lo llama por su día («Lote del jueves 27 nov»).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
     /// Una nota para quien lo revisa y lo firma.
     /// </summary>
     [JsonPropertyName("note")]
@@ -32768,6 +32774,12 @@ public sealed partial class Payout
     /// </summary>
     [JsonPropertyName("status")]
     public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del lote («Fletes»), o null: la app lo llama por su día.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 
     /// <summary>
     /// El día en que sale (AAAA-MM-DD, hora de la Ciudad de México).
