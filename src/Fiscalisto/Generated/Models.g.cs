@@ -13563,9 +13563,9 @@ public sealed partial class CreateRuleParams
 public sealed partial class CreateRuleParamsActionsItem
 {
     /// <summary>
-    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…).
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…); lote (invoice.received e invoice.approved): agregar la factura al lote de pagos abierto `lote_name` que paga `pay_on`, o crear uno, preparado como quien hizo la regla.
     /// <br/>
-    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category.
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category, lote.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
@@ -13589,6 +13589,26 @@ public sealed partial class CreateRuleParamsActionsItem
     /// </summary>
     [JsonPropertyName("remove_when_unmet")]
     public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote («Fletes»); vacío o null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga: el siguiente lunes … viernes (hoy incluido), a los `days` días, o `due`, la fecha de pago del contrarecibo del portal. Un día inhábil pasa al siguiente hábil. Por omisión, friday.
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días después.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
 
     /// <summary>
     /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
@@ -32670,6 +32690,18 @@ public sealed partial class PayeeAccount
     public string? VerifiedByHandReason { get; set; }
 
     /// <summary>
+    /// Su número de cuenta, si se anotó junto a la CLABE (solo de referencia: la transferencia usa la CLABE), o null.
+    /// </summary>
+    [JsonPropertyName("account_number")]
+    public string? AccountNumber { get; set; }
+
+    /// <summary>
+    /// true si es la cuenta predeterminada del proveedor: la que usa un pago cuando no se elige otra.
+    /// </summary>
+    [JsonPropertyName("is_default")]
+    public bool IsDefault { get; set; }
+
+    /// <summary>
     /// verifying (verificando con el banco), pending_approval (verificada, por aprobar), holder_mismatch (es de otra persona), failed (no existe o no recibe), approved, rejected o replaced (la sustituyó otra).
     /// <br/>
     /// Valores: verifying, pending_approval, holder_mismatch, failed, approved, rejected, replaced.
@@ -39266,7 +39298,7 @@ public sealed partial class RuleActionsItem
     /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
     /// <br/>
-    /// Valores: tag, cost_center, category, stage, close, ask_approval, notify.
+    /// Valores: tag, cost_center, category, stage, close, ask_approval, notify, lote.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -39312,6 +39344,26 @@ public sealed partial class RuleActionsItem
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote; null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga (siguiente día de la semana, a los días, o el del contrarecibo).
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
 }
 
 /// <summary>
@@ -49028,9 +49080,9 @@ public sealed partial class UpdateRuleParams
 public sealed partial class UpdateRuleParamsActionsItem
 {
     /// <summary>
-    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…).
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…); lote (invoice.received e invoice.approved): agregar la factura al lote de pagos abierto `lote_name` que paga `pay_on`, o crear uno, preparado como quien hizo la regla.
     /// <br/>
-    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category.
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category, lote.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
@@ -49054,6 +49106,26 @@ public sealed partial class UpdateRuleParamsActionsItem
     /// </summary>
     [JsonPropertyName("remove_when_unmet")]
     public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote («Fletes»); vacío o null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga: el siguiente lunes … viernes (hoy incluido), a los `days` días, o `due`, la fecha de pago del contrarecibo del portal. Un día inhábil pasa al siguiente hábil. Por omisión, friday.
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días después.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
 
     /// <summary>
     /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
