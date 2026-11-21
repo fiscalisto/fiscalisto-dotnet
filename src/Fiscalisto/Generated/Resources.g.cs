@@ -125,6 +125,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollBankFilesResource PayrollBankFiles => _payrollBankFiles ??= new PayrollBankFilesResource(this);
 
+    private PayrollPayoutsResource? _payrollPayouts;
+
+    /// <summary>Nómina.</summary>
+    public PayrollPayoutsResource PayrollPayouts => _payrollPayouts ??= new PayrollPayoutsResource(this);
+
     private ImssMovementsResource? _imssMovements;
 
     /// <summary>Nómina.</summary>
@@ -2496,6 +2501,30 @@ public sealed class PayrollBankFilesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollBankFile> CreateAsync(CreatePayrollBankFileParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollBankFile>("POST", "/v1/payroll_bank_files", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollPayouts</c>.
+/// </summary>
+public sealed class PayrollPayoutsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollPayoutsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Pagar la nómina por transferencia
+    /// </summary>
+    /// <remarks>
+    /// Como «Pagar por transferencia» en la app: el neto de cada recibo de nómina timbrado (y no cancelado) con esa fecha de pago, menos los vales de despensa, a la CLABE de cada empleado, en un pago a proveedores en borrador (Pagos). Nunca sale solo: alguien del equipo lo abre en app_url y lo firma con su llave de acceso. Solo se le paga a una CLABE ya registrada en Pagos, aprobada y pasada su espera: la API no registra CLABEs, así que cambiar la clabe de un empleado no desvía su nómina (se registra en la app y espera como cualquier cuenta). Quien no se puede pagar va en excluded con su razón; quien ya va en otro pago de esta nómina no se paga dos veces. Solo si la empresa paga con Fintoc y deja que la API prepare pagos en Pagos › Configurar pagos (si no, 403 payouts_api_disabled); si nadie se puede pagar contesta 400 parameter_invalid con el motivo. Pide Idempotency-Key: si la respuesta se pierde, repítala con el mismo valor y contesta el mismo pago; la misma llave con otra fecha contesta 409 idempotency_key_reused.
+    /// <br/>
+    /// <c>POST /v1/payroll_payouts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-payroll-payout"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollPayout> CreateAsync(CreatePayrollPayoutParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollPayout>("POST", "/v1/payroll_payouts", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

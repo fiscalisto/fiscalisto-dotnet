@@ -11066,6 +11066,30 @@ public sealed partial class CreatePayrollBatchParamsReceiptsItemPeriod
 }
 
 /// <summary>
+/// Los campos de «Pagar la nómina por transferencia».
+/// </summary>
+public sealed partial class CreatePayrollPayoutParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La fecha de pago (FechaPago) de los recibos de nómina timbrados que paga (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public required string PaymentDate { get; set; }
+
+    /// <summary>
+    /// El día en que sale (AAAA-MM-DD, hoy o después). Por omisión, hoy: sale en cuanto lo firmen.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Registrar las cuotas patronales de un mes».
 /// </summary>
 public sealed partial class CreatePayrollProvisionParams
@@ -35084,6 +35108,92 @@ public sealed partial class PayrollOrgChartVacanciesItemMonthlyCostMin
     /// </summary>
     [JsonPropertyName("total")]
     public decimal Total { get; set; }
+}
+
+/// <summary>
+/// El pago de una nómina en Pagos: el neto de cada empleado a su CLABE aprobada, en un pago en borrador que alguien del equipo firma en la app.
+/// </summary>
+public sealed partial class PayrollPayout
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…) que paga.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha de pago de los recibos que paga.
+    /// </summary>
+    [JsonPropertyName("payment_date")]
+    public string PaymentDate { get; set; } = default!;
+
+    /// <summary>
+    /// El pago en borrador (pyo_…), con una línea por empleado: se firma en la app, en su app_url.
+    /// </summary>
+    [JsonPropertyName("payout")]
+    public Payout Payout { get; set; } = default!;
+
+    /// <summary>
+    /// Quién no va en este pago y por qué: su CLABE no está registrada o aún no se puede pagar, no tiene CLABE, su neto es cero o ya va en otro pago de esta nómina.
+    /// </summary>
+    [JsonPropertyName("excluded")]
+    public List<PayrollPayoutExcludedItem> Excluded { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollPayoutExcludedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollPayoutExcludedItem
+{
+    /// <summary>
+    /// El empleado (emp_…); null si el recibo lo timbró otro sistema y no hay empleado con ese RFC.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su neto: la suma de sus recibos con esa fecha de pago, menos vales.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// add: su CLABE aún no está registrada en Pagos (se registra en la app); waiting: su cuenta está en verificación o en su espera; blocked: su cuenta tiene un problema; no_clabe: no tiene CLABE en su ficha; zero: su neto es cero; in_payout: ya va en otro pago de esta nómina; ready: no cupo (un pago lleva hasta 500).
+    /// <br/>
+    /// Valores: ready, add, waiting, blocked, no_clabe, zero, in_payout.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Por qué no va en este pago.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
 }
 
 /// <summary>
