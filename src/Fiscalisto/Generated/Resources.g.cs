@@ -5864,7 +5864,7 @@ public sealed class PayoutsResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/create-payout"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<Payout> CreateAsync(CreatePayoutParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    public Task<Payout> CreateAsync(CreatePayoutParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Payout>("POST", "/v1/payouts", @params, null, options, true, cancellationToken);
 
     /// <summary>

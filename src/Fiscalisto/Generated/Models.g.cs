@@ -10463,10 +10463,16 @@ public sealed partial class CreatePayoutParams
     public string? ExchangeRate { get; set; }
 
     /// <summary>
-    /// Las facturas recibidas a pagar (de 1 a 500). Las de un mismo proveedor van en una sola transferencia a su cuenta aprobada.
+    /// Las facturas recibidas a pagar (hasta 500). Las de un mismo proveedor van en una sola transferencia a su cuenta aprobada. Mande invoices, payments o las dos.
     /// </summary>
     [JsonPropertyName("invoices")]
-    public required List<CreatePayoutParamsInvoicesItem> Invoices { get; set; }
+    public List<CreatePayoutParamsInvoicesItem>? Invoices { get; set; }
+
+    /// <summary>
+    /// Pagos sin factura (hasta 500 entre los dos arreglos): una nómina, un anticipo, un reembolso. Los de un mismo RFC van en una sola transferencia.
+    /// </summary>
+    [JsonPropertyName("payments")]
+    public List<CreatePayoutParamsPaymentsItem>? Payments { get; set; }
 }
 
 /// <summary>
@@ -10491,6 +10497,42 @@ public sealed partial class CreatePayoutParamsInvoicesItem
     /// </summary>
     [JsonPropertyName("reason")]
     public string? Reason { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreatePayoutParamsPaymentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreatePayoutParamsPaymentsItem
+{
+    /// <summary>
+    /// El RFC de quien recibe (un proveedor o una persona), con una cuenta aprobada en Cuentas de proveedores.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// Su nombre, como se ve en el pago.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Cuánto mandarle, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Qué se paga («Nómina 1.ª quincena de noviembre», «Anticipo»). Si Configurar pagos lo pide, es obligatorio.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Si nunca llevará factura (una nómina, cuyo CFDI es el recibo; un reembolso), por qué: no se le pide factura ni aparece en Pagos sin factura. Sin él, se le pide como a cualquier pago sin factura.
+    /// </summary>
+    [JsonPropertyName("no_invoice_reason")]
+    public string? NoInvoiceReason { get; set; }
 }
 
 /// <summary>
@@ -15051,6 +15093,12 @@ public sealed partial class CreateTicketParamsLinesItem
     /// </summary>
     [JsonPropertyName("local_taxes")]
     public List<CreateTicketParamsLinesItemLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
+    /// Lo que solo dice esta venta, como las noches, fechas y número de reservación de una estancia. Con él, la factura dice «Hospedaje · 6 noches, del 14 al 20 de noviembre»; cuándo va lo decide `invoice_concepts.line_detail` de la autofactura (por omisión, el cliente lo elige en el portal).
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
 
     /// <summary>
     /// Unidades (noches, piezas). Por omisión 1.
@@ -24279,6 +24327,14 @@ public sealed partial class InvoiceConcepts
     /// </summary>
     [JsonPropertyName("ungrouped_name")]
     public string UngroupedName { get; set; } = default!;
+
+    /// <summary>
+    /// Qué pasa con el detail de cada línea del ticket: customer, el comprador ve la casilla sin marcar y la marca si lo quiere; always, va siempre después de la descripción; never, no va nunca.
+    /// <br/>
+    /// Valores: customer, always, never.
+    /// </summary>
+    [JsonPropertyName("line_detail")]
+    public string LineDetail { get; set; } = default!;
 }
 
 /// <summary>
@@ -32624,6 +32680,18 @@ public sealed partial class PayableInvoice
     public string? PaymentMethod { get; set; }
 
     /// <summary>
+    /// Las retenciones de la factura. total y amount_due ya vienen sin ellas: el pago manda el neto y la empresa las entera al SAT a más tardar el 17 del mes siguiente. null: no retiene.
+    /// </summary>
+    [JsonPropertyName("withheld")]
+    public PayableInvoiceWithheld? Withheld { get; set; }
+
+    /// <summary>
+    /// Pronto pago del portal de proveedores. Aceptado, amount_due ya es el total menos el descuento hasta que llega la nota de crédito del proveedor. null: no tiene.
+    /// </summary>
+    [JsonPropertyName("early_payment")]
+    public PayableInvoiceEarlyPayment? EarlyPayment { get; set; }
+
+    /// <summary>
     /// El pago abierto (pyo_…) en el que ya está, o null.
     /// </summary>
     [JsonPropertyName("in_payout")]
@@ -32646,6 +32714,38 @@ public sealed partial class PayableInvoice
     /// </summary>
     [JsonPropertyName("app_url")]
     public string AppUrl { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayableInvoiceEarlyPayment&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayableInvoiceEarlyPayment
+{
+    /// <summary>
+    /// requested: el proveedor lo pidió en el portal y nadie lo ha decidido; accepted: se aceptó.
+    /// <br/>
+    /// Valores: requested, accepted.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El día en que se paga (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string PayOn { get; set; } = default!;
+
+    /// <summary>
+    /// El descuento por pagar antes.
+    /// </summary>
+    [JsonPropertyName("discount")]
+    public decimal Discount { get; set; }
+
+    /// <summary>
+    /// Lo del descuento que su nota de crédito aún no cubre. Ya está fuera de amount_due.
+    /// </summary>
+    [JsonPropertyName("discount_pending")]
+    public decimal DiscountPending { get; set; }
 }
 
 /// <summary>
@@ -32700,6 +32800,24 @@ public sealed partial class PayableInvoicePaymentHold
     /// </summary>
     [JsonPropertyName("held_at")]
     public string HeldAt { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayableInvoiceWithheld&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayableInvoiceWithheld
+{
+    /// <summary>
+    /// ISR retenido en toda la factura.
+    /// </summary>
+    [JsonPropertyName("isr")]
+    public decimal Isr { get; set; }
+
+    /// <summary>
+    /// IVA retenido en toda la factura.
+    /// </summary>
+    [JsonPropertyName("vat")]
+    public decimal Vat { get; set; }
 }
 
 /// <summary>
@@ -42052,7 +42170,7 @@ public sealed partial class SatInvoice
     public SatInvoicePaidOtherwise? PaidOtherwise { get; set; }
 
     /// <summary>
-    /// Solo en una PUE recibida pagada en efectivo cuando la empresa pide confirmar estos pagos (Ajustes › Pagos sin complemento): pending hasta que alguien anote de dónde salió el dinero (mark_paid con money_source), confirmed después. Null en las demás. Sus impuestos no cambian.
+    /// Solo en una PUE recibida pagada en efectivo cuando la empresa pide confirmar estos pagos (Ajustes › Pagos en efectivo): pending hasta que alguien anote de dónde salió el dinero (mark_paid con money_source), confirmed después. Null en las demás. Sus impuestos no cambian.
     /// <br/>
     /// Valores: pending, confirmed.
     /// </summary>
@@ -46014,6 +46132,12 @@ public sealed partial class TicketLinesItem
     /// </summary>
     [JsonPropertyName("local_taxes")]
     public List<TicketLinesItemLocalTaxesItem> LocalTaxes { get; set; } = default!;
+
+    /// <summary>
+    /// El detalle que mandó (noches, fechas, reservación): va después de la descripción en la factura según `invoice_concepts.line_detail` de la autofactura.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
 
     /// <summary>
     /// Cantidad (Cantidad). Por omisión 1.
@@ -50362,6 +50486,14 @@ public sealed partial class UpdateSelfInvoicingParamsInvoiceConcepts
     /// </summary>
     [JsonPropertyName("ungrouped_name")]
     public string? UngroupedName { get; set; }
+
+    /// <summary>
+    /// Qué pasa con el `detail` de cada línea del ticket (las noches, fechas y reservación de una estancia): `customer` (por omisión), el comprador ve la casilla «Incluir el detalle en la descripción» sin marcar y la marca si lo quiere; `always`, va siempre después de la descripción, sin casilla; `never`, no va nunca, sin casilla.
+    /// <br/>
+    /// Valores: customer, always, never.
+    /// </summary>
+    [JsonPropertyName("line_detail")]
+    public string? LineDetail { get; set; }
 }
 
 /// <summary>
@@ -50678,6 +50810,12 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleTexts
     /// </summary>
     [JsonPropertyName("concepts_grouped")]
     public UpdateSelfInvoicingParamsPortalStyleTextsConceptsGrouped? ConceptsGrouped { get; set; }
+
+    /// <summary>
+    /// La casilla del detalle de los conceptos («Incluir el detalle en la descripción…»; ver `invoice_concepts.line_detail`); `null` vuelve al de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("detail_label")]
+    public UpdateSelfInvoicingParamsPortalStyleTextsDetailLabel? DetailLabel { get; set; }
 }
 
 /// <summary>
@@ -50759,6 +50897,24 @@ public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsConceptsTit
 
     /// <summary>
     /// El título de la elección de conceptos («Conceptos en su factura»; ver `invoice_concepts`) en inglés.
+    /// </summary>
+    [JsonPropertyName("en")]
+    public string? En { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateSelfInvoicingParamsPortalStyleTextsDetailLabel&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateSelfInvoicingParamsPortalStyleTextsDetailLabel
+{
+    /// <summary>
+    /// La casilla del detalle de los conceptos («Incluir el detalle en la descripción…»; ver `invoice_concepts.line_detail`) en español.
+    /// </summary>
+    [JsonPropertyName("es")]
+    public string? Es { get; set; }
+
+    /// <summary>
+    /// La casilla del detalle de los conceptos («Incluir el detalle en la descripción…»; ver `invoice_concepts.line_detail`) en inglés.
     /// </summary>
     [JsonPropertyName("en")]
     public string? En { get; set; }
