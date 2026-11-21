@@ -13133,9 +13133,9 @@ public sealed partial class CreateRuleParams
     public string? Name { get; set; }
 
     /// <summary>
-    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public required string Trigger { get; set; }
@@ -13177,9 +13177,9 @@ public sealed partial class CreateRuleParams
 public sealed partial class CreateRuleParamsActionsItem
 {
     /// <summary>
-    /// tag (órdenes): poner la etiqueta `tag`; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
     /// <br/>
-    /// Valores: tag, cost_center, stage, close, notify.
+    /// Valores: tag, cost_center, stage, close, notify, category.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
@@ -13189,6 +13189,14 @@ public sealed partial class CreateRuleParamsActionsItem
     /// </summary>
     [JsonPropertyName("tag")]
     public JsonElement? Tag { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto, como la app la nombra («Combustible»).
+    /// <br/>
+    /// Valores: Renta y arrendamiento, Servicios profesionales, Nómina y personal, Transporte y fletes, Combustible, Viáticos y viajes, Alimentos y representación, Telecomunicaciones e internet, Energía y agua, Software y suscripciones, Equipo de cómputo, Papelería y oficina, Mantenimiento y reparaciones, Publicidad y marketing, Seguros y fianzas, Comisiones bancarias y financieras, Impuestos y derechos, Compras de mercancía e inventario, Materias primas y producción, Activo fijo y mobiliario, Vehículos, Capacitación, Donativos, Otros gastos.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
 
     /// <summary>
     /// tag: quitarla si la orden deja de cumplir.
@@ -13253,7 +13261,7 @@ public sealed partial class CreateRuleParamsConditions
 public sealed partial class CreateRuleParamsConditionsConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -13317,7 +13325,7 @@ public sealed partial class CreateRuleParamsConditionsGroupsItem
 public sealed partial class CreateRuleParamsConditionsGroupsItemConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -38360,7 +38368,7 @@ public sealed partial class Rule
     /// <summary>
     /// Cuándo corre.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string Trigger { get; set; } = default!;
@@ -38422,7 +38430,7 @@ public sealed partial class RuleActionsItem
     /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
     /// <br/>
-    /// Valores: tag, cost_center, stage, close, notify.
+    /// Valores: tag, cost_center, category, stage, close, notify.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -38432,6 +38440,12 @@ public sealed partial class RuleActionsItem
     /// </summary>
     [JsonPropertyName("tag")]
     public string? Tag { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto (facturas recibidas).
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
 
     /// <summary>
     /// tag: se quita si la orden deja de cumplir.
@@ -38654,7 +38668,7 @@ public sealed partial class RuleRun
     /// <summary>
     /// Cuándo corre.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string Trigger { get; set; } = default!;
@@ -47880,9 +47894,9 @@ public sealed partial class UpdateRuleParams
     public string? Name { get; set; }
 
     /// <summary>
-    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), purchase_order.saved, .approved, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, purchase_order.saved, purchase_order.approved, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string? Trigger { get; set; }
@@ -47924,9 +47938,9 @@ public sealed partial class UpdateRuleParams
 public sealed partial class UpdateRuleParamsActionsItem
 {
     /// <summary>
-    /// tag (órdenes): poner la etiqueta `tag`; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; notify: avisar a `members` (mem_…).
     /// <br/>
-    /// Valores: tag, cost_center, stage, close, notify.
+    /// Valores: tag, cost_center, stage, close, notify, category.
     /// </summary>
     [JsonPropertyName("type")]
     public required string Type { get; set; }
@@ -47936,6 +47950,14 @@ public sealed partial class UpdateRuleParamsActionsItem
     /// </summary>
     [JsonPropertyName("tag")]
     public JsonElement? Tag { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto, como la app la nombra («Combustible»).
+    /// <br/>
+    /// Valores: Renta y arrendamiento, Servicios profesionales, Nómina y personal, Transporte y fletes, Combustible, Viáticos y viajes, Alimentos y representación, Telecomunicaciones e internet, Energía y agua, Software y suscripciones, Equipo de cómputo, Papelería y oficina, Mantenimiento y reparaciones, Publicidad y marketing, Seguros y fianzas, Comisiones bancarias y financieras, Impuestos y derechos, Compras de mercancía e inventario, Materias primas y producción, Activo fijo y mobiliario, Vehículos, Capacitación, Donativos, Otros gastos.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
 
     /// <summary>
     /// tag: quitarla si la orden deja de cumplir.
@@ -48000,7 +48022,7 @@ public sealed partial class UpdateRuleParamsConditions
 public sealed partial class UpdateRuleParamsConditionsConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -48064,7 +48086,7 @@ public sealed partial class UpdateRuleParamsConditionsGroupsItem
 public sealed partial class UpdateRuleParamsConditionsGroupsItemConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
+    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
