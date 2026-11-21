@@ -170,6 +170,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollOrgChartResource PayrollOrgChart => _payrollOrgChart ??= new PayrollOrgChartResource(this);
 
+    private HiringResource? _hiring;
+
+    /// <summary>Nómina.</summary>
+    public HiringResource Hiring => _hiring ??= new HiringResource(this);
+
+    private CandidatesResource? _candidates;
+
+    /// <summary>Nómina.</summary>
+    public CandidatesResource Candidates => _candidates ??= new CandidatesResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -3002,6 +3012,200 @@ public sealed class PayrollOrgChartResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollOrgChart> FillVacancyAsync(string id, FillPayrollVacancyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollOrgChart>("POST", $"/v1/payroll_org_chart/vacancies/{Uri.EscapeDataString(id)}/fill", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Publicar una vacante
+    /// </summary>
+    /// <remarks>
+    /// La pone en la página de empleos del emisor (published true) o la quita (false), con su descripción, requisitos, tipo de contrato, lugar, sueldo visible, fecha de cierre y el formulario (jbf_…) que llenan quienes se postulan. Solo una approved se publica; publicarla enciende la página si estaba apagada. Google la puede mostrar en sus resultados de empleos (JobPosting). Contesta hiring.
+    /// <br/>
+    /// <c>POST /v1/payroll_org_chart/vacancies/{id}/publish</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/publish-payroll-vacancy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Hiring> PublishVacancyAsync(string id, PublishPayrollVacancyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Hiring>("POST", $"/v1/payroll_org_chart/vacancies/{Uri.EscapeDataString(id)}/publish", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.Hiring</c>.
+/// </summary>
+public sealed class HiringResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal HiringResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Página de empleos
+    /// </summary>
+    /// <remarks>
+    /// Como «Nómina › Empleos» de la app: la página de empleos del emisor (careers_url, si se ve, su texto, el correo de contacto), las etapas de sus candidatos, qué hacer con quien no cumple un requisito, sus formularios (jbf_…) y sus vacantes con lo que publican y cuántos candidatos hay en cada etapa.
+    /// <br/>
+    /// <c>GET /v1/hiring</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-hiring"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Hiring> GetAsync(GetHiringParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Hiring>("GET", "/v1/hiring", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Configurar la página de empleos
+    /// </summary>
+    /// <remarks>
+    /// Enciende o apaga la página, cambia su texto y correo de contacto, las etapas de los candidatos (al menos dos; la primera es donde llegan), unmet_requirements y el formulario predeterminado. Lo que no manda no cambia. Contesta hiring.
+    /// <br/>
+    /// <c>POST /v1/hiring/settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-hiring-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Hiring> UpdateSettingsAsync(UpdateHiringSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Hiring>("POST", "/v1/hiring/settings", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Crear un formulario de solicitud
+    /// </summary>
+    /// <remarks>
+    /// Las preguntas que llena quien se postula, del tipo que sea (texto, párrafo, número, fecha, lista, varias opciones, sí o no, correo, teléfono, enlace o archivo), obligatorias u opcionales, con sus reglas y las que son requisito. nombre y correo van siempre. Una pregunta que la Ley Federal del Trabajo no deja pedir (art. 133: edad, género, estado civil, embarazo…) se guarda, pero la app la señala.
+    /// <br/>
+    /// <c>POST /v1/hiring/forms</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-job-form"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<JobForm> CreateFormAsync(CreateJobFormParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<JobForm>("POST", "/v1/hiring/forms", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un formulario de solicitud
+    /// </summary>
+    /// <remarks>
+    /// Cambia su nombre y sus preguntas. Las solicitudes que ya llegaron conservan las preguntas que contestaron.
+    /// <br/>
+    /// <c>POST /v1/hiring/forms/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-job-form"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<JobForm> UpdateFormAsync(string id, UpdateJobFormParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<JobForm>("POST", $"/v1/hiring/forms/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Archivar un formulario de solicitud
+    /// </summary>
+    /// <remarks>
+    /// Deja de usarse: sus vacantes piden el predeterminado desde ahora. Las solicitudes que ya llegaron no cambian.
+    /// <br/>
+    /// <c>DELETE /v1/hiring/forms/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-job-form"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteFormAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/hiring/forms/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.Candidates</c>.
+/// </summary>
+public sealed class CandidatesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal CandidatesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar candidatos
+    /// </summary>
+    /// <remarks>
+    /// Las solicitudes que llegaron por la página de empleos, las más recientes primero, con sus respuestas, su etapa y los requisitos que no cumple.
+    /// <br/>
+    /// <c>GET /v1/candidates</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-candidates"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Candidate>> ListAsync(ListCandidatesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Candidate>("/v1/candidates", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar candidatos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Candidate> ListAutoPagingAsync(ListCandidatesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Candidate>("/v1/candidates", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un candidato
+    /// </summary>
+    /// <remarks>
+    /// Una solicitud (cnd_…), con las preguntas que contestó y sus archivos.
+    /// <br/>
+    /// <c>GET /v1/candidates/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-candidate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Candidate> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Candidate>("GET", $"/v1/candidates/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un candidato
+    /// </summary>
+    /// <remarks>
+    /// Lo pasa a otra etapa, lo califica (1 a 5) o le pone una nota de su equipo. Lo que no manda no cambia.
+    /// <br/>
+    /// <c>POST /v1/candidates/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-candidate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Candidate> UpdateAsync(string id, UpdateCandidateParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Candidate>("POST", $"/v1/candidates/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un candidato
+    /// </summary>
+    /// <remarks>
+    /// Borra la solicitud y sus archivos, por ejemplo cuando el candidato lo pide (derechos ARCO). No se puede deshacer.
+    /// <br/>
+    /// <c>DELETE /v1/candidates/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-candidate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/candidates/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Contratar a un candidato
+    /// </summary>
+    /// <remarks>
+    /// Con el empleado ya dado de alta (POST /v1/employees), cubre la vacante de la solicitud (como POST /v1/payroll_org_chart/vacancies/{id}/fill), pasa al candidato a la etapa de contratados y quita la vacante de la página. Falta su alta en el IMSS.
+    /// <br/>
+    /// <c>POST /v1/candidates/{id}/hire</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/hire-candidate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Candidate> HireAsync(string id, HireCandidateParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Candidate>("POST", $"/v1/candidates/{Uri.EscapeDataString(id)}/hire", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Descargar un archivo de un candidato
+    /// </summary>
+    /// <remarks>
+    /// El archivo que subió a una pregunta de tipo file (su CV, por ejemplo), tal como lo subió: PDF, JPG, PNG o Word. answers[].file.url de candidate lleva esta ruta.
+    /// <br/>
+    /// <c>GET /v1/candidates/{id}/files/{question}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-candidate-file"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> FileAsync(string id, string question, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", $"/v1/candidates/{Uri.EscapeDataString(id)}/files/{Uri.EscapeDataString(question)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

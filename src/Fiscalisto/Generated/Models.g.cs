@@ -3862,6 +3862,198 @@ public sealed partial class CancelSatRetentionParams
 }
 
 /// <summary>
+/// Una solicitud que llegó por la página de empleos.
+/// </summary>
+public sealed partial class Candidate
+{
+    /// <summary>
+    /// La solicitud (cnd_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La vacante a la que se postuló (vac_…).
+    /// </summary>
+    [JsonPropertyName("vacancy")]
+    public string Vacancy { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Correo a donde se envía (varios separados por comas). Solo se usa si se pide enviarlo.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = default!;
+
+    /// <summary>
+    /// Su teléfono, si lo dio.
+    /// </summary>
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    /// <summary>
+    /// Su etapa, una de stages de hiring.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public string Stage { get; set; } = default!;
+
+    /// <summary>
+    /// De 1 a 5.
+    /// </summary>
+    [JsonPropertyName("rating")]
+    public long? Rating { get; set; }
+
+    /// <summary>
+    /// La nota de su equipo.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Si cumple todas las preguntas que son requisito.
+    /// </summary>
+    [JsonPropertyName("meets_requirements")]
+    public bool MeetsRequirements { get; set; }
+
+    /// <summary>
+    /// Las preguntas requisito que no cumple.
+    /// </summary>
+    [JsonPropertyName("unmet_requirements")]
+    public List<string> UnmetRequirements { get; set; } = default!;
+
+    /// <summary>
+    /// Sus respuestas, en el orden de las preguntas que contestó.
+    /// </summary>
+    [JsonPropertyName("answers")]
+    public List<CandidateAnswersItem> Answers { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…) si se le contrató.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;CandidateAnswersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CandidateAnswersItem
+{
+    /// <summary>
+    /// La clave de la pregunta.
+    /// </summary>
+    [JsonPropertyName("question")]
+    public string Question { get; set; } = default!;
+
+    /// <summary>
+    /// La pregunta, como la leyó.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public JsonElement? Value { get; set; }
+
+    /// <summary>
+    /// El archivo que subió, en una pregunta de tipo file.
+    /// </summary>
+    [JsonPropertyName("file")]
+    public CandidateAnswersItemFile? File { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CandidateAnswersItemFile&lt;/c&gt;.
+/// </summary>
+public sealed partial class CandidateAnswersItemFile
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su tamaño en bytes.
+    /// </summary>
+    [JsonPropertyName("size")]
+    public long Size { get; set; }
+
+    /// <summary>
+    /// Dónde descargarlo en la API.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class CandidateList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Candidate> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Llevar las pérdidas que quedan al año siguiente».
 /// </summary>
 public sealed partial class CarryForwardAnnualReturnParams
@@ -9783,6 +9975,186 @@ public sealed partial class CreateIssuerParamsDonationAuthorization
     /// </summary>
     [JsonPropertyName("date")]
     public required string Date { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear un formulario de solicitud».
+/// </summary>
+public sealed partial class CreateJobFormParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cómo lo llama su equipo.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Sus preguntas, en orden. nombre y correo van siempre (si no las manda, se agregan al principio).
+    /// </summary>
+    [JsonPropertyName("questions")]
+    public required List<CreateJobFormParamsQuestionsItem> Questions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateJobFormParamsQuestionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateJobFormParamsQuestionsItem
+{
+    /// <summary>
+    /// Su clave en el formulario y en las respuestas; por omisión sale de label. Las de siempre: nombre, correo, telefono y cv.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    /// <summary>
+    /// La pregunta, como la lee quien se postula.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public required string Label { get; set; }
+
+    /// <summary>
+    /// Una ayuda bajo la caja.
+    /// </summary>
+    [JsonPropertyName("help")]
+    public string? Help { get; set; }
+
+    /// <summary>
+    /// text, longtext (párrafo), number, date, select (una de la lista), multiselect (varias), yesno, email, phone, url o file (un archivo).
+    /// <br/>
+    /// Valores: text, longtext, number, date, select, multiselect, yesno, email, phone, url, file.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Si no se puede dejar en blanco.
+    /// </summary>
+    [JsonPropertyName("required")]
+    public required bool Required { get; set; }
+
+    /// <summary>
+    /// Las opciones de select y multiselect.
+    /// </summary>
+    [JsonPropertyName("options")]
+    public List<string>? Options { get; set; }
+
+    /// <summary>
+    /// Qué archivos toma una de tipo file: pdf, image (JPG, PNG), doc (.docx). Hasta 10 MB.
+    /// </summary>
+    [JsonPropertyName("files")]
+    public List<string>? Files { get; set; }
+
+    /// <summary>
+    /// Lo que se revisa de la respuesta (largo, formato, mínimo, máximo, fechas, ejemplo).
+    /// </summary>
+    [JsonPropertyName("rules")]
+    public CreateJobFormParamsQuestionsItemRules? Rules { get; set; }
+
+    /// <summary>
+    /// Si es un requisito: quien no lo cumple queda marcado o se le avisa antes de enviar, como diga unmet_requirements.
+    /// </summary>
+    [JsonPropertyName("requirement")]
+    public CreateJobFormParamsQuestionsItemRequirement? Requirement { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateJobFormParamsQuestionsItemRequirement&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateJobFormParamsQuestionsItemRequirement
+{
+    /// <summary>
+    /// Las respuestas que cumplen: ["si"] o ["no"] en una yesno, opciones en select y multiselect.
+    /// </summary>
+    [JsonPropertyName("answers")]
+    public List<string>? Answers { get; set; }
+
+    /// <summary>
+    /// En una number, el mínimo que cumple (años de experiencia…).
+    /// </summary>
+    [JsonPropertyName("min")]
+    public decimal? Min { get; set; }
+}
+
+/// <summary>
+/// Lo que se revisa de la respuesta: largo y formato (any, digits, alnum) de un texto, mínimo, máximo y enteros de un número, qué fechas, y el ejemplo dentro de la caja vacía.
+/// </summary>
+public sealed partial class CreateJobFormParamsQuestionsItemRules
+{
+    /// <summary>
+    /// Texto: cuántos caracteres como mínimo.
+    /// </summary>
+    [JsonPropertyName("min_length")]
+    public long? MinLength { get; set; }
+
+    /// <summary>
+    /// Texto: cuántos caracteres como máximo.
+    /// </summary>
+    [JsonPropertyName("max_length")]
+    public long? MaxLength { get; set; }
+
+    /// <summary>
+    /// Texto: any (cualquiera), digits (solo números) o alnum (letras y números).
+    /// <br/>
+    /// Valores: any, digits, alnum.
+    /// </summary>
+    [JsonPropertyName("format")]
+    public string? Format { get; set; }
+
+    /// <summary>
+    /// Número: el más chico.
+    /// </summary>
+    [JsonPropertyName("min")]
+    public decimal? Min { get; set; }
+
+    /// <summary>
+    /// Número: el más grande.
+    /// </summary>
+    [JsonPropertyName("max")]
+    public decimal? Max { get; set; }
+
+    /// <summary>
+    /// Número: sin decimales.
+    /// </summary>
+    [JsonPropertyName("integer")]
+    public bool? Integer { get; set; }
+
+    /// <summary>
+    /// Fecha: any, past (pasada; con days, no más vieja que esos días), future (futura; con days, al menos a esos días) o between (entre from y to).
+    /// <br/>
+    /// Valores: any, past, future, between.
+    /// </summary>
+    [JsonPropertyName("dates")]
+    public string? Dates { get; set; }
+
+    /// <summary>
+    /// Fecha: los días de past o future.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+
+    /// <summary>
+    /// Fecha: desde (YYYY-MM-DD), con between.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Fecha: hasta (YYYY-MM-DD), con between.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// El ejemplo que se ve dentro de la caja vacía.
+    /// </summary>
+    [JsonPropertyName("example")]
+    public string? Example { get; set; }
 }
 
 /// <summary>
@@ -21854,6 +22226,18 @@ public sealed partial class GetGeneralLedgerParams
 }
 
 /// <summary>
+/// Los campos de «Página de empleos».
+/// </summary>
+public sealed partial class GetHiringParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Calcular el ajuste anual por inflación».
 /// </summary>
 public sealed partial class GetInflationAdjustmentParams
@@ -22253,6 +22637,212 @@ public sealed partial class GetVatRefundParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Contratar a un candidato».
+/// </summary>
+public sealed partial class HireCandidateParams
+{
+    /// <summary>
+    /// El empleado (emp_…) que ya dio de alta con POST /v1/employees: cubre la vacante con él.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+}
+
+/// <summary>
+/// La página de empleos de un emisor: su configuración, sus formularios y sus vacantes.
+/// </summary>
+public sealed partial class Hiring
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La página de empleos del emisor.
+    /// </summary>
+    [JsonPropertyName("careers_url")]
+    public string CareersUrl { get; set; } = default!;
+
+    /// <summary>
+    /// Si la página se ve.
+    /// </summary>
+    [JsonPropertyName("enabled")]
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    /// El texto de arriba de la página.
+    /// </summary>
+    [JsonPropertyName("intro")]
+    public string? Intro { get; set; }
+
+    /// <summary>
+    /// El correo para dudas y derechos ARCO de los candidatos; null usa el de Datos fiscales.
+    /// </summary>
+    [JsonPropertyName("contact_email")]
+    public string? ContactEmail { get; set; }
+
+    /// <summary>
+    /// Las etapas de sus candidatos, en orden.
+    /// </summary>
+    [JsonPropertyName("stages")]
+    public List<string> Stages { get; set; } = default!;
+
+    /// <summary>
+    /// Quien no cumple un requisito: flag, su solicitud llega marcada; warn, además se le dice antes de enviar.
+    /// <br/>
+    /// Valores: flag, warn.
+    /// </summary>
+    [JsonPropertyName("unmet_requirements")]
+    public string UnmetRequirements { get; set; } = default!;
+
+    /// <summary>
+    /// El formulario (jbf_…) de las vacantes que no eligen uno; null el básico.
+    /// </summary>
+    [JsonPropertyName("default_form")]
+    public string? DefaultForm { get; set; }
+
+    /// <summary>
+    /// Sus formularios de solicitud.
+    /// </summary>
+    [JsonPropertyName("forms")]
+    public List<JobForm> Forms { get; set; } = default!;
+
+    /// <summary>
+    /// Las vacantes abiertas, y las cubiertas que aún tienen candidatos.
+    /// </summary>
+    [JsonPropertyName("vacancies")]
+    public List<HiringVacanciesItem> Vacancies { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;HiringVacanciesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class HiringVacanciesItem
+{
+    /// <summary>
+    /// La vacante (vac_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// El puesto.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// Departamento (Departamento).
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Estado del objeto.
+    /// <br/>
+    /// Valores: pending_approval, approved, rejected, filled.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Si está en la página de empleos.
+    /// </summary>
+    [JsonPropertyName("published")]
+    public bool Published { get; set; }
+
+    /// <summary>
+    /// Su página, si está publicada.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Lo que pide.
+    /// </summary>
+    [JsonPropertyName("requirements")]
+    public List<string> Requirements { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de contrato.
+    /// <br/>
+    /// Valores: full_time, part_time, fixed_term, project, internship.
+    /// </summary>
+    [JsonPropertyName("employment_type")]
+    public string? EmploymentType { get; set; }
+
+    /// <summary>
+    /// Dónde se trabaja.
+    /// <br/>
+    /// Valores: on_site, hybrid, remote.
+    /// </summary>
+    [JsonPropertyName("workplace")]
+    public string? Workplace { get; set; }
+
+    /// <summary>
+    /// Si la página muestra el sueldo.
+    /// </summary>
+    [JsonPropertyName("show_salary")]
+    public bool ShowSalary { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo recibe solicitudes (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+
+    /// <summary>
+    /// Forma farmacéutica (FormaFarmaceutica), c_FormaFarmaceutica.
+    /// </summary>
+    [JsonPropertyName("form")]
+    public string? Form { get; set; }
+
+    /// <summary>
+    /// Cuántos candidatos hay en cada etapa.
+    /// </summary>
+    [JsonPropertyName("candidates")]
+    public List<HiringVacanciesItemCandidatesItem> Candidates { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;HiringVacanciesItemCandidatesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class HiringVacanciesItemCandidatesItem
+{
+    /// <summary>
+    /// La etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public string Stage { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos hay en ella.
+    /// </summary>
+    [JsonPropertyName("count")]
+    public long Count { get; set; }
 }
 
 /// <summary>
@@ -28111,6 +28701,116 @@ public sealed partial class IssuerTestClock
 }
 
 /// <summary>
+/// Un formulario de solicitud: las preguntas que llena quien se postula.
+/// </summary>
+public sealed partial class JobForm
+{
+    /// <summary>
+    /// El formulario (jbf_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Sus preguntas, en orden.
+    /// </summary>
+    [JsonPropertyName("questions")]
+    public List<JobFormQuestionsItem> Questions { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;JobFormQuestionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class JobFormQuestionsItem
+{
+    /// <summary>
+    /// Su clave: las respuestas van por ella.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// La pregunta, como la lee quien se postula.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// La ayuda bajo la caja.
+    /// </summary>
+    [JsonPropertyName("help")]
+    public string? Help { get; set; }
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: text, longtext, number, date, select, multiselect, yesno, email, phone, url, file.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Si no se puede dejar en blanco.
+    /// </summary>
+    [JsonPropertyName("required")]
+    public bool Required { get; set; }
+
+    /// <summary>
+    /// Las de select y multiselect.
+    /// </summary>
+    [JsonPropertyName("options")]
+    public List<string> Options { get; set; } = default!;
+
+    /// <summary>
+    /// Los archivos que toma una de tipo file.
+    /// </summary>
+    [JsonPropertyName("files")]
+    public List<string> Files { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se revisa de la respuesta (min_length, max, dates…).
+    /// </summary>
+    [JsonPropertyName("rules")]
+    public Dictionary<string, JsonElement>? Rules { get; set; }
+
+    /// <summary>
+    /// Si es un requisito, las respuestas o el mínimo que lo cumplen.
+    /// </summary>
+    [JsonPropertyName("requirement")]
+    public JobFormQuestionsItemRequirement? Requirement { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;JobFormQuestionsItemRequirement&lt;/c&gt;.
+/// </summary>
+public sealed partial class JobFormQuestionsItemRequirement
+{
+    /// <summary>
+    /// Las respuestas que lo cumplen.
+    /// </summary>
+    [JsonPropertyName("answers")]
+    public List<string> Answers { get; set; } = default!;
+
+    /// <summary>
+    /// En una number, el mínimo que lo cumple.
+    /// </summary>
+    [JsonPropertyName("min")]
+    public decimal? Min { get; set; }
+}
+
+/// <summary>
 /// Una póliza de diario (de un CFDI, un pago, un recibo de nómina o la depreciación del mes): sus cargos y abonos, que siempre cuadran.
 /// </summary>
 public sealed partial class JournalEntry
@@ -28566,6 +29266,42 @@ public sealed partial class ListBranchesParams
     /// </summary>
     [JsonPropertyName("zip")]
     public string? Zip { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar candidatos».
+/// </summary>
+public sealed partial class ListCandidatesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de una vacante (vac_…).
+    /// </summary>
+    [JsonPropertyName("vacancy")]
+    public string? Vacancy { get; set; }
+
+    /// <summary>
+    /// Solo las de una etapa, como en stages de hiring.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public string? Stage { get; set; }
 }
 
 /// <summary>
@@ -36632,6 +37368,64 @@ public sealed partial class ProductionOrderOtherCostsItem
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Publicar una vacante».
+/// </summary>
+public sealed partial class PublishPayrollVacancyParams
+{
+    /// <summary>
+    /// true la pone en la página; false la quita.
+    /// </summary>
+    [JsonPropertyName("published")]
+    public required bool Published { get; set; }
+
+    /// <summary>
+    /// Qué hará la persona; los párrafos van separados por una línea en blanco.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Lo que pide, uno por renglón (escolaridad, experiencia…).
+    /// </summary>
+    [JsonPropertyName("requirements")]
+    public List<string>? Requirements { get; set; }
+
+    /// <summary>
+    /// full_time, part_time, fixed_term (por tiempo determinado), project (por obra determinada) o internship (prácticas).
+    /// <br/>
+    /// Valores: full_time, part_time, fixed_term, project, internship.
+    /// </summary>
+    [JsonPropertyName("employment_type")]
+    public string? EmploymentType { get; set; }
+
+    /// <summary>
+    /// Dónde se trabaja: on_site (presencial), hybrid (híbrido) o remote.
+    /// <br/>
+    /// Valores: on_site, hybrid, remote.
+    /// </summary>
+    [JsonPropertyName("workplace")]
+    public string? Workplace { get; set; }
+
+    /// <summary>
+    /// Si la página muestra el sueldo de la vacante (salary_min y salary_max).
+    /// </summary>
+    [JsonPropertyName("show_salary")]
+    public bool? ShowSalary { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo recibe solicitudes (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+
+    /// <summary>
+    /// El formulario que llenan (jbf_…); null el predeterminado.
+    /// </summary>
+    [JsonPropertyName("form")]
+    public string? Form { get; set; }
 }
 
 /// <summary>
@@ -45323,6 +46117,30 @@ public sealed partial class UpdateBranchParamsSeries
 }
 
 /// <summary>
+/// Los campos de «Cambiar un candidato».
+/// </summary>
+public sealed partial class UpdateCandidateParams
+{
+    /// <summary>
+    /// Una de las etapas (stages).
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public string? Stage { get; set; }
+
+    /// <summary>
+    /// Su calificación, de 1 a 5; null se la quita.
+    /// </summary>
+    [JsonPropertyName("rating")]
+    public long? Rating { get; set; }
+
+    /// <summary>
+    /// La nota de su equipo; no la ve el candidato.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cambiar un movimiento previsto».
 /// </summary>
 public sealed partial class UpdateCashForecastItemParams
@@ -46309,6 +47127,56 @@ public sealed partial class UpdateExpenseReportParams
 }
 
 /// <summary>
+/// Los campos de «Configurar la página de empleos».
+/// </summary>
+public sealed partial class UpdateHiringSettingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Si la página de empleos se ve.
+    /// </summary>
+    [JsonPropertyName("enabled")]
+    public bool? Enabled { get; set; }
+
+    /// <summary>
+    /// El texto de arriba de la página: quiénes son y por qué trabajar ahí.
+    /// </summary>
+    [JsonPropertyName("intro")]
+    public string? Intro { get; set; }
+
+    /// <summary>
+    /// El correo para dudas de quien se postula y para sus derechos ARCO (aviso de privacidad). Sin él se usa el de Datos fiscales; sin ninguno, las vacantes no reciben solicitudes.
+    /// </summary>
+    [JsonPropertyName("contact_email")]
+    public string? ContactEmail { get; set; }
+
+    /// <summary>
+    /// Las etapas de sus candidatos, en orden. La primera es donde llegan.
+    /// </summary>
+    [JsonPropertyName("stages")]
+    public List<string>? Stages { get; set; }
+
+    /// <summary>
+    /// Qué hacer con quien no cumple un requisito: flag la recibe marcada; warn le dice qué no cumple antes de enviar (puede enviarla igual) y también la marca.
+    /// <br/>
+    /// Valores: flag, warn.
+    /// </summary>
+    [JsonPropertyName("unmet_requirements")]
+    public string? UnmetRequirements { get; set; }
+
+    /// <summary>
+    /// El formulario (jbf_…) de las vacantes que no eligen uno; null el básico.
+    /// </summary>
+    [JsonPropertyName("default_form")]
+    public string? DefaultForm { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cambiar un movimiento del IMSS».
 /// </summary>
 public sealed partial class UpdateImssMovementParams
@@ -46450,6 +47318,186 @@ public sealed partial class UpdateIssuerParamsDonationAuthorization
     /// </summary>
     [JsonPropertyName("date")]
     public required string Date { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un formulario de solicitud».
+/// </summary>
+public sealed partial class UpdateJobFormParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cómo lo llama su equipo.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Sus preguntas, en orden. nombre y correo van siempre (si no las manda, se agregan al principio).
+    /// </summary>
+    [JsonPropertyName("questions")]
+    public required List<UpdateJobFormParamsQuestionsItem> Questions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateJobFormParamsQuestionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateJobFormParamsQuestionsItem
+{
+    /// <summary>
+    /// Su clave en el formulario y en las respuestas; por omisión sale de label. Las de siempre: nombre, correo, telefono y cv.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    /// <summary>
+    /// La pregunta, como la lee quien se postula.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public required string Label { get; set; }
+
+    /// <summary>
+    /// Una ayuda bajo la caja.
+    /// </summary>
+    [JsonPropertyName("help")]
+    public string? Help { get; set; }
+
+    /// <summary>
+    /// text, longtext (párrafo), number, date, select (una de la lista), multiselect (varias), yesno, email, phone, url o file (un archivo).
+    /// <br/>
+    /// Valores: text, longtext, number, date, select, multiselect, yesno, email, phone, url, file.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Si no se puede dejar en blanco.
+    /// </summary>
+    [JsonPropertyName("required")]
+    public required bool Required { get; set; }
+
+    /// <summary>
+    /// Las opciones de select y multiselect.
+    /// </summary>
+    [JsonPropertyName("options")]
+    public List<string>? Options { get; set; }
+
+    /// <summary>
+    /// Qué archivos toma una de tipo file: pdf, image (JPG, PNG), doc (.docx). Hasta 10 MB.
+    /// </summary>
+    [JsonPropertyName("files")]
+    public List<string>? Files { get; set; }
+
+    /// <summary>
+    /// Lo que se revisa de la respuesta (largo, formato, mínimo, máximo, fechas, ejemplo).
+    /// </summary>
+    [JsonPropertyName("rules")]
+    public UpdateJobFormParamsQuestionsItemRules? Rules { get; set; }
+
+    /// <summary>
+    /// Si es un requisito: quien no lo cumple queda marcado o se le avisa antes de enviar, como diga unmet_requirements.
+    /// </summary>
+    [JsonPropertyName("requirement")]
+    public UpdateJobFormParamsQuestionsItemRequirement? Requirement { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateJobFormParamsQuestionsItemRequirement&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateJobFormParamsQuestionsItemRequirement
+{
+    /// <summary>
+    /// Las respuestas que cumplen: ["si"] o ["no"] en una yesno, opciones en select y multiselect.
+    /// </summary>
+    [JsonPropertyName("answers")]
+    public List<string>? Answers { get; set; }
+
+    /// <summary>
+    /// En una number, el mínimo que cumple (años de experiencia…).
+    /// </summary>
+    [JsonPropertyName("min")]
+    public decimal? Min { get; set; }
+}
+
+/// <summary>
+/// Lo que se revisa de la respuesta: largo y formato (any, digits, alnum) de un texto, mínimo, máximo y enteros de un número, qué fechas, y el ejemplo dentro de la caja vacía.
+/// </summary>
+public sealed partial class UpdateJobFormParamsQuestionsItemRules
+{
+    /// <summary>
+    /// Texto: cuántos caracteres como mínimo.
+    /// </summary>
+    [JsonPropertyName("min_length")]
+    public long? MinLength { get; set; }
+
+    /// <summary>
+    /// Texto: cuántos caracteres como máximo.
+    /// </summary>
+    [JsonPropertyName("max_length")]
+    public long? MaxLength { get; set; }
+
+    /// <summary>
+    /// Texto: any (cualquiera), digits (solo números) o alnum (letras y números).
+    /// <br/>
+    /// Valores: any, digits, alnum.
+    /// </summary>
+    [JsonPropertyName("format")]
+    public string? Format { get; set; }
+
+    /// <summary>
+    /// Número: el más chico.
+    /// </summary>
+    [JsonPropertyName("min")]
+    public decimal? Min { get; set; }
+
+    /// <summary>
+    /// Número: el más grande.
+    /// </summary>
+    [JsonPropertyName("max")]
+    public decimal? Max { get; set; }
+
+    /// <summary>
+    /// Número: sin decimales.
+    /// </summary>
+    [JsonPropertyName("integer")]
+    public bool? Integer { get; set; }
+
+    /// <summary>
+    /// Fecha: any, past (pasada; con days, no más vieja que esos días), future (futura; con days, al menos a esos días) o between (entre from y to).
+    /// <br/>
+    /// Valores: any, past, future, between.
+    /// </summary>
+    [JsonPropertyName("dates")]
+    public string? Dates { get; set; }
+
+    /// <summary>
+    /// Fecha: los días de past o future.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+
+    /// <summary>
+    /// Fecha: desde (YYYY-MM-DD), con between.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Fecha: hasta (YYYY-MM-DD), con between.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
+
+    /// <summary>
+    /// El ejemplo que se ve dentro de la caja vacía.
+    /// </summary>
+    [JsonPropertyName("example")]
+    public string? Example { get; set; }
 }
 
 /// <summary>
