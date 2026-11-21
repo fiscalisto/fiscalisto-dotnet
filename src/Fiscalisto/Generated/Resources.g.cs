@@ -165,6 +165,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollCalendarResource PayrollCalendar => _payrollCalendar ??= new PayrollCalendarResource(this);
 
+    private PayrollOrgChartResource? _payrollOrgChart;
+
+    /// <summary>Nómina.</summary>
+    public PayrollOrgChartResource PayrollOrgChart => _payrollOrgChart ??= new PayrollOrgChartResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -2875,6 +2880,114 @@ public sealed class PayrollCalendarResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollCalendarEvent> MarkAsync(MarkPayrollCalendarEventParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollCalendarEvent>("POST", "/v1/payroll_calendar/mark", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.PayrollOrgChart</c>.
+/// </summary>
+public sealed class PayrollOrgChartResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PayrollOrgChartResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Organigrama
+    /// </summary>
+    /// <remarks>
+    /// Como «Nómina › Organigrama» de la app: los empleados de hoy del emisor con su jefe directo, departamento y sucursal, cuántas personas dependen de cada uno (directas y en toda su cadena), los departamentos con sus subdepartamentos, las vacantes y un resumen (jefes, tramo promedio, quién queda sin jefe o sin departamento). Quien no tiene jefe, o cuyo jefe ya se fue, queda arriba; un círculo que dejó una importación se rompe en el de número más bajo.
+    /// <br/>
+    /// <c>GET /v1/payroll_org_chart</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-payroll-org-chart"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> GetAsync(GetPayrollOrgChartParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("GET", "/v1/payroll_org_chart", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar jefe, departamento o sucursal
+    /// </summary>
+    /// <remarks>
+    /// Cambia el jefe directo, el departamento o la sucursal de uno o varios empleados (hasta 500); lo que no manda no cambia. Un jefe que, subiendo por su cadena, depende de alguno de ellos contesta parameter_invalid: quedarían en círculo. El departamento es el que llevan sus recibos (Departamento). Contesta el organigrama ya cambiado.
+    /// <br/>
+    /// <c>POST /v1/payroll_org_chart/assign</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/assign-payroll-org-chart"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> AssignAsync(AssignPayrollOrgChartParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("POST", "/v1/payroll_org_chart/assign", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Crear o cambiar un departamento
+    /// </summary>
+    /// <remarks>
+    /// Crea el departamento name o, si ya existe, lo cambia: new_name lo renombra (también en sus empleados y vacantes), parent lo pone dentro de otro y lead le pone responsable. Un parent que ya está dentro de él contesta parameter_invalid. Contesta el organigrama.
+    /// <br/>
+    /// <c>POST /v1/payroll_org_chart/departments</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/save-payroll-department"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> SaveDepartmentAsync(SavePayrollDepartmentParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("POST", "/v1/payroll_org_chart/departments", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar un departamento
+    /// </summary>
+    /// <remarks>
+    /// Quita un departamento sin personas; los que estaban dentro de él suben un nivel. Con personas contesta parameter_invalid: cámbielas antes con POST /v1/payroll_org_chart/assign. Contesta el organigrama.
+    /// <br/>
+    /// <c>POST /v1/payroll_org_chart/departments/remove</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/remove-payroll-department"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> RemoveDepartmentAsync(RemovePayrollDepartmentParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("POST", "/v1/payroll_org_chart/departments/remove", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Abrir una vacante
+    /// </summary>
+    /// <remarks>
+    /// Un puesto sin persona todavía, bajo un jefe, en un departamento y una sucursal: sale en el organigrama, pero no cuenta como empleado. Contesta el organigrama.
+    /// <br/>
+    /// <c>POST /v1/payroll_org_chart/vacancies</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-payroll-vacancy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> CreateVacancyAsync(CreatePayrollVacancyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("POST", "/v1/payroll_org_chart/vacancies", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una vacante
+    /// </summary>
+    /// <remarks>
+    /// Cambia el puesto, departamento, jefe o sucursal de una vacante (vac_…).
+    /// <br/>
+    /// <c>POST /v1/payroll_org_chart/vacancies/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-payroll-vacancy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> UpdateVacancyAsync(string id, UpdatePayrollVacancyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("POST", $"/v1/payroll_org_chart/vacancies/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cerrar una vacante
+    /// </summary>
+    /// <remarks>
+    /// La quita del organigrama (se cubrió o ya no hace falta). Contesta el organigrama.
+    /// <br/>
+    /// <c>DELETE /v1/payroll_org_chart/vacancies/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-payroll-vacancy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PayrollOrgChart> DeleteVacancyAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PayrollOrgChart>("DELETE", $"/v1/payroll_org_chart/vacancies/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

@@ -2158,6 +2158,42 @@ public sealed partial class ApproveVacationRequestParams
 }
 
 /// <summary>
+/// Los campos de «Cambiar jefe, departamento o sucursal».
+/// </summary>
+public sealed partial class AssignPayrollOrgChartParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// A quiénes (emp_…).
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public required List<string> Employees { get; set; }
+
+    /// <summary>
+    /// Su jefe directo (emp_…), o null para ponerlos arriba. Se omite si no cambia.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public string? Manager { get; set; }
+
+    /// <summary>
+    /// Su departamento, como lo llevan sus recibos (Departamento), o null para ninguno. Se omite si no cambia.
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Una sucursal del emisor (brn_…), o null para la matriz.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+}
+
+/// <summary>
 /// Una marca de entrada o salida de Asistencia (registro electrónico de jornada, LFT art. 132).
 /// </summary>
 public sealed partial class AttendanceMark
@@ -10867,6 +10903,48 @@ public sealed partial class CreatePayrollReceiptParamsPeriod
     /// </summary>
     [JsonPropertyName("payment_date")]
     public string? PaymentDate { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Abrir una vacante».
+/// </summary>
+public sealed partial class CreatePayrollVacancyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El puesto que falta cubrir.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// Departamento (Departamento).
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Bajo qué jefe (emp_…).
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public string? Manager { get; set; }
+
+    /// <summary>
+    /// Una sucursal del emisor (brn_…), o null para la matriz.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Desde cuándo está abierta (YYYY-MM-DD); por omisión hoy.
+    /// </summary>
+    [JsonPropertyName("opened_on")]
+    public string? OpenedOn { get; set; }
 }
 
 /// <summary>
@@ -21891,6 +21969,18 @@ public sealed partial class GetPayrollCostParams
     /// </summary>
     [JsonPropertyName("year")]
     public long? Year { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Organigrama».
+/// </summary>
+public sealed partial class GetPayrollOrgChartParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -33483,6 +33573,270 @@ public sealed partial class PayrollCostTotals
 }
 
 /// <summary>
+/// El organigrama de los empleados del emisor: jefes, departamentos, sucursales y vacantes.
+/// </summary>
+public sealed partial class PayrollOrgChart
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El día del organigrama (YYYY-MM-DD): salen quienes trabajan ese día.
+    /// </summary>
+    [JsonPropertyName("as_of")]
+    public string AsOf { get; set; } = default!;
+
+    /// <summary>
+    /// Las cuentas del organigrama y lo que conviene revisar.
+    /// </summary>
+    [JsonPropertyName("summary")]
+    public PayrollOrgChartSummary Summary { get; set; } = default!;
+
+    /// <summary>
+    /// Los empleados arriba de todo (sin jefe), el del equipo más grande primero.
+    /// </summary>
+    [JsonPropertyName("top")]
+    public List<string> Top { get; set; } = default!;
+
+    /// <summary>
+    /// Los empleados de hoy, cada uno con su jefe y su equipo.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<PayrollOrgChartEmployeesItem> Employees { get; set; } = default!;
+
+    /// <summary>
+    /// Los departamentos, cada uno después del de arriba.
+    /// </summary>
+    [JsonPropertyName("departments")]
+    public List<PayrollOrgChartDepartmentsItem> Departments { get; set; } = default!;
+
+    /// <summary>
+    /// Los puestos sin persona todavía.
+    /// </summary>
+    [JsonPropertyName("vacancies")]
+    public List<PayrollOrgChartVacanciesItem> Vacancies { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollOrgChartDepartmentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollOrgChartDepartmentsItem
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El departamento dentro del que está.
+    /// </summary>
+    [JsonPropertyName("parent")]
+    public string? Parent { get; set; }
+
+    /// <summary>
+    /// Su responsable (emp_…).
+    /// </summary>
+    [JsonPropertyName("lead")]
+    public string? Lead { get; set; }
+
+    /// <summary>
+    /// Personas en él.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public long Employees { get; set; }
+
+    /// <summary>
+    /// Personas en él y en sus subdepartamentos.
+    /// </summary>
+    [JsonPropertyName("total_employees")]
+    public long TotalEmployees { get; set; }
+
+    /// <summary>
+    /// 0 arriba, 1 dentro de uno, y así.
+    /// </summary>
+    [JsonPropertyName("depth")]
+    public long Depth { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollOrgChartEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollOrgChartEmployeesItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de empleado.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su puesto.
+    /// </summary>
+    [JsonPropertyName("position")]
+    public string? Position { get; set; }
+
+    /// <summary>
+    /// Departamento (Departamento).
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Su sucursal (brn_…); null es la matriz.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Su jefe directo (emp_…); null si está arriba.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public string? Manager { get; set; }
+
+    /// <summary>
+    /// Personas directamente a su cargo.
+    /// </summary>
+    [JsonPropertyName("direct_reports")]
+    public long DirectReports { get; set; }
+
+    /// <summary>
+    /// Todas las personas que dependen de él, en toda su cadena.
+    /// </summary>
+    [JsonPropertyName("total_reports")]
+    public long TotalReports { get; set; }
+}
+
+/// <summary>
+/// Las cuentas del organigrama y lo que conviene revisar.
+/// </summary>
+public sealed partial class PayrollOrgChartSummary
+{
+    /// <summary>
+    /// Empleados de hoy.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public long Employees { get; set; }
+
+    /// <summary>
+    /// Cuántos tienen al menos una persona directamente a su cargo.
+    /// </summary>
+    [JsonPropertyName("managers")]
+    public long Managers { get; set; }
+
+    /// <summary>
+    /// Personas directas por jefe, en promedio (un decimal).
+    /// </summary>
+    [JsonPropertyName("average_span")]
+    public decimal AverageSpan { get; set; }
+
+    /// <summary>
+    /// Departamentos, con los que solo llevan los recibos.
+    /// </summary>
+    [JsonPropertyName("departments")]
+    public long Departments { get; set; }
+
+    /// <summary>
+    /// En cuántas sucursales (con la matriz) hay personas.
+    /// </summary>
+    [JsonPropertyName("branches")]
+    public long Branches { get; set; }
+
+    /// <summary>
+    /// Puestos sin persona.
+    /// </summary>
+    [JsonPropertyName("vacancies")]
+    public long Vacancies { get; set; }
+
+    /// <summary>
+    /// Quienes quedan arriba sin ser la cabeza (todos los de arriba menos el del equipo más grande).
+    /// </summary>
+    [JsonPropertyName("without_manager")]
+    public List<string> WithoutManager { get; set; } = default!;
+
+    /// <summary>
+    /// Jefes con más de 10 personas directas.
+    /// </summary>
+    [JsonPropertyName("wide_span")]
+    public List<string> WideSpan { get; set; } = default!;
+
+    /// <summary>
+    /// Sin departamento: sus recibos no llevan uno.
+    /// </summary>
+    [JsonPropertyName("without_department")]
+    public List<string> WithoutDepartment { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollOrgChartVacanciesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollOrgChartVacanciesItem
+{
+    /// <summary>
+    /// La vacante (vac_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// El puesto.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// Departamento (Departamento).
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Bajo qué jefe (emp_…).
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public string? Manager { get; set; }
+
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Desde cuándo está abierta (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("opened_on")]
+    public string OpenedOn { get; set; } = default!;
+}
+
+/// <summary>
 /// Las cuotas patronales de un mes en la contabilidad: lo que la empresa debe al IMSS, al SAR y al Infonavit por los días del mes según sus recibos de nómina timbrados, el impuesto sobre nómina del mes y la póliza de provisión que los registra, si ya se registró.
 /// </summary>
 public sealed partial class PayrollProvision
@@ -37072,6 +37426,24 @@ public sealed partial class RejectVacationRequestParams
     /// </summary>
     [JsonPropertyName("note")]
     public required string Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Quitar un departamento».
+/// </summary>
+public sealed partial class RemovePayrollDepartmentParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
 }
 
 /// <summary>
@@ -42137,6 +42509,42 @@ public sealed partial class SaveInflationAccountsParamsAccountsItem
 }
 
 /// <summary>
+/// Los campos de «Crear o cambiar un departamento».
+/// </summary>
+public sealed partial class SavePayrollDepartmentParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El departamento. Si no existe, se crea; si existe, se cambia.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Su nuevo nombre: se cambia también en sus empleados y vacantes.
+    /// </summary>
+    [JsonPropertyName("new_name")]
+    public string? NewName { get; set; }
+
+    /// <summary>
+    /// El departamento dentro del que está, o null para ponerlo arriba.
+    /// </summary>
+    [JsonPropertyName("parent")]
+    public string? Parent { get; set; }
+
+    /// <summary>
+    /// Su responsable (emp_…).
+    /// </summary>
+    [JsonPropertyName("lead")]
+    public string? Lead { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Programar el pago de una factura de proveedor».
 /// </summary>
 public sealed partial class ScheduleSupplierInvoiceParams
@@ -46086,6 +46494,48 @@ public sealed partial class UpdatePayrollTaxSettingsParams
     /// </summary>
     [JsonPropertyName("due_days")]
     public Dictionary<string, JsonElement>? DueDays { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar una vacante».
+/// </summary>
+public sealed partial class UpdatePayrollVacancyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El puesto que falta cubrir.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// Departamento (Departamento).
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Bajo qué jefe (emp_…).
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public string? Manager { get; set; }
+
+    /// <summary>
+    /// Una sucursal del emisor (brn_…), o null para la matriz.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Desde cuándo está abierta (YYYY-MM-DD); por omisión hoy.
+    /// </summary>
+    [JsonPropertyName("opened_on")]
+    public string? OpenedOn { get; set; }
 }
 
 /// <summary>
