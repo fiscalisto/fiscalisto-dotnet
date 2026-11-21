@@ -13709,13 +13709,13 @@ public sealed partial class CreateRuleParamsActionsItem
     public string? Topic { get; set; }
 
     /// <summary>
-    /// email_supplier: el asunto. Puede llevar {folio}, {total}, {fecha} y {empresa}.
+    /// email_supplier: el asunto. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
     /// </summary>
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
 
     /// <summary>
-    /// email_supplier: el mensaje. Puede llevar {folio}, {total}, {fecha} y {empresa}.
+    /// email_supplier: el mensaje. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
     /// </summary>
     [JsonPropertyName("message")]
     public string? Message { get; set; }
@@ -24007,6 +24007,18 @@ public sealed partial class Invoice
     public string? RecurringInvoice { get; set; }
 
     /// <summary>
+    /// Los tickets (`tkt_…`) que factura: el que su cliente facturó en la autofactura, el que su equipo facturó desde la página del ticket o los que asoció a ella. Vacío en las demás; los de una factura global están en GET /v1/tickets con `status=global`.
+    /// </summary>
+    [JsonPropertyName("tickets")]
+    public List<string> Tickets { get; set; } = default!;
+
+    /// <summary>
+    /// Qué timbró la factura; `null` si se timbró fuera de Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("origin")]
+    public InvoiceOrigin? Origin { get; set; }
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -27296,6 +27308,26 @@ public sealed partial class InvoiceList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;InvoiceOrigin&lt;/c&gt;.
+/// </summary>
+public sealed partial class InvoiceOrigin
+{
+    /// <summary>
+    /// Qué la timbró: `app` (una persona en Fiscalisto), `api`, `assistant` (un asistente de IA por MCP), `point_of_sale` (una llave de punto de venta), `autofactura` (su cliente con un ticket, o los datos del comprador de Stripe o Mercado Libre), `invoice_link` (su cliente al llenar el enlace de factura), `quote` (su cliente al aceptar la cotización), `recurring_invoice` (una factura recurrente sola) o `global_invoice` (la factura global automática de los tickets).
+    /// <br/>
+    /// Valores: app, api, assistant, point_of_sale, autofactura, invoice_link, quote, recurring_invoice, global_invoice.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre de la llave de la API o del punto de venta, el asistente («ChatGPT») o de dónde vinieron los datos del comprador en una autofactura («Stripe»).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
 }
 
 /// <summary>
@@ -49612,13 +49644,13 @@ public sealed partial class UpdateRuleParamsActionsItem
     public string? Topic { get; set; }
 
     /// <summary>
-    /// email_supplier: el asunto. Puede llevar {folio}, {total}, {fecha} y {empresa}.
+    /// email_supplier: el asunto. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
     /// </summary>
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
 
     /// <summary>
-    /// email_supplier: el mensaje. Puede llevar {folio}, {total}, {fecha} y {empresa}.
+    /// email_supplier: el mensaje. Puede llevar {folio}, {total}, {fecha} y {empresa}. En los momentos de pagos también {facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}; en payout.paid, {rastreo} y {cep}; en payout.failed, {motivo}.
     /// </summary>
     [JsonPropertyName("message")]
     public string? Message { get; set; }
