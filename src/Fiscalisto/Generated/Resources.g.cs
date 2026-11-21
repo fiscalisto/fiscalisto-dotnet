@@ -8304,6 +8304,20 @@ public sealed class WebhookEndpointsResource
     /// </summary>
     public IAsyncEnumerable<WebhookDelivery> ListDeliveriesAutoPagingAsync(string id, ListWebhookDeliveriesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<WebhookDelivery>($"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/deliveries", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Recuperar eventos fallidos
+    /// </summary>
+    /// <remarks>
+    /// Después de que su servidor estuvo caído: le manda otra vez, ahora, todos los eventos desde since que este webhook escucha y no recibió (los que fallaron todos sus intentos y los que pasaron mientras estuvo apagado), del más antiguo al más reciente. Hasta 1,000 por llamada; si quedan más, next_since dice desde dónde volver a llamar. Cada uno es un intento aparte, firmado con su webhook-id de siempre, para que su servidor descarte los que ya tenía. El webhook tiene que estar encendido.
+    /// <br/>
+    /// <c>POST /v1/webhook_endpoints/{id}/recover</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/webhooks/recover-webhook-endpoint"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<WebhookRecovery> RecoverAsync(string id, RecoverWebhookEndpointParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<WebhookRecovery>("POST", $"/v1/webhook_endpoints/{Uri.EscapeDataString(id)}/recover", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

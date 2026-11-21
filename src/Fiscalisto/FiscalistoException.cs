@@ -30,6 +30,9 @@ public sealed class FiscalistoException : Exception
     /// <summary>Búsquelo en Desarrolladores › Solicitudes o mándelo a soporte.</summary>
     public string? RequestId { get; }
 
+    /// <summary>La solicitud en Desarrolladores › Solicitudes, para abrirla en el navegador.</summary>
+    public string? RequestLogUrl { get; }
+
     /// <summary>El código HTTP (sin él, la solicitud no llegó).</summary>
     public int? StatusCode { get; }
 
@@ -42,7 +45,7 @@ public sealed class FiscalistoException : Exception
     internal FiscalistoException(
         string type, string code, string message, int? statusCode, string? requestId, JsonElement? raw,
         string? idempotencyKey = null, string? param = null, string? satCode = null, string? invoice = null,
-        string? docUrl = null, Exception? inner = null)
+        string? docUrl = null, Exception? inner = null, string? requestLogUrl = null)
         : base(message, inner)
     {
         Type = type;
@@ -55,6 +58,7 @@ public sealed class FiscalistoException : Exception
         SatCode = satCode;
         Invoice = invoice;
         DocUrl = docUrl;
+        RequestLogUrl = requestLogUrl;
     }
 
     internal static FiscalistoException FromError(JsonElement? error, int status, string? requestId)
@@ -71,7 +75,8 @@ public sealed class FiscalistoException : Exception
             param: Text("param"),
             satCode: Text("sat_code"),
             invoice: Text("invoice"),
-            docUrl: Text("doc_url"));
+            docUrl: Text("doc_url"),
+            requestLogUrl: Text("request_log_url"));
     }
 
     /// <inheritdoc/>

@@ -13697,6 +13697,14 @@ public sealed partial class CreateRuleParamsActionsItem
     public string? Message { get; set; }
 
     /// <summary>
+    /// email_supplier en payout.submitted, payout.paid y payout.failed: payout manda un correo por pago y proveedor con todas sus facturas ({folio} es la lista de folios, {total} lo que se le paga y {fecha} la fecha del pago); invoice, uno por factura. Por omisión, payout.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
     /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
     /// </summary>
     [JsonPropertyName("signatures")]
@@ -18123,6 +18131,12 @@ public sealed partial class ErrorErrorValue
     /// </summary>
     [JsonPropertyName("request_id")]
     public string RequestId { get; set; } = default!;
+
+    /// <summary>
+    /// La solicitud en Desarrolladores › Solicitudes: lo que mandó, lo que contestamos y cómo repetirla. Viene en todos los errores salvo los 429.
+    /// </summary>
+    [JsonPropertyName("request_log_url")]
+    public string? RequestLogUrl { get; set; }
 }
 
 /// <summary>
@@ -38435,6 +38449,18 @@ public sealed partial class ReceivableList
 }
 
 /// <summary>
+/// Los campos de «Recuperar eventos fallidos».
+/// </summary>
+public sealed partial class RecoverWebhookEndpointParams
+{
+    /// <summary>
+    /// Desde cuándo (ISO 8601, de los últimos 30 días): por ejemplo, cuando empezó a fallar su servidor (failing_since del webhook).
+    /// </summary>
+    [JsonPropertyName("since")]
+    public required string Since { get; set; }
+}
+
+/// <summary>
 /// Una factura que el emisor timbra solo, cada mes, semana o día.
 /// </summary>
 public sealed partial class RecurringInvoice
@@ -39628,6 +39654,14 @@ public sealed partial class RuleActionsItem
     /// </summary>
     [JsonPropertyName("message")]
     public string? Message { get; set; }
+
+    /// <summary>
+    /// email_supplier en los disparadores de pagos: payout, un correo por pago y proveedor; invoice, uno por factura.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
 
     /// <summary>
     /// review_findings: los hallazgos que da por revisados (sus códigos).
@@ -49480,6 +49514,14 @@ public sealed partial class UpdateRuleParamsActionsItem
     public string? Message { get; set; }
 
     /// <summary>
+    /// email_supplier en payout.submitted, payout.paid y payout.failed: payout manda un correo por pago y proveedor con todas sus facturas ({folio} es la lista de folios, {total} lo que se le paga y {fecha} la fecha del pago); invoice, uno por factura. Por omisión, payout.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
     /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
     /// </summary>
     [JsonPropertyName("signatures")]
@@ -52360,6 +52402,42 @@ public sealed partial class WebhookEndpointList
     /// </summary>
     [JsonPropertyName("url")]
     public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Los eventos que un webhook no recibió, mandados otra vez: desde cuándo se buscaron, cuántos salieron y, si quedaron más de 1,000, desde dónde seguir.
+/// </summary>
+public sealed partial class WebhookRecovery
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El webhook (whe_…) al que se mandaron.
+    /// </summary>
+    [JsonPropertyName("endpoint")]
+    public string Endpoint { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo se buscaron: el since que mandó, o la creación del webhook si es posterior.
+    /// </summary>
+    [JsonPropertyName("since")]
+    public string Since { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos eventos salieron otra vez. 0: no le faltaba ninguno.
+    /// </summary>
+    [JsonPropertyName("events")]
+    public long Events { get; set; }
+
+    /// <summary>
+    /// Si quedaron más de 1,000: llame otra vez con este since. null: ya salieron todos.
+    /// </summary>
+    [JsonPropertyName("next_since")]
+    public string? NextSince { get; set; }
 }
 
 /// <summary>
