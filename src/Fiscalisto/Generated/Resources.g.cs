@@ -2670,14 +2670,14 @@ public sealed class ImssMovementsResource
     /// Marcar movimientos como presentados
     /// </summary>
     /// <remarks>
-    /// Cuando el IMSS ya los recibió (el acuse de IDSE o la importación en SUA): pasan a reported y ya no cambian ni se borran. Con reported false vuelven a pendientes. Devuelve los movimientos como quedaron.
+    /// Cuando el IMSS ya los recibió (el acuse de IDSE o la importación en SUA): pasan a reported y ya no cambian ni se borran. Con reported false vuelven a pendientes. Los que el IMSS rechazó van en rejected con su razón: quedan pending con imss_rejection hasta que los corrija. Devuelve los movimientos como quedaron.
     /// <br/>
     /// <c>POST /v1/imss_movements/report</c>
     /// <br/>
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/report-imss-movements"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<ImssMovementList> ReportAsync(ReportImssMovementsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    public Task<ImssMovementList> ReportAsync(ReportImssMovementsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<ImssMovementList>("POST", "/v1/imss_movements/report", @params, null, options, true, cancellationToken);
 
     /// <summary>

@@ -3561,6 +3561,18 @@ public sealed partial class Branch
     public string? PdfStyle { get; set; }
 
     /// <summary>
+    /// La zona horaria (IANA) en que cuenta su día: la elegida o, si no eligió, la de su código postal (Ley de los Husos Horarios). La fecha de sus facturas siempre es la hora local de su código postal.
+    /// </summary>
+    [JsonPropertyName("time_zone")]
+    public string TimeZone { get; set; } = default!;
+
+    /// <summary>
+    /// true: time_zone se eligió; false: sigue la de su código postal.
+    /// </summary>
+    [JsonPropertyName("time_zone_chosen")]
+    public bool TimeZoneChosen { get; set; }
+
+    /// <summary>
     /// true si está archivada: ya no se factura desde ella.
     /// </summary>
     [JsonPropertyName("archived")]
@@ -8281,6 +8293,14 @@ public sealed partial class CreateBranchParams
     /// </summary>
     [JsonPropertyName("pdf_style")]
     public string? PdfStyle { get; set; }
+
+    /// <summary>
+    /// Su zona horaria (IANA), cuando no es la de su código postal: cuándo empieza su día para «hoy», los límites por día y los avisos. null sigue la de su código postal. La fecha de sus facturas siempre es la hora local de su código postal (Anexo 20).
+    /// <br/>
+    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Matamoros, America/Ciudad_Juarez.
+    /// </summary>
+    [JsonPropertyName("time_zone")]
+    public string? TimeZone { get; set; }
 }
 
 /// <summary>
@@ -24419,10 +24439,34 @@ public sealed partial class ImssMovement
     public string? ReportedAt { get; set; }
 
     /// <summary>
+    /// El IMSS lo rechazó en el acuse del IDSE (sigue pending para corregirlo y enviarlo otra vez); null si no.
+    /// </summary>
+    [JsonPropertyName("imss_rejection")]
+    public ImssMovementImssRejection? ImssRejection { get; set; }
+
+    /// <summary>
     /// Lo que el IMSS rechazaría en su renglón (vacío: listo para el archivo).
     /// </summary>
     [JsonPropertyName("problems")]
     public List<string> Problems { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ImssMovementImssRejection&lt;/c&gt;.
+/// </summary>
+public sealed partial class ImssMovementImssRejection
+{
+    /// <summary>
+    /// Lo que dijo el IMSS, como en su acuse.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string Reason { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo lo anotó (el acuse que se subió o la llamada que lo mandó en rejected).
+    /// </summary>
+    [JsonPropertyName("rejected_at")]
+    public string RejectedAt { get; set; } = default!;
 }
 
 /// <summary>
@@ -40161,13 +40205,37 @@ public sealed partial class ReportImssMovementsParams
     /// Los movimientos (imv_…) que el IMSS ya recibió, hasta 1,000.
     /// </summary>
     [JsonPropertyName("movements")]
-    public required List<string> Movements { get; set; }
+    public List<string>? Movements { get; set; }
 
     /// <summary>
     /// true (por omisión): marcarlos como presentados; false: devolverlos a pendientes (si los marcó por error).
     /// </summary>
     [JsonPropertyName("reported")]
     public bool? Reported { get; set; }
+
+    /// <summary>
+    /// Los que el IMSS rechazó en el acuse del IDSE, cada uno con su razón: vuelven a pendientes con imss_rejection, para corregirlos y enviarlos otra vez.
+    /// </summary>
+    [JsonPropertyName("rejected")]
+    public List<ReportImssMovementsParamsRejectedItem>? Rejected { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ReportImssMovementsParamsRejectedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ReportImssMovementsParamsRejectedItem
+{
+    /// <summary>
+    /// El movimiento (imv_…).
+    /// </summary>
+    [JsonPropertyName("movement")]
+    public required string Movement { get; set; }
+
+    /// <summary>
+    /// Lo que dice el IMSS, como en su acuse del IDSE.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public required string Reason { get; set; }
 }
 
 /// <summary>
@@ -49074,6 +49142,14 @@ public sealed partial class UpdateBranchParams
     /// </summary>
     [JsonPropertyName("pdf_style")]
     public string? PdfStyle { get; set; }
+
+    /// <summary>
+    /// Su zona horaria (IANA), cuando no es la de su código postal: cuándo empieza su día para «hoy», los límites por día y los avisos. null sigue la de su código postal. La fecha de sus facturas siempre es la hora local de su código postal (Anexo 20).
+    /// <br/>
+    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Matamoros, America/Ciudad_Juarez.
+    /// </summary>
+    [JsonPropertyName("time_zone")]
+    public string? TimeZone { get; set; }
 
     /// <summary>
     /// true la archiva: ya no se puede facturar desde ella, y sus facturas la siguen nombrando. false la restaura.
