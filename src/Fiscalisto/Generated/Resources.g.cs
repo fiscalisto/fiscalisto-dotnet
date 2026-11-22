@@ -240,6 +240,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public ClimateComplaintsResource ClimateComplaints => _climateComplaints ??= new ClimateComplaintsResource(this);
 
+    private ReviewCyclesResource? _reviewCycles;
+
+    /// <summary>Nómina.</summary>
+    public ReviewCyclesResource ReviewCycles => _reviewCycles ??= new ReviewCyclesResource(this);
+
+    private ReviewObjectivesResource? _reviewObjectives;
+
+    /// <summary>Nómina.</summary>
+    public ReviewObjectivesResource ReviewObjectives => _reviewObjectives ??= new ReviewObjectivesResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -4080,6 +4090,228 @@ public sealed class ClimateComplaintsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<ClimateComplaint> UpdateAsync(string id, UpdateClimateComplaintParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<ClimateComplaint>("POST", $"/v1/climate_complaints/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.ReviewCycles</c>.
+/// </summary>
+public sealed class ReviewCyclesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ReviewCyclesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar ciclos de evaluación
+    /// </summary>
+    /// <remarks>
+    /// Los ciclos de evaluación de desempeño del emisor (rvc_…), los más recientes primero, con cuántas personas y cuántas evaluaciones van enviadas.
+    /// <br/>
+    /// <c>GET /v1/review_cycles</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-review-cycles"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ReviewCycle>> ListAsync(ListReviewCyclesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ReviewCycle>("/v1/review_cycles", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar ciclos de evaluación: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ReviewCycle> ListAutoPagingAsync(ListReviewCyclesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ReviewCycle>("/v1/review_cycles", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Crear un ciclo de evaluación
+    /// </summary>
+    /// <remarks>
+    /// Lo crea en borrador con todas las personas que trabajan hoy en el emisor, o en la sucursal o el departamento que diga. Ninguna ley pide evaluar el desempeño, así que la escala, quién evalúa, los pesos y las competencias los decide usted; lo que no manda toma los valores por omisión. Ábralo con POST /v1/review_cycles/{id}/open.
+    /// <br/>
+    /// <c>POST /v1/review_cycles</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-review-cycle"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> CreateAsync(CreateReviewCycleParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("POST", "/v1/review_cycles", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver un ciclo de evaluación
+    /// </summary>
+    /// <remarks>
+    /// El ciclo con sus reglas, competencias y cada persona: su jefe, quién la evalúa y si ya envió su evaluación (no qué contestó), sus objetivos y su resultado. Con el ciclo abierto el resultado se calcula con lo que va llegando; al cerrarlo queda guardado.
+    /// <br/>
+    /// <c>GET /v1/review_cycles/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-review-cycle"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("GET", $"/v1/review_cycles/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un ciclo de evaluación
+    /// </summary>
+    /// <remarks>
+    /// En borrador cambia todo. Abierto, solo el nombre, el periodo, la fecha límite, compañeros por persona y share_results: la escala, las competencias y quién evalúa ya no cambian porque hay quien ya contestó con ellas. Cerrado ya no cambia.
+    /// <br/>
+    /// <c>POST /v1/review_cycles/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-review-cycle"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> UpdateAsync(string id, UpdateReviewCycleParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("POST", $"/v1/review_cycles/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un ciclo de evaluación
+    /// </summary>
+    /// <remarks>
+    /// Lo borra con sus personas y objetivos si nadie ha enviado una evaluación. Con evaluaciones, ciérrelo.
+    /// <br/>
+    /// <c>DELETE /v1/review_cycles/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-review-cycle"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycleDeleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycleDeleted>("DELETE", $"/v1/review_cycles/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Abrir un ciclo de evaluación
+    /// </summary>
+    /// <remarks>
+    /// Arma quién evalúa a quién: la persona misma, su jefe en el organigrama, sus compañeros (los elegidos o, si no, peers_count al azar entre quienes tienen el mismo jefe) y las personas a su cargo, según rules.raters. A cada evaluador le aparece en su portal lo que le toca, con el aviso review si lo tiene encendido.
+    /// <br/>
+    /// <c>POST /v1/review_cycles/{id}/open</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/open-review-cycle"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> OpenAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("POST", $"/v1/review_cycles/{Uri.EscapeDataString(id)}/open", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cerrar un ciclo de evaluación
+    /// </summary>
+    /// <remarks>
+    /// Deja de recibir evaluaciones y guarda el resultado de cada persona como quedó. Con share_results, cada persona lo ve en su portal.
+    /// <br/>
+    /// <c>POST /v1/review_cycles/{id}/close</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/close-review-cycle"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> CloseAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("POST", $"/v1/review_cycles/{Uri.EscapeDataString(id)}/close", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Elegir a quién se evalúa
+    /// </summary>
+    /// <remarks>
+    /// En borrador: reemplaza la lista de personas del ciclo. Quien sale pierde sus objetivos en el ciclo.
+    /// <br/>
+    /// <c>POST /v1/review_cycles/{id}/participants</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/set-review-participants"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> SetParticipantsAsync(string id, SetReviewParticipantsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("POST", $"/v1/review_cycles/{Uri.EscapeDataString(id)}/participants", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Elegir los compañeros que evalúan a alguien
+    /// </summary>
+    /// <remarks>
+    /// Los compañeros que evalúan a una persona. Con el ciclo abierto agrega las evaluaciones de los nuevos y quita las que no se han enviado de los que salen.
+    /// <br/>
+    /// <c>POST /v1/review_cycles/{id}/peers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/set-review-peers"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> SetPeersAsync(string id, SetReviewPeersParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("POST", $"/v1/review_cycles/{Uri.EscapeDataString(id)}/peers", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Calibrar el resultado de una persona
+    /// </summary>
+    /// <remarks>
+    /// Con el ciclo abierto o cerrado: una calificación calibrada en lugar de la calculada (con la nota de por qué cambia) y su potencial para la matriz de 9 cuadros. Lo que no manda no cambia.
+    /// <br/>
+    /// <c>POST /v1/review_cycles/{id}/calibrations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/calibrate-review"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewCycle> CalibrateAsync(string id, CalibrateReviewParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewCycle>("POST", $"/v1/review_cycles/{Uri.EscapeDataString(id)}/calibrations", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver el resultado de una persona
+    /// </summary>
+    /// <remarks>
+    /// Su calificación por competencia y por tipo de evaluador, y los comentarios. Compañeros y personas a su cargo se promedian juntos y nunca llevan nombre; con menos respuestas que rules.anonymous_min no cuentan ni se muestran.
+    /// <br/>
+    /// <c>GET /v1/review_cycles/{id}/results/{employee}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-review-result"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewResult> ResultAsync(string id, string employee, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewResult>("GET", $"/v1/review_cycles/{Uri.EscapeDataString(id)}/results/{Uri.EscapeDataString(employee)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.ReviewObjectives</c>.
+/// </summary>
+public sealed class ReviewObjectivesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ReviewObjectivesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Agregar un objetivo
+    /// </summary>
+    /// <remarks>
+    /// Un objetivo de una persona en un ciclo, con su meta, unidad y peso (hasta 20 por persona). Su jefe lo califica al evaluarla y la persona anota su avance en su portal. Ya no se agregan cuando el jefe la evaluó.
+    /// <br/>
+    /// <c>POST /v1/review_objectives</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-review-objective"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewObjective> CreateAsync(CreateReviewObjectiveParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewObjective>("POST", "/v1/review_objectives", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un objetivo
+    /// </summary>
+    /// <remarks>
+    /// Reemplaza el objetivo con lo que manda: lo que no manda queda vacío o con su valor por omisión.
+    /// <br/>
+    /// <c>POST /v1/review_objectives/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-review-objective"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewObjective> UpdateAsync(string id, UpdateReviewObjectiveParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewObjective>("POST", $"/v1/review_objectives/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un objetivo
+    /// </summary>
+    /// <remarks>
+    /// Lo borra, salvo que su jefe ya lo haya calificado.
+    /// <br/>
+    /// <c>DELETE /v1/review_objectives/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-review-objective"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ReviewObjectiveDeleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ReviewObjectiveDeleted>("DELETE", $"/v1/review_objectives/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>

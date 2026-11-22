@@ -3972,6 +3972,36 @@ public sealed partial class BudgetLinesItem
 }
 
 /// <summary>
+/// Los campos de «Calibrar el resultado de una persona».
+/// </summary>
+public sealed partial class CalibrateReviewParams
+{
+    /// <summary>
+    /// La persona (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// La calificación calibrada, en la escala del ciclo; null usa la calculada.
+    /// </summary>
+    [JsonPropertyName("calibrated")]
+    public decimal? Calibrated { get; set; }
+
+    /// <summary>
+    /// Por qué cambia; se pide con calibrated.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// El potencial para la matriz de 9 cuadros: 1 bajo, 2 medio, 3 alto.
+    /// </summary>
+    [JsonPropertyName("potential")]
+    public long? Potential { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cancelar una factura».
 /// </summary>
 public sealed partial class CancelInvoiceParams
@@ -15278,6 +15308,282 @@ public sealed partial class CreateRetentionParamsTrustWithholding
 }
 
 /// <summary>
+/// Los campos de «Crear un ciclo de evaluación».
+/// </summary>
+public sealed partial class CreateReviewCycleParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Su nombre, como «Evaluación 2026».
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// Desde cuándo se evalúa.
+    /// </summary>
+    [JsonPropertyName("period_start")]
+    public string? PeriodStart { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo.
+    /// </summary>
+    [JsonPropertyName("period_end")]
+    public string? PeriodEnd { get; set; }
+
+    /// <summary>
+    /// La fecha límite para contestar que ve cada evaluador (opcional).
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+
+    /// <summary>
+    /// Cómo se califica. Por omisión, escala de 1 a 5, autoevaluación y jefe, objetivos 60 %.
+    /// </summary>
+    [JsonPropertyName("rules")]
+    public CreateReviewCycleParamsRules? Rules { get; set; }
+
+    /// <summary>
+    /// Lo que se califica de cada persona. Por omisión, cinco de ejemplo.
+    /// </summary>
+    [JsonPropertyName("competencies")]
+    public List<CreateReviewCycleParamsCompetenciesItem>? Competencies { get; set; }
+
+    /// <summary>
+    /// Con peer: cuántos compañeros se toman al azar, entre quienes tienen el mismo jefe, para quien no tenga elegidos. Por omisión, 3.
+    /// </summary>
+    [JsonPropertyName("peers_count")]
+    public long? PeersCount { get; set; }
+
+    /// <summary>
+    /// Al cerrar, cada persona ve su resultado en su portal. Por omisión, no.
+    /// </summary>
+    [JsonPropertyName("share_results")]
+    public bool? ShareResults { get; set; }
+
+    /// <summary>
+    /// Solo quien trabaja en esta sucursal (brn_…). null u omitido: todo el emisor.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Solo quien es de este departamento.
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateReviewCycleParamsCompetenciesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateReviewCycleParamsCompetenciesItem
+{
+    /// <summary>
+    /// Su id, único en el ciclo.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Qué se espera, en una frase; lo ve cada evaluador.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+}
+
+/// <summary>
+/// Cómo se califica. Por omisión, escala de 1 a 5, autoevaluación y jefe, objetivos 60 %.
+/// </summary>
+public sealed partial class CreateReviewCycleParamsRules
+{
+    /// <summary>
+    /// La escala.
+    /// </summary>
+    [JsonPropertyName("scale")]
+    public required CreateReviewCycleParamsRulesScale Scale { get; set; }
+
+    /// <summary>
+    /// Quién evalúa: self (autoevaluación), manager (su jefe en el organigrama), peer (compañeros), report (las personas a su cargo).
+    /// </summary>
+    [JsonPropertyName("raters")]
+    public required CreateReviewCycleParamsRulesRaters Raters { get; set; }
+
+    /// <summary>
+    /// El peso de cada uno en la calificación de competencias, de 0 a 100. Cuentan solo los que evalúan; no tienen que sumar 100.
+    /// </summary>
+    [JsonPropertyName("rater_weights")]
+    public required CreateReviewCycleParamsRulesRaterWeights RaterWeights { get; set; }
+
+    /// <summary>
+    /// Cuánto pesan los objetivos en el resultado, de 0 a 100; el resto son las competencias.
+    /// </summary>
+    [JsonPropertyName("objectives_weight")]
+    public required decimal ObjectivesWeight { get; set; }
+
+    /// <summary>
+    /// Compañeros o personas a su cargo con menos respuestas no cuentan, para que no se sepa quién contestó qué.
+    /// </summary>
+    [JsonPropertyName("anonymous_min")]
+    public required long AnonymousMin { get; set; }
+
+    /// <summary>
+    /// Los cortes de desempeño de la matriz de 9 cuadros: debajo del primero es bajo, desde el segundo es alto.
+    /// </summary>
+    [JsonPropertyName("box_cuts")]
+    public required List<decimal> BoxCuts { get; set; }
+}
+
+/// <summary>
+/// El peso de cada uno en la calificación de competencias, de 0 a 100. Cuentan solo los que evalúan; no tienen que sumar 100.
+/// </summary>
+public sealed partial class CreateReviewCycleParamsRulesRaterWeights
+{
+    /// <summary>
+    /// El peso de lo que dice la persona misma.
+    /// </summary>
+    [JsonPropertyName("self")]
+    public required decimal Self { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice su jefe en el organigrama.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public required decimal Manager { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice sus compañeros.
+    /// </summary>
+    [JsonPropertyName("peer")]
+    public required decimal Peer { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice las personas a su cargo.
+    /// </summary>
+    [JsonPropertyName("report")]
+    public required decimal Report { get; set; }
+}
+
+/// <summary>
+/// Quién evalúa: self (autoevaluación), manager (su jefe en el organigrama), peer (compañeros), report (las personas a su cargo).
+/// </summary>
+public sealed partial class CreateReviewCycleParamsRulesRaters
+{
+    /// <summary>
+    /// Si cuenta lo que dice la persona misma.
+    /// </summary>
+    [JsonPropertyName("self")]
+    public required bool Self { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice su jefe en el organigrama.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public required bool Manager { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice sus compañeros.
+    /// </summary>
+    [JsonPropertyName("peer")]
+    public required bool Peer { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice las personas a su cargo.
+    /// </summary>
+    [JsonPropertyName("report")]
+    public required bool Report { get; set; }
+}
+
+/// <summary>
+/// La escala.
+/// </summary>
+public sealed partial class CreateReviewCycleParamsRulesScale
+{
+    /// <summary>
+    /// Se califica de 1 a max (de 3 a 10).
+    /// </summary>
+    [JsonPropertyName("max")]
+    public required long Max { get; set; }
+
+    /// <summary>
+    /// El nombre de cada punto, del 1 al max; vacío: solo los números.
+    /// </summary>
+    [JsonPropertyName("labels")]
+    public required List<string> Labels { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar un objetivo».
+/// </summary>
+public sealed partial class CreateReviewObjectiveParams
+{
+    /// <summary>
+    /// El ciclo (rvc_…).
+    /// </summary>
+    [JsonPropertyName("cycle")]
+    public required string Cycle { get; set; }
+
+    /// <summary>
+    /// La persona (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// Qué tiene que lograr.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// La meta, si se mide con un número.
+    /// </summary>
+    [JsonPropertyName("target")]
+    public decimal? Target { get; set; }
+
+    /// <summary>
+    /// El avance.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public decimal? Actual { get; set; }
+
+    /// <summary>
+    /// La unidad: pesos, %, piezas.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// La meta es un máximo (quejas, mermas): menos es mejor.
+    /// </summary>
+    [JsonPropertyName("lower_better")]
+    public bool? LowerBetter { get; set; }
+
+    /// <summary>
+    /// Cuánto cuenta frente a sus otros objetivos. Por omisión, 1.
+    /// </summary>
+    [JsonPropertyName("weight")]
+    public decimal? Weight { get; set; }
+
+    /// <summary>
+    /// Una nota.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear un rol».
 /// </summary>
 public sealed partial class CreateRoleParams
@@ -19635,6 +19941,12 @@ public sealed partial class EmployeeNoticeSettings
     public bool Survey { get; set; }
 
     /// <summary>
+    /// Avisar cuando se abre un ciclo de Desempeño con evaluaciones que le toca hacer.
+    /// </summary>
+    [JsonPropertyName("review")]
+    public bool Review { get; set; }
+
+    /// <summary>
     /// Los días después de timbrarse en que se le recuerda, una vez, firmar un recibo sin firmar; 0: nunca.
     /// </summary>
     [JsonPropertyName("sign_reminder_days")]
@@ -19731,9 +20043,9 @@ public sealed partial class EmployeePortal
 public sealed partial class EmployeePortalNoticesItem
 {
     /// <summary>
-    /// receipt: recibo nuevo; receipt_canceled: se canceló uno; vacation_approved / vacation_rejected: la respuesta a sus vacaciones; sign_reminder: tiene un recibo por firmar; survey: tiene una encuesta de clima laboral por contestar.
+    /// receipt: recibo nuevo; receipt_canceled: se canceló uno; vacation_approved / vacation_rejected: la respuesta a sus vacaciones; sign_reminder: tiene un recibo por firmar; survey: tiene una encuesta de clima laboral por contestar; review: tiene evaluaciones de desempeño por hacer.
     /// <br/>
-    /// Valores: receipt, receipt_canceled, vacation_approved, vacation_rejected, sign_reminder, survey.
+    /// Valores: receipt, receipt_canceled, vacation_approved, vacation_rejected, sign_reminder, survey, review.
     /// </summary>
     [JsonPropertyName("kind")]
     public string Kind { get; set; } = default!;
@@ -33621,6 +33933,30 @@ public sealed partial class ListRetentionsParams
 }
 
 /// <summary>
+/// Los campos de «Listar ciclos de evaluación».
+/// </summary>
+public sealed partial class ListReviewCyclesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar roles».
 /// </summary>
 public sealed partial class ListRolesParams
@@ -43307,6 +43643,474 @@ public sealed partial class RevertAutomaticEntryParams
 }
 
 /// <summary>
+/// Un ciclo de evaluación (Nómina › Desempeño).
+/// </summary>
+public sealed partial class ReviewCycle
+{
+    /// <summary>
+    /// El ciclo (rvc_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre, como «Evaluación 2026».
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// draft, open o closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo se evalúa.
+    /// </summary>
+    [JsonPropertyName("period_start")]
+    public string? PeriodStart { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo.
+    /// </summary>
+    [JsonPropertyName("period_end")]
+    public string? PeriodEnd { get; set; }
+
+    /// <summary>
+    /// La fecha límite para contestar.
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+
+    /// <summary>
+    /// Cuántas personas se evalúan.
+    /// </summary>
+    [JsonPropertyName("people")]
+    public long People { get; set; }
+
+    /// <summary>
+    /// Cuántas evaluaciones hay que hacer (cero en borrador).
+    /// </summary>
+    [JsonPropertyName("evaluations")]
+    public long Evaluations { get; set; }
+
+    /// <summary>
+    /// Cuántas ya se enviaron.
+    /// </summary>
+    [JsonPropertyName("evaluations_done")]
+    public long EvaluationsDone { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// La sucursal con que se armó (brn_…).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// El departamento con que se armó.
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Cómo se califica (al ver un ciclo).
+    /// </summary>
+    [JsonPropertyName("rules")]
+    public ReviewCycleRules? Rules { get; set; }
+
+    /// <summary>
+    /// Lo que se califica de cada persona.
+    /// </summary>
+    [JsonPropertyName("competencies")]
+    public List<ReviewCycleCompetenciesItem>? Competencies { get; set; }
+
+    /// <summary>
+    /// Compañeros al azar por persona, para quien no tenga elegidos.
+    /// </summary>
+    [JsonPropertyName("peers_count")]
+    public long? PeersCount { get; set; }
+
+    /// <summary>
+    /// Si cada persona ve su resultado en su portal al cerrar.
+    /// </summary>
+    [JsonPropertyName("share_results")]
+    public bool? ShareResults { get; set; }
+
+    /// <summary>
+    /// Cuándo se abrió.
+    /// </summary>
+    [JsonPropertyName("opened_at")]
+    public string? OpenedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se cerró.
+    /// </summary>
+    [JsonPropertyName("closed_at")]
+    public string? ClosedAt { get; set; }
+
+    /// <summary>
+    /// Cada persona que se evalúa (al ver un ciclo).
+    /// </summary>
+    [JsonPropertyName("participants")]
+    public List<ReviewCycleParticipantsItem>? Participants { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ReviewCycleCompetenciesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ReviewCycleCompetenciesItem
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Descripción.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+}
+
+/// <summary>
+/// Un ciclo borrado.
+/// </summary>
+public sealed partial class ReviewCycleDeleted
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Siempre true.
+    /// </summary>
+    [JsonPropertyName("deleted")]
+    public bool Deleted { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ReviewCycleList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ReviewCycle> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ReviewCycleParticipantsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ReviewCycleParticipantsItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Puesto (Puesto).
+    /// </summary>
+    [JsonPropertyName("position")]
+    public string? Position { get; set; }
+
+    /// <summary>
+    /// Departamento (Departamento).
+    /// </summary>
+    [JsonPropertyName("department")]
+    public string? Department { get; set; }
+
+    /// <summary>
+    /// Su jefe en el organigrama (emp_…), quien la evalúa como jefe.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public string? Manager { get; set; }
+
+    /// <summary>
+    /// Los compañeros elegidos para evaluarla (emp_…).
+    /// </summary>
+    [JsonPropertyName("peers")]
+    public List<string> Peers { get; set; } = default!;
+
+    /// <summary>
+    /// Quién la evalúa, desde que se abre el ciclo.
+    /// </summary>
+    [JsonPropertyName("raters")]
+    public List<ReviewCycleParticipantsItemRatersItem> Raters { get; set; } = default!;
+
+    /// <summary>
+    /// Sus objetivos.
+    /// </summary>
+    [JsonPropertyName("objectives")]
+    public List<ReviewObjective> Objectives { get; set; } = default!;
+
+    /// <summary>
+    /// Su calificación de competencias.
+    /// </summary>
+    [JsonPropertyName("competencies_score")]
+    public decimal? CompetenciesScore { get; set; }
+
+    /// <summary>
+    /// Su calificación de objetivos.
+    /// </summary>
+    [JsonPropertyName("objectives_score")]
+    public decimal? ObjectivesScore { get; set; }
+
+    /// <summary>
+    /// El resultado calculado: vivo con el ciclo abierto, guardado al cerrar.
+    /// </summary>
+    [JsonPropertyName("final")]
+    public decimal? Final { get; set; }
+
+    /// <summary>
+    /// La calificación calibrada.
+    /// </summary>
+    [JsonPropertyName("calibrated")]
+    public decimal? Calibrated { get; set; }
+
+    /// <summary>
+    /// Por qué cambió.
+    /// </summary>
+    [JsonPropertyName("calibration_note")]
+    public string? CalibrationNote { get; set; }
+
+    /// <summary>
+    /// 1 bajo, 2 medio, 3 alto, para la matriz de 9 cuadros.
+    /// </summary>
+    [JsonPropertyName("potential")]
+    public long? Potential { get; set; }
+
+    /// <summary>
+    /// El que cuenta: calibrated, o si no, final.
+    /// </summary>
+    [JsonPropertyName("result")]
+    public decimal? Result { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ReviewCycleParticipantsItemRatersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ReviewCycleParticipantsItemRatersItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// self (autoevaluación), manager (su jefe), peer (compañeros) o report (personas a su cargo).
+    /// </summary>
+    [JsonPropertyName("relation")]
+    public string Relation { get; set; } = default!;
+
+    /// <summary>
+    /// Si ya la envió (no qué contestó).
+    /// </summary>
+    [JsonPropertyName("done")]
+    public bool Done { get; set; }
+
+    /// <summary>
+    /// Si tiene portal; sin él no puede contestar.
+    /// </summary>
+    [JsonPropertyName("portal")]
+    public bool Portal { get; set; }
+}
+
+/// <summary>
+/// Cómo se califica (al ver un ciclo).
+/// </summary>
+public sealed partial class ReviewCycleRules
+{
+    /// <summary>
+    /// La escala.
+    /// </summary>
+    [JsonPropertyName("scale")]
+    public ReviewCycleRulesScale Scale { get; set; } = default!;
+
+    /// <summary>
+    /// Quién evalúa.
+    /// </summary>
+    [JsonPropertyName("raters")]
+    public ReviewCycleRulesRaters Raters { get; set; } = default!;
+
+    /// <summary>
+    /// El peso de cada uno en las competencias; cuentan solo los que evalúan.
+    /// </summary>
+    [JsonPropertyName("rater_weights")]
+    public ReviewCycleRulesRaterWeights RaterWeights { get; set; } = default!;
+
+    /// <summary>
+    /// Cuánto pesan los objetivos en el resultado, de 0 a 100.
+    /// </summary>
+    [JsonPropertyName("objectives_weight")]
+    public decimal ObjectivesWeight { get; set; }
+
+    /// <summary>
+    /// Compañeros o personas a su cargo con menos respuestas no cuentan.
+    /// </summary>
+    [JsonPropertyName("anonymous_min")]
+    public long AnonymousMin { get; set; }
+
+    /// <summary>
+    /// Los cortes de desempeño medio y alto de la matriz de 9 cuadros.
+    /// </summary>
+    [JsonPropertyName("box_cuts")]
+    public List<decimal> BoxCuts { get; set; } = default!;
+}
+
+/// <summary>
+/// El peso de cada uno en las competencias; cuentan solo los que evalúan.
+/// </summary>
+public sealed partial class ReviewCycleRulesRaterWeights
+{
+    /// <summary>
+    /// El peso de lo que dice la persona misma.
+    /// </summary>
+    [JsonPropertyName("self")]
+    public decimal Self { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice su jefe en el organigrama.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public decimal Manager { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice sus compañeros.
+    /// </summary>
+    [JsonPropertyName("peer")]
+    public decimal Peer { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice las personas a su cargo.
+    /// </summary>
+    [JsonPropertyName("report")]
+    public decimal Report { get; set; }
+}
+
+/// <summary>
+/// Quién evalúa.
+/// </summary>
+public sealed partial class ReviewCycleRulesRaters
+{
+    /// <summary>
+    /// Si cuenta lo que dice la persona misma.
+    /// </summary>
+    [JsonPropertyName("self")]
+    public bool Self { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice su jefe en el organigrama.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public bool Manager { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice sus compañeros.
+    /// </summary>
+    [JsonPropertyName("peer")]
+    public bool Peer { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice las personas a su cargo.
+    /// </summary>
+    [JsonPropertyName("report")]
+    public bool Report { get; set; }
+}
+
+/// <summary>
+/// La escala.
+/// </summary>
+public sealed partial class ReviewCycleRulesScale
+{
+    /// <summary>
+    /// Se califica de 1 a max.
+    /// </summary>
+    [JsonPropertyName("max")]
+    public long Max { get; set; }
+
+    /// <summary>
+    /// El nombre de cada punto, del 1 al max; vacío: solo los números.
+    /// </summary>
+    [JsonPropertyName("labels")]
+    public List<string> Labels { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Marcar un hallazgo como revisado».
 /// </summary>
 public sealed partial class ReviewFindingParams
@@ -43316,6 +44120,264 @@ public sealed partial class ReviewFindingParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// Un objetivo de una persona en un ciclo.
+/// </summary>
+public sealed partial class ReviewObjective
+{
+    /// <summary>
+    /// El objetivo (rvo_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El ciclo (rvc_…).
+    /// </summary>
+    [JsonPropertyName("cycle")]
+    public string Cycle { get; set; } = default!;
+
+    /// <summary>
+    /// De quién es (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tiene que lograr.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// La meta.
+    /// </summary>
+    [JsonPropertyName("target")]
+    public decimal? Target { get; set; }
+
+    /// <summary>
+    /// El avance; lo anota la persona en su portal o usted aquí.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public decimal? Actual { get; set; }
+
+    /// <summary>
+    /// La unidad.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// La meta es un máximo: menos es mejor.
+    /// </summary>
+    [JsonPropertyName("lower_better")]
+    public bool LowerBetter { get; set; }
+
+    /// <summary>
+    /// Cuánto cuenta frente a sus otros objetivos.
+    /// </summary>
+    [JsonPropertyName("weight")]
+    public decimal Weight { get; set; }
+
+    /// <summary>
+    /// Una nota sobre el objetivo.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// % logrado: avance entre meta, o al revés con lower_better. null sin los dos.
+    /// </summary>
+    [JsonPropertyName("achievement")]
+    public decimal? Achievement { get; set; }
+
+    /// <summary>
+    /// La calificación que le dio su jefe al evaluarla.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal? Score { get; set; }
+}
+
+/// <summary>
+/// Un objetivo borrado.
+/// </summary>
+public sealed partial class ReviewObjectiveDeleted
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Siempre true.
+    /// </summary>
+    [JsonPropertyName("deleted")]
+    public bool Deleted { get; set; }
+}
+
+/// <summary>
+/// El resultado de una persona en un ciclo, por competencia y tipo de evaluador.
+/// </summary>
+public sealed partial class ReviewResult
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El ciclo (rvc_…).
+    /// </summary>
+    [JsonPropertyName("cycle")]
+    public string Cycle { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El resultado: competencias y objetivos con el peso de los objetivos.
+    /// </summary>
+    [JsonPropertyName("final")]
+    public decimal? Final { get; set; }
+
+    /// <summary>
+    /// El promedio de cada tipo de evaluador que cuenta, con su peso.
+    /// </summary>
+    [JsonPropertyName("competencies_score")]
+    public decimal? CompetenciesScore { get; set; }
+
+    /// <summary>
+    /// Lo que calificó el jefe en cada objetivo, con su peso.
+    /// </summary>
+    [JsonPropertyName("objectives_score")]
+    public decimal? ObjectivesScore { get; set; }
+
+    /// <summary>
+    /// Cada tipo de evaluador.
+    /// </summary>
+    [JsonPropertyName("relations")]
+    public List<ReviewResultRelationsItem> Relations { get; set; } = default!;
+
+    /// <summary>
+    /// La calificación de cada competencia.
+    /// </summary>
+    [JsonPropertyName("competencies")]
+    public List<ReviewResultCompetenciesItem> Competencies { get; set; } = default!;
+
+    /// <summary>
+    /// Los comentarios.
+    /// </summary>
+    [JsonPropertyName("comments")]
+    public List<ReviewResultCommentsItem> Comments { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ReviewResultCommentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ReviewResultCommentsItem
+{
+    /// <summary>
+    /// self (autoevaluación), manager (su jefe), peer (compañeros) o report (personas a su cargo).
+    /// </summary>
+    [JsonPropertyName("relation")]
+    public string Relation { get; set; } = default!;
+
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = default!;
+
+    /// <summary>
+    /// Solo de la autoevaluación y del jefe; compañeros y personas a su cargo van sin nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ReviewResultCompetenciesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ReviewResultCompetenciesItem
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su calificación, con el peso de cada tipo de evaluador.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal? Score { get; set; }
+
+    /// <summary>
+    /// Lo que dio cada tipo de evaluador que cuenta.
+    /// </summary>
+    [JsonPropertyName("by_relation")]
+    public Dictionary<string, JsonElement> ByRelation { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ReviewResultRelationsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ReviewResultRelationsItem
+{
+    /// <summary>
+    /// self (autoevaluación), manager (su jefe), peer (compañeros) o report (personas a su cargo).
+    /// </summary>
+    [JsonPropertyName("relation")]
+    public string Relation { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos la evaluaron así.
+    /// </summary>
+    [JsonPropertyName("answers")]
+    public long Answers { get; set; }
+
+    /// <summary>
+    /// Su promedio.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal? Score { get; set; }
+
+    /// <summary>
+    /// Menos respuestas que anonymous_min: no cuenta ni se muestra.
+    /// </summary>
+    [JsonPropertyName("hidden")]
+    public bool Hidden { get; set; }
 }
 
 /// <summary>
@@ -48691,6 +49753,36 @@ public sealed partial class SetOpeningBalancesParamsLinesItem
 }
 
 /// <summary>
+/// Los campos de «Elegir a quién se evalúa».
+/// </summary>
+public sealed partial class SetReviewParticipantsParams
+{
+    /// <summary>
+    /// Todas las personas que se evalúan (emp_…), en borrador. Reemplaza la lista.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public required List<string> Employees { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Elegir los compañeros que evalúan a alguien».
+/// </summary>
+public sealed partial class SetReviewPeersParams
+{
+    /// <summary>
+    /// La persona que se evalúa (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// Los compañeros que la evalúan (emp_…). Vacío: al abrir se toman al azar. Con el ciclo abierto agrega o quita sus evaluaciones (las ya contestadas se quedan).
+    /// </summary>
+    [JsonPropertyName("peers")]
+    public required List<string> Peers { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Quién tomó un curso».
 /// </summary>
 public sealed partial class SetTrainingParticipantsParams
@@ -52914,6 +54006,12 @@ public sealed partial class UpdateEmployeeNoticeSettingsParams
     public bool? Survey { get; set; }
 
     /// <summary>
+    /// Cuando se abre un ciclo de Desempeño con evaluaciones que le toca hacer (POST /v1/review_cycles/{id}/open).
+    /// </summary>
+    [JsonPropertyName("review")]
+    public bool? Review { get; set; }
+
+    /// <summary>
     /// Si un recibo sigue sin firmar de recibido estos días después de timbrarse, se le recuerda una vez. 0: nunca.
     /// </summary>
     [JsonPropertyName("sign_reminder_days")]
@@ -55590,6 +56688,258 @@ public sealed partial class UpdateRepseProfileParams
     /// </summary>
     [JsonPropertyName("commercial_folio")]
     public string? CommercialFolio { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un ciclo de evaluación».
+/// </summary>
+public sealed partial class UpdateReviewCycleParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Su nombre, como «Evaluación 2026».
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// Desde cuándo se evalúa.
+    /// </summary>
+    [JsonPropertyName("period_start")]
+    public string? PeriodStart { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo.
+    /// </summary>
+    [JsonPropertyName("period_end")]
+    public string? PeriodEnd { get; set; }
+
+    /// <summary>
+    /// La fecha límite para contestar que ve cada evaluador (opcional).
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+
+    /// <summary>
+    /// Cómo se califica. Por omisión, escala de 1 a 5, autoevaluación y jefe, objetivos 60 %.
+    /// </summary>
+    [JsonPropertyName("rules")]
+    public UpdateReviewCycleParamsRules? Rules { get; set; }
+
+    /// <summary>
+    /// Lo que se califica de cada persona. Por omisión, cinco de ejemplo.
+    /// </summary>
+    [JsonPropertyName("competencies")]
+    public List<UpdateReviewCycleParamsCompetenciesItem>? Competencies { get; set; }
+
+    /// <summary>
+    /// Con peer: cuántos compañeros se toman al azar, entre quienes tienen el mismo jefe, para quien no tenga elegidos. Por omisión, 3.
+    /// </summary>
+    [JsonPropertyName("peers_count")]
+    public long? PeersCount { get; set; }
+
+    /// <summary>
+    /// Al cerrar, cada persona ve su resultado en su portal. Por omisión, no.
+    /// </summary>
+    [JsonPropertyName("share_results")]
+    public bool? ShareResults { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateReviewCycleParamsCompetenciesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateReviewCycleParamsCompetenciesItem
+{
+    /// <summary>
+    /// Su id, único en el ciclo.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Qué se espera, en una frase; lo ve cada evaluador.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+}
+
+/// <summary>
+/// Cómo se califica. Por omisión, escala de 1 a 5, autoevaluación y jefe, objetivos 60 %.
+/// </summary>
+public sealed partial class UpdateReviewCycleParamsRules
+{
+    /// <summary>
+    /// La escala.
+    /// </summary>
+    [JsonPropertyName("scale")]
+    public required UpdateReviewCycleParamsRulesScale Scale { get; set; }
+
+    /// <summary>
+    /// Quién evalúa: self (autoevaluación), manager (su jefe en el organigrama), peer (compañeros), report (las personas a su cargo).
+    /// </summary>
+    [JsonPropertyName("raters")]
+    public required UpdateReviewCycleParamsRulesRaters Raters { get; set; }
+
+    /// <summary>
+    /// El peso de cada uno en la calificación de competencias, de 0 a 100. Cuentan solo los que evalúan; no tienen que sumar 100.
+    /// </summary>
+    [JsonPropertyName("rater_weights")]
+    public required UpdateReviewCycleParamsRulesRaterWeights RaterWeights { get; set; }
+
+    /// <summary>
+    /// Cuánto pesan los objetivos en el resultado, de 0 a 100; el resto son las competencias.
+    /// </summary>
+    [JsonPropertyName("objectives_weight")]
+    public required decimal ObjectivesWeight { get; set; }
+
+    /// <summary>
+    /// Compañeros o personas a su cargo con menos respuestas no cuentan, para que no se sepa quién contestó qué.
+    /// </summary>
+    [JsonPropertyName("anonymous_min")]
+    public required long AnonymousMin { get; set; }
+
+    /// <summary>
+    /// Los cortes de desempeño de la matriz de 9 cuadros: debajo del primero es bajo, desde el segundo es alto.
+    /// </summary>
+    [JsonPropertyName("box_cuts")]
+    public required List<decimal> BoxCuts { get; set; }
+}
+
+/// <summary>
+/// El peso de cada uno en la calificación de competencias, de 0 a 100. Cuentan solo los que evalúan; no tienen que sumar 100.
+/// </summary>
+public sealed partial class UpdateReviewCycleParamsRulesRaterWeights
+{
+    /// <summary>
+    /// El peso de lo que dice la persona misma.
+    /// </summary>
+    [JsonPropertyName("self")]
+    public required decimal Self { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice su jefe en el organigrama.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public required decimal Manager { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice sus compañeros.
+    /// </summary>
+    [JsonPropertyName("peer")]
+    public required decimal Peer { get; set; }
+
+    /// <summary>
+    /// El peso de lo que dice las personas a su cargo.
+    /// </summary>
+    [JsonPropertyName("report")]
+    public required decimal Report { get; set; }
+}
+
+/// <summary>
+/// Quién evalúa: self (autoevaluación), manager (su jefe en el organigrama), peer (compañeros), report (las personas a su cargo).
+/// </summary>
+public sealed partial class UpdateReviewCycleParamsRulesRaters
+{
+    /// <summary>
+    /// Si cuenta lo que dice la persona misma.
+    /// </summary>
+    [JsonPropertyName("self")]
+    public required bool Self { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice su jefe en el organigrama.
+    /// </summary>
+    [JsonPropertyName("manager")]
+    public required bool Manager { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice sus compañeros.
+    /// </summary>
+    [JsonPropertyName("peer")]
+    public required bool Peer { get; set; }
+
+    /// <summary>
+    /// Si cuenta lo que dice las personas a su cargo.
+    /// </summary>
+    [JsonPropertyName("report")]
+    public required bool Report { get; set; }
+}
+
+/// <summary>
+/// La escala.
+/// </summary>
+public sealed partial class UpdateReviewCycleParamsRulesScale
+{
+    /// <summary>
+    /// Se califica de 1 a max (de 3 a 10).
+    /// </summary>
+    [JsonPropertyName("max")]
+    public required long Max { get; set; }
+
+    /// <summary>
+    /// El nombre de cada punto, del 1 al max; vacío: solo los números.
+    /// </summary>
+    [JsonPropertyName("labels")]
+    public required List<string> Labels { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un objetivo».
+/// </summary>
+public sealed partial class UpdateReviewObjectiveParams
+{
+    /// <summary>
+    /// Qué tiene que lograr.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required string Title { get; set; }
+
+    /// <summary>
+    /// La meta, si se mide con un número.
+    /// </summary>
+    [JsonPropertyName("target")]
+    public decimal? Target { get; set; }
+
+    /// <summary>
+    /// El avance.
+    /// </summary>
+    [JsonPropertyName("actual")]
+    public decimal? Actual { get; set; }
+
+    /// <summary>
+    /// La unidad: pesos, %, piezas.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// La meta es un máximo (quejas, mermas): menos es mejor.
+    /// </summary>
+    [JsonPropertyName("lower_better")]
+    public bool? LowerBetter { get; set; }
+
+    /// <summary>
+    /// Cuánto cuenta frente a sus otros objetivos. Por omisión, 1.
+    /// </summary>
+    [JsonPropertyName("weight")]
+    public decimal? Weight { get; set; }
+
+    /// <summary>
+    /// Una nota.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }
 
 /// <summary>
