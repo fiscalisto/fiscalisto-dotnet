@@ -100,6 +100,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public EmployeesResource Employees => _employees ??= new EmployeesResource(this);
 
+    private EmployeeNoticeSettingsResource? _employeeNoticeSettings;
+
+    /// <summary>Nómina.</summary>
+    public EmployeeNoticeSettingsResource EmployeeNoticeSettings => _employeeNoticeSettings ??= new EmployeeNoticeSettingsResource(this);
+
     private VacationRequestsResource? _vacationRequests;
 
     /// <summary>Nómina.</summary>
@@ -2175,7 +2180,7 @@ public sealed class EmployeesResource
     /// Portal del empleado
     /// </summary>
     /// <remarks>
-    /// El enlace personal del empleado (sin cuenta) para ver, descargar y firmar de recibido sus recibos de nómina, ver sus vacaciones y pedir días; los celulares ligados y los recibos que firmó.
+    /// El enlace personal del empleado (sin cuenta) para ver, descargar y firmar de recibido sus recibos de nómina, ver sus vacaciones y pedir días; los celulares ligados, los que tienen avisos, sus últimos avisos y los recibos que firmó.
     /// <br/>
     /// <c>GET /v1/employees/{id}/portal</c>
     /// <br/>
@@ -2226,6 +2231,44 @@ public sealed class EmployeesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<EmployeeTraining> UpdateTrainingAsync(string id, UpdateEmployeeTrainingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<EmployeeTraining>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}/training", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.EmployeeNoticeSettings</c>.
+/// </summary>
+public sealed class EmployeeNoticeSettingsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal EmployeeNoticeSettingsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Avisos a empleados
+    /// </summary>
+    /// <remarks>
+    /// Qué avisos les llegan a los empleados del emisor en Mi nómina: recibo nuevo, recibo cancelado, la respuesta a sus vacaciones y el recordatorio de firmar. Llegan al celular de quien instaló Mi nómina y activó sus avisos; si no, a su correo (email_fallback).
+    /// <br/>
+    /// <c>GET /v1/employee_notice_settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee-notice-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeNoticeSettings> GetAsync(GetEmployeeNoticeSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeNoticeSettings>("GET", "/v1/employee_notice_settings", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar los avisos a empleados
+    /// </summary>
+    /// <remarks>
+    /// Lo que no mande se queda como estaba. Cada empleado puede, además, apagar los suyos desde su enlace.
+    /// <br/>
+    /// <c>POST /v1/employee_notice_settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-employee-notice-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeNoticeSettings> UpdateAsync(UpdateEmployeeNoticeSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeNoticeSettings>("POST", "/v1/employee_notice_settings", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>

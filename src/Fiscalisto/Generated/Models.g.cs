@@ -17952,7 +17952,73 @@ public sealed partial class EmployeeList
 }
 
 /// <summary>
-/// El portal del empleado: su enlace y los recibos que firmó de recibido.
+/// Qué avisos les llegan a los empleados del emisor en Mi nómina (al celular o a su correo). Cada empleado puede apagar los suyos.
+/// </summary>
+public sealed partial class EmployeeNoticeSettings
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Avisar cada recibo nuevo en cuanto se timbra.
+    /// </summary>
+    [JsonPropertyName("receipt")]
+    public bool Receipt { get; set; }
+
+    /// <summary>
+    /// Avisar cuando un recibo suyo se cancela ante el SAT.
+    /// </summary>
+    [JsonPropertyName("receipt_canceled")]
+    public bool ReceiptCanceled { get; set; }
+
+    /// <summary>
+    /// Avisar la respuesta a sus vacaciones, con su nota.
+    /// </summary>
+    [JsonPropertyName("vacation")]
+    public bool Vacation { get; set; }
+
+    /// <summary>
+    /// Los días después de timbrarse en que se le recuerda, una vez, firmar un recibo sin firmar; 0: nunca.
+    /// </summary>
+    [JsonPropertyName("sign_reminder_days")]
+    public long SignReminderDays { get; set; }
+
+    /// <summary>
+    /// A quien no activó los avisos en su celular le llega el mismo aviso a su correo.
+    /// </summary>
+    [JsonPropertyName("email_fallback")]
+    public bool EmailFallback { get; set; }
+
+    /// <summary>
+    /// Los avisos de entre las 21:00 y las 7:00 (hora del centro) llegan a las 7:00.
+    /// </summary>
+    [JsonPropertyName("quiet_hours")]
+    public bool QuietHours { get; set; }
+
+    /// <summary>
+    /// Cuándo se cambiaron; null, nunca (son los de omisión).
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+}
+
+/// <summary>
+/// El portal del empleado: su enlace, los avisos que le llegan y los recibos que firmó de recibido.
 /// </summary>
 public sealed partial class EmployeePortal
 {
@@ -17987,7 +18053,7 @@ public sealed partial class EmployeePortal
     public string? EnabledAt { get; set; }
 
     /// <summary>
-    /// Los celulares ligados: el primero que lo abre y los que lo abren en la hora siguiente, hasta 3.
+    /// Los celulares ligados: el primero que lo abre, los que lo abren en la hora siguiente (hasta 3) y la app Mi nómina que instala desde su enlace (hasta 6 en total).
     /// </summary>
     [JsonPropertyName("phones")]
     public long Phones { get; set; }
@@ -17999,10 +18065,56 @@ public sealed partial class EmployeePortal
     public string? LastSeenAt { get; set; }
 
     /// <summary>
+    /// Los celulares en que instaló Mi nómina y activó los avisos (recibo nuevo, recibo cancelado, respuesta a sus vacaciones, recibo sin firmar).
+    /// </summary>
+    [JsonPropertyName("push_phones")]
+    public long PushPhones { get; set; }
+
+    /// <summary>
+    /// Sus últimos 10 avisos, los más recientes primero.
+    /// </summary>
+    [JsonPropertyName("notices")]
+    public List<EmployeePortalNoticesItem> Notices { get; set; } = default!;
+
+    /// <summary>
     /// Los recibos que firmó de recibido desde su enlace (con el día, su celular y su IP guardados), los más recientes primero.
     /// </summary>
     [JsonPropertyName("signed_receipts")]
     public List<EmployeePortalSignedReceiptsItem> SignedReceipts { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;EmployeePortalNoticesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EmployeePortalNoticesItem
+{
+    /// <summary>
+    /// receipt: recibo nuevo; receipt_canceled: se canceló uno; vacation_approved / vacation_rejected: la respuesta a sus vacaciones; sign_reminder: tiene un recibo por firmar.
+    /// <br/>
+    /// Valores: receipt, receipt_canceled, vacation_approved, vacation_rejected, sign_reminder.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo le llegó: push (a su celular), email (a su correo), off (usted o el empleado apagó ese aviso), none (no tiene avisos ni correo), skipped (ya no aplicaba: lo firmó, se canceló o se lo mandamos con el recibo), stale (no salió en 7 días); null mientras está por salir (por ejemplo, de noche).
+    /// <br/>
+    /// Valores: push, email, off, none, skipped, stale.
+    /// </summary>
+    [JsonPropertyName("channel")]
+    public string? Channel { get; set; }
+
+    /// <summary>
+    /// Cuándo se generó.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo salió.
+    /// </summary>
+    [JsonPropertyName("sent_at")]
+    public string? SentAt { get; set; }
 }
 
 /// <summary>
@@ -23128,6 +23240,18 @@ public sealed partial class GetElectronicAccountingParams
     [JsonPropertyName("procedure_number")]
     public string? ProcedureNumber { get; set; }
 
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Avisos a empleados».
+/// </summary>
+public sealed partial class GetEmployeeNoticeSettingsParams
+{
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -49460,6 +49584,54 @@ public sealed partial class UpdateEmployeeDeductionParams
     /// </summary>
     [JsonPropertyName("extraordinary")]
     public bool? Extraordinary { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar los avisos a empleados».
+/// </summary>
+public sealed partial class UpdateEmployeeNoticeSettingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…); por omisión, el único de la cuenta.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// «Ya está su recibo de nómina» en cuanto se timbra.
+    /// </summary>
+    [JsonPropertyName("receipt")]
+    public bool? Receipt { get; set; }
+
+    /// <summary>
+    /// Cuando un recibo suyo se cancela ante el SAT.
+    /// </summary>
+    [JsonPropertyName("receipt_canceled")]
+    public bool? ReceiptCanceled { get; set; }
+
+    /// <summary>
+    /// Al aprobar o rechazar los días que pidió, con su nota.
+    /// </summary>
+    [JsonPropertyName("vacation")]
+    public bool? Vacation { get; set; }
+
+    /// <summary>
+    /// Si un recibo sigue sin firmar de recibido estos días después de timbrarse, se le recuerda una vez. 0: nunca.
+    /// </summary>
+    [JsonPropertyName("sign_reminder_days")]
+    public long? SignReminderDays { get; set; }
+
+    /// <summary>
+    /// A quien no activó los avisos en su celular le llega el mismo aviso a su correo.
+    /// </summary>
+    [JsonPropertyName("email_fallback")]
+    public bool? EmailFallback { get; set; }
+
+    /// <summary>
+    /// Los avisos de entre las 21:00 y las 7:00 (hora del centro) llegan a las 7:00.
+    /// </summary>
+    [JsonPropertyName("quiet_hours")]
+    public bool? QuietHours { get; set; }
 }
 
 /// <summary>
