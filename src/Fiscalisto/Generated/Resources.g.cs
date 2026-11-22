@@ -205,6 +205,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Reglas.</summary>
     public RulesResource Rules => _rules ??= new RulesResource(this);
 
+    private FindingsResource? _findings;
+
+    /// <summary>Hallazgos.</summary>
+    public FindingsResource Findings => _findings ??= new FindingsResource(this);
+
     private CostCentersResource? _costCenters;
 
     /// <summary>Centros de costo.</summary>
@@ -3575,6 +3580,78 @@ public sealed class RulesResource
     /// </summary>
     public IAsyncEnumerable<RuleRun> ListRunsAutoPagingAsync(string id, ListRuleRunsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<RuleRun>($"/v1/rules/{Uri.EscapeDataString(id)}/runs", @params, options, cancellationToken);
+}
+
+/// <summary>
+/// Hallazgos: <c>fiscalisto.Findings</c>.
+/// </summary>
+public sealed class FindingsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal FindingsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar hallazgos
+    /// </summary>
+    /// <remarks>
+    /// Lo que Fiscalisto encontró en las órdenes de compra, pagos, proveedores y contabilidad del emisor, el más reciente primero: una factura que no coincide con su orden, un proveedor en la lista 69-B, un documento vencido, Caja con saldo acreedor. Sin status, los que nadie ha revisado. Los de facturas están en GET /v1/sat_findings. No usa timbres.
+    /// <br/>
+    /// <c>GET /v1/findings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/hallazgos/list-findings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Finding>> ListAsync(ListFindingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Finding>("/v1/findings", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar hallazgos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Finding> ListAutoPagingAsync(ListFindingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Finding>("/v1/findings", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un hallazgo
+    /// </summary>
+    /// <remarks>
+    /// Un hallazgo, con su registro y si lo revisaron.
+    /// <br/>
+    /// <c>GET /v1/findings/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/hallazgos/get-finding"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Finding> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Finding>("GET", $"/v1/findings/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Marcar un hallazgo como revisado
+    /// </summary>
+    /// <remarks>
+    /// Como «Revisado» en la app: alguien vio el hallazgo y está bien, con una nota opcional de por qué. Si detenía su registro, ya no lo detiene. Uno ya revisado cambia su nota. Uno que ya no aplica contesta finding_resolved. Si lo que lo causó cambia después, vuelve a abrirse solo.
+    /// <br/>
+    /// <c>POST /v1/findings/{id}/review</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/hallazgos/review-finding"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Finding> ReviewAsync(string id, ReviewFindingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Finding>("POST", $"/v1/findings/{Uri.EscapeDataString(id)}/review", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Volver a abrir un hallazgo
+    /// </summary>
+    /// <remarks>
+    /// Como «Deshacer» en la app: un hallazgo revisado vuelve a «Sin revisar», sin su nota, y si su ajuste es detener el registro, lo vuelve a detener.
+    /// <br/>
+    /// <c>POST /v1/findings/{id}/reopen</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/hallazgos/reopen-finding"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Finding> ReopenAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Finding>("POST", $"/v1/findings/{Uri.EscapeDataString(id)}/reopen", null, null, options, true, cancellationToken);
 }
 
 /// <summary>

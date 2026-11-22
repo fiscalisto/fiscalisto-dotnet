@@ -12817,7 +12817,7 @@ public sealed partial class CreateRecurringInvoiceParamsSchedule
     /// <summary>
     /// La zona de esa hora. Por omisión America/Mexico_City.
     /// <br/>
-    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Ciudad_Juarez.
+    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Matamoros, America/Ciudad_Juarez.
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string? TimeZone { get; set; }
@@ -21646,6 +21646,200 @@ public sealed partial class FinancialStatementsIncomeStatementYearToDateSections
 }
 
 /// <summary>
+/// Un hallazgo en una orden de compra, un pago, un proveedor o la contabilidad: lo que Fiscalisto encontró y conviene revisar. Los de facturas están en SatFinding.
+/// </summary>
+public sealed partial class Finding
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad) o bank (movimientos del banco).
+    /// <br/>
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank.
+    /// </summary>
+    [JsonPropertyName("area")]
+    public string? Area { get; set; }
+
+    /// <summary>
+    /// En qué registro está.
+    /// </summary>
+    [JsonPropertyName("record")]
+    public FindingRecord Record { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de hallazgo (oc_factura_distinta, prov_lista_sat…).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = default!;
+
+    /// <summary>
+    /// critical (grave), warning (revisar) o info (aviso), como lo puso la empresa.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string Severity { get; set; } = default!;
+
+    /// <summary>
+    /// El tipo de hallazgo en palabras.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// Qué significa y por qué, con el artículo.
+    /// </summary>
+    [JsonPropertyName("explanation")]
+    public string? Explanation { get; set; }
+
+    /// <summary>
+    /// Qué encontró exactamente en este registro.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = default!;
+
+    /// <summary>
+    /// El monto en cuestión, en pesos, o null.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// El RFC del proveedor, o null.
+    /// </summary>
+    [JsonPropertyName("counterparty_tax_id")]
+    public string? CounterpartyTaxId { get; set; }
+
+    /// <summary>
+    /// open: nadie lo ha revisado; reviewed: alguien dijo que está bien; resolved: ya no aplica (lo que lo causó cambió).
+    /// <br/>
+    /// Valores: open, reviewed, resolved.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// true si detiene su registro hasta que alguien lo revise («No dejar aprobar», «No dejar pagar»).
+    /// </summary>
+    [JsonPropertyName("holds_record")]
+    public bool HoldsRecord { get; set; }
+
+    /// <summary>
+    /// Por qué está bien, si quien lo revisó lo dijo.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Cuándo lo encontró.
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// La última vez que cambió su texto.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo lo revisaron, o null.
+    /// </summary>
+    [JsonPropertyName("reviewed_at")]
+    public string? ReviewedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo dejó de aplicar, o null.
+    /// </summary>
+    [JsonPropertyName("resolved_at")]
+    public string? ResolvedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class FindingList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<Finding> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// En qué registro está.
+/// </summary>
+public sealed partial class FindingRecord
+{
+    /// <summary>
+    /// purchase_order, payout, supplier, poliza (la contabilidad de un mes), account (una cuenta en un mes) o bank_movement.
+    /// <br/>
+    /// Valores: purchase_order, payout, supplier, poliza, account, bank_movement.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Su id en la API: el pago (pyo_…) o el RFC del proveedor; null si no tiene.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    /// <summary>
+    /// Cómo lo nombra Fiscalisto: el número de la orden, el RFC, «RFC:AAAA-MM» un mes de contabilidad, «RFC:AAAA-MM:cuenta» una cuenta.
+    /// </summary>
+    [JsonPropertyName("reference")]
+    public string Reference { get; set; } = default!;
+
+    /// <summary>
+    /// El registro en palabras: «Orden de compra 12».
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = default!;
+}
+
+/// <summary>
 /// Un activo fijo del emisor en su contabilidad al cierre de un mes: su monto original, su depreciación en línea recta (tasas del artículo 34 de la LISR) y su valor en libros.
 /// </summary>
 public sealed partial class FixedAsset
@@ -30288,6 +30482,66 @@ public sealed partial class ListExportsParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar hallazgos».
+/// </summary>
+public sealed partial class ListFindingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// Solo los de un área: purchase_orders, payouts, suppliers, accounting o bank.
+    /// <br/>
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank.
+    /// </summary>
+    [JsonPropertyName("area")]
+    public string? Area { get; set; }
+
+    /// <summary>
+    /// open (por omisión: sin revisar), reviewed (revisados), resolved (ya no aplican) o all.
+    /// <br/>
+    /// Valores: open, reviewed, resolved, all.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Solo los de esta gravedad: critical, warning o info.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string? Severity { get; set; }
+
+    /// <summary>
+    /// Solo este tipo de hallazgo (oc_factura_distinta…).
+    /// </summary>
+    [JsonPropertyName("code")]
+    public string? Code { get; set; }
+
+    /// <summary>
+    /// Solo los de este proveedor (su RFC).
+    /// </summary>
+    [JsonPropertyName("counterparty_tax_id")]
+    public string? CounterpartyTaxId { get; set; }
 }
 
 /// <summary>
@@ -39980,6 +40234,18 @@ public sealed partial class RevertAutomaticEntryParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Marcar un hallazgo como revisado».
+/// </summary>
+public sealed partial class ReviewFindingParams
+{
+    /// <summary>
+    /// Por qué está bien (hasta 500 caracteres).
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }
 
 /// <summary>
@@ -50412,7 +50678,7 @@ public sealed partial class UpdateRecurringInvoiceParamsSchedule
     /// <summary>
     /// La zona de esa hora. Por omisión America/Mexico_City.
     /// <br/>
-    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Ciudad_Juarez.
+    /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Matamoros, America/Ciudad_Juarez.
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string? TimeZone { get; set; }
