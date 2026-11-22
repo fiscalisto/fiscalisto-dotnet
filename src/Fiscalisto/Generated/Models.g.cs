@@ -14148,6 +14148,222 @@ public sealed partial class CreateRecurringInvoiceParamsSchedule
 }
 
 /// <summary>
+/// Los campos de «Registrar un contrato de servicios especializados».
+/// </summary>
+public sealed partial class CreateRepseContractParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Número de contrato: dígitos, hasta 20 (así lo pide el SISUB).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public required string Number { get; set; }
+
+    /// <summary>
+    /// Tipo de contrato, como lo dice el contrato.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// Objeto del contrato.
+    /// </summary>
+    [JsonPropertyName("contract_object")]
+    public required string ContractObject { get; set; }
+
+    /// <summary>
+    /// El servicio u obra especializada registrado en el REPSE que cubre.
+    /// </summary>
+    [JsonPropertyName("service")]
+    public required string Service { get; set; }
+
+    /// <summary>
+    /// Monto pactado, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+
+    /// <summary>
+    /// Inicio de su vigencia (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public required string StartDate { get; set; }
+
+    /// <summary>
+    /// Fecha de término; null si es por tiempo indefinido.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Número estimado mensual de trabajadores que pone a disposición.
+    /// </summary>
+    [JsonPropertyName("estimated_workers")]
+    public required long EstimatedWorkers { get; set; }
+
+    /// <summary>
+    /// RFC del cliente (el beneficiario de los servicios).
+    /// </summary>
+    [JsonPropertyName("client_tax_id")]
+    public required string ClientTaxId { get; set; }
+
+    /// <summary>
+    /// Razón social del cliente.
+    /// </summary>
+    [JsonPropertyName("client_name")]
+    public required string ClientName { get; set; }
+
+    /// <summary>
+    /// Registro patronal del cliente ante el IMSS, si tiene.
+    /// </summary>
+    [JsonPropertyName("client_employer_registration")]
+    public string? ClientEmployerRegistration { get; set; }
+
+    /// <summary>
+    /// Domicilio fiscal del cliente.
+    /// </summary>
+    [JsonPropertyName("client_address")]
+    public required CreateRepseContractParamsClientAddress ClientAddress { get; set; }
+
+    /// <summary>
+    /// El centro de trabajo donde trabajan las personas que pone a disposición.
+    /// </summary>
+    [JsonPropertyName("site_address")]
+    public required CreateRepseContractParamsSiteAddress SiteAddress { get; set; }
+
+    /// <summary>
+    /// Quién trabaja en el contrato y desde cuándo (hasta 2,000).
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public required List<CreateRepseContractParamsWorkersItem> Workers { get; set; }
+}
+
+/// <summary>
+/// Domicilio fiscal del cliente.
+/// </summary>
+public sealed partial class CreateRepseContractParamsClientAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public required string Street { get; set; }
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Código postal, 5 dígitos.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// Municipio o demarcación territorial, sin abreviar.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public required string Municipality { get; set; }
+
+    /// <summary>
+    /// Estado (c_Estado: NLE, CMX…).
+    /// </summary>
+    [JsonPropertyName("state")]
+    public required string State { get; set; }
+}
+
+/// <summary>
+/// El centro de trabajo donde trabajan las personas que pone a disposición.
+/// </summary>
+public sealed partial class CreateRepseContractParamsSiteAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public required string Street { get; set; }
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Código postal, 5 dígitos.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// Municipio o demarcación territorial, sin abreviar.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public required string Municipality { get; set; }
+
+    /// <summary>
+    /// Estado (c_Estado: NLE, CMX…).
+    /// </summary>
+    [JsonPropertyName("state")]
+    public required string State { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRepseContractParamsWorkersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRepseContractParamsWorkersItem
+{
+    /// <summary>
+    /// El empleado (emp_…) del mismo emisor.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// Desde cuándo trabaja en el contrato (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public required string StartDate { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo; null mientras siga.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Timbrar una constancia de retenciones».
 /// </summary>
 public sealed partial class CreateRetentionParams
@@ -25012,6 +25228,30 @@ public sealed partial class GetPayrollTaxParams
 }
 
 /// <summary>
+/// Los campos de «Ver los datos del sujeto obligado».
+/// </summary>
+public sealed partial class GetRepseProfileParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Informes ICSOE y SISUB de un cuatrimestre».
+/// </summary>
+public sealed partial class GetRepseReturnParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver una constancia».
 /// </summary>
 public sealed partial class GetRetentionParams
@@ -33231,6 +33471,30 @@ public sealed partial class ListRecurringInvoicesParams
 }
 
 /// <summary>
+/// Los campos de «Listar contratos de servicios especializados».
+/// </summary>
+public sealed partial class ListRepseContractsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar constancias».
 /// </summary>
 public sealed partial class ListRetentionsParams
@@ -34506,15 +34770,15 @@ public sealed partial class MarkPayrollCalendarEventParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo o ajuste_anual.
+    /// imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe o sisub.
     /// <br/>
-    /// Valores: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual.
+    /// Valores: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe, sisub.
     /// </summary>
     [JsonPropertyName("obligation")]
     public required string Obligation { get; set; }
 
     /// <summary>
-    /// Como lo da GET /v1/payroll_calendar: 2026-11, 2026-B6, 2026, 2026-11:CMX.
+    /// Como lo da GET /v1/payroll_calendar: 2026-11, 2026-B6, 2026-C3, 2026, 2026-11:CMX.
     /// </summary>
     [JsonPropertyName("key")]
     public required string Key { get; set; }
@@ -36592,10 +36856,16 @@ public sealed partial class PayrollApproval
     public string? DecidedAt { get; set; }
 
     /// <summary>
-    /// Por qué se rechazó (o el comentario de quien la aprobó), o null.
+    /// Por qué se rechazó, el comentario de quien la aprobó, o el paso que la aprobó solo; o null.
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// Mientras espera (pending): en qué paso de sus «Pasos de aprobación» va (Ajustes › Aprobaciones › Prenómina); null en otro estado.
+    /// </summary>
+    [JsonPropertyName("step")]
+    public PayrollApprovalStep? Step { get; set; }
 }
 
 /// <summary>
@@ -36728,6 +36998,30 @@ public sealed partial class PayrollApprovalReceiptsItemTotals
     /// </summary>
     [JsonPropertyName("net")]
     public decimal Net { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollApprovalStep&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollApprovalStep
+{
+    /// <summary>
+    /// El paso en que va, desde 1.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public long Number { get; set; }
+
+    /// <summary>
+    /// Cuántos pasos tiene.
+    /// </summary>
+    [JsonPropertyName("of")]
+    public long Of { get; set; }
+
+    /// <summary>
+    /// El nombre del paso, como «Finanzas».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
 }
 
 /// <summary>
@@ -37178,9 +37472,9 @@ public sealed partial class PayrollCalendarEvent
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// pago (una nómina, en su fecha de pago), imss (cuotas del mes, LSS art. 39), rcv_infonavit (bimestrales), isn (impuesto sobre nómina de un estado), aguinaldo (LFT art. 87), ptu (LFT art. 122), prima_riesgo (determinación anual, RACERF art. 32) o ajuste_anual (LISR art. 97).
+    /// pago (una nómina, en su fecha de pago), imss (cuotas del mes, LSS art. 39), rcv_infonavit (bimestrales), isn (impuesto sobre nómina de un estado), aguinaldo (LFT art. 87), ptu (LFT art. 122), prima_riesgo (determinación anual, RACERF art. 32), ajuste_anual (LISR art. 97), icsoe (informativa cuatrimestral al IMSS de un contratista REPSE, LSS art. 15-A) o sisub (la del Infonavit, Ley del Infonavit art. 29 Bis).
     /// <br/>
-    /// Valores: pago, imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual.
+    /// Valores: pago, imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe, sisub.
     /// </summary>
     [JsonPropertyName("obligation")]
     public string Obligation { get; set; } = default!;
@@ -41722,6 +42016,644 @@ public sealed partial class ReportImssMovementsParamsRejectedItem
     /// </summary>
     [JsonPropertyName("reason")]
     public required string Reason { get; set; }
+}
+
+/// <summary>
+/// Un contrato de servicios u obras especializados (LFT art. 15) con un cliente, y quién del personal del emisor trabaja en él: lo que piden el ICSOE y el SISUB. Como Nómina › REPSE en la app.
+/// </summary>
+public sealed partial class RepseContract
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Número de contrato (dígitos, hasta 20).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de contrato.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Objeto del contrato.
+    /// </summary>
+    [JsonPropertyName("contract_object")]
+    public string ContractObject { get; set; } = default!;
+
+    /// <summary>
+    /// El servicio u obra especializada registrado en el REPSE que cubre.
+    /// </summary>
+    [JsonPropertyName("service")]
+    public string Service { get; set; } = default!;
+
+    /// <summary>
+    /// Monto pactado, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Inicio de su vigencia (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string StartDate { get; set; } = default!;
+
+    /// <summary>
+    /// Fecha de término, o null si es por tiempo indefinido.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Número estimado mensual de trabajadores que pone a disposición.
+    /// </summary>
+    [JsonPropertyName("estimated_workers")]
+    public long EstimatedWorkers { get; set; }
+
+    /// <summary>
+    /// RFC del cliente (el beneficiario).
+    /// </summary>
+    [JsonPropertyName("client_tax_id")]
+    public string ClientTaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Razón social del cliente.
+    /// </summary>
+    [JsonPropertyName("client_name")]
+    public string ClientName { get; set; } = default!;
+
+    /// <summary>
+    /// Registro patronal del cliente, o null si no tiene.
+    /// </summary>
+    [JsonPropertyName("client_employer_registration")]
+    public string? ClientEmployerRegistration { get; set; }
+
+    /// <summary>
+    /// Domicilio fiscal del cliente.
+    /// </summary>
+    [JsonPropertyName("client_address")]
+    public RepseContractClientAddress ClientAddress { get; set; } = default!;
+
+    /// <summary>
+    /// El centro de trabajo donde trabajan las personas que pone a disposición.
+    /// </summary>
+    [JsonPropertyName("site_address")]
+    public RepseContractSiteAddress SiteAddress { get; set; } = default!;
+
+    /// <summary>
+    /// Quién trabaja en el contrato y desde cuándo.
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public List<RepseContractWorkersItem> Workers { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Domicilio fiscal del cliente.
+/// </summary>
+public sealed partial class RepseContractClientAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string Street { get; set; } = default!;
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Código postal.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string Zip { get; set; } = default!;
+
+    /// <summary>
+    /// Municipio o demarcación territorial.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public string Municipality { get; set; } = default!;
+
+    /// <summary>
+    /// Estado (c_Estado).
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string State { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class RepseContractList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<RepseContract> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// El centro de trabajo donde trabajan las personas que pone a disposición.
+/// </summary>
+public sealed partial class RepseContractSiteAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string Street { get; set; } = default!;
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Código postal.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string Zip { get; set; } = default!;
+
+    /// <summary>
+    /// Municipio o demarcación territorial.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public string Municipality { get; set; } = default!;
+
+    /// <summary>
+    /// Estado (c_Estado).
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string State { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;RepseContractWorkersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RepseContractWorkersItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo trabaja en el contrato (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string StartDate { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuándo, o null mientras siga.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+}
+
+/// <summary>
+/// Lo que el SISUB pide del sujeto obligado (el contratista); la razón social y el registro patronal salen de sus datos fiscales.
+/// </summary>
+public sealed partial class RepseProfile
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Folio de su registro en el REPSE que dio la STPS.
+    /// </summary>
+    [JsonPropertyName("stps_folio")]
+    public string? StpsFolio { get; set; }
+
+    /// <summary>
+    /// Correo del sujeto obligado.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Teléfono, 10 dígitos.
+    /// </summary>
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    /// <summary>
+    /// Domicilio fiscal en una línea.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public string? Address { get; set; }
+
+    /// <summary>
+    /// Representante legal (persona moral).
+    /// </summary>
+    [JsonPropertyName("legal_representative")]
+    public string? LegalRepresentative { get; set; }
+
+    /// <summary>
+    /// Administrador único (persona moral).
+    /// </summary>
+    [JsonPropertyName("sole_administrator")]
+    public string? SoleAdministrator { get; set; }
+
+    /// <summary>
+    /// Número de la escritura constitutiva.
+    /// </summary>
+    [JsonPropertyName("deed_number")]
+    public string? DeedNumber { get; set; }
+
+    /// <summary>
+    /// Nombre del notario público.
+    /// </summary>
+    [JsonPropertyName("notary_name")]
+    public string? NotaryName { get; set; }
+
+    /// <summary>
+    /// Número de la notaría.
+    /// </summary>
+    [JsonPropertyName("notary_number")]
+    public string? NotaryNumber { get; set; }
+
+    /// <summary>
+    /// Fecha de la escritura (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("deed_date")]
+    public string? DeedDate { get; set; }
+
+    /// <summary>
+    /// Folio mercantil.
+    /// </summary>
+    [JsonPropertyName("commercial_folio")]
+    public string? CommercialFolio { get; set; }
+}
+
+/// <summary>
+/// El ICSOE (IMSS, LSS art. 15-A) y el SISUB (Infonavit, Ley del Infonavit art. 29 Bis) de un cuatrimestre, hechos de los contratos y los recibos timbrados. No hay forma de mandarlos por API: se suben, firmados con la e.firma, en cada portal.
+/// </summary>
+public sealed partial class RepseReturn
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El cuatrimestre: AAAA-1 (enero a abril), AAAA-2 o AAAA-3.
+    /// </summary>
+    [JsonPropertyName("period")]
+    public string Period { get; set; } = default!;
+
+    /// <summary>
+    /// Primer día del cuatrimestre.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string StartDate { get; set; } = default!;
+
+    /// <summary>
+    /// Último día del cuatrimestre.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string EndDate { get; set; } = default!;
+
+    /// <summary>
+    /// Último día para presentarlos: el 17 de enero, mayo o septiembre, o el siguiente día hábil (CFF art. 12).
+    /// </summary>
+    [JsonPropertyName("due_date")]
+    public string DueDate { get; set; } = default!;
+
+    /// <summary>
+    /// Los contratos vigentes en el cuatrimestre.
+    /// </summary>
+    [JsonPropertyName("contracts")]
+    public List<RepseReturnContractsItem> Contracts { get; set; } = default!;
+
+    /// <summary>
+    /// Cada trabajador por bimestre (el detalle de trabajadores del SISUB).
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public List<RepseReturnWorkersItem> Workers { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que el archivo del sujeto obligado del SISUB suma.
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public RepseReturnTotals Totals { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que falta o está mal antes de presentarlos; vacío si nada.
+    /// </summary>
+    [JsonPropertyName("problems")]
+    public List<string> Problems { get; set; } = default!;
+
+    /// <summary>
+    /// Los 3 CSV del SISUB (sujeto obligado, contratos, trabajadores) y un CSV de trabajadores del ICSOE por contrato.
+    /// </summary>
+    [JsonPropertyName("files")]
+    public List<RepseReturnFilesItem> Files { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;RepseReturnContractsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RepseReturnContractsItem
+{
+    /// <summary>
+    /// El contrato (rpc_…).
+    /// </summary>
+    [JsonPropertyName("contract")]
+    public string Contract { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de contrato.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string Number { get; set; } = default!;
+
+    /// <summary>
+    /// Sus trabajadores en el cuatrimestre (el CSV del ICSOE).
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public List<RepseReturnContractsItemWorkersItem> Workers { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;RepseReturnContractsItemWorkersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RepseReturnContractsItemWorkersItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su NSS, 11 dígitos.
+    /// </summary>
+    [JsonPropertyName("nss")]
+    public string Nss { get; set; } = default!;
+
+    /// <summary>
+    /// Su CURP.
+    /// </summary>
+    [JsonPropertyName("curp")]
+    public string Curp { get; set; } = default!;
+
+    /// <summary>
+    /// Su último salario base de cotización del cuatrimestre, hasta 25 UMA.
+    /// </summary>
+    [JsonPropertyName("sbc")]
+    public decimal Sbc { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RepseReturnFilesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RepseReturnFilesItem
+{
+    /// <summary>
+    /// Nombre del archivo.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// sisub (Infonavit) o icsoe (IMSS).
+    /// <br/>
+    /// Valores: sisub, icsoe.
+    /// </summary>
+    [JsonPropertyName("system")]
+    public string System { get; set; } = default!;
+
+    /// <summary>
+    /// El CSV, en texto.
+    /// </summary>
+    [JsonPropertyName("content")]
+    public string Content { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que el archivo del sujeto obligado del SISUB suma.
+/// </summary>
+public sealed partial class RepseReturnTotals
+{
+    /// <summary>
+    /// Aportaciones de los trabajadores sin crédito.
+    /// </summary>
+    [JsonPropertyName("contributions_without_credit")]
+    public decimal ContributionsWithoutCredit { get; set; }
+
+    /// <summary>
+    /// Aportaciones de los trabajadores con crédito.
+    /// </summary>
+    [JsonPropertyName("contributions_with_credit")]
+    public decimal ContributionsWithCredit { get; set; }
+
+    /// <summary>
+    /// Amortizaciones descontadas.
+    /// </summary>
+    [JsonPropertyName("amortizations")]
+    public decimal Amortizations { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RepseReturnWorkersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RepseReturnWorkersItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su NSS.
+    /// </summary>
+    [JsonPropertyName("nss")]
+    public string Nss { get; set; } = default!;
+
+    /// <summary>
+    /// El bimestre del año (1 a 6).
+    /// </summary>
+    [JsonPropertyName("bimester")]
+    public long Bimester { get; set; }
+
+    /// <summary>
+    /// Los números de los contratos en que trabajó ese bimestre.
+    /// </summary>
+    [JsonPropertyName("contracts")]
+    public List<string> Contracts { get; set; } = default!;
+
+    /// <summary>
+    /// Las percepciones variables del bimestre anterior que integraron su salario (LSS arts. 27 y 30).
+    /// </summary>
+    [JsonPropertyName("variable_perceptions")]
+    public decimal VariablePerceptions { get; set; }
+
+    /// <summary>
+    /// Lo pagado en el bimestre de sueldos, aguinaldo y prima vacacional.
+    /// </summary>
+    [JsonPropertyName("fixed_perceptions")]
+    public decimal FixedPerceptions { get; set; }
+
+    /// <summary>
+    /// Días de incapacidad del bimestre.
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public long DisabilityDays { get; set; }
+
+    /// <summary>
+    /// Lo demás pagado en el bimestre que no integra el salario.
+    /// </summary>
+    [JsonPropertyName("non_integrable_perceptions")]
+    public decimal NonIntegrablePerceptions { get; set; }
+
+    /// <summary>
+    /// Su salario base al cierre del bimestre, hasta 25 UMA.
+    /// </summary>
+    [JsonPropertyName("capped_salary")]
+    public decimal CappedSalary { get; set; }
+
+    /// <summary>
+    /// Su aportación al Infonavit del bimestre (5% del salario base).
+    /// </summary>
+    [JsonPropertyName("infonavit_contribution")]
+    public decimal InfonavitContribution { get; set; }
+
+    /// <summary>
+    /// true si tuvo descuento de crédito Infonavit en el bimestre.
+    /// </summary>
+    [JsonPropertyName("has_credit")]
+    public bool HasCredit { get; set; }
+
+    /// <summary>
+    /// Lo que se le descontó de amortización del crédito en el bimestre.
+    /// </summary>
+    [JsonPropertyName("amortization")]
+    public decimal Amortization { get; set; }
 }
 
 /// <summary>
@@ -54098,6 +55030,294 @@ public sealed partial class UpdateRecurringInvoiceParamsSchedule
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string? TimeZone { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un contrato de servicios especializados».
+/// </summary>
+public sealed partial class UpdateRepseContractParams
+{
+    /// <summary>
+    /// Número de contrato: dígitos, hasta 20 (así lo pide el SISUB).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Tipo de contrato, como lo dice el contrato.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// Objeto del contrato.
+    /// </summary>
+    [JsonPropertyName("contract_object")]
+    public string? ContractObject { get; set; }
+
+    /// <summary>
+    /// El servicio u obra especializada registrado en el REPSE que cubre.
+    /// </summary>
+    [JsonPropertyName("service")]
+    public string? Service { get; set; }
+
+    /// <summary>
+    /// Monto pactado, en pesos.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Inicio de su vigencia (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string? StartDate { get; set; }
+
+    /// <summary>
+    /// Fecha de término; null si es por tiempo indefinido.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Número estimado mensual de trabajadores que pone a disposición.
+    /// </summary>
+    [JsonPropertyName("estimated_workers")]
+    public long? EstimatedWorkers { get; set; }
+
+    /// <summary>
+    /// RFC del cliente (el beneficiario de los servicios).
+    /// </summary>
+    [JsonPropertyName("client_tax_id")]
+    public string? ClientTaxId { get; set; }
+
+    /// <summary>
+    /// Razón social del cliente.
+    /// </summary>
+    [JsonPropertyName("client_name")]
+    public string? ClientName { get; set; }
+
+    /// <summary>
+    /// Registro patronal del cliente ante el IMSS, si tiene.
+    /// </summary>
+    [JsonPropertyName("client_employer_registration")]
+    public string? ClientEmployerRegistration { get; set; }
+
+    /// <summary>
+    /// Domicilio fiscal del cliente.
+    /// </summary>
+    [JsonPropertyName("client_address")]
+    public UpdateRepseContractParamsClientAddress? ClientAddress { get; set; }
+
+    /// <summary>
+    /// El centro de trabajo donde trabajan las personas que pone a disposición.
+    /// </summary>
+    [JsonPropertyName("site_address")]
+    public UpdateRepseContractParamsSiteAddress? SiteAddress { get; set; }
+
+    /// <summary>
+    /// Quién trabaja en el contrato y desde cuándo (hasta 2,000).
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public List<UpdateRepseContractParamsWorkersItem>? Workers { get; set; }
+}
+
+/// <summary>
+/// Domicilio fiscal del cliente.
+/// </summary>
+public sealed partial class UpdateRepseContractParamsClientAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public required string Street { get; set; }
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Código postal, 5 dígitos.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// Municipio o demarcación territorial, sin abreviar.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public required string Municipality { get; set; }
+
+    /// <summary>
+    /// Estado (c_Estado: NLE, CMX…).
+    /// </summary>
+    [JsonPropertyName("state")]
+    public required string State { get; set; }
+}
+
+/// <summary>
+/// El centro de trabajo donde trabajan las personas que pone a disposición.
+/// </summary>
+public sealed partial class UpdateRepseContractParamsSiteAddress
+{
+    /// <summary>
+    /// Calle.
+    /// </summary>
+    [JsonPropertyName("street")]
+    public required string Street { get; set; }
+
+    /// <summary>
+    /// Número exterior.
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior.
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia.
+    /// </summary>
+    [JsonPropertyName("neighborhood")]
+    public string? Neighborhood { get; set; }
+
+    /// <summary>
+    /// Código postal, 5 dígitos.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// Municipio o demarcación territorial, sin abreviar.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public required string Municipality { get; set; }
+
+    /// <summary>
+    /// Estado (c_Estado: NLE, CMX…).
+    /// </summary>
+    [JsonPropertyName("state")]
+    public required string State { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRepseContractParamsWorkersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRepseContractParamsWorkersItem
+{
+    /// <summary>
+    /// El empleado (emp_…) del mismo emisor.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// Desde cuándo trabaja en el contrato (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public required string StartDate { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo; null mientras siga.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string? EndDate { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Guardar los datos del sujeto obligado».
+/// </summary>
+public sealed partial class UpdateRepseProfileParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Folio de su registro en el REPSE que dio la STPS (AR65000).
+    /// </summary>
+    [JsonPropertyName("stps_folio")]
+    public string? StpsFolio { get; set; }
+
+    /// <summary>
+    /// Correo del sujeto obligado.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Teléfono, 10 dígitos.
+    /// </summary>
+    [JsonPropertyName("phone")]
+    public string? Phone { get; set; }
+
+    /// <summary>
+    /// Domicilio fiscal en una línea: calle, números, colonia, C.P., municipio y estado.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public string? Address { get; set; }
+
+    /// <summary>
+    /// Representante legal (persona moral).
+    /// </summary>
+    [JsonPropertyName("legal_representative")]
+    public string? LegalRepresentative { get; set; }
+
+    /// <summary>
+    /// Administrador único, si tiene (persona moral).
+    /// </summary>
+    [JsonPropertyName("sole_administrator")]
+    public string? SoleAdministrator { get; set; }
+
+    /// <summary>
+    /// Número de la escritura constitutiva (persona moral).
+    /// </summary>
+    [JsonPropertyName("deed_number")]
+    public string? DeedNumber { get; set; }
+
+    /// <summary>
+    /// Nombre del notario público de la escritura.
+    /// </summary>
+    [JsonPropertyName("notary_name")]
+    public string? NotaryName { get; set; }
+
+    /// <summary>
+    /// Número de la notaría.
+    /// </summary>
+    [JsonPropertyName("notary_number")]
+    public string? NotaryNumber { get; set; }
+
+    /// <summary>
+    /// Fecha de la escritura (YYYY-MM-DD).
+    /// </summary>
+    [JsonPropertyName("deed_date")]
+    public string? DeedDate { get; set; }
+
+    /// <summary>
+    /// Folio mercantil (persona moral).
+    /// </summary>
+    [JsonPropertyName("commercial_folio")]
+    public string? CommercialFolio { get; set; }
 }
 
 /// <summary>

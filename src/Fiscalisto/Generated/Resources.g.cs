@@ -175,6 +175,21 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public PayrollCalendarResource PayrollCalendar => _payrollCalendar ??= new PayrollCalendarResource(this);
 
+    private RepseContractsResource? _repseContracts;
+
+    /// <summary>Nómina.</summary>
+    public RepseContractsResource RepseContracts => _repseContracts ??= new RepseContractsResource(this);
+
+    private RepseProfileResource? _repseProfile;
+
+    /// <summary>Nómina.</summary>
+    public RepseProfileResource RepseProfile => _repseProfile ??= new RepseProfileResource(this);
+
+    private RepseReturnsResource? _repseReturns;
+
+    /// <summary>Nómina.</summary>
+    public RepseReturnsResource RepseReturns => _repseReturns ??= new RepseReturnsResource(this);
+
     private PayrollOrgChartResource? _payrollOrgChart;
 
     /// <summary>Nómina.</summary>
@@ -3031,7 +3046,7 @@ public sealed class PayrollCalendarResource
     /// Marcar un pago de nómina como pagado
     /// </summary>
     /// <remarks>
-    /// Marca (paid true) o desmarca (false) un pago del calendario de nómina: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo o ajuste_anual, con su key como lo da GET /v1/payroll_calendar. Una nómina (pago) queda hecha al timbrar sus recibos.
+    /// Marca (paid true) o desmarca (false) un pago del calendario de nómina: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe o sisub, con su key como lo da GET /v1/payroll_calendar. Una nómina (pago) queda hecha al timbrar sus recibos.
     /// <br/>
     /// <c>POST /v1/payroll_calendar/mark</c>
     /// <br/>
@@ -3040,6 +3055,154 @@ public sealed class PayrollCalendarResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollCalendarEvent> MarkAsync(MarkPayrollCalendarEventParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollCalendarEvent>("POST", "/v1/payroll_calendar/mark", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.RepseContracts</c>.
+/// </summary>
+public sealed class RepseContractsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal RepseContractsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Registrar un contrato de servicios especializados
+    /// </summary>
+    /// <remarks>
+    /// Un contrato de servicios u obras especializadas (LFT art. 15 y 15-A) con su cliente, el centro de trabajo y quién trabaja en él y desde cuándo, como «Nómina › REPSE › + Contrato» en la app. Con él se arman los informes cuatrimestrales ICSOE del IMSS (LSS art. 15-A) y SISUB del Infonavit (Ley del Infonavit art. 29 Bis) de GET /v1/repse_returns/{period}, y aparecen sus fechas en el calendario de nómina. Un número de contrato que ya usó contesta parameter_invalid en number; un trabajador de otro emisor, en workers.
+    /// <br/>
+    /// <c>POST /v1/repse_contracts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-repse-contract"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RepseContract> CreateAsync(CreateRepseContractParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RepseContract>("POST", "/v1/repse_contracts", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar contratos de servicios especializados
+    /// </summary>
+    /// <remarks>
+    /// Los contratos del emisor que no ha archivado, por fecha de inicio (el más antiguo primero) y número.
+    /// <br/>
+    /// <c>GET /v1/repse_contracts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-repse-contracts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<RepseContract>> ListAsync(ListRepseContractsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<RepseContract>("/v1/repse_contracts", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar contratos de servicios especializados: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<RepseContract> ListAutoPagingAsync(ListRepseContractsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<RepseContract>("/v1/repse_contracts", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un contrato de servicios especializados
+    /// </summary>
+    /// <remarks>
+    /// Un contrato con su cliente, centro de trabajo y trabajadores.
+    /// <br/>
+    /// <c>GET /v1/repse_contracts/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-repse-contract"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RepseContract> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RepseContract>("GET", $"/v1/repse_contracts/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un contrato de servicios especializados
+    /// </summary>
+    /// <remarks>
+    /// Cambia lo que mande; lo demás queda. workers reemplaza la lista completa: para que alguien deje el contrato, póngale end_date en vez de quitarlo, así sigue en los informes de los meses que trabajó. Un contrato que terminó lleva su end_date.
+    /// <br/>
+    /// <c>POST /v1/repse_contracts/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-repse-contract"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RepseContract> UpdateAsync(string id, UpdateRepseContractParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RepseContract>("POST", $"/v1/repse_contracts/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Archivar un contrato de servicios especializados
+    /// </summary>
+    /// <remarks>
+    /// Lo archiva: sale de la lista y de todos los informes, también de los pasados. Para un contrato que terminó, mejor póngale end_date con POST /v1/repse_contracts/{id}.
+    /// <br/>
+    /// <c>DELETE /v1/repse_contracts/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-repse-contract"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/repse_contracts/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.RepseProfile</c>.
+/// </summary>
+public sealed class RepseProfileResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal RepseProfileResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver los datos del sujeto obligado
+    /// </summary>
+    /// <remarks>
+    /// Los datos del emisor que pide el SISUB del Infonavit y no están en Fiscalisto: folio del REPSE, correo, teléfono, domicilio, representante legal y, de una persona moral, su acta constitutiva y folio mercantil. Como «Datos del sujeto obligado» en «Nómina › REPSE».
+    /// <br/>
+    /// <c>GET /v1/repse_profile</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-repse-profile"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RepseProfile> GetAsync(GetRepseProfileParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RepseProfile>("GET", "/v1/repse_profile", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Guardar los datos del sujeto obligado
+    /// </summary>
+    /// <remarks>
+    /// Cambia lo que mande; lo demás queda y "" lo vacía. El teléfono va con 10 dígitos y deed_date como AAAA-MM-DD; si no, contesta parameter_invalid en ese campo.
+    /// <br/>
+    /// <c>POST /v1/repse_profile</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-repse-profile"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RepseProfile> UpdateAsync(UpdateRepseProfileParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RepseProfile>("POST", "/v1/repse_profile", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.RepseReturns</c>.
+/// </summary>
+public sealed class RepseReturnsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal RepseReturnsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Informes ICSOE y SISUB de un cuatrimestre
+    /// </summary>
+    /// <remarks>
+    /// Lo que se presenta del cuatrimestre (AAAA-1 enero a abril, AAAA-2 mayo a agosto, AAAA-3 septiembre a diciembre) a más tardar el día 17 del mes siguiente, o el siguiente día hábil: por contrato, sus trabajadores con NSS, CURP y último salario base de cotización (ICSOE, LSS art. 15-A), y por trabajador y bimestre las percepciones, el salario topado a 25 UMA, la aportación del 5% y la amortización de su crédito (SISUB, Ley del Infonavit art. 29 Bis), calculados de los recibos timbrados. files trae los archivos para subir: los tres del SISUB y uno del ICSOE por contrato. problems dice lo que falta para presentarlos.
+    /// <br/>
+    /// <c>GET /v1/repse_returns/{period}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-repse-return"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RepseReturn> GetAsync(string period, GetRepseReturnParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RepseReturn>("GET", $"/v1/repse_returns/{Uri.EscapeDataString(period)}", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>
