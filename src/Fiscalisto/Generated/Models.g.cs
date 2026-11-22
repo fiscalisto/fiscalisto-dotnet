@@ -14139,7 +14139,7 @@ public sealed partial class CreateRecurringInvoiceParamsSchedule
     public long? Hour { get; set; }
 
     /// <summary>
-    /// La zona de esa hora. Por omisión America/Mexico_City.
+    /// La zona de esa hora. Por omisión, la de la empresa emisora (su «Zona horaria»).
     /// <br/>
     /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Matamoros, America/Ciudad_Juarez.
     /// </summary>
@@ -34782,9 +34782,9 @@ public sealed partial class MarkPayrollCalendarEventParams
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe o sisub.
+    /// imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe, sisub o renovacion_repse.
     /// <br/>
-    /// Valores: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe, sisub.
+    /// Valores: imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe, sisub, renovacion_repse.
     /// </summary>
     [JsonPropertyName("obligation")]
     public required string Obligation { get; set; }
@@ -37484,9 +37484,9 @@ public sealed partial class PayrollCalendarEvent
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// pago (una nómina, en su fecha de pago), imss (cuotas del mes, LSS art. 39), rcv_infonavit (bimestrales), isn (impuesto sobre nómina de un estado), aguinaldo (LFT art. 87), ptu (LFT art. 122), prima_riesgo (determinación anual, RACERF art. 32), ajuste_anual (LISR art. 97), icsoe (informativa cuatrimestral al IMSS de un contratista REPSE, LSS art. 15-A) o sisub (la del Infonavit, Ley del Infonavit art. 29 Bis).
+    /// pago (una nómina, en su fecha de pago), imss (cuotas del mes, LSS art. 39), rcv_infonavit (bimestrales), isn (impuesto sobre nómina de un estado), aguinaldo (LFT art. 87), ptu (LFT art. 122), prima_riesgo (determinación anual, RACERF art. 32), ajuste_anual (LISR art. 97), icsoe (informativa cuatrimestral al IMSS de un contratista REPSE, LSS art. 15-A), sisub (la del Infonavit, Ley del Infonavit art. 29 Bis) o renovacion_repse (la renovación del registro en el REPSE cada tres años, LFT art. 15).
     /// <br/>
-    /// Valores: pago, imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe, sisub.
+    /// Valores: pago, imss, rcv_infonavit, isn, aguinaldo, ptu, prima_riesgo, ajuste_anual, icsoe, sisub, renovacion_repse.
     /// </summary>
     [JsonPropertyName("obligation")]
     public string Obligation { get; set; } = default!;
@@ -41836,7 +41836,7 @@ public sealed partial class RecurringInvoiceSchedule
     public long Hour { get; set; }
 
     /// <summary>
-    /// La zona de esa hora (America/Mexico_City, America/Cancun…).
+    /// La zona de esa hora (America/Mexico_City, America/Cancun…); sin ella, la de la empresa emisora.
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string TimeZone { get; set; } = default!;
@@ -42336,6 +42336,18 @@ public sealed partial class RepseProfile
     public string? StpsFolio { get; set; }
 
     /// <summary>
+    /// Fecha en que la STPS otorgó el registro o su última renovación.
+    /// </summary>
+    [JsonPropertyName("stps_registration_date")]
+    public string? StpsRegistrationDate { get; set; }
+
+    /// <summary>
+    /// Cuándo renovar el registro; null sin fecha de registro.
+    /// </summary>
+    [JsonPropertyName("renewal")]
+    public RepseProfileRenewal? Renewal { get; set; }
+
+    /// <summary>
     /// Correo del sujeto obligado.
     /// </summary>
     [JsonPropertyName("email")]
@@ -42394,6 +42406,24 @@ public sealed partial class RepseProfile
     /// </summary>
     [JsonPropertyName("commercial_folio")]
     public string? CommercialFolio { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RepseProfileRenewal&lt;/c&gt;.
+/// </summary>
+public sealed partial class RepseProfileRenewal
+{
+    /// <summary>
+    /// Primer día para pedir la renovación (tres meses antes del vencimiento).
+    /// </summary>
+    [JsonPropertyName("opens_on")]
+    public string OpensOn { get; set; } = default!;
+
+    /// <summary>
+    /// Último día de vigencia del registro: tres años desde que se otorgó (LFT art. 15).
+    /// </summary>
+    [JsonPropertyName("last_day")]
+    public string LastDay { get; set; } = default!;
 }
 
 /// <summary>
@@ -55048,7 +55078,7 @@ public sealed partial class UpdateRecurringInvoiceParamsSchedule
     public long? Hour { get; set; }
 
     /// <summary>
-    /// La zona de esa hora. Por omisión America/Mexico_City.
+    /// La zona de esa hora. Por omisión, la de la empresa emisora (su «Zona horaria»).
     /// <br/>
     /// Valores: America/Mexico_City, America/Cancun, America/Mazatlan, America/Hermosillo, America/Tijuana, America/Matamoros, America/Ciudad_Juarez.
     /// </summary>
@@ -55282,6 +55312,12 @@ public sealed partial class UpdateRepseProfileParams
     /// </summary>
     [JsonPropertyName("stps_folio")]
     public string? StpsFolio { get; set; }
+
+    /// <summary>
+    /// Fecha en que la STPS otorgó el registro o su última renovación (YYYY-MM-DD). Se renueva cada tres años (LFT art. 15).
+    /// </summary>
+    [JsonPropertyName("stps_registration_date")]
+    public string? StpsRegistrationDate { get; set; }
 
     /// <summary>
     /// Correo del sujeto obligado.
