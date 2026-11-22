@@ -7822,6 +7822,34 @@ public sealed class AccountingResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> DiotFileAsync(GetDiotFileParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", "/v1/accounting/diot/file", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ver los clientes con IEPS desglosado
+    /// </summary>
+    /// <remarks>
+    /// La relación trimestral de los clientes a los que el emisor les trasladó el IEPS por separado (artículo 19, fracción II, tercer párrafo de la Ley del IEPS): bebidas alcohólicas, bebidas energetizantes, bebidas saborizadas y alimentos de alta densidad calórica, de sus facturas de ingreso no canceladas. Público en general y extranjeros no van. Se presenta cada trimestre en el MULTI-IEPS, Anexo 1 (regla 5.2.2 de la RMF 2026), en el mes siguiente al trimestre.
+    /// <br/>
+    /// <c>GET /v1/accounting/ieps_customers</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-ieps-customers"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<IepsCustomers> IepsCustomersAsync(GetIepsCustomersParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<IepsCustomers>("GET", "/v1/accounting/ieps_customers", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Descargar los clientes con IEPS desglosado
+    /// </summary>
+    /// <remarks>
+    /// La relación de un trimestre en CSV (UTF-8): RFC, nombre, facturas e IEPS trasladado de cada cliente, y el total; la misma que descarga la app en Impuestos.
+    /// <br/>
+    /// <c>GET /v1/accounting/ieps_customers/file</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-ieps-customers-file"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<string> IepsCustomersFileAsync(GetIepsCustomersFileParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestTextAsync("GET", "/v1/accounting/ieps_customers/file", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>

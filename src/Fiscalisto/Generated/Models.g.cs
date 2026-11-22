@@ -25434,6 +25434,58 @@ public sealed partial class GetHiringParams
 }
 
 /// <summary>
+/// Los campos de «Descargar los clientes con IEPS desglosado».
+/// </summary>
+public sealed partial class GetIepsCustomersFileParams
+{
+    /// <summary>
+    /// El año (AAAA), de 2015 al actual.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required string Year { get; set; }
+
+    /// <summary>
+    /// El trimestre (1 a 4).
+    /// <br/>
+    /// Valores: 1, 2, 3, 4.
+    /// </summary>
+    [JsonPropertyName("quarter")]
+    public required string Quarter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver los clientes con IEPS desglosado».
+/// </summary>
+public sealed partial class GetIepsCustomersParams
+{
+    /// <summary>
+    /// El año (AAAA), de 2015 al actual.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required string Year { get; set; }
+
+    /// <summary>
+    /// Solo ese trimestre (1 a 4); por omisión, los cuatro.
+    /// <br/>
+    /// Valores: 1, 2, 3, 4.
+    /// </summary>
+    [JsonPropertyName("quarter")]
+    public string? Quarter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Calcular el ajuste anual por inflación».
 /// </summary>
 public sealed partial class GetInflationAdjustmentParams
@@ -26111,6 +26163,102 @@ public sealed partial class HiringVacanciesItemCandidatesItem
     /// </summary>
     [JsonPropertyName("count")]
     public long Count { get; set; }
+}
+
+/// <summary>
+/// Los clientes a los que se les trasladó el IEPS por separado, por trimestre (artículo 19, fracción II de la Ley del IEPS).
+/// </summary>
+public sealed partial class IepsCustomers
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// false en modo de prueba.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El año.
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long Year { get; set; }
+
+    /// <summary>
+    /// Cada trimestre pedido, también los que no tienen clientes.
+    /// </summary>
+    [JsonPropertyName("quarters")]
+    public List<IepsCustomersQuartersItem> Quarters { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;IepsCustomersQuartersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class IepsCustomersQuartersItem
+{
+    /// <summary>
+    /// El trimestre, 1 a 4.
+    /// </summary>
+    [JsonPropertyName("quarter")]
+    public long Quarter { get; set; }
+
+    /// <summary>
+    /// El mes (AAAA-MM) en que se presenta en el MULTI-IEPS: el siguiente al trimestre.
+    /// </summary>
+    [JsonPropertyName("due_month")]
+    public string DueMonth { get; set; } = default!;
+
+    /// <summary>
+    /// Los clientes, el de más IEPS primero.
+    /// </summary>
+    [JsonPropertyName("customers")]
+    public List<IepsCustomersQuartersItemCustomersItem> Customers { get; set; } = default!;
+
+    /// <summary>
+    /// El IEPS de todos, en pesos.
+    /// </summary>
+    [JsonPropertyName("total")]
+    public decimal Total { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;IepsCustomersQuartersItemCustomersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class IepsCustomersQuartersItemCustomersItem
+{
+    /// <summary>
+    /// El RFC del cliente.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string TaxId { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre como viene en sus facturas.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Cuántas facturas del trimestre llevan ese IEPS.
+    /// </summary>
+    [JsonPropertyName("invoices")]
+    public long Invoices { get; set; }
+
+    /// <summary>
+    /// El IEPS que se le trasladó en el trimestre, en pesos.
+    /// </summary>
+    [JsonPropertyName("ieps")]
+    public decimal Ieps { get; set; }
 }
 
 /// <summary>
