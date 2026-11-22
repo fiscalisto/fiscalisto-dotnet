@@ -13799,6 +13799,12 @@ public sealed partial class CreateRuleParams
     public required List<CreateRuleParamsActionsItem> Actions { get; set; }
 
     /// <summary>
+    /// Si no: de 0 a 8 acciones, las mismas de actions, que hace cuando sus condiciones no se cumplen. Solo con condiciones; [] las quita.
+    /// </summary>
+    [JsonPropertyName("else_actions")]
+    public List<CreateRuleParamsElseActionsItem>? ElseActions { get; set; }
+
+    /// <summary>
     /// true: corre una sola vez por factura, orden o movimiento. Por omisión true, salvo purchase_order.saved.
     /// </summary>
     [JsonPropertyName("once_per_record")]
@@ -14121,6 +14127,172 @@ public sealed partial class CreateRuleParamsConditionsGroupsItemConditionsItem
     /// </summary>
     [JsonPropertyName("text")]
     public string? Text { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsElseActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsElseActionsItem
+{
+    /// <summary>
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; account (facturas): registrar su ingreso o gasto en la cuenta `account` del catálogo en vez de la de su categoría, nunca sobre la que eligió una persona ni en un mes cerrado; en bank.movement, registrar el movimiento con su póliza de ingresos o egresos contra esa cuenta (otra cuenta de banco de la empresa es un traspaso), si no tiene una ni es un mes cerrado; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…); lote (invoice.received e invoice.approved): agregar la factura al lote de pagos abierto `lote_name` que paga `pay_on`, o crear uno, preparado como quien hizo la regla; hold_payment (facturas recibidas): retener su pago hasta que alguien lo suelte, con `note`; email_supplier (facturas recibidas): escribirle al proveedor a los correos de su tema `topic`, con `subject` y `message`; review_findings: dar por revisados los hallazgos `findings` de la factura; extra_signature (payout.submitted): el pago necesita `signatures` firmas más que las de Configurar pagos, con `reason` para quien firma (nunca las baja; no cambia un pago que ya salió).
+    /// <br/>
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category, account, lote, hold_payment, email_supplier, review_findings, extra_signature.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// tag: la etiqueta (tag_…, GET /v1/tags). Un número, el id de antes, también se acepta.
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public JsonElement? Tag { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto, como la app la nombra («Combustible»).
+    /// <br/>
+    /// Valores: Renta y arrendamiento, Servicios profesionales, Nómina y personal, Transporte y fletes, Combustible, Viáticos y viajes, Alimentos y representación, Telecomunicaciones e internet, Energía y agua, Software y suscripciones, Equipo de cómputo, Papelería y oficina, Mantenimiento y reparaciones, Publicidad y marketing, Seguros y fianzas, Comisiones bancarias y financieras, Impuestos y derechos, Compras de mercancía e inventario, Materias primas y producción, Activo fijo y mobiliario, Vehículos, Capacitación, Donativos, Otros gastos.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// account: el número de la cuenta del catálogo («601-84-002», GET /v1/accounting/accounts). No una de Caja o Bancos.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// tag: quitarla si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote («Fletes»); vacío o null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga: el siguiente lunes … viernes (hoy incluido), a los `days` días, o `due`, la fecha de pago del contrarecibo del portal. Un día inhábil pasa al siguiente hábil. Por omisión, friday.
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días después.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// email_supplier: el tema de los correos del proveedor a los que va (ordenes, pagos, facturas, complementos, documentos, precios; Ajustes › Correos a proveedores). Sin correos de ese tema, va a sus correos generales. Por omisión, facturas.
+    /// <br/>
+    /// Valores: ordenes, pagos, facturas, complementos, documentos, precios.
+    /// </summary>
+    [JsonPropertyName("topic")]
+    public string? Topic { get; set; }
+
+    /// <summary>
+    /// email_supplier: el asunto. Lleva las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string? Subject { get; set; }
+
+    /// <summary>
+    /// email_supplier: el mensaje. Variables: {folio}, {total}, {fecha}, {empresa}, {rfc_empresa}, {proveedor}, {rfc_proveedor}, {subtotal}, {iva}, {retenciones} y {moneda}; de una factura también {uuid}, {metodo_pago}, {forma_pago}, {uso_cfdi}, {conceptos}, {categoria}, {saldo}, {orden}, {contrarecibo}, {fecha_promesa}, {hallazgos} y la tabla {tabla_conceptos}; de una orden {entrega}, {almacen}, {credito}, {comprador}, {nota}, {enlace} y la tabla {tabla_productos}; en invoice.rejected y purchase_order.rejected, {motivo_rechazo}; en los momentos de pagos {facturas}, la tabla {tabla_facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}, en payout.paid {rastreo} y {cep}, en payout.failed {motivo}. Un correo por pago (per payout) no lleva las de una sola factura. Cada {tabla_…} se dibuja como tabla, con las columnas de `columns`; un dato que el registro no tiene queda en blanco.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// email_supplier en payout.submitted, payout.paid y payout.failed: payout manda un correo por pago y proveedor con todas sus facturas ({folio} es la lista de folios, {total} lo que se le paga y {fecha} la fecha del pago); invoice, uno por factura. Por omisión, payout.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje, en su orden. tabla_facturas: folio, uuid, fecha, total, retenido, pagado; tabla_conceptos: clave, descripcion, cantidad, unidad, precio, importe; tabla_productos: producto, codigo, cantidad, recibido, pendiente, precio, importe. Sin columnas, las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public CreateRuleParamsElseActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo que reciben copia (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
+    /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
+    /// </summary>
+    [JsonPropertyName("signatures")]
+    public long? Signatures { get; set; }
+
+    /// <summary>
+    /// extra_signature: por qué, para quien firma («Proveedor nuevo»). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// review_findings: los hallazgos que da por revisados (sus códigos, `code` en GET /v1/sat_findings). No los que cambian impuestos o la lista negra: cancelado, efos_definitivo, efos_presunto, lista_69b_bis, lista_69.
+    /// </summary>
+    [JsonPropertyName("findings")]
+    public List<string>? Findings { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsElseActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsElseActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
 }
 
 /// <summary>
@@ -39970,6 +40142,12 @@ public sealed partial class Rule
     public List<RuleActionsItem> Actions { get; set; } = default!;
 
     /// <summary>
+    /// Si no: lo que hace cuando sus condiciones no se cumplen ([]: nada).
+    /// </summary>
+    [JsonPropertyName("else_actions")]
+    public List<RuleElseActionsItem> ElseActions { get; set; } = default!;
+
+    /// <summary>
     /// true: corre una sola vez por factura u orden.
     /// </summary>
     [JsonPropertyName("once_per_record")]
@@ -40308,6 +40486,170 @@ public sealed partial class RuleConditionsGroupsItemConditionsItem
     /// </summary>
     [JsonPropertyName("text")]
     public string? Text { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RuleElseActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleElseActionsItem
+{
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: tag, cost_center, category, stage, close, ask_approval, notify, lote, hold_payment, email_supplier, review_findings, extra_signature, account.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// tag: la etiqueta (tag_…, GET /v1/tags).
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public string? Tag { get; set; }
+
+    /// <summary>
+    /// account: el número de cuenta del catálogo en que se registra la factura, en vez de la de su categoría (no cambia la que eligió una persona).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto (facturas recibidas).
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// tag: se quita si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// email_supplier: el tema de los correos del proveedor a los que va.
+    /// <br/>
+    /// Valores: ordenes, pagos, facturas, complementos, documentos, precios.
+    /// </summary>
+    [JsonPropertyName("topic")]
+    public string? Topic { get; set; }
+
+    /// <summary>
+    /// email_supplier: el asunto.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string? Subject { get; set; }
+
+    /// <summary>
+    /// email_supplier: el mensaje.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// email_supplier en los disparadores de pagos: payout, un correo por pago y proveedor; invoice, uno por factura.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje; null: las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public RuleElseActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo con copia (mem_…).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
+    /// review_findings: los hallazgos que da por revisados (sus códigos).
+    /// </summary>
+    [JsonPropertyName("findings")]
+    public List<string>? Findings { get; set; }
+
+    /// <summary>
+    /// extra_signature: cuántas firmas más pide (1 a 3).
+    /// </summary>
+    [JsonPropertyName("signatures")]
+    public long? Signatures { get; set; }
+
+    /// <summary>
+    /// extra_signature: por qué, para quien firma.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote; null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga (siguiente día de la semana, a los días, o el del contrarecibo).
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RuleElseActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleElseActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
 }
 
 /// <summary>
@@ -50010,6 +50352,12 @@ public sealed partial class UpdateRuleParams
     public List<UpdateRuleParamsActionsItem>? Actions { get; set; }
 
     /// <summary>
+    /// Si no: de 0 a 8 acciones, las mismas de actions, que hace cuando sus condiciones no se cumplen. Solo con condiciones; [] las quita.
+    /// </summary>
+    [JsonPropertyName("else_actions")]
+    public List<UpdateRuleParamsElseActionsItem>? ElseActions { get; set; }
+
+    /// <summary>
     /// true: corre una sola vez por factura, orden o movimiento. Por omisión true, salvo purchase_order.saved.
     /// </summary>
     [JsonPropertyName("once_per_record")]
@@ -50332,6 +50680,172 @@ public sealed partial class UpdateRuleParamsConditionsGroupsItemConditionsItem
     /// </summary>
     [JsonPropertyName("text")]
     public string? Text { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsElseActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsElseActionsItem
+{
+    /// <summary>
+    /// tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; account (facturas): registrar su ingreso o gasto en la cuenta `account` del catálogo en vez de la de su categoría, nunca sobre la que eligió una persona ni en un mes cerrado; en bank.movement, registrar el movimiento con su póliza de ingresos o egresos contra esa cuenta (otra cuenta de banco de la empresa es un traspaso), si no tiene una ni es un mes cerrado; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…); lote (invoice.received e invoice.approved): agregar la factura al lote de pagos abierto `lote_name` que paga `pay_on`, o crear uno, preparado como quien hizo la regla; hold_payment (facturas recibidas): retener su pago hasta que alguien lo suelte, con `note`; email_supplier (facturas recibidas): escribirle al proveedor a los correos de su tema `topic`, con `subject` y `message`; review_findings: dar por revisados los hallazgos `findings` de la factura; extra_signature (payout.submitted): el pago necesita `signatures` firmas más que las de Configurar pagos, con `reason` para quien firma (nunca las baja; no cambia un pago que ya salió).
+    /// <br/>
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category, account, lote, hold_payment, email_supplier, review_findings, extra_signature.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// tag: la etiqueta (tag_…, GET /v1/tags). Un número, el id de antes, también se acepta.
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public JsonElement? Tag { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto, como la app la nombra («Combustible»).
+    /// <br/>
+    /// Valores: Renta y arrendamiento, Servicios profesionales, Nómina y personal, Transporte y fletes, Combustible, Viáticos y viajes, Alimentos y representación, Telecomunicaciones e internet, Energía y agua, Software y suscripciones, Equipo de cómputo, Papelería y oficina, Mantenimiento y reparaciones, Publicidad y marketing, Seguros y fianzas, Comisiones bancarias y financieras, Impuestos y derechos, Compras de mercancía e inventario, Materias primas y producción, Activo fijo y mobiliario, Vehículos, Capacitación, Donativos, Otros gastos.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// account: el número de la cuenta del catálogo («601-84-002», GET /v1/accounting/accounts). No una de Caja o Bancos.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// tag: quitarla si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote («Fletes»); vacío o null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga: el siguiente lunes … viernes (hoy incluido), a los `days` días, o `due`, la fecha de pago del contrarecibo del portal. Un día inhábil pasa al siguiente hábil. Por omisión, friday.
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días después.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// email_supplier: el tema de los correos del proveedor a los que va (ordenes, pagos, facturas, complementos, documentos, precios; Ajustes › Correos a proveedores). Sin correos de ese tema, va a sus correos generales. Por omisión, facturas.
+    /// <br/>
+    /// Valores: ordenes, pagos, facturas, complementos, documentos, precios.
+    /// </summary>
+    [JsonPropertyName("topic")]
+    public string? Topic { get; set; }
+
+    /// <summary>
+    /// email_supplier: el asunto. Lleva las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string? Subject { get; set; }
+
+    /// <summary>
+    /// email_supplier: el mensaje. Variables: {folio}, {total}, {fecha}, {empresa}, {rfc_empresa}, {proveedor}, {rfc_proveedor}, {subtotal}, {iva}, {retenciones} y {moneda}; de una factura también {uuid}, {metodo_pago}, {forma_pago}, {uso_cfdi}, {conceptos}, {categoria}, {saldo}, {orden}, {contrarecibo}, {fecha_promesa}, {hallazgos} y la tabla {tabla_conceptos}; de una orden {entrega}, {almacen}, {credito}, {comprador}, {nota}, {enlace} y la tabla {tabla_productos}; en invoice.rejected y purchase_order.rejected, {motivo_rechazo}; en los momentos de pagos {facturas}, la tabla {tabla_facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}, en payout.paid {rastreo} y {cep}, en payout.failed {motivo}. Un correo por pago (per payout) no lleva las de una sola factura. Cada {tabla_…} se dibuja como tabla, con las columnas de `columns`; un dato que el registro no tiene queda en blanco.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// email_supplier en payout.submitted, payout.paid y payout.failed: payout manda un correo por pago y proveedor con todas sus facturas ({folio} es la lista de folios, {total} lo que se le paga y {fecha} la fecha del pago); invoice, uno por factura. Por omisión, payout.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje, en su orden. tabla_facturas: folio, uuid, fecha, total, retenido, pagado; tabla_conceptos: clave, descripcion, cantidad, unidad, precio, importe; tabla_productos: producto, codigo, cantidad, recibido, pendiente, precio, importe. Sin columnas, las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public UpdateRuleParamsElseActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo que reciben copia (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
+    /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
+    /// </summary>
+    [JsonPropertyName("signatures")]
+    public long? Signatures { get; set; }
+
+    /// <summary>
+    /// extra_signature: por qué, para quien firma («Proveedor nuevo»). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// review_findings: los hallazgos que da por revisados (sus códigos, `code` en GET /v1/sat_findings). No los que cambian impuestos o la lista negra: cancelado, efos_definitivo, efos_presunto, lista_69b_bis, lista_69.
+    /// </summary>
+    [JsonPropertyName("findings")]
+    public List<string>? Findings { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsElseActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsElseActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
 }
 
 /// <summary>
