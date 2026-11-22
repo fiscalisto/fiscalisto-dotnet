@@ -15620,6 +15620,112 @@ public sealed partial class CreateTicketParamsLocalTaxesItem
 }
 
 /// <summary>
+/// Los campos de «Registrar un curso de capacitación».
+/// </summary>
+public sealed partial class CreateTrainingCourseParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El nombre del curso, como va en la constancia.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// La clave del área temática del catálogo de la STPS (1000 Producción general … 9000 Participación social).
+    /// </summary>
+    [JsonPropertyName("thematic_area")]
+    public required string ThematicArea { get; set; }
+
+    /// <summary>
+    /// La duración en horas.
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public required decimal Hours { get; set; }
+
+    /// <summary>
+    /// presencial (por omisión), en_linea o mixta.
+    /// <br/>
+    /// Valores: presencial, en_linea, mixta.
+    /// </summary>
+    [JsonPropertyName("modality")]
+    public string? Modality { get; set; }
+
+    /// <summary>
+    /// El día en que empezó.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public required string StartDate { get; set; }
+
+    /// <summary>
+    /// El día en que terminó; de ahí corren los 20 días hábiles para entregar las constancias.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public required string EndDate { get; set; }
+
+    /// <summary>
+    /// Quién lo imparte: internal (instructor interno, por omisión: la constancia dice el nombre de la empresa como agente), external (agente capacitador externo, con su registro), supplier (proveedor de un bien o servicio), foreign (capacitador extranjero) o stps.
+    /// <br/>
+    /// Valores: internal, external, supplier, foreign, stps.
+    /// </summary>
+    [JsonPropertyName("trainer_kind")]
+    public string? TrainerKind { get; set; }
+
+    /// <summary>
+    /// El nombre del agente capacitador, salvo internal y stps.
+    /// </summary>
+    [JsonPropertyName("trainer_name")]
+    public string? TrainerName { get; set; }
+
+    /// <summary>
+    /// El registro del agente externo ante la STPS.
+    /// </summary>
+    [JsonPropertyName("trainer_registration")]
+    public string? TrainerRegistration { get; set; }
+
+    /// <summary>
+    /// Quien firma la constancia como instructor o tutor.
+    /// </summary>
+    [JsonPropertyName("instructor_name")]
+    public string? InstructorName { get; set; }
+
+    /// <summary>
+    /// Cada cuántos meses se renueva (para avisar); null, sin vigencia.
+    /// </summary>
+    [JsonPropertyName("validity_months")]
+    public long? ValidityMonths { get; set; }
+
+    /// <summary>
+    /// La calificación mínima para aprobar (opcional).
+    /// </summary>
+    [JsonPropertyName("passing_score")]
+    public decimal? PassingScore { get; set; }
+
+    /// <summary>
+    /// Dónde se impartió.
+    /// </summary>
+    [JsonPropertyName("place")]
+    public string? Place { get; set; }
+
+    /// <summary>
+    /// Su objetivo.
+    /// </summary>
+    [JsonPropertyName("objective")]
+    public string? Objective { get; set; }
+
+    /// <summary>
+    /// Quiénes lo tomaron (emp_…); en una actualización reemplaza la lista.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<string>? Employees { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Crear un webhook».
 /// </summary>
 public sealed partial class CreateWebhookEndpointParams
@@ -17072,6 +17178,32 @@ public sealed partial class Deleted
 }
 
 /// <summary>
+/// Los campos de «Marcar constancias como entregadas».
+/// </summary>
+public sealed partial class DeliverTrainingCertificatesParams
+{
+    /// <summary>
+    /// A quiénes se entregó; por omisión todas las emitidas sin entregar.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<string>? Employees { get; set; }
+
+    /// <summary>
+    /// El día de la entrega; por omisión hoy.
+    /// </summary>
+    [JsonPropertyName("delivered_on")]
+    public string? DeliveredOn { get; set; }
+
+    /// <summary>
+    /// Cómo: paper (en papel, por omisión), email o portal.
+    /// <br/>
+    /// Valores: paper, email, portal.
+    /// </summary>
+    [JsonPropertyName("via")]
+    public string? Via { get; set; }
+}
+
+/// <summary>
 /// La depreciación contable del año contra la deducción de inversiones (artículos 31 y 34 de la Ley del ISR) de cada activo, para la conciliación contable-fiscal.
 /// </summary>
 public sealed partial class DepreciationReconciliation
@@ -17991,6 +18123,138 @@ public sealed partial class EmployeeRaiseEmployeesItem
     /// </summary>
     [JsonPropertyName("error")]
     public string? Error { get; set; }
+}
+
+/// <summary>
+/// La capacitación de un empleado.
+/// </summary>
+public sealed partial class EmployeeTraining
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su ocupación: la suya o la de su puesto.
+    /// </summary>
+    [JsonPropertyName("occupation")]
+    public string? Occupation { get; set; }
+
+    /// <summary>
+    /// La suya, cuando no es la de su puesto.
+    /// </summary>
+    [JsonPropertyName("own_occupation")]
+    public string? OwnOccupation { get; set; }
+
+    /// <summary>
+    /// Su grado de estudios terminados.
+    /// </summary>
+    [JsonPropertyName("education")]
+    public string? Education { get; set; }
+
+    /// <summary>
+    /// Los cursos que tomó, del más reciente al más antiguo.
+    /// </summary>
+    [JsonPropertyName("courses")]
+    public List<EmployeeTrainingCoursesItem> Courses { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;EmployeeTrainingCoursesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class EmployeeTrainingCoursesItem
+{
+    /// <summary>
+    /// El curso (trc_…).
+    /// </summary>
+    [JsonPropertyName("course")]
+    public string Course { get; set; } = default!;
+
+    /// <summary>
+    /// Su lugar en el curso (trp_…).
+    /// </summary>
+    [JsonPropertyName("participant")]
+    public string Participant { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El área temática, clave y nombre.
+    /// </summary>
+    [JsonPropertyName("thematic_area")]
+    public string ThematicArea { get; set; } = default!;
+
+    /// <summary>
+    /// La duración en horas.
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public decimal Hours { get; set; }
+
+    /// <summary>
+    /// Fecha de inicio de la relación laboral (FechaInicioRelLaboral), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string StartDate { get; set; } = default!;
+
+    /// <summary>
+    /// Último día trabajado si ya no trabaja ahí, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string EndDate { get; set; } = default!;
+
+    /// <summary>
+    /// pending, passed, failed o sufficiency.
+    /// </summary>
+    [JsonPropertyName("result")]
+    public string Result { get; set; } = default!;
+
+    /// <summary>
+    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public long? Folio { get; set; }
+
+    /// <summary>
+    /// Cuándo se emitió su constancia.
+    /// </summary>
+    [JsonPropertyName("issued_at")]
+    public string? IssuedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se le entregó.
+    /// </summary>
+    [JsonPropertyName("delivered_at")]
+    public string? DeliveredAt { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo está vigente, si el curso tiene vigencia.
+    /// </summary>
+    [JsonPropertyName("expires_on")]
+    public string? ExpiresOn { get; set; }
 }
 
 /// <summary>
@@ -23397,6 +23661,30 @@ public sealed partial class GetTaxDiscrepancyParams
     /// </summary>
     [JsonPropertyName("declared_income")]
     public decimal? DeclaredIncome { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Descargar constancias DC-3».
+/// </summary>
+public sealed partial class GetTrainingCertificatesPdfParams
+{
+    /// <summary>
+    /// Solo las de estos empleados (emp_…, separados por comas).
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public string? Employees { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Capacitación».
+/// </summary>
+public sealed partial class GetTrainingParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -29205,6 +29493,18 @@ public sealed partial class InvoiceTaxes
 }
 
 /// <summary>
+/// Los campos de «Emitir constancias DC-3».
+/// </summary>
+public sealed partial class IssueTrainingCertificatesParams
+{
+    /// <summary>
+    /// A quiénes; por omisión a todos los que aprobaron y no la tienen.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<string>? Employees { get; set; }
+}
+
+/// <summary>
 /// Un emisor: un RFC que timbra desde su cuenta API.
 /// </summary>
 public sealed partial class Issuer
@@ -32104,6 +32404,54 @@ public sealed partial class ListTicketsParams
     /// </summary>
     [JsonPropertyName("sold_at_lte")]
     public string? SoldAtLte { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Constancias para el aviso a la STPS».
+/// </summary>
+public sealed partial class ListTrainingCertificatesParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Desde (AAAA-MM-DD), por la fecha de fin del curso.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public required string From { get; set; }
+
+    /// <summary>
+    /// Hasta (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("to")]
+    public required string To { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar cursos de capacitación».
+/// </summary>
+public sealed partial class ListTrainingCoursesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -45491,6 +45839,62 @@ public sealed partial class SetOpeningBalancesParamsLinesItem
 }
 
 /// <summary>
+/// Los campos de «Quién tomó un curso».
+/// </summary>
+public sealed partial class SetTrainingParticipantsParams
+{
+    /// <summary>
+    /// Los empleados (emp_…).
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public required List<string> Employees { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Calificar un curso».
+/// </summary>
+public sealed partial class SetTrainingResultsParams
+{
+    /// <summary>
+    /// La calificación de cada empleado, hasta 1,000 a la vez.
+    /// </summary>
+    [JsonPropertyName("results")]
+    public required List<SetTrainingResultsParamsResultsItem> Results { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SetTrainingResultsParamsResultsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SetTrainingResultsParamsResultsItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// pending (por calificar), passed (aprobó), failed (no aprobó) o sufficiency (aprobó el examen de suficiencia, art. 24, fr. III, inciso b).
+    /// <br/>
+    /// Valores: pending, passed, failed, sufficiency.
+    /// </summary>
+    [JsonPropertyName("result")]
+    public required string Result { get; set; }
+
+    /// <summary>
+    /// Su calificación de 0 a 100.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal? Score { get; set; }
+
+    /// <summary>
+    /// Una nota.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Firmar el contrato con el PAC».
 /// </summary>
 public sealed partial class SignEfirmaParams
@@ -47493,6 +47897,726 @@ public sealed partial class TicketList
 }
 
 /// <summary>
+/// La capacitación de un emisor (Nómina › Capacitación).
+/// </summary>
+public sealed partial class Training
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se configura en POST /v1/training/settings.
+    /// </summary>
+    [JsonPropertyName("settings")]
+    public TrainingSettings Settings { get; set; } = default!;
+
+    /// <summary>
+    /// Los trabajadores que cuenta.
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public long Workers { get; set; }
+
+    /// <summary>
+    /// Si los cuenta de Nómina (true) o a mano (false).
+    /// </summary>
+    [JsonPropertyName("workers_from_payroll")]
+    public bool WorkersFromPayroll { get; set; }
+
+    /// <summary>
+    /// Si son más de 50 y firman los representantes de la comisión mixta (artículo 24, fracción II).
+    /// </summary>
+    [JsonPropertyName("mixed_commission")]
+    public bool MixedCommission { get; set; }
+
+    /// <summary>
+    /// Los años del plan de capacitación.
+    /// </summary>
+    [JsonPropertyName("plan_years")]
+    public List<TrainingPlanYearsItem> PlanYears { get; set; } = default!;
+
+    /// <summary>
+    /// Constancias que vencen en 60 días o ya vencieron.
+    /// </summary>
+    [JsonPropertyName("renewals")]
+    public List<TrainingRenewalsItem> Renewals { get; set; } = default!;
+
+    /// <summary>
+    /// Totales (Totales).
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public TrainingTotals Totals { get; set; } = default!;
+}
+
+/// <summary>
+/// Una constancia DC-3 emitida, con lo que pide el aviso a la STPS.
+/// </summary>
+public sealed partial class TrainingCertificate
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public long Folio { get; set; }
+
+    /// <summary>
+    /// Apellido paterno, materno y nombre(s).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// CURP, 18 caracteres.
+    /// </summary>
+    [JsonPropertyName("curp")]
+    public string Curp { get; set; } = default!;
+
+    /// <summary>
+    /// Su ocupación del Catálogo Nacional de Ocupaciones, clave y nombre («06 Transporte»).
+    /// </summary>
+    [JsonPropertyName("occupation")]
+    public string Occupation { get; set; } = default!;
+
+    /// <summary>
+    /// Puesto (Puesto).
+    /// </summary>
+    [JsonPropertyName("position")]
+    public string? Position { get; set; }
+
+    /// <summary>
+    /// Su grado de estudios terminados.
+    /// </summary>
+    [JsonPropertyName("education")]
+    public string? Education { get; set; }
+
+    /// <summary>
+    /// El nombre del curso.
+    /// </summary>
+    [JsonPropertyName("course")]
+    public string Course { get; set; } = default!;
+
+    /// <summary>
+    /// El área temática, clave y nombre («6000 Seguridad»).
+    /// </summary>
+    [JsonPropertyName("thematic_area")]
+    public string ThematicArea { get; set; } = default!;
+
+    /// <summary>
+    /// La duración en horas.
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public decimal Hours { get; set; }
+
+    /// <summary>
+    /// Fecha de inicio de la relación laboral (FechaInicioRelLaboral), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string StartDate { get; set; } = default!;
+
+    /// <summary>
+    /// Último día trabajado si ya no trabaja ahí, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string EndDate { get; set; } = default!;
+
+    /// <summary>
+    /// El agente capacitador como va en la constancia.
+    /// </summary>
+    [JsonPropertyName("trainer")]
+    public string Trainer { get; set; } = default!;
+
+    /// <summary>
+    /// El registro del agente externo ante la STPS.
+    /// </summary>
+    [JsonPropertyName("trainer_registration")]
+    public string? TrainerRegistration { get; set; }
+
+    /// <summary>
+    /// Cuándo se entregó.
+    /// </summary>
+    [JsonPropertyName("delivered_at")]
+    public string? DeliveredAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class TrainingCertificateList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<TrainingCertificate> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Un curso de capacitación (Nómina › Capacitación).
+/// </summary>
+public sealed partial class TrainingCourse
+{
+    /// <summary>
+    /// El curso (trc_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del curso.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// La clave del área temática del catálogo de la STPS (1000 a 9000).
+    /// </summary>
+    [JsonPropertyName("thematic_area")]
+    public string ThematicArea { get; set; } = default!;
+
+    /// <summary>
+    /// La duración en horas.
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public decimal Hours { get; set; }
+
+    /// <summary>
+    /// presencial, en_linea o mixta.
+    /// </summary>
+    [JsonPropertyName("modality")]
+    public string Modality { get; set; } = default!;
+
+    /// <summary>
+    /// internal, external, supplier, foreign o stps.
+    /// </summary>
+    [JsonPropertyName("trainer_kind")]
+    public string TrainerKind { get; set; } = default!;
+
+    /// <summary>
+    /// El agente capacitador.
+    /// </summary>
+    [JsonPropertyName("trainer_name")]
+    public string? TrainerName { get; set; }
+
+    /// <summary>
+    /// Fecha de inicio de la relación laboral (FechaInicioRelLaboral), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public string StartDate { get; set; } = default!;
+
+    /// <summary>
+    /// Último día trabajado si ya no trabaja ahí, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public string EndDate { get; set; } = default!;
+
+    /// <summary>
+    /// Si se canceló teniendo constancias emitidas (se conservan).
+    /// </summary>
+    [JsonPropertyName("cancelled")]
+    public bool Cancelled { get; set; }
+
+    /// <summary>
+    /// El registro del agente externo ante la STPS.
+    /// </summary>
+    [JsonPropertyName("trainer_registration")]
+    public string? TrainerRegistration { get; set; }
+
+    /// <summary>
+    /// Quien firma como instructor o tutor.
+    /// </summary>
+    [JsonPropertyName("instructor_name")]
+    public string? InstructorName { get; set; }
+
+    /// <summary>
+    /// Cada cuántos meses se renueva.
+    /// </summary>
+    [JsonPropertyName("validity_months")]
+    public long? ValidityMonths { get; set; }
+
+    /// <summary>
+    /// La calificación mínima.
+    /// </summary>
+    [JsonPropertyName("passing_score")]
+    public decimal? PassingScore { get; set; }
+
+    /// <summary>
+    /// Dónde se imparte.
+    /// </summary>
+    [JsonPropertyName("place")]
+    public string? Place { get; set; }
+
+    /// <summary>
+    /// El objetivo del curso.
+    /// </summary>
+    [JsonPropertyName("objective")]
+    public string? Objective { get; set; }
+
+    /// <summary>
+    /// Qué falta de quién firma las constancias.
+    /// </summary>
+    [JsonPropertyName("signers_problem")]
+    public string? SignersProblem { get; set; }
+
+    /// <summary>
+    /// Quienes lo tomaron (al ver un curso; no en la lista).
+    /// </summary>
+    [JsonPropertyName("participants")]
+    public List<TrainingParticipant>? Participants { get; set; }
+
+    /// <summary>
+    /// Los totales (en la lista).
+    /// </summary>
+    [JsonPropertyName("counts")]
+    public TrainingCourseCounts? Counts { get; set; }
+}
+
+/// <summary>
+/// Los totales (en la lista).
+/// </summary>
+public sealed partial class TrainingCourseCounts
+{
+    /// <summary>
+    /// Quienes lo tomaron.
+    /// </summary>
+    [JsonPropertyName("participants")]
+    public long Participants { get; set; }
+
+    /// <summary>
+    /// Quienes aprobaron (o el examen de suficiencia).
+    /// </summary>
+    [JsonPropertyName("passed")]
+    public long Passed { get; set; }
+
+    /// <summary>
+    /// Quienes faltan por calificar.
+    /// </summary>
+    [JsonPropertyName("pending")]
+    public long Pending { get; set; }
+
+    /// <summary>
+    /// Constancias emitidas.
+    /// </summary>
+    [JsonPropertyName("issued")]
+    public long Issued { get; set; }
+
+    /// <summary>
+    /// Constancias entregadas.
+    /// </summary>
+    [JsonPropertyName("delivered")]
+    public long Delivered { get; set; }
+
+    /// <summary>
+    /// Constancias que se deben (aprobaron) y no se han entregado.
+    /// </summary>
+    [JsonPropertyName("due")]
+    public long Due { get; set; }
+
+    /// <summary>
+    /// De due, las que pasaron los 20 días hábiles (artículo 24, fracción III).
+    /// </summary>
+    [JsonPropertyName("late")]
+    public long Late { get; set; }
+}
+
+/// <summary>
+/// Un curso borrado o cancelado.
+/// </summary>
+public sealed partial class TrainingCourseDeleted
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true si se borró.
+    /// </summary>
+    [JsonPropertyName("deleted")]
+    public bool Deleted { get; set; }
+
+    /// <summary>
+    /// true si se canceló porque tenía constancias emitidas.
+    /// </summary>
+    [JsonPropertyName("cancelled")]
+    public bool Cancelled { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class TrainingCourseList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<TrainingCourse> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Quien tomó un curso y su constancia DC-3.
+/// </summary>
+public sealed partial class TrainingParticipant
+{
+    /// <summary>
+    /// Quien tomó el curso (trp_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su clave del Catálogo Nacional de Ocupaciones.
+    /// </summary>
+    [JsonPropertyName("occupation")]
+    public string? Occupation { get; set; }
+
+    /// <summary>
+    /// pending, passed, failed o sufficiency.
+    /// </summary>
+    [JsonPropertyName("result")]
+    public string Result { get; set; } = default!;
+
+    /// <summary>
+    /// Su calificación de 0 a 100.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal? Score { get; set; }
+
+    /// <summary>
+    /// Una nota sobre su resultado.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// El folio de su constancia DC-3, consecutivo por emisor.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public long? Folio { get; set; }
+
+    /// <summary>
+    /// Cuándo se emitió.
+    /// </summary>
+    [JsonPropertyName("issued_at")]
+    public string? IssuedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se entregó.
+    /// </summary>
+    [JsonPropertyName("delivered_at")]
+    public string? DeliveredAt { get; set; }
+
+    /// <summary>
+    /// paper, email o portal.
+    /// </summary>
+    [JsonPropertyName("delivered_via")]
+    public string? DeliveredVia { get; set; }
+
+    /// <summary>
+    /// none (sin constancia), waiting (el curso no termina), due (por entregar), late (pasó el plazo), issued (emitida, sin entregar) o delivered.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// El día límite para entregarla (20 días hábiles desde el fin del curso).
+    /// </summary>
+    [JsonPropertyName("deliver_by")]
+    public string? DeliverBy { get; set; }
+
+    /// <summary>
+    /// Hasta cuándo está vigente, si el curso tiene vigencia.
+    /// </summary>
+    [JsonPropertyName("expires_on")]
+    public string? ExpiresOn { get; set; }
+
+    /// <summary>
+    /// Por qué todavía no se puede emitir su constancia.
+    /// </summary>
+    [JsonPropertyName("blocker")]
+    public string? Blocker { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;TrainingPlanYearsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TrainingPlanYearsItem
+{
+    /// <summary>
+    /// El primer día del año del plan.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string From { get; set; } = default!;
+
+    /// <summary>
+    /// El último día del año del plan.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string To { get; set; } = default!;
+
+    /// <summary>
+    /// El día límite del aviso a la STPS (60 días hábiles después de to).
+    /// </summary>
+    [JsonPropertyName("list_by")]
+    public string ListBy { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;TrainingRenewalsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TrainingRenewalsItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El nombre del curso.
+    /// </summary>
+    [JsonPropertyName("course")]
+    public string Course { get; set; } = default!;
+
+    /// <summary>
+    /// La clave del área temática.
+    /// </summary>
+    [JsonPropertyName("thematic_area")]
+    public string ThematicArea { get; set; } = default!;
+
+    /// <summary>
+    /// Hasta cuándo está vigente.
+    /// </summary>
+    [JsonPropertyName("until")]
+    public string Until { get; set; } = default!;
+
+    /// <summary>
+    /// Si ya venció.
+    /// </summary>
+    [JsonPropertyName("expired")]
+    public bool Expired { get; set; }
+}
+
+/// <summary>
+/// Lo que se configura en POST /v1/training/settings.
+/// </summary>
+public sealed partial class TrainingSettings
+{
+    /// <summary>
+    /// El nombre en la constancia; null usa la razón social.
+    /// </summary>
+    [JsonPropertyName("company_name")]
+    public string? CompanyName { get; set; }
+
+    /// <summary>
+    /// Quien firma con hasta 50 trabajadores.
+    /// </summary>
+    [JsonPropertyName("legal_rep")]
+    public string? LegalRep { get; set; }
+
+    /// <summary>
+    /// El representante del patrón ante la comisión mixta.
+    /// </summary>
+    [JsonPropertyName("commission_employer_rep")]
+    public string? CommissionEmployerRep { get; set; }
+
+    /// <summary>
+    /// El representante de los trabajadores ante la comisión mixta.
+    /// </summary>
+    [JsonPropertyName("workers_rep")]
+    public string? WorkersRep { get; set; }
+
+    /// <summary>
+    /// Los integrantes de la comisión mixta de capacitación (artículo 153-E LFT).
+    /// </summary>
+    [JsonPropertyName("commission")]
+    public List<TrainingSettingsCommissionItem> Commission { get; set; } = default!;
+
+    /// <summary>
+    /// El día en que se constituyó la comisión mixta.
+    /// </summary>
+    [JsonPropertyName("commission_constituted_on")]
+    public string? CommissionConstitutedOn { get; set; }
+
+    /// <summary>
+    /// Los trabajadores contados a mano; null cuenta Nómina.
+    /// </summary>
+    [JsonPropertyName("workers_count")]
+    public long? WorkersCount { get; set; }
+
+    /// <summary>
+    /// Cuándo empieza el plan de capacitación vigente.
+    /// </summary>
+    [JsonPropertyName("plan_start")]
+    public string? PlanStart { get; set; }
+
+    /// <summary>
+    /// Cuándo termina el plan de capacitación vigente.
+    /// </summary>
+    [JsonPropertyName("plan_end")]
+    public string? PlanEnd { get; set; }
+
+    /// <summary>
+    /// La ocupación de cada puesto.
+    /// </summary>
+    [JsonPropertyName("occupations")]
+    public Dictionary<string, string> Occupations { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;TrainingSettingsCommissionItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class TrainingSettingsCommissionItem
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// patron o trabajadores.
+    /// </summary>
+    [JsonPropertyName("side")]
+    public string Side { get; set; } = default!;
+
+    /// <summary>
+    /// Su cargo en la comisión (presidente, secretario…).
+    /// </summary>
+    [JsonPropertyName("role")]
+    public string? Role { get; set; }
+}
+
+/// <summary>
+/// Totales (Totales).
+/// </summary>
+public sealed partial class TrainingTotals
+{
+    /// <summary>
+    /// Constancias por entregar.
+    /// </summary>
+    [JsonPropertyName("due")]
+    public long Due { get; set; }
+
+    /// <summary>
+    /// De ellas, fuera de plazo.
+    /// </summary>
+    [JsonPropertyName("late")]
+    public long Late { get; set; }
+
+    /// <summary>
+    /// Empleados activos sin ocupación del catálogo.
+    /// </summary>
+    [JsonPropertyName("missing_occupation")]
+    public long MissingOccupation { get; set; }
+}
+
+/// <summary>
 /// La balanza de comprobación de un mes.
 /// </summary>
 public sealed partial class TrialBalance
@@ -48570,6 +49694,26 @@ public sealed partial class UpdateEmployeePortalParams
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ocupación y estudios de un empleado».
+/// </summary>
+public sealed partial class UpdateEmployeeTrainingParams
+{
+    /// <summary>
+    /// Su clave del Catálogo Nacional de Ocupaciones cuando no es la de su puesto; null usa la de su puesto.
+    /// </summary>
+    [JsonPropertyName("occupation")]
+    public string? Occupation { get; set; }
+
+    /// <summary>
+    /// Su grado de estudios terminados, que pide el aviso a la STPS: primaria, secundaria, bachillerato, tecnico, licenciatura, especialidad, maestria o doctorado.
+    /// <br/>
+    /// Valores: primaria, secundaria, bachillerato, tecnico, licenciatura, especialidad, maestria, doctorado.
+    /// </summary>
+    [JsonPropertyName("education")]
+    public string? Education { get; set; }
 }
 
 /// <summary>
@@ -52886,6 +54030,210 @@ public sealed partial class UpdateTagParams
     /// </summary>
     [JsonPropertyName("color")]
     public string? Color { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un curso de capacitación».
+/// </summary>
+public sealed partial class UpdateTrainingCourseParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El nombre del curso, como va en la constancia.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// La clave del área temática del catálogo de la STPS (1000 Producción general … 9000 Participación social).
+    /// </summary>
+    [JsonPropertyName("thematic_area")]
+    public required string ThematicArea { get; set; }
+
+    /// <summary>
+    /// La duración en horas.
+    /// </summary>
+    [JsonPropertyName("hours")]
+    public required decimal Hours { get; set; }
+
+    /// <summary>
+    /// presencial (por omisión), en_linea o mixta.
+    /// <br/>
+    /// Valores: presencial, en_linea, mixta.
+    /// </summary>
+    [JsonPropertyName("modality")]
+    public string? Modality { get; set; }
+
+    /// <summary>
+    /// El día en que empezó.
+    /// </summary>
+    [JsonPropertyName("start_date")]
+    public required string StartDate { get; set; }
+
+    /// <summary>
+    /// El día en que terminó; de ahí corren los 20 días hábiles para entregar las constancias.
+    /// </summary>
+    [JsonPropertyName("end_date")]
+    public required string EndDate { get; set; }
+
+    /// <summary>
+    /// Quién lo imparte: internal (instructor interno, por omisión: la constancia dice el nombre de la empresa como agente), external (agente capacitador externo, con su registro), supplier (proveedor de un bien o servicio), foreign (capacitador extranjero) o stps.
+    /// <br/>
+    /// Valores: internal, external, supplier, foreign, stps.
+    /// </summary>
+    [JsonPropertyName("trainer_kind")]
+    public string? TrainerKind { get; set; }
+
+    /// <summary>
+    /// El nombre del agente capacitador, salvo internal y stps.
+    /// </summary>
+    [JsonPropertyName("trainer_name")]
+    public string? TrainerName { get; set; }
+
+    /// <summary>
+    /// El registro del agente externo ante la STPS.
+    /// </summary>
+    [JsonPropertyName("trainer_registration")]
+    public string? TrainerRegistration { get; set; }
+
+    /// <summary>
+    /// Quien firma la constancia como instructor o tutor.
+    /// </summary>
+    [JsonPropertyName("instructor_name")]
+    public string? InstructorName { get; set; }
+
+    /// <summary>
+    /// Cada cuántos meses se renueva (para avisar); null, sin vigencia.
+    /// </summary>
+    [JsonPropertyName("validity_months")]
+    public long? ValidityMonths { get; set; }
+
+    /// <summary>
+    /// La calificación mínima para aprobar (opcional).
+    /// </summary>
+    [JsonPropertyName("passing_score")]
+    public decimal? PassingScore { get; set; }
+
+    /// <summary>
+    /// Dónde se impartió.
+    /// </summary>
+    [JsonPropertyName("place")]
+    public string? Place { get; set; }
+
+    /// <summary>
+    /// Su objetivo.
+    /// </summary>
+    [JsonPropertyName("objective")]
+    public string? Objective { get; set; }
+
+    /// <summary>
+    /// Quiénes lo tomaron (emp_…); en una actualización reemplaza la lista.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<string>? Employees { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Configurar la capacitación».
+/// </summary>
+public sealed partial class UpdateTrainingSettingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El nombre de la empresa en la constancia; null usa la razón social. Persona física: apellido paterno, materno y nombre(s).
+    /// </summary>
+    [JsonPropertyName("company_name")]
+    public string? CompanyName { get; set; }
+
+    /// <summary>
+    /// Quien firma como patrón o representante legal cuando hay hasta 50 trabajadores (art. 24, fr. II).
+    /// </summary>
+    [JsonPropertyName("legal_rep")]
+    public string? LegalRep { get; set; }
+
+    /// <summary>
+    /// Con más de 50 trabajadores: el representante del patrón ante la comisión mixta de capacitación, que firma la constancia.
+    /// </summary>
+    [JsonPropertyName("commission_employer_rep")]
+    public string? CommissionEmployerRep { get; set; }
+
+    /// <summary>
+    /// Con más de 50 trabajadores: el representante de los trabajadores ante la comisión mixta, que también firma.
+    /// </summary>
+    [JsonPropertyName("workers_rep")]
+    public string? WorkersRep { get; set; }
+
+    /// <summary>
+    /// Los integrantes de la comisión mixta de capacitación (LFT 153-E: igual número por cada parte).
+    /// </summary>
+    [JsonPropertyName("commission")]
+    public List<UpdateTrainingSettingsParamsCommissionItem>? Commission { get; set; }
+
+    /// <summary>
+    /// El día en que se constituyó la comisión mixta.
+    /// </summary>
+    [JsonPropertyName("commission_constituted_on")]
+    public string? CommissionConstitutedOn { get; set; }
+
+    /// <summary>
+    /// Los trabajadores de la empresa, si no todos están en Nómina; null cuenta los empleados activos.
+    /// </summary>
+    [JsonPropertyName("workers_count")]
+    public long? WorkersCount { get; set; }
+
+    /// <summary>
+    /// El día en que empieza el plan de capacitación (dos años como máximo, LFT 153-H).
+    /// </summary>
+    [JsonPropertyName("plan_start")]
+    public string? PlanStart { get; set; }
+
+    /// <summary>
+    /// El día en que termina el plan.
+    /// </summary>
+    [JsonPropertyName("plan_end")]
+    public string? PlanEnd { get; set; }
+
+    /// <summary>
+    /// La ocupación del Catálogo Nacional de Ocupaciones de cada puesto: {"Operador de montacargas": "06.2"}. Reemplaza las de antes.
+    /// </summary>
+    [JsonPropertyName("occupations")]
+    public Dictionary<string, string>? Occupations { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateTrainingSettingsParamsCommissionItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateTrainingSettingsParamsCommissionItem
+{
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// A quién representa: patron o trabajadores.
+    /// <br/>
+    /// Valores: patron, trabajadores.
+    /// </summary>
+    [JsonPropertyName("side")]
+    public required string Side { get; set; }
+
+    /// <summary>
+    /// Su cargo en la comisión (opcional).
+    /// </summary>
+    [JsonPropertyName("role")]
+    public string? Role { get; set; }
 }
 
 /// <summary>

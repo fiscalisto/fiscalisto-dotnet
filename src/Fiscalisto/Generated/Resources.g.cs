@@ -185,6 +185,16 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public CandidatesResource Candidates => _candidates ??= new CandidatesResource(this);
 
+    private TrainingResource? _training;
+
+    /// <summary>Nómina.</summary>
+    public TrainingResource Training => _training ??= new TrainingResource(this);
+
+    private TrainingCoursesResource? _trainingCourses;
+
+    /// <summary>Nómina.</summary>
+    public TrainingCoursesResource TrainingCourses => _trainingCourses ??= new TrainingCoursesResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -2188,6 +2198,34 @@ public sealed class EmployeesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<EmployeePortal> UpdatePortalAsync(string id, UpdateEmployeePortalParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<EmployeePortal>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}/portal", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Capacitación de un empleado
+    /// </summary>
+    /// <remarks>
+    /// Su ocupación del Catálogo Nacional de Ocupaciones (la suya o la de su puesto), su grado de estudios y los cursos que tomó con su constancia.
+    /// <br/>
+    /// <c>GET /v1/employees/{id}/training</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-employee-training"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeTraining> TrainingAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeTraining>("GET", $"/v1/employees/{Uri.EscapeDataString(id)}/training", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Ocupación y estudios de un empleado
+    /// </summary>
+    /// <remarks>
+    /// Su ocupación cuando no es la de su puesto (null usa la del puesto) y su grado de estudios terminados, que pide el aviso a la STPS.
+    /// <br/>
+    /// <c>POST /v1/employees/{id}/training</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-employee-training"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<EmployeeTraining> UpdateTrainingAsync(string id, UpdateEmployeeTrainingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<EmployeeTraining>("POST", $"/v1/employees/{Uri.EscapeDataString(id)}/training", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -3250,6 +3288,214 @@ public sealed class CandidatesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<string> FileAsync(string id, string question, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestTextAsync("GET", $"/v1/candidates/{Uri.EscapeDataString(id)}/files/{Uri.EscapeDataString(question)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.Training</c>.
+/// </summary>
+public sealed class TrainingResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TrainingResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Capacitación
+    /// </summary>
+    /// <remarks>
+    /// Como «Nómina › Capacitación» de la app: quién firma las constancias DC-3 (con hasta 50 trabajadores el patrón o su representante legal; con más, el representante del patrón y el de los trabajadores ante la comisión mixta: Acuerdo de la STPS del 14 de junio de 2013, artículo 24, fracción II), cuántos trabajadores cuenta, los años del plan de capacitación con el día límite del aviso a la STPS de cada uno (60 días hábiles, artículo 26, fracción I), las constancias por renovar y cuántas faltan por entregar.
+    /// <br/>
+    /// <c>GET /v1/training</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-training"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Training> GetAsync(GetTrainingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Training>("GET", "/v1/training", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Configurar la capacitación
+    /// </summary>
+    /// <remarks>
+    /// Quién firma las constancias, la comisión mixta (LFT 153-E: igual número por cada parte), cuántos trabajadores contar si no todos están en Nómina, las fechas del plan (dos años como máximo, LFT 153-H) y la ocupación del Catálogo Nacional de Ocupaciones de cada puesto. Lo que no manda no cambia. Contesta training.
+    /// <br/>
+    /// <c>POST /v1/training/settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-training-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Training> UpdateSettingsAsync(UpdateTrainingSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Training>("POST", "/v1/training/settings", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Constancias para el aviso a la STPS
+    /// </summary>
+    /// <remarks>
+    /// Las constancias DC-3 emitidas de los cursos que terminaron entre from y to, con lo que pide el aviso a la STPS (artículo 26, fracción I: nombre, CURP, ocupación, puesto, estudios, curso, área temática, horas, fechas y agente capacitador), ordenadas por folio. El día límite para presentarlo de cada año del plan viene en plan_years de GET /v1/training. El aviso se presenta en el sistema de la STPS, que no tiene API.
+    /// <br/>
+    /// <c>GET /v1/training/certificates</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-training-certificates"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCertificateList> CertificatesAsync(ListTrainingCertificatesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCertificateList>("GET", "/v1/training/certificates", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.TrainingCourses</c>.
+/// </summary>
+public sealed class TrainingCoursesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal TrainingCoursesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar cursos de capacitación
+    /// </summary>
+    /// <remarks>
+    /// Los cursos del emisor (trc_…), los más recientes primero, con cuántos lo tomaron, aprobaron, tienen su constancia y faltan por entregar (due) o ya pasaron los 20 días hábiles (late).
+    /// <br/>
+    /// <c>GET /v1/training_courses</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-training-courses"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<TrainingCourse>> ListAsync(ListTrainingCoursesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<TrainingCourse>("/v1/training_courses", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar cursos de capacitación: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<TrainingCourse> ListAutoPagingAsync(ListTrainingCoursesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<TrainingCourse>("/v1/training_courses", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Registrar un curso de capacitación
+    /// </summary>
+    /// <remarks>
+    /// Lo que pide la constancia DC-3 (artículo 24, fracción IV): nombre, área temática del catálogo de la STPS, horas, periodo y quién lo imparte (con un instructor interno la constancia dice el nombre de la empresa como agente capacitador), con quiénes lo tomaron (employees).
+    /// <br/>
+    /// <c>POST /v1/training_courses</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-training-course"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourse> CreateAsync(CreateTrainingCourseParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourse>("POST", "/v1/training_courses", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver un curso de capacitación
+    /// </summary>
+    /// <remarks>
+    /// Un curso (trc_…) con quienes lo tomaron (trp_…): su resultado, el folio de su constancia, el día límite para entregarla (20 días hábiles desde el fin del curso, artículo 24, fracción III), si ya se entregó y, cuando todavía no se puede emitir, por qué (blocker).
+    /// <br/>
+    /// <c>GET /v1/training_courses/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-training-course"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourse> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourse>("GET", $"/v1/training_courses/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un curso de capacitación
+    /// </summary>
+    /// <remarks>
+    /// Cambia sus datos; employees reemplaza la lista (quien ya tiene su constancia se queda). Las constancias ya emitidas guardan lo que decían.
+    /// <br/>
+    /// <c>POST /v1/training_courses/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-training-course"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourse> UpdateAsync(string id, UpdateTrainingCourseParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourse>("POST", $"/v1/training_courses/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un curso de capacitación
+    /// </summary>
+    /// <remarks>
+    /// Lo borra si nadie tiene su constancia; si alguien la tiene, lo cancela (cancelled true), porque las copias se conservan a disposición de la STPS (artículo 26, fracción III).
+    /// <br/>
+    /// <c>DELETE /v1/training_courses/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-training-course"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourseDeleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourseDeleted>("DELETE", $"/v1/training_courses/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Quién tomó un curso
+    /// </summary>
+    /// <remarks>
+    /// Reemplaza la lista de quienes lo tomaron (emp_…). Quien ya tiene su constancia se queda.
+    /// <br/>
+    /// <c>POST /v1/training_courses/{id}/participants</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/set-training-participants"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourse> SetParticipantsAsync(string id, SetTrainingParticipantsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourse>("POST", $"/v1/training_courses/{Uri.EscapeDataString(id)}/participants", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Calificar un curso
+    /// </summary>
+    /// <remarks>
+    /// El resultado de cada quien: pending, passed, failed o sufficiency (aprobó el examen de suficiencia, artículo 24, fracción III, inciso b), con su calificación. A quien ya tiene su constancia no se le puede poner failed.
+    /// <br/>
+    /// <c>POST /v1/training_courses/{id}/results</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/set-training-results"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourse> SetResultsAsync(string id, SetTrainingResultsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourse>("POST", $"/v1/training_courses/{Uri.EscapeDataString(id)}/results", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Emitir constancias DC-3
+    /// </summary>
+    /// <remarks>
+    /// Emite la constancia de quienes aprobaron (o de los que mande en employees), cada una con el folio siguiente del emisor. Pide que el curso haya terminado (salvo el examen de suficiencia), el CURP y la ocupación de cada quien y quién firma; lo que falte se lee en blocker de cada participante.
+    /// <br/>
+    /// <c>POST /v1/training_courses/{id}/issue</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/issue-training-certificates"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourse> IssueAsync(string id, IssueTrainingCertificatesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourse>("POST", $"/v1/training_courses/{Uri.EscapeDataString(id)}/issue", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Marcar constancias como entregadas
+    /// </summary>
+    /// <remarks>
+    /// Anota que se entregaron (en papel, por correo o en el portal del empleado) y el día. Por omisión todas las emitidas sin entregar.
+    /// <br/>
+    /// <c>POST /v1/training_courses/{id}/deliver</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/deliver-training-certificates"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<TrainingCourse> DeliverAsync(string id, DeliverTrainingCertificatesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<TrainingCourse>("POST", $"/v1/training_courses/{Uri.EscapeDataString(id)}/deliver", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Descargar constancias DC-3
+    /// </summary>
+    /// <remarks>
+    /// Las constancias emitidas del curso en el formato DC-3 de la STPS, una página cada una con su reverso de catálogos, listas para firmar. El logo de la empresa va si lo tiene (artículo 25: solo logotipos).
+    /// <br/>
+    /// <c>GET /v1/training_courses/{id}/pdf</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-training-certificates-pdf"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<byte[]> PdfAsync(string id, GetTrainingCertificatesPdfParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestBytesAsync("GET", $"/v1/training_courses/{Uri.EscapeDataString(id)}/pdf", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>
