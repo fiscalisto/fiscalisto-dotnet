@@ -48508,6 +48508,24 @@ public sealed partial class SelfInvoicing
     public bool FailureEmail { get; set; }
 
     /// <summary>
+    /// Cuántas facturas puede tener un ticket como máximo (dividir un ticket en varias facturas), contando la que toma todo lo que queda; 0: no se puede dividir.
+    /// </summary>
+    [JsonPropertyName("split_max")]
+    public long SplitMax { get; set; }
+
+    /// <summary>
+    /// Lo menos que puede ser cada factura de un ticket dividido, con impuestos; tampoco puede quedar menos por facturar, salvo la factura que toma todo lo que queda.
+    /// </summary>
+    [JsonPropertyName("split_min")]
+    public decimal SplitMin { get; set; }
+
+    /// <summary>
+    /// true: un comprador puede hacerse varias facturas con los mismos datos de una vez (4 de 250 de un ticket de 1,000).
+    /// </summary>
+    [JsonPropertyName("split_same")]
+    public bool SplitSame { get; set; }
+
+    /// <summary>
     /// ticket: la factura global lleva un concepto «Venta» por ticket, con su folio. summary: solo el monto total del periodo, uno por combinación de impuestos (NoIdentificacion «Resumen»), para una persona física en RESICO (regla 2.7.1.21 de la RMF 2026).
     /// <br/>
     /// Valores: ticket, summary.
@@ -50836,6 +50854,12 @@ public sealed partial class Ticket
     /// </summary>
     [JsonPropertyName("global_invoice")]
     public string? GlobalInvoice { get; set; }
+
+    /// <summary>
+    /// Lo que ya cubren las facturas de un ticket dividido en varias (la autofactura lo permite con `split_max`), con impuestos. 0 si no se ha dividido; un ticket `pending` con más de 0 tiene `total - invoiced_amount` por facturar con el mismo código, y un ticket `invoiced` dividido tiene `invoice` null.
+    /// </summary>
+    [JsonPropertyName("invoiced_amount")]
+    public decimal InvoicedAmount { get; set; }
 
     /// <summary>
     /// A quién se facturó, o null.
@@ -57014,6 +57038,24 @@ public sealed partial class UpdateSelfInvoicingParams
     /// </summary>
     [JsonPropertyName("failure_email")]
     public bool? FailureEmail { get; set; }
+
+    /// <summary>
+    /// Dividir un ticket en varias facturas (Autofactura › Reglas de los tickets): cuántas facturas puede tener un ticket como máximo, de 2 a 50, contando la que toma todo lo que queda. `0` (por omisión): el comprador no puede dividirlo. Cada factura usa un timbre.
+    /// </summary>
+    [JsonPropertyName("split_max")]
+    public long? SplitMax { get; set; }
+
+    /// <summary>
+    /// Lo menos que puede ser cada factura de un ticket dividido, con impuestos (por omisión 100). Tampoco puede quedar por facturar menos que esto, salvo la factura que toma todo lo que queda.
+    /// </summary>
+    [JsonPropertyName("split_min")]
+    public decimal? SplitMin { get; set; }
+
+    /// <summary>
+    /// `true` (por omisión): un comprador puede hacerse varias facturas con los mismos datos de una vez (4 de 250 de un ticket de 1,000). `false`: una por persona.
+    /// </summary>
+    [JsonPropertyName("split_same")]
+    public bool? SplitSame { get; set; }
 
     /// <summary>
     /// Los conceptos de la factura que se hace el comprador (Autofactura › Conceptos de la factura): desglosados o en uno solo, y si el comprador puede elegir. Mande solo lo que cambia; `null` regresa a desglosados sin elección.
