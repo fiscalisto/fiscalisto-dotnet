@@ -31366,7 +31366,7 @@ public sealed partial class Issuer
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// api si lo creó con la API o en Desarrolladores; empresa si es una empresa de la app conectada a su cuenta (Desarrolladores › Emisores › Conectar una empresa): con ella solo se usa su Portal de proveedores, y status siempre es active.
+    /// api si lo creó con la API o en Desarrolladores; empresa si es una empresa de la app conectada a su cuenta (Desarrolladores › Emisores › Conectar una empresa): con ella solo se usan su Portal de proveedores y, si se encendieron, sus pagos a proveedores, y status siempre es active.
     /// <br/>
     /// Valores: api, empresa.
     /// </summary>
@@ -35990,9 +35990,9 @@ public sealed partial class PayeeAccount
     public bool ThirdParty { get; set; }
 
     /// <summary>
-    /// Cómo se confió en la cuenta: bank (el banco confirmó el RFC del proveedor), by_hand (alguien la verificó a mano porque el RFC del banco solo cambiaba la homoclave o no venía), third_party (se autorizó como de un tercero), o null si aún no está aprobada.
+    /// Cómo se confió en la cuenta: bank (el banco confirmó el RFC del proveedor), by_name (el banco no dio el RFC y el nombre del titular es el del proveedor según el SAT, cuando la empresa lo permite), by_hand (alguien la verificó a mano porque el RFC del banco solo cambiaba la homoclave o no venía), third_party (se autorizó como de un tercero), o null si aún no está aprobada.
     /// <br/>
-    /// Valores: bank, by_hand, third_party.
+    /// Valores: bank, by_name, by_hand, third_party.
     /// </summary>
     [JsonPropertyName("verification")]
     public string? Verification { get; set; }
