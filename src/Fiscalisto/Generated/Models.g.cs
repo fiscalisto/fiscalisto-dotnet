@@ -9975,6 +9975,12 @@ public sealed partial class CreateCustomerGroupParams
     public long? CreditDays { get; set; }
 
     /// <summary>
+    /// Días que vale una cotización nueva para sus clientes; null: los de la empresa (Ajustes › Horarios). Un cliente con los suyos los usa antes.
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long? QuoteValidDays { get; set; }
+
+    /// <summary>
     /// El pedido mínimo antes de IVA desde el Portal del cliente.
     /// </summary>
     [JsonPropertyName("min_order")]
@@ -10095,6 +10101,12 @@ public sealed partial class CreateCustomerParams
     /// </summary>
     [JsonPropertyName("credit_days")]
     public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// Días que vale una cotización nueva para este cliente (valid_until); null: los de su grupo o los de la empresa (Ajustes › Horarios).
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long? QuoteValidDays { get; set; }
 
     /// <summary>
     /// Sus condiciones de pago («Crédito a 30 días»): las facturas nuevas en la app empiezan con ellas; null: las de la empresa. POST /v1/invoices no las pone solas: mándelas en payment_terms.
@@ -18009,6 +18021,12 @@ public sealed partial class Customer
     public long? CreditDays { get; set; }
 
     /// <summary>
+    /// Días que vale una cotización nueva (1 a 366). En un cliente o grupo, null usa los de su grupo o los de la empresa (Ajustes › Horarios).
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long? QuoteValidDays { get; set; }
+
+    /// <summary>
     /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
     /// </summary>
     [JsonPropertyName("payment_terms")]
@@ -18293,6 +18311,12 @@ public sealed partial class CustomerGroup
     /// </summary>
     [JsonPropertyName("credit_days")]
     public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// Días que vale una cotización nueva (1 a 366). En un cliente o grupo, null usa los de su grupo o los de la empresa (Ajustes › Horarios).
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long? QuoteValidDays { get; set; }
 
     /// <summary>
     /// Pedido mínimo, sin IVA, para pedir desde el Portal del cliente, o null sin mínimo.
@@ -25397,6 +25421,18 @@ public sealed partial class GetSatDeclarationCalendarParams
 /// Los campos de «Revisar como el SAT».
 /// </summary>
 public sealed partial class GetSatRiskCheckParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver los horarios».
+/// </summary>
+public sealed partial class GetScheduleSettingsParams
 {
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
@@ -48259,6 +48295,66 @@ public sealed partial class SavePayrollDepartmentParams
 }
 
 /// <summary>
+/// Los horarios de la empresa (Ajustes › Horarios): cuánto vale una cotización nueva y a qué hora vence, y a qué hora corren las reglas «Cada mañana», los hallazgos diarios y el resumen semanal, en su zona horaria.
+/// </summary>
+public sealed partial class ScheduleSettings
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…) con que se leyeron; valen para toda la empresa.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// La zona horaria de la empresa (Ajustes › Datos fiscales), en la que van todas las horas.
+    /// </summary>
+    [JsonPropertyName("time_zone")]
+    public string TimeZone { get; set; } = default!;
+
+    /// <summary>
+    /// Días que vale una cotización nueva cuando el cliente y su grupo no tienen los suyos.
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long QuoteValidDays { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) vence una cotización su último día; null: al terminar ese día.
+    /// </summary>
+    [JsonPropertyName("quote_expiry_hour")]
+    public long? QuoteExpiryHour { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) corren las reglas «Cada mañana».
+    /// </summary>
+    [JsonPropertyName("rules_hour")]
+    public long RulesHour { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) corre la revisión diaria de hallazgos.
+    /// </summary>
+    [JsonPropertyName("findings_hour")]
+    public long FindingsHour { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) del lunes sale el resumen semanal.
+    /// </summary>
+    [JsonPropertyName("digest_hour")]
+    public long DigestHour { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Programar el pago de una factura de proveedor».
 /// </summary>
 public sealed partial class ScheduleSupplierInvoiceParams
@@ -52542,6 +52638,12 @@ public sealed partial class UpdateCustomerGroupParams
     public long? CreditDays { get; set; }
 
     /// <summary>
+    /// Días que vale una cotización nueva para sus clientes; null: los de la empresa (Ajustes › Horarios). Un cliente con los suyos los usa antes.
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long? QuoteValidDays { get; set; }
+
+    /// <summary>
     /// El pedido mínimo antes de IVA desde el Portal del cliente.
     /// </summary>
     [JsonPropertyName("min_order")]
@@ -52656,6 +52758,12 @@ public sealed partial class UpdateCustomerParams
     /// </summary>
     [JsonPropertyName("credit_days")]
     public long? CreditDays { get; set; }
+
+    /// <summary>
+    /// Días que vale una cotización nueva para este cliente (valid_until); null: los de su grupo o los de la empresa (Ajustes › Horarios).
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long? QuoteValidDays { get; set; }
 
     /// <summary>
     /// Sus condiciones de pago («Crédito a 30 días»): las facturas nuevas en la app empiezan con ellas; null: las de la empresa. POST /v1/invoices no las pone solas: mándelas en payment_terms.
@@ -56752,6 +56860,48 @@ public sealed partial class UpdateSatReviewParamsRequestsItem
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar los horarios».
+/// </summary>
+public sealed partial class UpdateScheduleSettingsParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Días que vale una cotización nueva, de 1 a 366. Un cliente o su grupo pueden tener los suyos (quote_valid_days en /v1/customers y /v1/customer_groups).
+    /// </summary>
+    [JsonPropertyName("quote_valid_days")]
+    public long? QuoteValidDays { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) vence una cotización su último día; null: al terminar ese día, a medianoche.
+    /// </summary>
+    [JsonPropertyName("quote_expiry_hour")]
+    public long? QuoteExpiryHour { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) corren las reglas «Cada mañana» (triggers invoice.daily y purchase_order.daily).
+    /// </summary>
+    [JsonPropertyName("rules_hour")]
+    public long? RulesHour { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) corre la revisión diaria de hallazgos.
+    /// </summary>
+    [JsonPropertyName("findings_hour")]
+    public long? FindingsHour { get; set; }
+
+    /// <summary>
+    /// A qué hora (0 a 23) del lunes sale el resumen semanal por correo.
+    /// </summary>
+    [JsonPropertyName("digest_hour")]
+    public long? DigestHour { get; set; }
 }
 
 /// <summary>

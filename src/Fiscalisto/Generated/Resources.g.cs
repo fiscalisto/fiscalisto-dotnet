@@ -45,6 +45,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Emisores.</summary>
     public IssuersResource Issuers => _issuers ??= new IssuersResource(this);
 
+    private ScheduleSettingsResource? _scheduleSettings;
+
+    /// <summary>Emisores.</summary>
+    public ScheduleSettingsResource ScheduleSettings => _scheduleSettings ??= new ScheduleSettingsResource(this);
+
     private InvoicesResource? _invoices;
 
     /// <summary>Facturas.</summary>
@@ -1181,6 +1186,44 @@ public sealed class IssuersResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<SelfInvoicing> UpdateSelfInvoicingAsync(string id, UpdateSelfInvoicingParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<SelfInvoicing>("POST", $"/v1/issuers/{Uri.EscapeDataString(id)}/self_invoicing", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Emisores: <c>fiscalisto.ScheduleSettings</c>.
+/// </summary>
+public sealed class ScheduleSettingsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ScheduleSettingsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver los horarios
+    /// </summary>
+    /// <remarks>
+    /// Los horarios de la empresa, como Ajustes › Horarios en la app: cuántos días vale una cotización nueva y a qué hora vence, y a qué hora corren las reglas «Cada mañana», la revisión diaria de hallazgos y el resumen semanal de los lunes, todo en su zona horaria (time_zone). Valen para toda la empresa: cualquiera de sus emisores lee los mismos.
+    /// <br/>
+    /// <c>GET /v1/schedule_settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/get-schedule-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ScheduleSettings> GetAsync(GetScheduleSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ScheduleSettings>("GET", "/v1/schedule_settings", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar los horarios
+    /// </summary>
+    /// <remarks>
+    /// Cambia los horarios de la empresa (para todos sus emisores). Lo que no mande se queda como está. Un cliente o su grupo pueden tener su propia vigencia de cotizaciones (quote_valid_days), que gana a la de la empresa.
+    /// <br/>
+    /// <c>POST /v1/schedule_settings</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/update-schedule-settings"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ScheduleSettings> UpdateAsync(UpdateScheduleSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ScheduleSettings>("POST", "/v1/schedule_settings", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
