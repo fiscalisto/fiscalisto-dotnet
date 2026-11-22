@@ -24045,9 +24045,9 @@ public sealed partial class Finding
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad), bank (movimientos del banco) o expense_reports (comprobaciones de viáticos).
+    /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad), bank (movimientos del banco), expense_reports (comprobaciones de viáticos) o purchase_receipts (tickets de compra).
     /// <br/>
-    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports.
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts.
     /// </summary>
     [JsonPropertyName("area")]
     public string? Area { get; set; }
@@ -24183,15 +24183,15 @@ public sealed partial class FindingList
 public sealed partial class FindingRecord
 {
     /// <summary>
-    /// purchase_order, payout, supplier, poliza (la contabilidad de un mes), account (una cuenta en un mes), bank_movement o expense_report (una comprobación de viáticos).
+    /// purchase_order, payout, supplier, poliza (la contabilidad de un mes), account (una cuenta en un mes), bank_movement, expense_report (una comprobación de viáticos) o expense_ticket (un ticket de compra).
     /// <br/>
-    /// Valores: purchase_order, payout, supplier, poliza, account, bank_movement, expense_report.
+    /// Valores: purchase_order, payout, supplier, poliza, account, bank_movement, expense_report, expense_ticket.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// Su id en la API: el pago (pyo_…), la comprobación (exr_…) o el RFC del proveedor; null si no tiene.
+    /// Su id en la API: el pago (pyo_…), la comprobación (exr_…), el ticket (rct_…) o el RFC del proveedor; null si no tiene.
     /// </summary>
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -33082,9 +33082,9 @@ public sealed partial class ListFindingsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// Solo los de un área: purchase_orders, payouts, suppliers, accounting, bank o expense_reports.
+    /// Solo los de un área: purchase_orders, payouts, suppliers, accounting, bank, expense_reports o purchase_receipts.
     /// <br/>
-    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports.
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts.
     /// </summary>
     [JsonPropertyName("area")]
     public string? Area { get; set; }
