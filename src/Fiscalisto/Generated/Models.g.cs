@@ -6754,6 +6754,24 @@ public sealed partial class ComparativeStatementsIncomeStatementYearToDateSectio
 }
 
 /// <summary>
+/// Los campos de «Comparar las cuotas de un mes con el SUA».
+/// </summary>
+public sealed partial class CompareSuaCedulaParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La cédula de determinación de cuotas del mes (la mensual, del IMSS) en PDF como la imprimió el SUA, en base64; hasta 10 MB.
+    /// </summary>
+    [JsonPropertyName("file")]
+    public required string File { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Terminar una orden de producción».
 /// </summary>
 public sealed partial class CompleteProductionOrderParams
@@ -14053,7 +14071,7 @@ public sealed partial class CreateRuleParamsConditions
 public sealed partial class CreateRuleParamsConditionsConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -14117,7 +14135,7 @@ public sealed partial class CreateRuleParamsConditionsGroupsItem
 public sealed partial class CreateRuleParamsConditionsGroupsItemConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -15355,6 +15373,38 @@ public sealed partial class CreateStoreConnectionParamsSettings
     /// </summary>
     [JsonPropertyName("notify_buyer")]
     public bool? NotifyBuyer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear un grupo de proveedores».
+/// </summary>
+public sealed partial class CreateSupplierGroupParams
+{
+    /// <summary>
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Color de su etiqueta en la app: info, warning, positive, critical o muted.
+    /// <br/>
+    /// Valores: info, warning, positive, critical, muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+
+    /// <summary>
+    /// RFC de los proveedores que entran al grupo (hasta 500); salen del que tenían.
+    /// </summary>
+    [JsonPropertyName("suppliers")]
+    public List<string>? Suppliers { get; set; }
 }
 
 /// <summary>
@@ -32463,6 +32513,30 @@ public sealed partial class ListStoreConnectionsParams
 }
 
 /// <summary>
+/// Los campos de «Listar grupos de proveedores».
+/// </summary>
+public sealed partial class ListSupplierGroupsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar facturas de proveedores».
 /// </summary>
 public sealed partial class ListSupplierInvoicesParams
@@ -46801,6 +46875,288 @@ public sealed partial class StoreImportSkippedItem
 }
 
 /// <summary>
+/// La cédula de determinación de cuotas del SUA comparada, trabajador por trabajador, con las cuotas patronales que Fiscalisto calculó de los recibos del mes.
+/// </summary>
+public sealed partial class SuaComparison
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes que se comparó (AAAA-MM).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// El mes que dice la cédula (AAAA-MM), o null si no lo dice.
+    /// </summary>
+    [JsonPropertyName("cedula_month")]
+    public string? CedulaMonth { get; set; }
+
+    /// <summary>
+    /// El registro patronal de la cédula, sin guiones.
+    /// </summary>
+    [JsonPropertyName("employer_registration")]
+    public string? EmployerRegistration { get; set; }
+
+    /// <summary>
+    /// true si la cédula es de otro registro patronal que el de sus datos fiscales.
+    /// </summary>
+    [JsonPropertyName("other_employer_registration")]
+    public bool OtherEmployerRegistration { get; set; }
+
+    /// <summary>
+    /// La prima de riesgo de trabajo de la cédula, como fracción; el cálculo se hizo con ella.
+    /// </summary>
+    [JsonPropertyName("employer_risk_premium")]
+    public decimal? EmployerRiskPremium { get; set; }
+
+    /// <summary>
+    /// true si no se pudo leer el texto del PDF (dañado o escaneado): imprímalo de nuevo desde el SUA.
+    /// </summary>
+    [JsonPropertyName("unreadable")]
+    public bool Unreadable { get; set; }
+
+    /// <summary>
+    /// Cada trabajador: primero los que difieren, luego los que coinciden.
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public List<SuaComparisonWorkersItem> Workers { get; set; } = default!;
+
+    /// <summary>
+    /// Totales (Totales).
+    /// </summary>
+    [JsonPropertyName("totals")]
+    public SuaComparisonTotals Totals { get; set; } = default!;
+}
+
+/// <summary>
+/// Totales (Totales).
+/// </summary>
+public sealed partial class SuaComparisonTotals
+{
+    /// <summary>
+    /// Las cuotas al IMSS del mes según el SUA; 0 si algún renglón no se pudo leer.
+    /// </summary>
+    [JsonPropertyName("sua")]
+    public decimal Sua { get; set; }
+
+    /// <summary>
+    /// Las calculadas por Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("calculated")]
+    public decimal Calculated { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SuaComparisonWorkersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class SuaComparisonWorkersItem
+{
+    /// <summary>
+    /// El NSS, 11 dígitos.
+    /// </summary>
+    [JsonPropertyName("nss")]
+    public string? Nss { get; set; }
+
+    /// <summary>
+    /// El nombre en Fiscalisto, o null si solo está en el SUA.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Lo que dice el SUA, o null si no está en la cédula.
+    /// </summary>
+    [JsonPropertyName("sua")]
+    public SuaComparisonWorkersItemSua? Sua { get; set; }
+
+    /// <summary>
+    /// Lo que calculó Fiscalisto, o null si no tiene recibos timbrados del mes.
+    /// </summary>
+    [JsonPropertyName("calculated")]
+    public SuaComparisonWorkersItemCalculated? Calculated { get; set; }
+
+    /// <summary>
+    /// En qué difieren: days, sbc, amount (más de un peso), o missing si está solo en uno de los dos. Vacío si coinciden.
+    /// </summary>
+    [JsonPropertyName("differs")]
+    public List<string> Differs { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;SuaComparisonWorkersItemCalculated&lt;/c&gt;.
+/// </summary>
+public sealed partial class SuaComparisonWorkersItemCalculated
+{
+    /// <summary>
+    /// Días en enfermedades y maternidad: los del mes menos las incapacidades.
+    /// </summary>
+    [JsonPropertyName("days_health")]
+    public decimal DaysHealth { get; set; }
+
+    /// <summary>
+    /// Días en invalidez y vida: menos incapacidades y ausentismos.
+    /// </summary>
+    [JsonPropertyName("days_disability_life")]
+    public decimal DaysDisabilityLife { get; set; }
+
+    /// <summary>
+    /// El salario base de cotización.
+    /// </summary>
+    [JsonPropertyName("sbc")]
+    public decimal Sbc { get; set; }
+
+    /// <summary>
+    /// Sus cuotas patronales al IMSS.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;SuaComparisonWorkersItemSua&lt;/c&gt;.
+/// </summary>
+public sealed partial class SuaComparisonWorkersItemSua
+{
+    /// <summary>
+    /// Días en enfermedades y maternidad: los del mes menos las incapacidades.
+    /// </summary>
+    [JsonPropertyName("days_health")]
+    public decimal DaysHealth { get; set; }
+
+    /// <summary>
+    /// Días en invalidez y vida: menos incapacidades y ausentismos.
+    /// </summary>
+    [JsonPropertyName("days_disability_life")]
+    public decimal DaysDisabilityLife { get; set; }
+
+    /// <summary>
+    /// El salario base de cotización.
+    /// </summary>
+    [JsonPropertyName("sbc")]
+    public decimal Sbc { get; set; }
+
+    /// <summary>
+    /// Los días de incapacidad que trae el SUA.
+    /// </summary>
+    [JsonPropertyName("disability_days")]
+    public decimal DisabilityDays { get; set; }
+
+    /// <summary>
+    /// Los ausentismos que trae el SUA.
+    /// </summary>
+    [JsonPropertyName("absences")]
+    public decimal Absences { get; set; }
+
+    /// <summary>
+    /// Lo que paga el patrón del renglón (Patronal, más Obrera si gana el salario mínimo), o null si sus importes no se pudieron leer.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+}
+
+/// <summary>
+/// Un grupo de proveedores (Proveedores › Grupos): cada proveedor está en uno a lo más, y una regla vale para todo el grupo con la condición supplierGroup.
+/// </summary>
+public sealed partial class SupplierGroup
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Color de su etiqueta en la app: info, warning, positive, critical o muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string Color { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos proveedores hay en el grupo.
+    /// </summary>
+    [JsonPropertyName("suppliers")]
+    public long Suppliers { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SupplierGroupList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SupplierGroup> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Una factura que un proveedor le mandó al emisor por su Portal de proveedores, con lo que se revisó, su orden de compra, su contrarecibo y sus fechas de pago.
 /// </summary>
 public sealed partial class SupplierInvoice
@@ -52378,7 +52734,7 @@ public sealed partial class UpdateRuleParamsConditions
 public sealed partial class UpdateRuleParamsConditionsConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -52442,7 +52798,7 @@ public sealed partial class UpdateRuleParamsConditionsGroupsItem
 public sealed partial class UpdateRuleParamsConditionsGroupsItemConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -54258,6 +54614,38 @@ public sealed partial class UpdateStoreConnectionParamsSettings
     /// </summary>
     [JsonPropertyName("notify_buyer")]
     public bool? NotifyBuyer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Actualizar un grupo de proveedores».
+/// </summary>
+public sealed partial class UpdateSupplierGroupParams
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Color de su etiqueta en la app: info, warning, positive, critical o muted.
+    /// <br/>
+    /// Valores: info, warning, positive, critical, muted.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+
+    /// <summary>
+    /// RFC de los proveedores que entran al grupo (hasta 500); salen del que tenían.
+    /// </summary>
+    [JsonPropertyName("add_suppliers")]
+    public List<string>? AddSuppliers { get; set; }
+
+    /// <summary>
+    /// RFC de los proveedores que salen del grupo y quedan sin grupo (hasta 500).
+    /// </summary>
+    [JsonPropertyName("remove_suppliers")]
+    public List<string>? RemoveSuppliers { get; set; }
 }
 
 /// <summary>

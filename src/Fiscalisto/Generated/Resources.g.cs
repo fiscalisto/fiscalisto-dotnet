@@ -220,6 +220,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Reglas.</summary>
     public RulesResource Rules => _rules ??= new RulesResource(this);
 
+    private SupplierGroupsResource? _supplierGroups;
+
+    /// <summary>Reglas.</summary>
+    public SupplierGroupsResource SupplierGroups => _supplierGroups ??= new SupplierGroupsResource(this);
+
     private FindingsResource? _findings;
 
     /// <summary>Hallazgos.</summary>
@@ -3869,6 +3874,92 @@ public sealed class RulesResource
     /// </summary>
     public IAsyncEnumerable<RuleRun> ListRunsAutoPagingAsync(string id, ListRuleRunsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<RuleRun>($"/v1/rules/{Uri.EscapeDataString(id)}/runs", @params, options, cancellationToken);
+}
+
+/// <summary>
+/// Reglas: <c>fiscalisto.SupplierGroups</c>.
+/// </summary>
+public sealed class SupplierGroupsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SupplierGroupsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear un grupo de proveedores
+    /// </summary>
+    /// <remarks>
+    /// Un grupo de proveedores (fletes, materia prima…), como Proveedores › Grupos en la app. Cada proveedor está en un solo grupo: los de suppliers salen del que tenían. Una regla vale para todo el grupo con la condición supplierGroup.
+    /// <br/>
+    /// <c>POST /v1/supplier_groups</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/create-supplier-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SupplierGroup> CreateAsync(CreateSupplierGroupParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SupplierGroup>("POST", "/v1/supplier_groups", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar grupos de proveedores
+    /// </summary>
+    /// <remarks>
+    /// Los grupos de proveedores, con cuántos proveedores tiene cada uno.
+    /// <br/>
+    /// <c>GET /v1/supplier_groups</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/list-supplier-groups"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SupplierGroup>> ListAsync(ListSupplierGroupsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SupplierGroup>("/v1/supplier_groups", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar grupos de proveedores: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SupplierGroup> ListAutoPagingAsync(ListSupplierGroupsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SupplierGroup>("/v1/supplier_groups", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver un grupo de proveedores
+    /// </summary>
+    /// <remarks>
+    /// Un grupo de proveedores.
+    /// <br/>
+    /// <c>GET /v1/supplier_groups/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/get-supplier-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SupplierGroup> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SupplierGroup>("GET", $"/v1/supplier_groups/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar un grupo de proveedores
+    /// </summary>
+    /// <remarks>
+    /// Cambia solo lo que manda: su nombre, su color, los proveedores que entran (add_suppliers) y los que salen (remove_suppliers).
+    /// <br/>
+    /// <c>POST /v1/supplier_groups/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/update-supplier-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SupplierGroup> UpdateAsync(string id, UpdateSupplierGroupParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SupplierGroup>("POST", $"/v1/supplier_groups/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Quitar un grupo de proveedores
+    /// </summary>
+    /// <remarks>
+    /// Sus proveedores se quedan sin grupo, y las reglas que lo usan ya no aplican a nadie.
+    /// <br/>
+    /// <c>DELETE /v1/supplier_groups/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/delete-supplier-group"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/supplier_groups/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
 }
 
 /// <summary>
@@ -7899,6 +7990,20 @@ public sealed class PayrollProvisionsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<PayrollProvision> DeleteAsync(string month, DeletePayrollProvisionParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PayrollProvision>("DELETE", $"/v1/accounting/payroll_provisions/{Uri.EscapeDataString(month)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Comparar las cuotas de un mes con el SUA
+    /// </summary>
+    /// <remarks>
+    /// Lee la cédula de determinación de cuotas que imprimió el SUA para el mes (la mensual, del IMSS: cuota fija, excedente, prestaciones en dinero, gastos médicos de pensionados, riesgos de trabajo, invalidez y vida y guarderías) y la compara trabajador por trabajador, por su NSS, con lo que Fiscalisto calculó de los recibos timbrados: quién está solo en uno de los dos y en qué difieren los días, el salario base de cotización o las cuotas (hasta un peso es redondeo del SUA). Se calcula con la prima de riesgo de la cédula. No guarda nada: si el SUA tiene razón, mande sus importes a POST /v1/accounting/payroll_provisions/{month}. Como Cierre del mes › Cuotas patronales del mes › Comparar con el SUA en la app. Una cédula de otro mes contesta workers vacío y cedula_month con su mes.
+    /// <br/>
+    /// <c>POST /v1/accounting/payroll_provisions/{month}/sua_comparison</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/compare-sua-cedula"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SuaComparison> CompareSuaAsync(string month, CompareSuaCedulaParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SuaComparison>("POST", $"/v1/accounting/payroll_provisions/{Uri.EscapeDataString(month)}/sua_comparison", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
