@@ -24017,9 +24017,9 @@ public sealed partial class Finding
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad) o bank (movimientos del banco).
+    /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad), bank (movimientos del banco) o expense_reports (comprobaciones de viáticos).
     /// <br/>
-    /// Valores: purchase_orders, payouts, suppliers, accounting, bank.
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports.
     /// </summary>
     [JsonPropertyName("area")]
     public string? Area { get; set; }
@@ -24155,15 +24155,15 @@ public sealed partial class FindingList
 public sealed partial class FindingRecord
 {
     /// <summary>
-    /// purchase_order, payout, supplier, poliza (la contabilidad de un mes), account (una cuenta en un mes) o bank_movement.
+    /// purchase_order, payout, supplier, poliza (la contabilidad de un mes), account (una cuenta en un mes), bank_movement o expense_report (una comprobación de viáticos).
     /// <br/>
-    /// Valores: purchase_order, payout, supplier, poliza, account, bank_movement.
+    /// Valores: purchase_order, payout, supplier, poliza, account, bank_movement, expense_report.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// Su id en la API: el pago (pyo_…) o el RFC del proveedor; null si no tiene.
+    /// Su id en la API: el pago (pyo_…), la comprobación (exr_…) o el RFC del proveedor; null si no tiene.
     /// </summary>
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -33054,9 +33054,9 @@ public sealed partial class ListFindingsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// Solo los de un área: purchase_orders, payouts, suppliers, accounting o bank.
+    /// Solo los de un área: purchase_orders, payouts, suppliers, accounting, bank o expense_reports.
     /// <br/>
-    /// Valores: purchase_orders, payouts, suppliers, accounting, bank.
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports.
     /// </summary>
     [JsonPropertyName("area")]
     public string? Area { get; set; }
