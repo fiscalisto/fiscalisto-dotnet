@@ -2896,6 +2896,18 @@ public sealed partial class AutomaticJournalEntryOriginalLinesItem
 }
 
 /// <summary>
+/// Los campos de «Probar una regla en los últimos días».
+/// </summary>
+public sealed partial class BacktestRuleParams
+{
+    /// <summary>
+    /// Cuántos días hacia atrás (90 por omisión, hasta 90).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+}
+
+/// <summary>
 /// Timbres de producción de la cuenta, por paquete, el que vence antes primero.
 /// </summary>
 public sealed partial class Balance
@@ -44797,6 +44809,78 @@ public sealed partial class RuleActionsItemColumns
 }
 
 /// <summary>
+/// Lo que la regla habría hecho en los últimos días, contado (sin cambiar nada).
+/// </summary>
+public sealed partial class RuleBacktest
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// La regla (rul_…).
+    /// </summary>
+    [JsonPropertyName("rule")]
+    public string Rule { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos días hacia atrás revisó.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long Days { get; set; }
+
+    /// <summary>
+    /// Desde qué día (YYYY-MM-DD, hora de México).
+    /// </summary>
+    [JsonPropertyName("since")]
+    public string Since { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántas facturas, órdenes, movimientos o avisos de su trigger revisó.
+    /// </summary>
+    [JsonPropertyName("records")]
+    public long Records { get; set; }
+
+    /// <summary>
+    /// En cuántos se habrían cumplido sus condiciones.
+    /// </summary>
+    [JsonPropertyName("matches")]
+    public long Matches { get; set; }
+
+    /// <summary>
+    /// Lo que suman los que cumplen, en pesos; null para los avisos del SAT o si ninguno cumple.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// true: revisó los 2,000 más recientes y se detuvo ahí.
+    /// </summary>
+    [JsonPropertyName("capped")]
+    public bool Capped { get; set; }
+
+    /// <summary>
+    /// Lo que habría hecho con cada uno que cumple, en palabras.
+    /// </summary>
+    [JsonPropertyName("would_do")]
+    public List<string> WouldDo { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que habría hecho con los demás («Si no se cumple»), en palabras.
+    /// </summary>
+    [JsonPropertyName("else_would_do")]
+    public List<string> ElseWouldDo { get; set; } = default!;
+
+    /// <summary>
+    /// Días que espera y vuelve a revisar antes de actuar (0: actúa en seguida).
+    /// </summary>
+    [JsonPropertyName("wait_days")]
+    public long WaitDays { get; set; }
+}
+
+/// <summary>
 /// Si: lo que tiene que cumplir la factura u orden. Sin condiciones, corre siempre.
 /// </summary>
 public sealed partial class RuleConditions
@@ -45468,6 +45552,80 @@ public sealed partial class RuleTestList
     /// </summary>
     [JsonPropertyName("data")]
     public List<RuleTest> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Un cambio a una regla, con la regla como quedó. Se guardan las últimas 50 de cada regla; las de una regla borrada, 90 días.
+/// </summary>
+public sealed partial class RuleVersion
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Qué cambió: created, edited, paused (en pausa), resumed (activada), deleted o restored (regresó a una versión anterior).
+    /// <br/>
+    /// Valores: created, edited, paused, resumed, deleted, restored.
+    /// </summary>
+    [JsonPropertyName("change")]
+    public string Change { get; set; } = default!;
+
+    /// <summary>
+    /// El miembro (mem_…) que la cambió; null si fue la API o Fiscalisto.
+    /// </summary>
+    [JsonPropertyName("changed_by")]
+    public string? ChangedBy { get; set; }
+
+    /// <summary>
+    /// La regla como quedó después de este cambio.
+    /// </summary>
+    [JsonPropertyName("rule")]
+    public Rule Rule { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class RuleVersionList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<RuleVersion> Data { get; set; } = default!;
 
     /// <summary>
     /// true si hay más: pida la siguiente con starting_after igual al id del último.

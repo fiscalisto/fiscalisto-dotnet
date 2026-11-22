@@ -4642,6 +4642,48 @@ public sealed class RulesResource
     /// </summary>
     public IAsyncEnumerable<RuleRun> ListRunsAutoPagingAsync(string id, ListRuleRunsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<RuleRun>($"/v1/rules/{Uri.EscapeDataString(id)}/runs", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Probar una regla en los últimos días
+    /// </summary>
+    /// <remarks>
+    /// Con todos los registros de su trigger de los últimos days días (90 por omisión, hasta 2,000): en cuántos se cumple, cuánto suman y qué habría hecho. No cambia nada.
+    /// <br/>
+    /// <c>POST /v1/rules/{id}/backtest</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/backtest-rule"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RuleBacktest> BacktestAsync(string id, BacktestRuleParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RuleBacktest>("POST", $"/v1/rules/{Uri.EscapeDataString(id)}/backtest", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambios de una regla
+    /// </summary>
+    /// <remarks>
+    /// Cada cambio, el más reciente primero, con quién lo hizo y la regla como quedó. También de una regla borrada (90 días).
+    /// <br/>
+    /// <c>GET /v1/rules/{id}/versions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/list-rule-versions"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<RuleVersionList> ListVersionsAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RuleVersionList>("GET", $"/v1/rules/{Uri.EscapeDataString(id)}/versions", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Regresar una regla a una versión
+    /// </summary>
+    /// <remarks>
+    /// La regla vuelve a como quedó en esa versión; una borrada vuelve a existir. Se revisa como cualquier cambio y queda como una versión más.
+    /// <br/>
+    /// <c>POST /v1/rules/{id}/versions/{version}/restore</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/restore-rule-version"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Rule> RestoreVersionAsync(string id, string version, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Rule>("POST", $"/v1/rules/{Uri.EscapeDataString(id)}/versions/{Uri.EscapeDataString(version)}/restore", null, null, options, true, cancellationToken);
 }
 
 /// <summary>
