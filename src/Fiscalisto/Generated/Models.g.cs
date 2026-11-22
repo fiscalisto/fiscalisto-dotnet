@@ -5570,6 +5570,1128 @@ public sealed partial class ClassifyBankTransactionParams
 }
 
 /// <summary>
+/// El clima laboral de un emisor (Nómina › Clima laboral).
+/// </summary>
+public sealed partial class Climate
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que se configura en POST /v1/climate/policy.
+    /// </summary>
+    [JsonPropertyName("settings")]
+    public ClimateSettings Settings { get; set; } = default!;
+
+    /// <summary>
+    /// Cada centro de trabajo con su guía y cuándo le toca.
+    /// </summary>
+    [JsonPropertyName("centros")]
+    public List<ClimateCentrosItem> Centros { get; set; } = default!;
+
+    /// <summary>
+    /// Las acciones del Programa de intervención.
+    /// </summary>
+    [JsonPropertyName("actions")]
+    public ClimateActions Actions { get; set; } = default!;
+
+    /// <summary>
+    /// Las quejas del buzón que esperan atención.
+    /// </summary>
+    [JsonPropertyName("complaints")]
+    public ClimateComplaints Complaints { get; set; } = default!;
+}
+
+/// <summary>
+/// Una acción del Programa de intervención (numerales 8.3 a 8.5).
+/// </summary>
+public sealed partial class ClimateAction
+{
+    /// <summary>
+    /// La acción (cla_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// La encuesta de la que sale (cls_…).
+    /// </summary>
+    [JsonPropertyName("survey")]
+    public string? Survey { get; set; }
+
+    /// <summary>
+    /// La categoría o el dominio que atiende.
+    /// </summary>
+    [JsonPropertyName("area")]
+    public string Area { get; set; } = default!;
+
+    /// <summary>
+    /// primer, segundo o tercer nivel (numeral 8.5).
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string Level { get; set; } = default!;
+
+    /// <summary>
+    /// Qué se va a hacer.
+    /// </summary>
+    [JsonPropertyName("action")]
+    public string Action { get; set; } = default!;
+
+    /// <summary>
+    /// El responsable.
+    /// </summary>
+    [JsonPropertyName("owner")]
+    public string? Owner { get; set; }
+
+    /// <summary>
+    /// Para cuándo.
+    /// </summary>
+    [JsonPropertyName("due_on")]
+    public string? DueOn { get; set; }
+
+    /// <summary>
+    /// pending, in_progress o done.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se terminó.
+    /// </summary>
+    [JsonPropertyName("done_on")]
+    public string? DoneOn { get; set; }
+
+    /// <summary>
+    /// Cómo resultó (numeral 8.4 c)).
+    /// </summary>
+    [JsonPropertyName("evaluation")]
+    public string? Evaluation { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+}
+
+/// <summary>
+/// Una acción borrada.
+/// </summary>
+public sealed partial class ClimateActionDeleted
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Siempre true.
+    /// </summary>
+    [JsonPropertyName("deleted")]
+    public bool Deleted { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ClimateActionList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ClimateAction> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Las acciones del Programa de intervención.
+/// </summary>
+public sealed partial class ClimateActions
+{
+    /// <summary>
+    /// Total en la moneda del comprobante (Total).
+    /// </summary>
+    [JsonPropertyName("total")]
+    public long Total { get; set; }
+
+    /// <summary>
+    /// Las que no se han terminado.
+    /// </summary>
+    [JsonPropertyName("pending")]
+    public long Pending { get; set; }
+
+    /// <summary>
+    /// De ellas, las que pasaron su fecha.
+    /// </summary>
+    [JsonPropertyName("late")]
+    public long Late { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateCentrosItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateCentrosItem
+{
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Quienes trabajan ahí hoy.
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public long Workers { get; set; }
+
+    /// <summary>
+    /// II, III o null (solo la Guía I).
+    /// </summary>
+    [JsonPropertyName("guide")]
+    public string? Guide { get; set; }
+
+    /// <summary>
+    /// Cuándo se cerró la última identificación NOM-035 ahí.
+    /// </summary>
+    [JsonPropertyName("last_on")]
+    public string? LastOn { get; set; }
+
+    /// <summary>
+    /// Cuándo toca la siguiente: cada dos años como mínimo (numeral 7.9).
+    /// </summary>
+    [JsonPropertyName("next_due")]
+    public string? NextDue { get; set; }
+
+    /// <summary>
+    /// Si ya le tocaba (o nunca se ha hecho).
+    /// </summary>
+    [JsonPropertyName("overdue")]
+    public bool Overdue { get; set; }
+}
+
+/// <summary>
+/// Una queja del buzón (numeral 8.1 b)).
+/// </summary>
+public sealed partial class ClimateComplaint
+{
+    /// <summary>
+    /// La queja (clq_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// violencia, entorno u otro.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que escribió.
+    /// </summary>
+    [JsonPropertyName("body")]
+    public string Body { get; set; } = default!;
+
+    /// <summary>
+    /// Solo si quien la mandó la firmó.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Cuándo llegó.
+    /// </summary>
+    [JsonPropertyName("received_on")]
+    public string ReceivedOn { get; set; } = default!;
+
+    /// <summary>
+    /// nueva, en_atencion o atendida.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// Qué se hizo.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// Cuándo se atendió.
+    /// </summary>
+    [JsonPropertyName("closed_on")]
+    public string? ClosedOn { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ClimateComplaintList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ClimateComplaint> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Las quejas del buzón que esperan atención.
+/// </summary>
+public sealed partial class ClimateComplaints
+{
+    /// <summary>
+    /// Quejas nuevas.
+    /// </summary>
+    [JsonPropertyName("new")]
+    public long New { get; set; }
+
+    /// <summary>
+    /// Quejas en atención.
+    /// </summary>
+    [JsonPropertyName("in_progress")]
+    public long InProgress { get; set; }
+}
+
+/// <summary>
+/// Lo que se configura en POST /v1/climate/policy.
+/// </summary>
+public sealed partial class ClimateSettings
+{
+    /// <summary>
+    /// La política de prevención de riesgos psicosociales (numeral 5.1).
+    /// </summary>
+    [JsonPropertyName("policy")]
+    public string? Policy { get; set; }
+
+    /// <summary>
+    /// La versión publicada (0: ninguna).
+    /// </summary>
+    [JsonPropertyName("policy_version")]
+    public long PolicyVersion { get; set; }
+
+    /// <summary>
+    /// Cuándo se publicó.
+    /// </summary>
+    [JsonPropertyName("policy_published_at")]
+    public string? PolicyPublishedAt { get; set; }
+
+    /// <summary>
+    /// Con quién más presentar una queja, además del buzón.
+    /// </summary>
+    [JsonPropertyName("complaints_contact")]
+    public string? ComplaintsContact { get; set; }
+
+    /// <summary>
+    /// Quienes leyeron la versión publicada (numeral 5.7 a)).
+    /// </summary>
+    [JsonPropertyName("policy_reads")]
+    public long PolicyReads { get; set; }
+
+    /// <summary>
+    /// Quienes trabajan hoy en el emisor.
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public long Workers { get; set; }
+}
+
+/// <summary>
+/// Una encuesta NOM-035 o de clima (Nómina › Clima laboral).
+/// </summary>
+public sealed partial class ClimateSurvey
+{
+    /// <summary>
+    /// La encuesta (cls_…).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// nom035 o clima.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = default!;
+
+    /// <summary>
+    /// El centro de trabajo (brn_…); null: todos los trabajadores del emisor.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// El nombre del centro de trabajo.
+    /// </summary>
+    [JsonPropertyName("centro")]
+    public string Centro { get; set; } = default!;
+
+    /// <summary>
+    /// NOM-035: II (de 16 a 50 trabajadores), III (más de 50) o null (hasta 15: solo la Guía I), numeral 7.1.
+    /// </summary>
+    [JsonPropertyName("guide")]
+    public string? Guide { get; set; }
+
+    /// <summary>
+    /// Si también pregunta la Guía I.
+    /// </summary>
+    [JsonPropertyName("guide_i")]
+    public bool GuideI { get; set; }
+
+    /// <summary>
+    /// Si se aplica a una muestra (Guía III).
+    /// </summary>
+    [JsonPropertyName("sample")]
+    public bool Sample { get; set; }
+
+    /// <summary>
+    /// draft, open o closed.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string Status { get; set; } = default!;
+
+    /// <summary>
+    /// La fecha límite para contestar.
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+
+    /// <summary>
+    /// Los trabajadores del centro cuando se abrió.
+    /// </summary>
+    [JsonPropertyName("workers")]
+    public long? Workers { get; set; }
+
+    /// <summary>
+    /// A cuántos se les pidió contestarla.
+    /// </summary>
+    [JsonPropertyName("invited")]
+    public long Invited { get; set; }
+
+    /// <summary>
+    /// Cuántos la contestaron.
+    /// </summary>
+    [JsonPropertyName("answered")]
+    public long Answered { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se abrió.
+    /// </summary>
+    [JsonPropertyName("opened_at")]
+    public string? OpenedAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se cerró.
+    /// </summary>
+    [JsonPropertyName("closed_at")]
+    public string? ClosedAt { get; set; }
+
+    /// <summary>
+    /// Encuesta de clima: sus preguntas (al ver una encuesta).
+    /// </summary>
+    [JsonPropertyName("questions")]
+    public List<ClimateSurveyQuestionsItem>? Questions { get; set; }
+
+    /// <summary>
+    /// Lo que dice el informe además de los resultados (numeral 7.7).
+    /// </summary>
+    [JsonPropertyName("report")]
+    public ClimateSurveyReport? Report { get; set; }
+
+    /// <summary>
+    /// Los resultados, sin nombres.
+    /// </summary>
+    [JsonPropertyName("results")]
+    public ClimateSurveyResults? Results { get; set; }
+
+    /// <summary>
+    /// A quién se le pidió y si contestó, para recordarle a quien falta.
+    /// </summary>
+    [JsonPropertyName("invites")]
+    public List<ClimateSurveyInvitesItem>? Invites { get; set; }
+}
+
+/// <summary>
+/// Una encuesta borrada.
+/// </summary>
+public sealed partial class ClimateSurveyDeleted
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Siempre true.
+    /// </summary>
+    [JsonPropertyName("deleted")]
+    public bool Deleted { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyInvitesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyInvitesItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Si ya contestó (no qué).
+    /// </summary>
+    [JsonPropertyName("answered")]
+    public bool Answered { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ClimateSurveyList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ClimateSurvey> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyQuestionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyQuestionsItem
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = default!;
+
+    /// <summary>
+    /// scale, nps, choice o text.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Con choice: sus opciones.
+    /// </summary>
+    [JsonPropertyName("options")]
+    public List<string>? Options { get; set; }
+
+    /// <summary>
+    /// Si es obligatoria.
+    /// </summary>
+    [JsonPropertyName("required")]
+    public bool Required { get; set; }
+}
+
+/// <summary>
+/// Lo que dice el informe además de los resultados (numeral 7.7).
+/// </summary>
+public sealed partial class ClimateSurveyReport
+{
+    /// <summary>
+    /// El domicilio del centro de trabajo.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public string? Address { get; set; }
+
+    /// <summary>
+    /// Su actividad principal.
+    /// </summary>
+    [JsonPropertyName("activity")]
+    public string? Activity { get; set; }
+
+    /// <summary>
+    /// El objetivo de la evaluación.
+    /// </summary>
+    [JsonPropertyName("objective")]
+    public string? Objective { get; set; }
+
+    /// <summary>
+    /// Las principales actividades que se hacen ahí.
+    /// </summary>
+    [JsonPropertyName("activities")]
+    public string? Activities { get; set; }
+
+    /// <summary>
+    /// Las conclusiones.
+    /// </summary>
+    [JsonPropertyName("conclusions")]
+    public string? Conclusions { get; set; }
+
+    /// <summary>
+    /// El responsable de la evaluación.
+    /// </summary>
+    [JsonPropertyName("responsible")]
+    public string? Responsible { get; set; }
+
+    /// <summary>
+    /// Su cédula profesional.
+    /// </summary>
+    [JsonPropertyName("license")]
+    public string? License { get; set; }
+}
+
+/// <summary>
+/// Los resultados, sin nombres.
+/// </summary>
+public sealed partial class ClimateSurveyResults
+{
+    /// <summary>
+    /// A cuántos se les pidió.
+    /// </summary>
+    [JsonPropertyName("invited")]
+    public long Invited { get; set; }
+
+    /// <summary>
+    /// Cuántos contestaron.
+    /// </summary>
+    [JsonPropertyName("answered")]
+    public long Answered { get; set; }
+
+    /// <summary>
+    /// Cuántas respuestas hacen falta para mostrar resultados (5).
+    /// </summary>
+    [JsonPropertyName("min_group")]
+    public long MinGroup { get; set; }
+
+    /// <summary>
+    /// true con menos de min_group respuestas: no se muestra nada, para que no se distinga lo que contestó cada quien.
+    /// </summary>
+    [JsonPropertyName("hidden")]
+    public bool Hidden { get; set; }
+
+    /// <summary>
+    /// La calificación final, por categoría y por dominio (Guías II y III).
+    /// </summary>
+    [JsonPropertyName("nom035")]
+    public ClimateSurveyResultsNom035? Nom035 { get; set; }
+
+    /// <summary>
+    /// Encuesta de clima: cada pregunta.
+    /// </summary>
+    [JsonPropertyName("climate")]
+    public List<ClimateSurveyResultsClimateItem>? Climate { get; set; }
+
+    /// <summary>
+    /// Guía I: cuántos dijeron «Sí» (los nombres, en traumatic_events).
+    /// </summary>
+    [JsonPropertyName("traumatic")]
+    public ClimateSurveyResultsTraumatic? Traumatic { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyResultsClimateItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyResultsClimateItem
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string Text { get; set; } = default!;
+
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos la contestaron.
+    /// </summary>
+    [JsonPropertyName("answered")]
+    public long Answered { get; set; }
+
+    /// <summary>
+    /// scale y nps: el promedio.
+    /// </summary>
+    [JsonPropertyName("average")]
+    public decimal? Average { get; set; }
+
+    /// <summary>
+    /// Cuántos dieron cada respuesta (cada número o cada opción).
+    /// </summary>
+    [JsonPropertyName("counts")]
+    public Dictionary<string, JsonElement>? Counts { get; set; }
+
+    /// <summary>
+    /// nps: el porcentaje de promotores menos el de detractores.
+    /// </summary>
+    [JsonPropertyName("enps")]
+    public decimal? Enps { get; set; }
+
+    /// <summary>
+    /// text: las respuestas, en orden alfabético y sin nombre.
+    /// </summary>
+    [JsonPropertyName("texts")]
+    public List<string>? Texts { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyResultsNom035&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyResultsNom035
+{
+    /// <summary>
+    /// La calificación final y su nivel de riesgo.
+    /// </summary>
+    [JsonPropertyName("final")]
+    public ClimateSurveyResultsNom035Final Final { get; set; } = default!;
+
+    /// <summary>
+    /// Cada categoría de la guía.
+    /// </summary>
+    [JsonPropertyName("categories")]
+    public List<ClimateSurveyResultsNom035CategoriesItem> Categories { get; set; } = default!;
+
+    /// <summary>
+    /// Cada dominio de la guía.
+    /// </summary>
+    [JsonPropertyName("domains")]
+    public List<ClimateSurveyResultsNom035DomainsItem> Domains { get; set; } = default!;
+
+    /// <summary>
+    /// Cada departamento con min_group respuestas o más.
+    /// </summary>
+    [JsonPropertyName("departments")]
+    public List<ClimateSurveyResultsNom035DepartmentsItem> Departments { get; set; } = default!;
+
+    /// <summary>
+    /// Departamentos con menos de min_group respuestas, que no se muestran.
+    /// </summary>
+    [JsonPropertyName("hidden_departments")]
+    public long HiddenDepartments { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyResultsNom035CategoriesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyResultsNom035CategoriesItem
+{
+    /// <summary>
+    /// Su clave (la que va en area de una acción).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El promedio de las calificaciones de los trabajadores.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal Score { get; set; }
+
+    /// <summary>
+    /// El nivel de riesgo de ese promedio según las tablas de la norma: nulo, bajo, medio, alto o muy_alto.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string Level { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos trabajadores quedaron en cada nivel (nulo, bajo, medio, alto, muy_alto).
+    /// </summary>
+    [JsonPropertyName("levels")]
+    public Dictionary<string, JsonElement> Levels { get; set; } = default!;
+
+    /// <summary>
+    /// De medio para arriba pide un Programa de intervención (numeral 8.3).
+    /// </summary>
+    [JsonPropertyName("needs_program")]
+    public bool NeedsProgram { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyResultsNom035DepartmentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyResultsNom035DepartmentsItem
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos de ahí contestaron.
+    /// </summary>
+    [JsonPropertyName("answered")]
+    public long Answered { get; set; }
+
+    /// <summary>
+    /// La calificación final promedio del departamento.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal Score { get; set; }
+
+    /// <summary>
+    /// Nivel educativo (nivelEducativo).
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string Level { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyResultsNom035DomainsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyResultsNom035DomainsItem
+{
+    /// <summary>
+    /// Su clave (la que va en area de una acción).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public string Key { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El promedio de las calificaciones de los trabajadores.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal Score { get; set; }
+
+    /// <summary>
+    /// El nivel de riesgo de ese promedio según las tablas de la norma: nulo, bajo, medio, alto o muy_alto.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string Level { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos trabajadores quedaron en cada nivel (nulo, bajo, medio, alto, muy_alto).
+    /// </summary>
+    [JsonPropertyName("levels")]
+    public Dictionary<string, JsonElement> Levels { get; set; } = default!;
+
+    /// <summary>
+    /// De medio para arriba pide un Programa de intervención (numeral 8.3).
+    /// </summary>
+    [JsonPropertyName("needs_program")]
+    public bool NeedsProgram { get; set; }
+}
+
+/// <summary>
+/// La calificación final y su nivel de riesgo.
+/// </summary>
+public sealed partial class ClimateSurveyResultsNom035Final
+{
+    /// <summary>
+    /// La calificación final del cuestionario.
+    /// </summary>
+    [JsonPropertyName("score")]
+    public decimal Score { get; set; }
+
+    /// <summary>
+    /// Nivel educativo (nivelEducativo).
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string Level { get; set; } = default!;
+
+    /// <summary>
+    /// Cuántos trabajadores quedaron en cada nivel (nulo, bajo, medio, alto, muy_alto).
+    /// </summary>
+    [JsonPropertyName("levels")]
+    public Dictionary<string, JsonElement> Levels { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;ClimateSurveyResultsTraumatic&lt;/c&gt;.
+/// </summary>
+public sealed partial class ClimateSurveyResultsTraumatic
+{
+    /// <summary>
+    /// Quienes dijeron haber vivido un acontecimiento traumático severo.
+    /// </summary>
+    [JsonPropertyName("yes")]
+    public long Yes { get; set; }
+
+    /// <summary>
+    /// De ellos, quienes requieren valoración clínica (Guía I).
+    /// </summary>
+    [JsonPropertyName("needs_attention")]
+    public long NeedsAttention { get; set; }
+}
+
+/// <summary>
+/// Quien dijo haber vivido un acontecimiento traumático severo (Guía I).
+/// </summary>
+public sealed partial class ClimateTraumaticEvent
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// La encuesta (cls_…).
+    /// </summary>
+    [JsonPropertyName("survey")]
+    public string Survey { get; set; } = default!;
+
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Si requiere valoración clínica según la Guía I (numeral 5.5).
+    /// </summary>
+    [JsonPropertyName("needs_attention")]
+    public bool NeedsAttention { get; set; }
+
+    /// <summary>
+    /// Cuándo contestó.
+    /// </summary>
+    [JsonPropertyName("answered_on")]
+    public string AnsweredOn { get; set; } = default!;
+
+    /// <summary>
+    /// A dónde se le canalizó.
+    /// </summary>
+    [JsonPropertyName("referred_to")]
+    public string? ReferredTo { get; set; }
+
+    /// <summary>
+    /// Cuándo se le canalizó.
+    /// </summary>
+    [JsonPropertyName("referred_on")]
+    public string? ReferredOn { get; set; }
+
+    /// <summary>
+    /// Una nota.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ClimateTraumaticEventList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ClimateTraumaticEvent> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// Los campos de «Cerrar un pedido».
 /// </summary>
 public sealed partial class CloseSalesOrderParams
@@ -8443,6 +9565,170 @@ public sealed partial class CreateCashForecastItemParams
     /// </summary>
     [JsonPropertyName("until")]
     public string? Until { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Agregar una acción del Programa de intervención».
+/// </summary>
+public sealed partial class CreateClimateActionParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La encuesta de la que sale (cls_…), si sale de una.
+    /// </summary>
+    [JsonPropertyName("survey")]
+    public string? Survey { get; set; }
+
+    /// <summary>
+    /// La categoría o el dominio que atiende (su clave en results), o un texto libre.
+    /// </summary>
+    [JsonPropertyName("area")]
+    public required string Area { get; set; }
+
+    /// <summary>
+    /// El nivel de la acción (numeral 8.5): primer (la organización, por omisión), segundo (grupos) o tercer (cada persona).
+    /// <br/>
+    /// Valores: primer, segundo, tercer.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string? Level { get; set; }
+
+    /// <summary>
+    /// Qué se va a hacer.
+    /// </summary>
+    [JsonPropertyName("action")]
+    public required string Action { get; set; }
+
+    /// <summary>
+    /// El responsable.
+    /// </summary>
+    [JsonPropertyName("owner")]
+    public string? Owner { get; set; }
+
+    /// <summary>
+    /// Para cuándo.
+    /// </summary>
+    [JsonPropertyName("due_on")]
+    public string? DueOn { get; set; }
+
+    /// <summary>
+    /// pending (por omisión), in_progress o done.
+    /// <br/>
+    /// Valores: pending, in_progress, done.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Al terminarla: cómo resultó (numeral 8.4 c)).
+    /// </summary>
+    [JsonPropertyName("evaluation")]
+    public string? Evaluation { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear una encuesta de clima laboral».
+/// </summary>
+public sealed partial class CreateClimateSurveyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// nom035 (las guías de la norma por centro de trabajo) o clima (una encuesta propia con sus preguntas).
+    /// <br/>
+    /// Valores: nom035, clima.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// Su nombre; por omisión «NOM-035 2026» o «Encuesta de clima 2026».
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// El centro de trabajo: una sucursal (brn_…). null u omitido: todos los trabajadores del emisor.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// NOM-035: también pregunta la Guía I, para identificar a quien vivió un acontecimiento traumático severo (numeral 5.5). Por omisión, sí.
+    /// </summary>
+    [JsonPropertyName("guide_i")]
+    public bool? GuideI { get; set; }
+
+    /// <summary>
+    /// NOM-035 con la Guía III (más de 50 trabajadores): la aplica a una muestra elegida al azar según la Ecuación 1 de la norma, en proporción de hombres y mujeres.
+    /// </summary>
+    [JsonPropertyName("sample")]
+    public bool? Sample { get; set; }
+
+    /// <summary>
+    /// Encuesta de clima: sus preguntas, en orden.
+    /// </summary>
+    [JsonPropertyName("questions")]
+    public List<CreateClimateSurveyParamsQuestionsItem>? Questions { get; set; }
+
+    /// <summary>
+    /// La fecha límite para contestar (opcional).
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+
+    /// <summary>
+    /// true la abre de una vez: invita a quien trabaja hoy en ese centro y aparece en su portal.
+    /// </summary>
+    [JsonPropertyName("open")]
+    public bool? Open { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateClimateSurveyParamsQuestionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateClimateSurveyParamsQuestionsItem
+{
+    /// <summary>
+    /// Su id, único en la encuesta.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
+
+    /// <summary>
+    /// La pregunta.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public required string Text { get; set; }
+
+    /// <summary>
+    /// scale (del 1 al 5, qué tan de acuerdo), nps (del 0 al 10, para el eNPS), choice (opciones) o text (respuesta abierta).
+    /// <br/>
+    /// Valores: scale, nps, choice, text.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Con choice: de 2 a 12 opciones.
+    /// </summary>
+    [JsonPropertyName("options")]
+    public List<string>? Options { get; set; }
+
+    /// <summary>
+    /// Si es obligatoria (por omisión, sí).
+    /// </summary>
+    [JsonPropertyName("required")]
+    public bool? Required { get; set; }
 }
 
 /// <summary>
@@ -23042,6 +24328,18 @@ public sealed partial class GetCashForecastParams
 }
 
 /// <summary>
+/// Los campos de «Clima laboral».
+/// </summary>
+public sealed partial class GetClimateParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Ver hasta qué mes está cerrada la contabilidad».
 /// </summary>
 public sealed partial class GetClosedPeriodParams
@@ -30687,6 +31985,90 @@ public sealed partial class ListCandidatesParams
 /// </summary>
 public sealed partial class ListChartTemplatesParams
 {
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar acciones del Programa de intervención».
+/// </summary>
+public sealed partial class ListClimateActionsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las de esta encuesta (cls_…).
+    /// </summary>
+    [JsonPropertyName("survey")]
+    public string? Survey { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar quejas del buzón».
+/// </summary>
+public sealed partial class ListClimateComplaintsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo las nueva, en_atencion o atendida.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar encuestas de clima laboral».
+/// </summary>
+public sealed partial class ListClimateSurveysParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
     /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
@@ -40152,6 +41534,36 @@ public sealed partial class RecurringInvoiceSchedule
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string TimeZone { get; set; } = default!;
+}
+
+/// <summary>
+/// Los campos de «Anotar a dónde se canalizó a un trabajador».
+/// </summary>
+public sealed partial class ReferClimateTraumaticEventParams
+{
+    /// <summary>
+    /// Quien vivió el acontecimiento (emp_…), de GET /v1/climate_surveys/{id}/traumatic_events.
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public required string Employee { get; set; }
+
+    /// <summary>
+    /// A dónde se le canalizó: el IMSS, un médico, un psicólogo.
+    /// </summary>
+    [JsonPropertyName("referred_to")]
+    public string? ReferredTo { get; set; }
+
+    /// <summary>
+    /// Cuándo.
+    /// </summary>
+    [JsonPropertyName("referred_on")]
+    public string? ReferredOn { get; set; }
+
+    /// <summary>
+    /// Una nota.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
 }
 
 /// <summary>
@@ -49696,6 +51108,262 @@ public sealed partial class UpdateCashForecastParamsStartingBalance
     /// </summary>
     [JsonPropertyName("date")]
     public string? Date { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar una acción del Programa de intervención».
+/// </summary>
+public sealed partial class UpdateClimateActionParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// La encuesta de la que sale (cls_…), si sale de una.
+    /// </summary>
+    [JsonPropertyName("survey")]
+    public string? Survey { get; set; }
+
+    /// <summary>
+    /// La categoría o el dominio que atiende (su clave en results), o un texto libre.
+    /// </summary>
+    [JsonPropertyName("area")]
+    public required string Area { get; set; }
+
+    /// <summary>
+    /// El nivel de la acción (numeral 8.5): primer (la organización, por omisión), segundo (grupos) o tercer (cada persona).
+    /// <br/>
+    /// Valores: primer, segundo, tercer.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public string? Level { get; set; }
+
+    /// <summary>
+    /// Qué se va a hacer.
+    /// </summary>
+    [JsonPropertyName("action")]
+    public required string Action { get; set; }
+
+    /// <summary>
+    /// El responsable.
+    /// </summary>
+    [JsonPropertyName("owner")]
+    public string? Owner { get; set; }
+
+    /// <summary>
+    /// Para cuándo.
+    /// </summary>
+    [JsonPropertyName("due_on")]
+    public string? DueOn { get; set; }
+
+    /// <summary>
+    /// pending (por omisión), in_progress o done.
+    /// <br/>
+    /// Valores: pending, in_progress, done.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Al terminarla: cómo resultó (numeral 8.4 c)).
+    /// </summary>
+    [JsonPropertyName("evaluation")]
+    public string? Evaluation { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Atender una queja del buzón».
+/// </summary>
+public sealed partial class UpdateClimateComplaintParams
+{
+    /// <summary>
+    /// nueva, en_atencion o atendida.
+    /// <br/>
+    /// Valores: nueva, en_atencion, atendida.
+    /// </summary>
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    /// <summary>
+    /// Qué se hizo.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Guardar la política de prevención».
+/// </summary>
+public sealed partial class UpdateClimatePolicyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El texto de la política de prevención de riesgos psicosociales (numeral 5.1). La Guía IV de la norma trae un ejemplo.
+    /// </summary>
+    [JsonPropertyName("policy")]
+    public string? Policy { get; set; }
+
+    /// <summary>
+    /// Con quién más pueden presentar una queja, además del buzón del portal (Recursos Humanos, por ejemplo).
+    /// </summary>
+    [JsonPropertyName("complaints_contact")]
+    public string? ComplaintsContact { get; set; }
+
+    /// <summary>
+    /// true la publica en el portal de cada trabajador (numeral 5.7) como una versión nueva, que se les pide leer otra vez.
+    /// </summary>
+    [JsonPropertyName("publish")]
+    public bool? Publish { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar una encuesta de clima laboral».
+/// </summary>
+public sealed partial class UpdateClimateSurveyParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// nom035 (las guías de la norma por centro de trabajo) o clima (una encuesta propia con sus preguntas).
+    /// <br/>
+    /// Valores: nom035, clima.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public required string Kind { get; set; }
+
+    /// <summary>
+    /// Su nombre; por omisión «NOM-035 2026» o «Encuesta de clima 2026».
+    /// </summary>
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    /// <summary>
+    /// El centro de trabajo: una sucursal (brn_…). null u omitido: todos los trabajadores del emisor.
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// NOM-035: también pregunta la Guía I, para identificar a quien vivió un acontecimiento traumático severo (numeral 5.5). Por omisión, sí.
+    /// </summary>
+    [JsonPropertyName("guide_i")]
+    public bool? GuideI { get; set; }
+
+    /// <summary>
+    /// NOM-035 con la Guía III (más de 50 trabajadores): la aplica a una muestra elegida al azar según la Ecuación 1 de la norma, en proporción de hombres y mujeres.
+    /// </summary>
+    [JsonPropertyName("sample")]
+    public bool? Sample { get; set; }
+
+    /// <summary>
+    /// Encuesta de clima: sus preguntas, en orden.
+    /// </summary>
+    [JsonPropertyName("questions")]
+    public List<UpdateClimateSurveyParamsQuestionsItem>? Questions { get; set; }
+
+    /// <summary>
+    /// La fecha límite para contestar (opcional).
+    /// </summary>
+    [JsonPropertyName("closes_on")]
+    public string? ClosesOn { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateClimateSurveyParamsQuestionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateClimateSurveyParamsQuestionsItem
+{
+    /// <summary>
+    /// Su id, único en la encuesta.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
+
+    /// <summary>
+    /// La pregunta.
+    /// </summary>
+    [JsonPropertyName("text")]
+    public required string Text { get; set; }
+
+    /// <summary>
+    /// scale (del 1 al 5, qué tan de acuerdo), nps (del 0 al 10, para el eNPS), choice (opciones) o text (respuesta abierta).
+    /// <br/>
+    /// Valores: scale, nps, choice, text.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Con choice: de 2 a 12 opciones.
+    /// </summary>
+    [JsonPropertyName("options")]
+    public List<string>? Options { get; set; }
+
+    /// <summary>
+    /// Si es obligatoria (por omisión, sí).
+    /// </summary>
+    [JsonPropertyName("required")]
+    public bool? Required { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Guardar el informe de una encuesta».
+/// </summary>
+public sealed partial class UpdateClimateSurveyReportParams
+{
+    /// <summary>
+    /// El domicilio del centro de trabajo (numeral 7.7 b)).
+    /// </summary>
+    [JsonPropertyName("address")]
+    public string? Address { get; set; }
+
+    /// <summary>
+    /// Su actividad principal.
+    /// </summary>
+    [JsonPropertyName("activity")]
+    public string? Activity { get; set; }
+
+    /// <summary>
+    /// El objetivo de la evaluación.
+    /// </summary>
+    [JsonPropertyName("objective")]
+    public string? Objective { get; set; }
+
+    /// <summary>
+    /// Las principales actividades que se hacen ahí.
+    /// </summary>
+    [JsonPropertyName("activities")]
+    public string? Activities { get; set; }
+
+    /// <summary>
+    /// Las conclusiones (numeral 7.7 g)).
+    /// </summary>
+    [JsonPropertyName("conclusions")]
+    public string? Conclusions { get; set; }
+
+    /// <summary>
+    /// El responsable de la evaluación.
+    /// </summary>
+    [JsonPropertyName("responsible")]
+    public string? Responsible { get; set; }
+
+    /// <summary>
+    /// Su cédula profesional, si la tiene.
+    /// </summary>
+    [JsonPropertyName("license")]
+    public string? License { get; set; }
 }
 
 /// <summary>

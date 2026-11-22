@@ -200,6 +200,26 @@ public sealed partial class FiscalistoClient
     /// <summary>Nómina.</summary>
     public TrainingCoursesResource TrainingCourses => _trainingCourses ??= new TrainingCoursesResource(this);
 
+    private ClimateResource? _climate;
+
+    /// <summary>Nómina.</summary>
+    public ClimateResource Climate => _climate ??= new ClimateResource(this);
+
+    private ClimateSurveysResource? _climateSurveys;
+
+    /// <summary>Nómina.</summary>
+    public ClimateSurveysResource ClimateSurveys => _climateSurveys ??= new ClimateSurveysResource(this);
+
+    private ClimateActionsResource? _climateActions;
+
+    /// <summary>Nómina.</summary>
+    public ClimateActionsResource ClimateActions => _climateActions ??= new ClimateActionsResource(this);
+
+    private ClimateComplaintsResource? _climateComplaints;
+
+    /// <summary>Nómina.</summary>
+    public ClimateComplaintsResource ClimateComplaints => _climateComplaints ??= new ClimateComplaintsResource(this);
+
     private InvoiceBatchesResource? _invoiceBatches;
 
     /// <summary>Lotes.</summary>
@@ -3544,6 +3564,316 @@ public sealed class TrainingCoursesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<byte[]> PdfAsync(string id, GetTrainingCertificatesPdfParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestBytesAsync("GET", $"/v1/training_courses/{Uri.EscapeDataString(id)}/pdf", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.Climate</c>.
+/// </summary>
+public sealed class ClimateResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ClimateResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Clima laboral
+    /// </summary>
+    /// <remarks>
+    /// Como «Nómina › Clima laboral» de la app: la política de prevención de riesgos psicosociales y cuántos la leyeron (NOM-035-STPS-2018, numerales 5.1 y 5.7), cada centro de trabajo con la guía que le toca por cuántos trabajan ahí (numeral 7.1) y cuándo le toca la siguiente identificación (cada dos años como mínimo, numeral 7.9), cuántas acciones del Programa de intervención faltan y cuántas quejas del buzón esperan atención.
+    /// <br/>
+    /// <c>GET /v1/climate</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-climate"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Climate> GetAsync(GetClimateParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Climate>("GET", "/v1/climate", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Guardar la política de prevención
+    /// </summary>
+    /// <remarks>
+    /// El texto de la política (numeral 5.1) y con quién más presentar una queja. Con publish true la publica en el portal de cada trabajador como una versión nueva (numeral 5.7) y se les pide leerla otra vez. Lo que no manda no cambia. Contesta climate.
+    /// <br/>
+    /// <c>POST /v1/climate/policy</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-climate-policy"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Climate> UpdatePolicyAsync(UpdateClimatePolicyParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Climate>("POST", "/v1/climate/policy", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.ClimateSurveys</c>.
+/// </summary>
+public sealed class ClimateSurveysResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ClimateSurveysResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar encuestas de clima laboral
+    /// </summary>
+    /// <remarks>
+    /// Las encuestas NOM-035 y de clima del emisor (cls_…), las más recientes primero, con a cuántos se les pidió y cuántos contestaron.
+    /// <br/>
+    /// <c>GET /v1/climate_surveys</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-climate-surveys"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ClimateSurvey>> ListAsync(ListClimateSurveysParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ClimateSurvey>("/v1/climate_surveys", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar encuestas de clima laboral: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ClimateSurvey> ListAutoPagingAsync(ListClimateSurveysParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ClimateSurvey>("/v1/climate_surveys", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Crear una encuesta de clima laboral
+    /// </summary>
+    /// <remarks>
+    /// kind nom035 aplica la guía que le toca al centro de trabajo por cuántos trabajan ahí hoy: la Guía II de 16 a 50 y la Guía III con más de 50 (numeral 7.1), y la Guía I para identificar a quien vivió un acontecimiento traumático severo (numeral 5.5). Un centro tiene una sola encuesta NOM-035 abierta a la vez. kind clima es una encuesta propia con sus preguntas (scale, nps para el eNPS, choice o text). Queda en borrador salvo con open true. Las respuestas llegan solo desde el portal del empleado y nunca con nombre.
+    /// <br/>
+    /// <c>POST /v1/climate_surveys</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-climate-survey"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateSurvey> CreateAsync(CreateClimateSurveyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateSurvey>("POST", "/v1/climate_surveys", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver una encuesta de clima laboral
+    /// </summary>
+    /// <remarks>
+    /// La encuesta con sus resultados: con la NOM-035, la calificación final y la de cada categoría y dominio con su nivel de riesgo según las tablas de la norma, y si pide un Programa de intervención (de medio para arriba, numeral 8.3); con la de clima, cada pregunta y el eNPS. Los resultados se muestran desde 5 respuestas (hidden true antes), y los departamentos con menos se dejan fuera, para que no se distinga lo que contestó cada quien. invites dice a quién se le pidió y si ya contestó, no qué.
+    /// <br/>
+    /// <c>GET /v1/climate_surveys/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/get-climate-survey"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateSurvey> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateSurvey>("GET", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una encuesta de clima laboral
+    /// </summary>
+    /// <remarks>
+    /// Cambia un borrador. Una encuesta abierta o cerrada ya no cambia, porque hay quien contestó esas preguntas: ciérrela y haga otra.
+    /// <br/>
+    /// <c>POST /v1/climate_surveys/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-climate-survey"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateSurvey> UpdateAsync(string id, UpdateClimateSurveyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateSurvey>("POST", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una encuesta de clima laboral
+    /// </summary>
+    /// <remarks>
+    /// La borra si nadie la ha contestado. Con respuestas se conserva: los resultados se guardan al menos un año (numeral 5.8).
+    /// <br/>
+    /// <c>DELETE /v1/climate_surveys/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-climate-survey"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateSurveyDeleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateSurveyDeleted>("DELETE", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Abrir una encuesta de clima laboral
+    /// </summary>
+    /// <remarks>
+    /// Invita a quien trabaja hoy en el centro (o a la muestra, con sample) y la encuesta aparece en su portal. Con la NOM-035 no se abre si el centro ya tiene otra abierta.
+    /// <br/>
+    /// <c>POST /v1/climate_surveys/{id}/open</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/open-climate-survey"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateSurvey> OpenAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateSurvey>("POST", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}/open", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cerrar una encuesta de clima laboral
+    /// </summary>
+    /// <remarks>
+    /// Deja de recibir respuestas. Una NOM-035 cerrada cuenta como la identificación del centro de trabajo, y la siguiente toca dos años después (numeral 7.9).
+    /// <br/>
+    /// <c>POST /v1/climate_surveys/{id}/close</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/close-climate-survey"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateSurvey> CloseAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateSurvey>("POST", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}/close", null, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Guardar el informe de una encuesta
+    /// </summary>
+    /// <remarks>
+    /// Solo de la NOM-035: lo que pide el informe de resultados además de lo que calcula Fiscalisto (numeral 7.7): domicilio y actividad del centro, objetivo, actividades, conclusiones y el responsable de la evaluación. Lo que no manda no cambia.
+    /// <br/>
+    /// <c>POST /v1/climate_surveys/{id}/report</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-climate-survey-report"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateSurvey> UpdateReportAsync(string id, UpdateClimateSurveyReportParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateSurvey>("POST", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}/report", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar acontecimientos traumáticos
+    /// </summary>
+    /// <remarks>
+    /// Quienes contestaron «Sí» en la Guía I, con su nombre, porque el patrón debe canalizar a quien lo requiera para su atención (numeral 5.5), y si requiere valoración clínica según la guía. Es lo único de una encuesta que lleva nombre.
+    /// <br/>
+    /// <c>GET /v1/climate_surveys/{id}/traumatic_events</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-climate-traumatic-events"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateTraumaticEventList> TraumaticEventsAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateTraumaticEventList>("GET", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}/traumatic_events", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Anotar a dónde se canalizó a un trabajador
+    /// </summary>
+    /// <remarks>
+    /// A dónde se canalizó a quien vivió un acontecimiento traumático severo (el IMSS, un médico, un psicólogo), cuándo y una nota. Lo que no manda se borra.
+    /// <br/>
+    /// <c>POST /v1/climate_surveys/{id}/referrals</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/refer-climate-traumatic-event"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateTraumaticEvent> ReferAsync(string id, ReferClimateTraumaticEventParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateTraumaticEvent>("POST", $"/v1/climate_surveys/{Uri.EscapeDataString(id)}/referrals", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.ClimateActions</c>.
+/// </summary>
+public sealed class ClimateActionsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ClimateActionsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar acciones del Programa de intervención
+    /// </summary>
+    /// <remarks>
+    /// Las acciones del emisor (cla_…), las pendientes primero y por fecha, o solo las de una encuesta con survey.
+    /// <br/>
+    /// <c>GET /v1/climate_actions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-climate-actions"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ClimateAction>> ListAsync(ListClimateActionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ClimateAction>("/v1/climate_actions", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar acciones del Programa de intervención: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ClimateAction> ListAutoPagingAsync(ListClimateActionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ClimateAction>("/v1/climate_actions", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Agregar una acción del Programa de intervención
+    /// </summary>
+    /// <remarks>
+    /// Lo que pide el programa (numeral 8.4): el área que atiende, la acción, su nivel (primer nivel la organización, segundo los grupos, tercero cada persona, numeral 8.5), el responsable y la fecha. Al marcarla done se anota el día, y evaluation dice cómo resultó.
+    /// <br/>
+    /// <c>POST /v1/climate_actions</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/create-climate-action"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateAction> CreateAsync(CreateClimateActionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateAction>("POST", "/v1/climate_actions", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una acción del Programa de intervención
+    /// </summary>
+    /// <remarks>
+    /// Reemplaza la acción con lo que manda: lo que no manda queda vacío o con su valor por omisión.
+    /// <br/>
+    /// <c>POST /v1/climate_actions/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-climate-action"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateAction> UpdateAsync(string id, UpdateClimateActionParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateAction>("POST", $"/v1/climate_actions/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar una acción del Programa de intervención
+    /// </summary>
+    /// <remarks>
+    /// La borra. No se puede deshacer.
+    /// <br/>
+    /// <c>DELETE /v1/climate_actions/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/delete-climate-action"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateActionDeleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateActionDeleted>("DELETE", $"/v1/climate_actions/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Nómina: <c>fiscalisto.ClimateComplaints</c>.
+/// </summary>
+public sealed class ClimateComplaintsResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ClimateComplaintsResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar quejas del buzón
+    /// </summary>
+    /// <remarks>
+    /// Las quejas que mandaron los trabajadores desde su portal (numeral 8.1 b)): de violencia laboral, del entorno u otra. Llevan nombre solo si quien la mandó la firmó.
+    /// <br/>
+    /// <c>GET /v1/climate_complaints</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-climate-complaints"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ClimateComplaint>> ListAsync(ListClimateComplaintsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ClimateComplaint>("/v1/climate_complaints", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar quejas del buzón: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ClimateComplaint> ListAutoPagingAsync(ListClimateComplaintsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ClimateComplaint>("/v1/climate_complaints", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Atender una queja del buzón
+    /// </summary>
+    /// <remarks>
+    /// Su estado y qué se hizo. Al marcarla atendida se anota el día. Lo que no manda no cambia.
+    /// <br/>
+    /// <c>POST /v1/climate_complaints/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/update-climate-complaint"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ClimateComplaint> UpdateAsync(string id, UpdateClimateComplaintParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ClimateComplaint>("POST", $"/v1/climate_complaints/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
