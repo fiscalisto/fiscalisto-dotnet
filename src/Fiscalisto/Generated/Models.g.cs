@@ -17415,6 +17415,20 @@ public sealed partial class CreateTicketParams
     public List<CreateTicketParamsLocalTaxesItem>? LocalTaxes { get; set; }
 
     /// <summary>
+    /// IEPS incluido en su total, con `product_key` (un producto lleva el suyo): una tasa de c_TasaOCuota como 0.08 (botanas) o, con `ieps_factor` `Cuota`, pesos por unidad. La factura global lo desglosa aparte (RMF 2026 regla 2.7.1.21); la factura de un cliente que no paga IEPS lo lleva dentro del precio (LIEPS art. 19 fr. II).
+    /// </summary>
+    [JsonPropertyName("ieps")]
+    public decimal? Ieps { get; set; }
+
+    /// <summary>
+    /// `Tasa` (por omisión) o `Cuota` (pesos por unidad).
+    /// <br/>
+    /// Valores: Tasa, Cuota.
+    /// </summary>
+    [JsonPropertyName("ieps_factor")]
+    public string? IepsFactor { get; set; }
+
+    /// <summary>
     /// Quién pagó, para reconocer la venta en Tickets. No es el receptor de la factura (eso lo escribe el comprador en el portal) y no se le manda nada.
     /// </summary>
     [JsonPropertyName("buyer")]
@@ -17493,6 +17507,20 @@ public sealed partial class CreateTicketParamsLinesItem
     /// </summary>
     [JsonPropertyName("local_taxes")]
     public List<CreateTicketParamsLinesItemLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
+    /// IEPS incluido en su total, con `product_key` (un producto lleva el suyo): una tasa de c_TasaOCuota como 0.08 (botanas) o, con `ieps_factor` `Cuota`, pesos por unidad. La factura global lo desglosa aparte (RMF 2026 regla 2.7.1.21); la factura de un cliente que no paga IEPS lo lleva dentro del precio (LIEPS art. 19 fr. II).
+    /// </summary>
+    [JsonPropertyName("ieps")]
+    public decimal? Ieps { get; set; }
+
+    /// <summary>
+    /// `Tasa` (por omisión) o `Cuota` (pesos por unidad).
+    /// <br/>
+    /// Valores: Tasa, Cuota.
+    /// </summary>
+    [JsonPropertyName("ieps_factor")]
+    public string? IepsFactor { get; set; }
 
     /// <summary>
     /// Lo que solo dice esta venta, como las noches, fechas y número de reservación de una estancia. Con él, la factura dice «Hospedaje · 6 noches, del 14 al 20 de noviembre»; cuándo va lo decide `invoice_concepts.line_detail` de la autofactura (por omisión, el cliente lo elige en el portal).
@@ -52212,6 +52240,20 @@ public sealed partial class TicketLinesItem
     /// </summary>
     [JsonPropertyName("local_taxes")]
     public List<TicketLinesItemLocalTaxesItem> LocalTaxes { get; set; } = default!;
+
+    /// <summary>
+    /// Su IEPS (el de su producto o el que mandó), incluido en su total: una tasa o, con `ieps_factor` `Cuota`, pesos por unidad. `null`: sin IEPS.
+    /// </summary>
+    [JsonPropertyName("ieps")]
+    public decimal? Ieps { get; set; }
+
+    /// <summary>
+    /// Tasa o Cuota (TipoFactor del IEPS).
+    /// <br/>
+    /// Valores: Tasa, Cuota.
+    /// </summary>
+    [JsonPropertyName("ieps_factor")]
+    public string? IepsFactor { get; set; }
 
     /// <summary>
     /// El detalle que mandó (noches, fechas, reservación): va después de la descripción en la factura según `invoice_concepts.line_detail` de la autofactura.
