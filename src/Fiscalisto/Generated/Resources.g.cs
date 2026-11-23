@@ -50,6 +50,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Emisores.</summary>
     public ScheduleSettingsResource ScheduleSettings => _scheduleSettings ??= new ScheduleSettingsResource(this);
 
+    private SettingChangesResource? _settingChanges;
+
+    /// <summary>Emisores.</summary>
+    public SettingChangesResource SettingChanges => _settingChanges ??= new SettingChangesResource(this);
+
     private InvoicesResource? _invoices;
 
     /// <summary>Facturas.</summary>
@@ -1239,6 +1244,50 @@ public sealed class ScheduleSettingsResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<ScheduleSettings> UpdateAsync(UpdateScheduleSettingsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<ScheduleSettings>("POST", "/v1/schedule_settings", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
+/// Emisores: <c>fiscalisto.SettingChanges</c>.
+/// </summary>
+public sealed class SettingChangesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal SettingChangesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Listar los cambios a los ajustes
+    /// </summary>
+    /// <remarks>
+    /// Como Ajustes › Cambios en la app: cada ajuste de la empresa que alguien cambió (por ahora la cobranza automática y los horarios), de qué a qué, quién, por dónde y cuándo, del más reciente al más antiguo. Valen para toda la empresa: cualquiera de sus emisores lee los mismos.
+    /// <br/>
+    /// <c>GET /v1/setting_changes</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/list-setting-changes"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<SettingChange>> ListAsync(ListSettingChangesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<SettingChange>("/v1/setting_changes", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar los cambios a los ajustes: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<SettingChange> ListAutoPagingAsync(ListSettingChangesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<SettingChange>("/v1/setting_changes", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Deshacer un cambio a un ajuste
+    /// </summary>
+    /// <remarks>
+    /// Regresa el ajuste al valor que tenía antes de ese cambio, como «Deshacer» en la app, y devuelve el cambio nuevo que eso hizo (que también se puede deshacer). Solo el cambio más reciente de cada ajuste y mientras conserve el valor que dejó: si no, 400 setting_change_not_undoable.
+    /// <br/>
+    /// <c>POST /v1/setting_changes/{id}/undo</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/emisores/undo-setting-change"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<SettingChange> UndoAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SettingChange>("POST", $"/v1/setting_changes/{Uri.EscapeDataString(id)}/undo", null, null, options, true, cancellationToken);
 }
 
 /// <summary>

@@ -35535,6 +35535,36 @@ public sealed partial class ListSatReviewsParams
 }
 
 /// <summary>
+/// Los campos de «Listar los cambios a los ajustes».
+/// </summary>
+public sealed partial class ListSettingChangesParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Solo los de este ajuste, por ejemplo cobranza.dias-credito.
+    /// </summary>
+    [JsonPropertyName("setting")]
+    public string? Setting { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar ajustes».
 /// </summary>
 public sealed partial class ListStockAdjustmentsParams
@@ -51632,6 +51662,122 @@ public sealed partial class SetTrainingResultsParamsResultsItem
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+}
+
+/// <summary>
+/// Un cambio a un ajuste de la empresa (Ajustes › Cambios): cuál (setting, su id, y name, su nombre en la app), de qué a qué como lo escribe la app (before, after), quién (changed_by: su nombre; null si fue con la API o su cuenta ya no existe) y por dónde (source: app, api o mcp), cuándo, si ya se deshizo (undone) y si todavía se puede deshacer (undoable: es el cambio más reciente de ese ajuste).
+/// </summary>
+public sealed partial class SettingChange
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El ajuste que cambió, por su id (cobranza.dias-credito, horarios.vigencia-cotizaciones…).
+    /// </summary>
+    [JsonPropertyName("setting")]
+    public string Setting { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que tenía antes, como lo escribe la app («30 días», «Encendido»).
+    /// </summary>
+    [JsonPropertyName("before")]
+    public string Before { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que quedó, como lo escribe la app.
+    /// </summary>
+    [JsonPropertyName("after")]
+    public string After { get; set; } = default!;
+
+    /// <summary>
+    /// Quién lo cambió, por su nombre; «La API» si fue con una llave, null si su cuenta ya no existe.
+    /// </summary>
+    [JsonPropertyName("changed_by")]
+    public string? ChangedBy { get; set; }
+
+    /// <summary>
+    /// Por dónde: app (la app), api (la API) o mcp (un asistente como ChatGPT o Claude).
+    /// <br/>
+    /// Valores: app, api, mcp.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se cambió.
+    /// </summary>
+    [JsonPropertyName("created")]
+    public string Created { get; set; } = default!;
+
+    /// <summary>
+    /// Cuándo se deshizo; null si no.
+    /// </summary>
+    [JsonPropertyName("undone")]
+    public string? Undone { get; set; }
+
+    /// <summary>
+    /// Si todavía se puede deshacer (POST /v1/setting_changes/{id}/undo): es el cambio más reciente de ese ajuste y no se ha deshecho.
+    /// </summary>
+    [JsonPropertyName("undoable")]
+    public bool Undoable { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class SettingChangeList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<SettingChange> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
 }
 
 /// <summary>
