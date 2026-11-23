@@ -25625,6 +25625,12 @@ public sealed partial class GetGeneralLedgerParams
     public string? Account { get; set; }
 
     /// <summary>
+    /// Solo las cuentas de este código agrupador del SAT (102 trae 102.01, 102.02…), como el renglón de un estado financiero. Con account no se usa.
+    /// </summary>
+    [JsonPropertyName("grouping_code")]
+    public string? GroupingCode { get; set; }
+
+    /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
     [JsonPropertyName("issuer")]
