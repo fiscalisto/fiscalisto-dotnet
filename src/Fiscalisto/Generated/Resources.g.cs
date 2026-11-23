@@ -1348,6 +1348,26 @@ public sealed class InvoicesResource
         => _client.RequestAsync<InvoicePreview>("POST", "/v1/invoices/preview", @params, null, options, true, cancellationToken);
 
     /// <summary>
+    /// Buscar facturas
+    /// </summary>
+    /// <remarks>
+    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por customer (RFC), customer_name, uuid, series, folio, total, status (valid, pending, canceled, rejected o processing) y created. Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
+    /// <br/>
+    /// <c>GET /v1/invoices/search</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas/search-invoices"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Invoice>> SearchAsync(SearchInvoicesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Invoice>("/v1/invoices/search", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Buscar facturas: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Invoice> SearchAutoPagingAsync(SearchInvoicesParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Invoice>("/v1/invoices/search", @params, options, cancellationToken);
+
+    /// <summary>
     /// Ver una factura
     /// </summary>
     /// <remarks>
@@ -1574,6 +1594,26 @@ public sealed class CustomersResource
     /// </summary>
     public IAsyncEnumerable<Customer> ListAutoPagingAsync(ListCustomersParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<Customer>("/v1/customers", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Buscar clientes
+    /// </summary>
+    /// <remarks>
+    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por tax_id, legal_name, email, zip, tax_system, use y created. Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
+    /// <br/>
+    /// <c>GET /v1/customers/search</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/clientes/search-customers"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Customer>> SearchAsync(SearchCustomersParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Customer>("/v1/customers/search", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Buscar clientes: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Customer> SearchAutoPagingAsync(SearchCustomersParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Customer>("/v1/customers/search", @params, options, cancellationToken);
 
     /// <summary>
     /// Ver un cliente
@@ -5920,6 +5960,26 @@ public sealed class ProductsResource
     /// </summary>
     public IAsyncEnumerable<Product> ListAutoPagingAsync(ListProductsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.ListAllAsync<Product>("/v1/products", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Buscar productos
+    /// </summary>
+    /// <remarks>
+    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por name, description, sku, product_key, unit_key, unit_price y created. Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
+    /// <br/>
+    /// <c>GET /v1/products/search</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/productos/search-products"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<Product>> SearchAsync(SearchProductsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<Product>("/v1/products/search", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Buscar productos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<Product> SearchAutoPagingAsync(SearchProductsParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<Product>("/v1/products/search", @params, options, cancellationToken);
 
     /// <summary>
     /// Ver un producto

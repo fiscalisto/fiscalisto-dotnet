@@ -91,6 +91,18 @@ public sealed partial class AccountKey
     public bool ReadOnly { get; set; }
 
     /// <summary>
+    /// Una llave con permisos por recurso: read (consulta) o write (consulta y cambia) en cada recurso (invoices, customers, payouts…, uno por sección de la referencia); uno que no aparece no tiene acceso (key_resource_denied). null si tiene todos los permisos.
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public Dictionary<string, string>? Permissions { get; set; }
+
+    /// <summary>
+    /// Las IP o rangos (CIDR, IPv4 o IPv6) desde los que funciona la llave; desde otra responde ip_not_allowed. null si funciona desde cualquiera.
+    /// </summary>
+    [JsonPropertyName("allowed_ips")]
+    public List<string>? AllowedIps { get; set; }
+
+    /// <summary>
     /// Cuándo deja de funcionar: la vigencia elegida al crearla, o el fin del traslape al cambiarla. null si no vence.
     /// </summary>
     [JsonPropertyName("expires_at")]
@@ -3353,6 +3365,12 @@ public sealed partial class AutomaticJournalEntryLinesItem
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Por qué este renglón va a esa cuenta, con el artículo de la ley que lo decide (la categoría y quién la puso, PUE o PPD, la tasa del IVA, una retención…). null en los renglones de una edición a mano y en los de un recibo de nómina.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
 }
 
 /// <summary>
@@ -3395,6 +3413,12 @@ public sealed partial class AutomaticJournalEntryOriginalLinesItem
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Por qué este renglón va a esa cuenta, con el artículo de la ley que lo decide (la categoría y quién la puso, PUE o PPD, la tasa del IVA, una retención…). null en los renglones de una edición a mano y en los de un recibo de nómina.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
 }
 
 /// <summary>
@@ -21775,7 +21799,7 @@ public sealed partial class Event
     public string Object { get; set; } = default!;
 
     /// <summary>
-    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready o rule.matched.
+    /// Qué pasó: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer.created, customer.updated, customer.deleted, product.created, product.updated, product.deleted, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready o rule.matched.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -21799,14 +21823,14 @@ public sealed partial class Event
     public string CreatedAt { get; set; } = default!;
 
     /// <summary>
-    /// Lo que cambió, en data.object: el comprobante (o el lote) completo, como lo contesta su GET.
+    /// Lo que cambió, en data.object: el comprobante (o el lote, el cliente…) completo, como lo contesta su GET. En customer.updated y product.updated, data.previous_attributes trae lo que tenían antes los campos que cambiaron.
     /// </summary>
     [JsonPropertyName("data")]
     public EventData Data { get; set; } = default!;
 }
 
 /// <summary>
-/// Lo que cambió, en data.object: el comprobante (o el lote) completo, como lo contesta su GET.
+/// Lo que cambió, en data.object: el comprobante (o el lote, el cliente…) completo, como lo contesta su GET. En customer.updated y product.updated, data.previous_attributes trae lo que tenían antes los campos que cambiaron.
 /// </summary>
 public sealed partial class EventData
 {
@@ -21815,6 +21839,12 @@ public sealed partial class EventData
     /// </summary>
     [JsonPropertyName("object")]
     public Dictionary<string, JsonElement> Object { get; set; } = default!;
+
+    /// <summary>
+    /// Solo en customer.updated y product.updated: los campos que cambiaron, con el valor que tenían antes. Los demás quedaron igual.
+    /// </summary>
+    [JsonPropertyName("previous_attributes")]
+    public Dictionary<string, JsonElement>? PreviousAttributes { get; set; }
 }
 
 /// <summary>
@@ -33986,7 +34016,7 @@ public sealed partial class ListEventsParams
     /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, payout.*, payout_transfer.*, ticket.*, retention.*, customer_data_request.*, sat_download.*, sat_declaration.*, sat_refresh.*, issuer.*, balance.*, usage.*, test_clock.*, rule.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer.created, customer.updated, customer.deleted, product.created, product.updated, product.deleted, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, payout.*, payout_transfer.*, ticket.*, retention.*, customer.*, product.*, customer_data_request.*, sat_download.*, sat_declaration.*, sat_refresh.*, issuer.*, balance.*, usage.*, test_clock.*, rule.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -51231,6 +51261,96 @@ public sealed partial class ScheduleSupplierInvoiceParams
 }
 
 /// <summary>
+/// Los campos de «Buscar clientes».
+/// </summary>
+public sealed partial class SearchCustomersParams
+{
+    /// <summary>
+    /// La búsqueda, por ejemplo legal_name~'robotica' AND zip:'86991'.
+    /// </summary>
+    [JsonPropertyName("query")]
+    public required string Query { get; set; }
+
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Buscar facturas».
+/// </summary>
+public sealed partial class SearchInvoicesParams
+{
+    /// <summary>
+    /// La búsqueda, por ejemplo customer:'URE180429TM6' AND total&gt;1000 AND created&gt;'2026-11-01'.
+    /// </summary>
+    [JsonPropertyName("query")]
+    public required string Query { get; set; }
+
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Buscar productos».
+/// </summary>
+public sealed partial class SearchProductsParams
+{
+    /// <summary>
+    /// La búsqueda, por ejemplo description~'tornillo' AND unit_price&lt;10.
+    /// </summary>
+    [JsonPropertyName("query")]
+    public required string Query { get; set; }
+
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// El portal de autofactura de un emisor y sus reglas.
 /// </summary>
 public sealed partial class SelfInvoicing
@@ -53780,7 +53900,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer.created, customer.updated, customer.deleted, product.created, product.updated, product.deleted, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }

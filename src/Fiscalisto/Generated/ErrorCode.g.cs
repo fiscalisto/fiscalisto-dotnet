@@ -195,6 +195,9 @@ public static class ErrorCode
     /// <summary>El PAC o el SAT no la aceptaron. sat_code trae su código (CFDI40xxx), message qué corregir y doc_url su explicación en [Rechazos del SAT](/docs/api/rechazos-del-sat). La factura queda como rejected; no se usó ningún timbre.</summary>
     public const string InvoiceRejected = "invoice_rejected";
 
+    /// <summary>La llave solo funciona desde algunas IP (Solo desde estas IP, en Desarrolladores › Llaves) y la solicitud llegó desde otra. El mensaje dice desde cuál.</summary>
+    public const string IpNotAllowed = "ip_not_allowed";
+
     /// <summary>El emisor está archivado: ya no timbra. Sus comprobantes se pueden consultar y cancelar.</summary>
     public const string IssuerArchived = "issuer_archived";
 
@@ -230,6 +233,9 @@ public static class ErrorCode
 
     /// <summary>La llave es de solo lectura: puede hacer GET, validar RFC, revisar listas del SAT y calcular recibos de nómina, pero nada que timbre, cancele, envíe o cambie datos.</summary>
     public const string KeyReadOnly = "key_read_only";
+
+    /// <summary>La llave tiene permisos por recurso y no tiene el que pide la ruta: lectura para un GET (o un POST que solo revisa), escritura para lo que cambia algo. El mensaje dice qué recurso y qué permiso.</summary>
+    public const string KeyResourceDenied = "key_resource_denied";
 
     /// <summary>La llave está limitada a algunos emisores y la solicitud toca otro (o crea uno nuevo, o usa algo de toda la cuenta como webhooks).</summary>
     public const string KeyRestricted = "key_restricted";
@@ -377,6 +383,9 @@ public static class ErrorCode
 
     /// <summary>El SAT no contestó o no dejó entrar con la e.firma del emisor. El mensaje trae lo que dijo; no se usó ningún timbre. Reintente en 10 minutos.</summary>
     public const string SatUnavailable = "sat_unavailable";
+
+    /// <summary>La búsqueda de query no se entiende: un campo por el que no se busca, un operador que no va con ese campo, una comilla sin cerrar, AND y OR juntos o más de 10 cláusulas. El mensaje dice dónde.</summary>
+    public const string SearchQueryInvalid = "search_query_invalid";
 
     /// <summary>Ese cambio ya no se puede deshacer: ya se deshizo, el ajuste cambió otra vez después (deshaga primero el más reciente) o ya no tiene el valor que dejó ese cambio.</summary>
     public const string SettingChangeNotUndoable = "setting_change_not_undoable";
