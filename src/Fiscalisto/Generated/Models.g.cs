@@ -36536,6 +36536,12 @@ public sealed partial class PayableInvoice
     public string? InPayout { get; set; }
 
     /// <summary>
+    /// Las notas de crédito que el proveedor relacionó con esta factura en su CFDI y que ya se restaron de amount_due. Las aplicadas en pagos no van aquí.
+    /// </summary>
+    [JsonPropertyName("credit_notes_subtracted")]
+    public List<PayableInvoiceCreditNotesSubtractedItem> CreditNotesSubtracted { get; set; } = default!;
+
+    /// <summary>
     /// Con «Notas de crédito relacionadas con la factura: Esperar a que alguien las acepte» en Configurar pagos: las notas que el proveedor relacionó con esta factura y que todavía no se restan de amount_due. Se aceptan en la app (**Aceptar nota de crédito**) o aplicándolas en un pago de esta factura (`credit_notes` de la línea). Vacío si la empresa las resta solas.
     /// </summary>
     [JsonPropertyName("credit_notes_to_review")]
@@ -36558,6 +36564,36 @@ public sealed partial class PayableInvoice
     /// </summary>
     [JsonPropertyName("app_url")]
     public string AppUrl { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayableInvoiceCreditNotesSubtractedItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayableInvoiceCreditNotesSubtractedItem
+{
+    /// <summary>
+    /// Folio fiscal de la nota de crédito.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// Serie y folio de la nota.
+    /// </summary>
+    [JsonPropertyName("series_folio")]
+    public string SeriesFolio { get; set; } = default!;
+
+    /// <summary>
+    /// Su fecha (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que descuenta, en la moneda de la factura.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
 }
 
 /// <summary>
