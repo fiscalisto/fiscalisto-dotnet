@@ -15687,6 +15687,12 @@ public sealed partial class CreateRuleParams
     public long? WaitDays { get; set; }
 
     /// <summary>
+    /// Si sigue así: hasta 5 pasos días después de que actuó (recordatorios, escalar). El día de cada paso revisa de nuevo sus condiciones; si ya no se cumplen, los pasos que siguen no corren. [] los quita.
+    /// </summary>
+    [JsonPropertyName("follow_ups")]
+    public List<CreateRuleParamsFollowUpsItem>? FollowUps { get; set; }
+
+    /// <summary>
     /// true: si se cumple, las reglas que siguen no corren para ese registro.
     /// </summary>
     [JsonPropertyName("stop_after")]
@@ -16197,6 +16203,210 @@ public sealed partial class CreateRuleParamsElseActionsItem
 /// &lt;c&gt;CreateRuleParamsElseActionsItemColumns&lt;/c&gt;.
 /// </summary>
 public sealed partial class CreateRuleParamsElseActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsFollowUpsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsFollowUpsItem
+{
+    /// <summary>
+    /// Días después de que hizo lo de actions (cada paso, más que el anterior).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public required long Days { get; set; }
+
+    /// <summary>
+    /// Lo que hace ese día, si sus condiciones aún se cumplen.
+    /// </summary>
+    [JsonPropertyName("actions")]
+    public required List<CreateRuleParamsFollowUpsItemActionsItem> Actions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsFollowUpsItemActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsFollowUpsItemActionsItem
+{
+    /// <summary>
+    /// flag (facturas, órdenes y movimientos del banco): marcar el hallazgo propio de la regla, con su nombre, `severity` y `detail`; queda abierto en Hallazgos hasta que alguien lo revise y se va si se borra la regla (`finding_code` es su código en GET /v1/findings y GET /v1/sat_findings); tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; account (facturas): registrar su ingreso o gasto en la cuenta `account` del catálogo en vez de la de su categoría, nunca sobre la que eligió una persona ni en un mes cerrado; en bank.movement, registrar el movimiento con su póliza de ingresos o egresos contra esa cuenta (otra cuenta de banco de la empresa es un traspaso), si no tiene una ni es un mes cerrado; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…); lote (invoice.received e invoice.approved): agregar la factura al lote de pagos abierto `lote_name` que paga `pay_on`, o crear uno, preparado como quien hizo la regla; hold_payment (facturas recibidas): retener su pago hasta que alguien lo suelte, con `note`; en sat.listed, retener todas las facturas por pagar de ese proveedor; email_supplier (facturas recibidas): escribirle al proveedor a los correos de su tema `topic`, con `subject` y `message`; review_findings: dar por revisados los hallazgos `findings` de la factura; extra_signature (payout.submitted): el pago necesita `signatures` firmas más que las de Configurar pagos, con `reason` para quien firma (nunca las baja; no cambia un pago que ya salió); webhook: mandar el evento rule.matched, con el registro y todos los campos de sus condiciones, a `url` (Zapier, Make, n8n o su sistema), firmado y con reintentos como los demás webhooks; al guardar se usa o se crea el webhook de esa dirección en Desarrolladores › Webhooks. Pide permiso de administrar la API.
+    /// <br/>
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category, account, lote, hold_payment, email_supplier, review_findings, extra_signature, webhook, flag.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// webhook: la dirección https a la que manda rule.matched.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+
+    /// <summary>
+    /// tag: la etiqueta (tag_…, GET /v1/tags). Un número, el id de antes, también se acepta.
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public JsonElement? Tag { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto, como la app la nombra («Combustible»).
+    /// <br/>
+    /// Valores: Renta y arrendamiento, Servicios profesionales, Nómina y personal, Transporte y fletes, Combustible, Viáticos y viajes, Alimentos y representación, Telecomunicaciones e internet, Energía y agua, Software y suscripciones, Equipo de cómputo, Papelería y oficina, Mantenimiento y reparaciones, Publicidad y marketing, Seguros y fianzas, Comisiones bancarias y financieras, Impuestos y derechos, Compras de mercancía e inventario, Materias primas y producción, Activo fijo y mobiliario, Vehículos, Capacitación, Donativos, Otros gastos.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// account: el número de la cuenta del catálogo («601-84-002», GET /v1/accounting/accounts). No una de Caja o Bancos.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// tag: quitarla si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote («Fletes»); vacío o null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga: el siguiente lunes … viernes (hoy incluido), a los `days` días, o `due`, la fecha de pago del contrarecibo del portal. Un día inhábil pasa al siguiente hábil. Por omisión, friday.
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días después.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// email_supplier: el tema de los correos del proveedor a los que va (ordenes, pagos, facturas, complementos, documentos, precios; Ajustes › Correos a proveedores). Sin correos de ese tema, va a sus correos generales. Por omisión, facturas.
+    /// <br/>
+    /// Valores: ordenes, pagos, facturas, complementos, documentos, precios.
+    /// </summary>
+    [JsonPropertyName("topic")]
+    public string? Topic { get; set; }
+
+    /// <summary>
+    /// email_supplier: el asunto. Lleva las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string? Subject { get; set; }
+
+    /// <summary>
+    /// email_supplier: el mensaje. Variables: {folio}, {total}, {fecha}, {empresa}, {rfc_empresa}, {proveedor}, {rfc_proveedor}, {subtotal}, {iva}, {retenciones} y {moneda}; de una factura también {uuid}, {metodo_pago}, {forma_pago}, {uso_cfdi}, {conceptos}, {categoria}, {saldo}, {orden}, {contrarecibo}, {fecha_promesa}, {hallazgos} y la tabla {tabla_conceptos}; de una orden {entrega}, {almacen}, {credito}, {comprador}, {nota}, {enlace} y la tabla {tabla_productos}; en invoice.rejected y purchase_order.rejected, {motivo_rechazo}; en los momentos de pagos {facturas}, la tabla {tabla_facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}, en payout.paid {rastreo} y {cep}, en payout.failed {motivo}. Un correo por pago (per payout) no lleva las de una sola factura. Cada {tabla_…} se dibuja como tabla, con las columnas de `columns`; un dato que el registro no tiene queda en blanco.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// email_supplier en payout.submitted, payout.paid y payout.failed: payout manda un correo por pago y proveedor con todas sus facturas ({folio} es la lista de folios, {total} lo que se le paga y {fecha} la fecha del pago); invoice, uno por factura. Por omisión, payout.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje, en su orden. tabla_facturas: folio, uuid, fecha, total, retenido, pagado; tabla_conceptos: clave, descripcion, cantidad, unidad, precio, importe; tabla_productos: producto, codigo, cantidad, recibido, pendiente, precio, importe. Sin columnas, las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public CreateRuleParamsFollowUpsItemActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo que reciben copia (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
+    /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
+    /// </summary>
+    [JsonPropertyName("signatures")]
+    public long? Signatures { get; set; }
+
+    /// <summary>
+    /// extra_signature: por qué, para quien firma («Proveedor nuevo»). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// flag: qué tan grave es su hallazgo. Por omisión, warning.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string? Severity { get; set; }
+
+    /// <summary>
+    /// flag: qué revisar, como sale en Hallazgos.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
+
+    /// <summary>
+    /// review_findings: los hallazgos que da por revisados (sus códigos, `code` en GET /v1/sat_findings). No los que cambian impuestos o la lista negra: cancelado, efos_definitivo, efos_presunto, lista_69b_bis, lista_69.
+    /// </summary>
+    [JsonPropertyName("findings")]
+    public List<string>? Findings { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateRuleParamsFollowUpsItemActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateRuleParamsFollowUpsItemActionsItemColumns
 {
     /// <summary>
     /// Columnas de {tabla_facturas}, en su orden.
@@ -44758,6 +44968,12 @@ public sealed partial class Rule
     public long WaitDays { get; set; }
 
     /// <summary>
+    /// Si sigue así: pasos días después de que actuó (recordatorios, escalar); si sus condiciones ya no se cumplen, los que siguen no corren ([]: ninguno).
+    /// </summary>
+    [JsonPropertyName("follow_ups")]
+    public List<RuleFollowUpsItem> FollowUps { get; set; } = default!;
+
+    /// <summary>
     /// true: si se cumple, las reglas que siguen no corren para ese registro.
     /// </summary>
     [JsonPropertyName("stop_after")]
@@ -45378,6 +45594,220 @@ public sealed partial class RuleElseActionsItem
 /// &lt;c&gt;RuleElseActionsItemColumns&lt;/c&gt;.
 /// </summary>
 public sealed partial class RuleElseActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RuleFollowUpsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleFollowUpsItem
+{
+    /// <summary>
+    /// Días después de que hizo lo de actions.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long Days { get; set; }
+
+    /// <summary>
+    /// Lo que hace ese día, si sus condiciones aún se cumplen.
+    /// </summary>
+    [JsonPropertyName("actions")]
+    public List<RuleFollowUpsItemActionsItem> Actions { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;RuleFollowUpsItemActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleFollowUpsItemActionsItem
+{
+    /// <summary>
+    /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
+    /// <br/>
+    /// Valores: tag, cost_center, category, stage, close, ask_approval, notify, lote, hold_payment, email_supplier, review_findings, extra_signature, account, webhook, flag.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = default!;
+
+    /// <summary>
+    /// flag: qué tan grave es el hallazgo de la regla.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string? Severity { get; set; }
+
+    /// <summary>
+    /// flag: qué revisar, como sale en Hallazgos.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
+
+    /// <summary>
+    /// flag: el código de su hallazgo (regla_…), el `code` en GET /v1/findings y GET /v1/sat_findings.
+    /// </summary>
+    [JsonPropertyName("finding_code")]
+    public string? FindingCode { get; set; }
+
+    /// <summary>
+    /// tag: la etiqueta (tag_…, GET /v1/tags).
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public string? Tag { get; set; }
+
+    /// <summary>
+    /// webhook: la dirección a la que manda rule.matched.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+
+    /// <summary>
+    /// webhook: el webhook de Desarrolladores › Webhooks con esa dirección (we_…), donde están su secreto y sus envíos.
+    /// </summary>
+    [JsonPropertyName("webhook_endpoint")]
+    public string? WebhookEndpoint { get; set; }
+
+    /// <summary>
+    /// account: el número de cuenta del catálogo en que se registra la factura, en vez de la de su categoría (no cambia la que eligió una persona).
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto (facturas recibidas).
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// tag: se quita si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// email_supplier: el tema de los correos del proveedor a los que va.
+    /// <br/>
+    /// Valores: ordenes, pagos, facturas, complementos, documentos, precios.
+    /// </summary>
+    [JsonPropertyName("topic")]
+    public string? Topic { get; set; }
+
+    /// <summary>
+    /// email_supplier: el asunto.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string? Subject { get; set; }
+
+    /// <summary>
+    /// email_supplier: el mensaje.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// email_supplier en los disparadores de pagos: payout, un correo por pago y proveedor; invoice, uno por factura.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje; null: las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public RuleFollowUpsItemActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo con copia (mem_…).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
+    /// review_findings: los hallazgos que da por revisados (sus códigos).
+    /// </summary>
+    [JsonPropertyName("findings")]
+    public List<string>? Findings { get; set; }
+
+    /// <summary>
+    /// extra_signature: cuántas firmas más pide (1 a 3).
+    /// </summary>
+    [JsonPropertyName("signatures")]
+    public long? Signatures { get; set; }
+
+    /// <summary>
+    /// extra_signature: por qué, para quien firma.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote; null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga (siguiente día de la semana, a los días, o el del contrarecibo).
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;RuleFollowUpsItemActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class RuleFollowUpsItemActionsItemColumns
 {
     /// <summary>
     /// Columnas de {tabla_facturas}, en su orden.
@@ -57376,6 +57806,12 @@ public sealed partial class UpdateRuleParams
     public long? WaitDays { get; set; }
 
     /// <summary>
+    /// Si sigue así: hasta 5 pasos días después de que actuó (recordatorios, escalar). El día de cada paso revisa de nuevo sus condiciones; si ya no se cumplen, los pasos que siguen no corren. [] los quita.
+    /// </summary>
+    [JsonPropertyName("follow_ups")]
+    public List<UpdateRuleParamsFollowUpsItem>? FollowUps { get; set; }
+
+    /// <summary>
     /// true: si se cumple, las reglas que siguen no corren para ese registro.
     /// </summary>
     [JsonPropertyName("stop_after")]
@@ -57886,6 +58322,210 @@ public sealed partial class UpdateRuleParamsElseActionsItem
 /// &lt;c&gt;UpdateRuleParamsElseActionsItemColumns&lt;/c&gt;.
 /// </summary>
 public sealed partial class UpdateRuleParamsElseActionsItemColumns
+{
+    /// <summary>
+    /// Columnas de {tabla_facturas}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_facturas")]
+    public List<string>? TablaFacturas { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_conceptos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_conceptos")]
+    public List<string>? TablaConceptos { get; set; }
+
+    /// <summary>
+    /// Columnas de {tabla_productos}, en su orden.
+    /// </summary>
+    [JsonPropertyName("tabla_productos")]
+    public List<string>? TablaProductos { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsFollowUpsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsFollowUpsItem
+{
+    /// <summary>
+    /// Días después de que hizo lo de actions (cada paso, más que el anterior).
+    /// </summary>
+    [JsonPropertyName("days")]
+    public required long Days { get; set; }
+
+    /// <summary>
+    /// Lo que hace ese día, si sus condiciones aún se cumplen.
+    /// </summary>
+    [JsonPropertyName("actions")]
+    public required List<UpdateRuleParamsFollowUpsItemActionsItem> Actions { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsFollowUpsItemActionsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsFollowUpsItemActionsItem
+{
+    /// <summary>
+    /// flag (facturas, órdenes y movimientos del banco): marcar el hallazgo propio de la regla, con su nombre, `severity` y `detail`; queda abierto en Hallazgos hasta que alguien lo revise y se va si se borra la regla (`finding_code` es su código en GET /v1/findings y GET /v1/sat_findings); tag (facturas y órdenes): poner la etiqueta `tag`; category (facturas recibidas): poner la categoría de gasto `category`, nunca sobre la que eligió una persona; account (facturas): registrar su ingreso o gasto en la cuenta `account` del catálogo en vez de la de su categoría, nunca sobre la que eligió una persona ni en un mes cerrado; en bank.movement, registrar el movimiento con su póliza de ingresos o egresos contra esa cuenta (otra cuenta de banco de la empresa es un traspaso), si no tiene una ni es un mes cerrado; cost_center (facturas): poner `cost_center` (ccn_…), nunca sobre lo que puso una persona; stage (órdenes): pasar a la etapa `stage`; close (órdenes): cerrarla si ya llegó todo; ask_approval (órdenes en borrador): pedir aprobación por sus pasos de aprobación; notify: avisar a `members` (mem_…); lote (invoice.received e invoice.approved): agregar la factura al lote de pagos abierto `lote_name` que paga `pay_on`, o crear uno, preparado como quien hizo la regla; hold_payment (facturas recibidas): retener su pago hasta que alguien lo suelte, con `note`; en sat.listed, retener todas las facturas por pagar de ese proveedor; email_supplier (facturas recibidas): escribirle al proveedor a los correos de su tema `topic`, con `subject` y `message`; review_findings: dar por revisados los hallazgos `findings` de la factura; extra_signature (payout.submitted): el pago necesita `signatures` firmas más que las de Configurar pagos, con `reason` para quien firma (nunca las baja; no cambia un pago que ya salió); webhook: mandar el evento rule.matched, con el registro y todos los campos de sus condiciones, a `url` (Zapier, Make, n8n o su sistema), firmado y con reintentos como los demás webhooks; al guardar se usa o se crea el webhook de esa dirección en Desarrolladores › Webhooks. Pide permiso de administrar la API.
+    /// <br/>
+    /// Valores: tag, cost_center, stage, close, ask_approval, notify, category, account, lote, hold_payment, email_supplier, review_findings, extra_signature, webhook, flag.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// webhook: la dirección https a la que manda rule.matched.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string? Url { get; set; }
+
+    /// <summary>
+    /// tag: la etiqueta (tag_…, GET /v1/tags). Un número, el id de antes, también se acepta.
+    /// </summary>
+    [JsonPropertyName("tag")]
+    public JsonElement? Tag { get; set; }
+
+    /// <summary>
+    /// category: la categoría de gasto, como la app la nombra («Combustible»).
+    /// <br/>
+    /// Valores: Renta y arrendamiento, Servicios profesionales, Nómina y personal, Transporte y fletes, Combustible, Viáticos y viajes, Alimentos y representación, Telecomunicaciones e internet, Energía y agua, Software y suscripciones, Equipo de cómputo, Papelería y oficina, Mantenimiento y reparaciones, Publicidad y marketing, Seguros y fianzas, Comisiones bancarias y financieras, Impuestos y derechos, Compras de mercancía e inventario, Materias primas y producción, Activo fijo y mobiliario, Vehículos, Capacitación, Donativos, Otros gastos.
+    /// </summary>
+    [JsonPropertyName("category")]
+    public string? Category { get; set; }
+
+    /// <summary>
+    /// account: el número de la cuenta del catálogo («601-84-002», GET /v1/accounting/accounts). No una de Caja o Bancos.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// tag: quitarla si la orden deja de cumplir.
+    /// </summary>
+    [JsonPropertyName("remove_when_unmet")]
+    public bool? RemoveWhenUnmet { get; set; }
+
+    /// <summary>
+    /// lote: el nombre del lote («Fletes»); vacío o null: «Lote del jueves 27 nov».
+    /// </summary>
+    [JsonPropertyName("lote_name")]
+    public string? LoteName { get; set; }
+
+    /// <summary>
+    /// lote: el día que paga: el siguiente lunes … viernes (hoy incluido), a los `days` días, o `due`, la fecha de pago del contrarecibo del portal. Un día inhábil pasa al siguiente hábil. Por omisión, friday.
+    /// <br/>
+    /// Valores: monday, tuesday, wednesday, thursday, friday, in_days, due.
+    /// </summary>
+    [JsonPropertyName("pay_on")]
+    public string? PayOn { get; set; }
+
+    /// <summary>
+    /// lote con pay_on in_days: cuántos días después.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long? Days { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
+    /// </summary>
+    [JsonPropertyName("cost_center")]
+    public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// stage: la etapa.
+    /// </summary>
+    [JsonPropertyName("stage")]
+    public long? Stage { get; set; }
+
+    /// <summary>
+    /// notify: a quién (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("members")]
+    public List<string>? Members { get; set; }
+
+    /// <summary>
+    /// notify: lo que dice el aviso. hold_payment: por qué se retiene (hasta 200). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+
+    /// <summary>
+    /// email_supplier: el tema de los correos del proveedor a los que va (ordenes, pagos, facturas, complementos, documentos, precios; Ajustes › Correos a proveedores). Sin correos de ese tema, va a sus correos generales. Por omisión, facturas.
+    /// <br/>
+    /// Valores: ordenes, pagos, facturas, complementos, documentos, precios.
+    /// </summary>
+    [JsonPropertyName("topic")]
+    public string? Topic { get; set; }
+
+    /// <summary>
+    /// email_supplier: el asunto. Lleva las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("subject")]
+    public string? Subject { get; set; }
+
+    /// <summary>
+    /// email_supplier: el mensaje. Variables: {folio}, {total}, {fecha}, {empresa}, {rfc_empresa}, {proveedor}, {rfc_proveedor}, {subtotal}, {iva}, {retenciones} y {moneda}; de una factura también {uuid}, {metodo_pago}, {forma_pago}, {uso_cfdi}, {conceptos}, {categoria}, {saldo}, {orden}, {contrarecibo}, {fecha_promesa}, {hallazgos} y la tabla {tabla_conceptos}; de una orden {entrega}, {almacen}, {credito}, {comprador}, {nota}, {enlace} y la tabla {tabla_productos}; en invoice.rejected y purchase_order.rejected, {motivo_rechazo}; en los momentos de pagos {facturas}, la tabla {tabla_facturas}, {pagado}, {fecha_pago}, {pago}, {cuenta}, {banco} y {referencia}, en payout.paid {rastreo} y {cep}, en payout.failed {motivo}. Un correo por pago (per payout) no lleva las de una sola factura. Cada {tabla_…} se dibuja como tabla, con las columnas de `columns`; un dato que el registro no tiene queda en blanco.
+    /// </summary>
+    [JsonPropertyName("message")]
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// email_supplier en payout.submitted, payout.paid y payout.failed: payout manda un correo por pago y proveedor con todas sus facturas ({folio} es la lista de folios, {total} lo que se le paga y {fecha} la fecha del pago); invoice, uno por factura. Por omisión, payout.
+    /// <br/>
+    /// Valores: payout, invoice.
+    /// </summary>
+    [JsonPropertyName("per")]
+    public string? Per { get; set; }
+
+    /// <summary>
+    /// email_supplier: las columnas de cada tabla del mensaje, en su orden. tabla_facturas: folio, uuid, fecha, total, retenido, pagado; tabla_conceptos: clave, descripcion, cantidad, unidad, precio, importe; tabla_productos: producto, codigo, cantidad, recibido, pendiente, precio, importe. Sin columnas, las de siempre.
+    /// </summary>
+    [JsonPropertyName("columns")]
+    public UpdateRuleParamsFollowUpsItemActionsItemColumns? Columns { get; set; }
+
+    /// <summary>
+    /// email_supplier: personas del equipo que reciben copia (mem_…, GET /v1/members).
+    /// </summary>
+    [JsonPropertyName("cc")]
+    public List<string>? Cc { get; set; }
+
+    /// <summary>
+    /// extra_signature: cuántas firmas más pide (1 a 3). Por omisión, 1.
+    /// </summary>
+    [JsonPropertyName("signatures")]
+    public long? Signatures { get; set; }
+
+    /// <summary>
+    /// extra_signature: por qué, para quien firma («Proveedor nuevo»). Puede llevar las variables de `message`, menos las tablas.
+    /// </summary>
+    [JsonPropertyName("reason")]
+    public string? Reason { get; set; }
+
+    /// <summary>
+    /// flag: qué tan grave es su hallazgo. Por omisión, warning.
+    /// <br/>
+    /// Valores: critical, warning, info.
+    /// </summary>
+    [JsonPropertyName("severity")]
+    public string? Severity { get; set; }
+
+    /// <summary>
+    /// flag: qué revisar, como sale en Hallazgos.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public string? Detail { get; set; }
+
+    /// <summary>
+    /// review_findings: los hallazgos que da por revisados (sus códigos, `code` en GET /v1/sat_findings). No los que cambian impuestos o la lista negra: cancelado, efos_definitivo, efos_presunto, lista_69b_bis, lista_69.
+    /// </summary>
+    [JsonPropertyName("findings")]
+    public List<string>? Findings { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateRuleParamsFollowUpsItemActionsItemColumns&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateRuleParamsFollowUpsItemActionsItemColumns
 {
     /// <summary>
     /// Columnas de {tabla_facturas}, en su orden.
