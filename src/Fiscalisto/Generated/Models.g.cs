@@ -36536,6 +36536,12 @@ public sealed partial class PayableInvoice
     public string? InPayout { get; set; }
 
     /// <summary>
+    /// Con «Notas de crédito relacionadas con la factura: Esperar a que alguien las acepte» en Configurar pagos: las notas que el proveedor relacionó con esta factura y que todavía no se restan de amount_due. Se aceptan en la app (**Aceptar nota de crédito**) o aplicándolas en un pago de esta factura (`credit_notes` de la línea). Vacío si la empresa las resta solas.
+    /// </summary>
+    [JsonPropertyName("credit_notes_to_review")]
+    public List<PayableInvoiceCreditNotesToReviewItem> CreditNotesToReview { get; set; } = default!;
+
+    /// <summary>
     /// Si una regla de Ajustes › Reglas retuvo su pago: no se paga hasta que alguien con permiso lo suelte en la app («Soltar el pago»). null: no está retenido.
     /// </summary>
     [JsonPropertyName("payment_hold")]
@@ -36552,6 +36558,42 @@ public sealed partial class PayableInvoice
     /// </summary>
     [JsonPropertyName("app_url")]
     public string AppUrl { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayableInvoiceCreditNotesToReviewItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayableInvoiceCreditNotesToReviewItem
+{
+    /// <summary>
+    /// Folio fiscal de la nota de crédito.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// Serie y folio de la nota.
+    /// </summary>
+    [JsonPropertyName("series_folio")]
+    public string SeriesFolio { get; set; } = default!;
+
+    /// <summary>
+    /// Su fecha (AAAA-MM-DD).
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que descuenta, en la moneda de la factura.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// true: alguien eligió «No restarla» en la app (se le pide al proveedor que la cancele); false: espera a que alguien la acepte.
+    /// </summary>
+    [JsonPropertyName("declined")]
+    public bool Declined { get; set; }
 }
 
 /// <summary>
