@@ -39420,6 +39420,12 @@ public sealed partial class PayrollReceiptPreview
     /// </summary>
     [JsonPropertyName("totals")]
     public PayrollReceiptPreviewTotals Totals { get; set; } = default!;
+
+    /// <summary>
+    /// Cómo se calculó cada línea de ISR, subsidio para el empleo e IMSS: base, tasa o renglón de la tarifa, la operación y el artículo de la ley. Son las mismas cifras del recibo, no un recálculo.
+    /// </summary>
+    [JsonPropertyName("explanation")]
+    public List<PayrollReceiptPreviewExplanationItem> Explanation { get; set; } = default!;
 }
 
 /// <summary>
@@ -39450,6 +39456,106 @@ public sealed partial class PayrollReceiptPreviewDeductionsItem
     /// </summary>
     [JsonPropertyName("amount")]
     public decimal Amount { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollReceiptPreviewExplanationItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewExplanationItem
+{
+    /// <summary>
+    /// isr, subsidio, isr_ajuste (ajuste mensual del subsidio) o imss_eym_excedente, imss_eym_dinero, imss_gmp, imss_iv, imss_cv (cada cuota obrera del IMSS).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// isr: el impuesto; subsidio: subsidio para el empleo; imss: una cuota obrera.
+    /// <br/>
+    /// Valores: isr, subsidio, imss.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string Kind { get; set; } = default!;
+
+    /// <summary>
+    /// La línea como la nombra el recibo.
+    /// </summary>
+    [JsonPropertyName("concept")]
+    public string Concept { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que el recibo tiene en esa línea.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Qué es la línea y por qué salió así, en una frase.
+    /// </summary>
+    [JsonPropertyName("summary")]
+    public string Summary { get; set; } = default!;
+
+    /// <summary>
+    /// La base, la tasa o el renglón de la tarifa y la operación, en orden; el último paso es el importe.
+    /// </summary>
+    [JsonPropertyName("steps")]
+    public List<PayrollReceiptPreviewExplanationItemStepsItem> Steps { get; set; } = default!;
+
+    /// <summary>
+    /// El fundamento de cada cifra.
+    /// </summary>
+    [JsonPropertyName("law")]
+    public List<PayrollReceiptPreviewExplanationItemLawItem> Law { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollReceiptPreviewExplanationItemLawItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewExplanationItemLawItem
+{
+    /// <summary>
+    /// Ley y artículo: «LISR art. 96», «LSS art. 147».
+    /// </summary>
+    [JsonPropertyName("ref")]
+    public string Ref { get; set; } = default!;
+
+    /// <summary>
+    /// Lo que dice que importa aquí.
+    /// </summary>
+    [JsonPropertyName("says")]
+    public string Says { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PayrollReceiptPreviewExplanationItemStepsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PayrollReceiptPreviewExplanationItemStepsItem
+{
+    /// <summary>
+    /// Qué cifra es: la base, la tasa, los días…
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = default!;
+
+    /// <summary>
+    /// La cifra, en la unidad de unit.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal Value { get; set; }
+
+    /// <summary>
+    /// mxn: pesos; pct: tasa (0.01125 es 1.125%); days: días.
+    /// <br/>
+    /// Valores: mxn, pct, days.
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string Unit { get; set; } = default!;
+
+    /// <summary>
+    /// La operación con las cifras del recibo.
+    /// </summary>
+    [JsonPropertyName("formula")]
+    public string? Formula { get; set; }
 }
 
 /// <summary>
