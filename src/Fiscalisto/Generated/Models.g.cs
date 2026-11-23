@@ -24255,9 +24255,9 @@ public sealed partial class Finding
     public string Issuer { get; set; } = default!;
 
     /// <summary>
-    /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad), bank (movimientos del banco), expense_reports (comprobaciones de viáticos), purchase_receipts (tickets de compra) o inventory (inventario).
+    /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad), bank (movimientos del banco), expense_reports (comprobaciones de viáticos), purchase_receipts (tickets de compra), inventory (inventario) o customers (clientes y cobranza).
     /// <br/>
-    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts, inventory.
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts, inventory, customers.
     /// </summary>
     [JsonPropertyName("area")]
     public string? Area { get; set; }
@@ -24393,15 +24393,15 @@ public sealed partial class FindingList
 public sealed partial class FindingRecord
 {
     /// <summary>
-    /// purchase_order, payout, supplier, poliza (la contabilidad de un mes), account (una cuenta en un mes), bank_movement, expense_report (una comprobación de viáticos), expense_ticket (un ticket de compra) o product (la existencia de un producto).
+    /// purchase_order, payout, supplier, poliza (la contabilidad de un mes), account (una cuenta en un mes), bank_movement, expense_report (una comprobación de viáticos), expense_ticket (un ticket de compra), product (la existencia de un producto) o customer (un cliente).
     /// <br/>
-    /// Valores: purchase_order, payout, supplier, poliza, account, bank_movement, expense_report, expense_ticket, product.
+    /// Valores: purchase_order, payout, supplier, poliza, account, bank_movement, expense_report, expense_ticket, product, customer.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// Su id en la API: el pago (pyo_…), la comprobación (exr_…), el ticket (rct_…), el producto (prd_…) o el RFC del proveedor; null si no tiene.
+    /// Su id en la API: el pago (pyo_…), la comprobación (exr_…), el ticket (rct_…), el producto (prd_…), el cliente (cus_…) o el RFC del proveedor; null si no tiene.
     /// </summary>
     [JsonPropertyName("id")]
     public string? Id { get; set; }
@@ -33446,9 +33446,9 @@ public sealed partial class ListFindingsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// Solo los de un área: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts o inventory.
+    /// Solo los de un área: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts, inventory o customers.
     /// <br/>
-    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts, inventory.
+    /// Valores: purchase_orders, payouts, suppliers, accounting, bank, expense_reports, purchase_receipts, inventory, customers.
     /// </summary>
     [JsonPropertyName("area")]
     public string? Area { get; set; }
