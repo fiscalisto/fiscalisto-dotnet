@@ -2224,6 +2224,236 @@ public sealed partial class AssignPayrollOrgChartParams
 }
 
 /// <summary>
+/// El calendario de turnos de un mes, como Nómina › Asistencia › Turnos: el turno de cada empleado cada día y de dónde sale.
+/// </summary>
+public sealed partial class AttendanceCalendar
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El mes, AAAA-MM.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public string Month { get; set; } = default!;
+
+    /// <summary>
+    /// Primer día, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string From { get; set; } = default!;
+
+    /// <summary>
+    /// Último día, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string To { get; set; } = default!;
+
+    /// <summary>
+    /// Desde cuándo un día da horas extra: agreed, al pasar el horario acordado de cada quien (LFT art. 58); law, al pasar la jornada de la ley para su turno (art. 61).
+    /// <br/>
+    /// Valores: agreed, law.
+    /// </summary>
+    [JsonPropertyName("daily_jornada")]
+    public string DailyJornada { get; set; } = default!;
+
+    /// <summary>
+    /// Cada empleado del emisor que registra asistencia.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public List<AttendanceCalendarEmployeesItem> Employees { get; set; } = default!;
+}
+
+/// <summary>
+/// Lo que cambió en el calendario de turnos.
+/// </summary>
+public sealed partial class AttendanceCalendarChange
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// A cuántos empleados.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public long Employees { get; set; }
+
+    /// <summary>
+    /// Cuántos días a cada uno.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public long Days { get; set; }
+
+    /// <summary>
+    /// El turno que se puso (ats_…), o null: descanso o quitado.
+    /// </summary>
+    [JsonPropertyName("shift")]
+    public string? Shift { get; set; }
+
+    /// <summary>
+    /// true: se quitó lo del calendario y esos días vuelven a su rol u horario.
+    /// </summary>
+    [JsonPropertyName("cleared")]
+    public bool Cleared { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceCalendarEmployeesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceCalendarEmployeesItem
+{
+    /// <summary>
+    /// El empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string Employee { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su número de empleado, o null.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Su rol de turnos (atr_…), o null.
+    /// </summary>
+    [JsonPropertyName("rotation")]
+    public string? Rotation { get; set; }
+
+    /// <summary>
+    /// Más de seis días de trabajo seguidos sin descanso en el mes (LFT art. 69).
+    /// </summary>
+    [JsonPropertyName("warning")]
+    public string? Warning { get; set; }
+
+    /// <summary>
+    /// Cada día del mes.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public List<AttendanceCalendarEmployeesItemDaysItem> Days { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceCalendarEmployeesItemDaysItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceCalendarEmployeesItemDaysItem
+{
+    /// <summary>
+    /// AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// De dónde sale: calendar (un cambio puesto en el calendario), rotation (su rol de turnos) o week (su horario de la semana).
+    /// <br/>
+    /// Valores: calendar, rotation, week.
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; } = default!;
+
+    /// <summary>
+    /// El turno (ats_…), o null.
+    /// </summary>
+    [JsonPropertyName("shift")]
+    public string? Shift { get; set; }
+
+    /// <summary>
+    /// Hora de entrada, HH:MM; null si descansa.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string? Start { get; set; }
+
+    /// <summary>
+    /// Hora de salida, HH:MM, o null.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string? End { get; set; }
+
+    /// <summary>
+    /// Sus tramos, o null si descansa.
+    /// </summary>
+    [JsonPropertyName("segments")]
+    public List<AttendanceCalendarEmployeesItemDaysItemSegmentsItem>? Segments { get; set; }
+
+    /// <summary>
+    /// Minutos de jornada.
+    /// </summary>
+    [JsonPropertyName("minutes")]
+    public long Minutes { get; set; }
+
+    /// <summary>
+    /// Su jornada por ley (LFT art. 60): diurna, nocturna o mixta; null si descansa.
+    /// <br/>
+    /// Valores: diurna, nocturna, mixta.
+    /// </summary>
+    [JsonPropertyName("jornada")]
+    public string? Jornada { get; set; }
+
+    /// <summary>
+    /// La nota del día que puso la empresa, o null.
+    /// <br/>
+    /// Valores: vacaciones, incapacidad, permiso_con_goce, permiso_sin_goce, descanso, festivo, falta.
+    /// </summary>
+    [JsonPropertyName("note")]
+    public string? Note { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceCalendarEmployeesItemDaysItemSegmentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceCalendarEmployeesItemDaysItemSegmentsItem
+{
+    /// <summary>
+    /// Entrada del tramo, HH:MM.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// Salida del tramo, HH:MM (antes de la entrada: al día siguiente).
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
+}
+
+/// <summary>
 /// Una marca de entrada o salida de Asistencia (registro electrónico de jornada, LFT art. 132).
 /// </summary>
 public sealed partial class AttendanceMark
@@ -2299,7 +2529,7 @@ public sealed partial class AttendanceMark
     public decimal? DistanceM { get; set; }
 
     /// <summary>
-    /// Notas para revisar (la marca nunca se rechaza por ellas): no_location (no dio su ubicación), far (lejos del lugar), imprecise (ubicación imprecisa), remote (fuera de la sucursal), new_device (un celular nuevo).
+    /// Notas para revisar (la marca nunca se rechaza por ellas): no_location (no dio su ubicación), far (lejos del lugar), imprecise (ubicación imprecisa), remote (fuera de la sucursal), new_device (un celular nuevo), offline (se hizo sin conexión y llegó después; at es la hora en que se hizo, corregida por el reloj del celular), code_time (sin conexión, con un código del checador de otra hora).
     /// </summary>
     [JsonPropertyName("flags")]
     public List<string> Flags { get; set; } = default!;
@@ -2449,6 +2679,14 @@ public sealed partial class AttendanceReport
     /// </summary>
     [JsonPropertyName("weekly_hours")]
     public long? WeeklyHours { get; set; }
+
+    /// <summary>
+    /// Desde cuándo un día da horas extra: agreed, al pasar el horario acordado de cada quien (LFT art. 58); law, al pasar la jornada de la ley para su turno (art. 61).
+    /// <br/>
+    /// Valores: agreed, law.
+    /// </summary>
+    [JsonPropertyName("daily_jornada")]
+    public string DailyJornada { get; set; } = default!;
 
     /// <summary>
     /// Cada empleado del emisor en el periodo.
@@ -2639,6 +2877,14 @@ public sealed partial class AttendanceReportEmployeesItemDaysItem
     public AttendanceReportEmployeesItemDaysItemScheduled? Scheduled { get; set; }
 
     /// <summary>
+    /// La jornada de ese día por ley, o null si descansa.
+    /// <br/>
+    /// Valores: diurna, nocturna, mixta.
+    /// </summary>
+    [JsonPropertyName("jornada")]
+    public string? Jornada { get; set; }
+
+    /// <summary>
     /// Minutos trabajados ese día.
     /// </summary>
     [JsonPropertyName("worked_minutes")]
@@ -2711,6 +2957,42 @@ public sealed partial class AttendanceReportEmployeesItemDaysItemScheduled
     /// </summary>
     [JsonPropertyName("break_minutes")]
     public long BreakMinutes { get; set; }
+
+    /// <summary>
+    /// Sus tramos: uno, o dos o tres en un turno partido.
+    /// </summary>
+    [JsonPropertyName("segments")]
+    public List<AttendanceReportEmployeesItemDaysItemScheduledSegmentsItem> Segments { get; set; } = default!;
+
+    /// <summary>
+    /// true: el descanso cuenta como jornada porque no puede salir del lugar (LFT art. 64).
+    /// </summary>
+    [JsonPropertyName("break_paid")]
+    public bool BreakPaid { get; set; }
+
+    /// <summary>
+    /// El turno (ats_…) de ese día, de su rol o del calendario; null: su horario.
+    /// </summary>
+    [JsonPropertyName("shift")]
+    public string? Shift { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceReportEmployeesItemDaysItemScheduledSegmentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceReportEmployeesItemDaysItemScheduledSegmentsItem
+{
+    /// <summary>
+    /// Entrada del tramo, HH:MM.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// Salida del tramo, HH:MM (antes de la entrada: al día siguiente).
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
 }
 
 /// <summary>
@@ -2729,6 +3011,226 @@ public sealed partial class AttendanceReportEmployeesItemWeeksDisputedItem
     /// </summary>
     [JsonPropertyName("text")]
     public string Text { get; set; } = default!;
+}
+
+/// <summary>
+/// Un rol de turnos: turnos y descansos que se repiten en un ciclo (4×4, semana y semana).
+/// </summary>
+public sealed partial class AttendanceRotation
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// El ciclo en orden: cada día un turno (ats_…) o null para descanso.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public List<string?> Days { get; set; } = default!;
+
+    /// <summary>
+    /// Minutos a la semana en promedio en el ciclo.
+    /// </summary>
+    [JsonPropertyName("week_minutes")]
+    public long WeekMinutes { get; set; }
+
+    /// <summary>
+    /// Si pasan más de seis días de trabajo seguidos sin descanso (LFT art. 69), lo dice; si no, null.
+    /// </summary>
+    [JsonPropertyName("warning")]
+    public string? Warning { get; set; }
+
+    /// <summary>
+    /// true: archivado, ya no se le pone a nadie más.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool Archived { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class AttendanceRotationList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<AttendanceRotation> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// Un turno de Asistencia › Turnos: a qué hora se entra y se sale, en uno a tres tramos, y su jornada por ley.
+/// </summary>
+public sealed partial class AttendanceShift
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Su nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = default!;
+
+    /// <summary>
+    /// Su color en el calendario.
+    /// <br/>
+    /// Valores: teal, blue, violet, amber, rose, slate.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string Color { get; set; } = default!;
+
+    /// <summary>
+    /// Sus tramos: uno, o dos o tres en un turno partido.
+    /// </summary>
+    [JsonPropertyName("segments")]
+    public List<AttendanceShiftSegmentsItem> Segments { get; set; } = default!;
+
+    /// <summary>
+    /// Minutos de descanso dentro del turno.
+    /// </summary>
+    [JsonPropertyName("break_minutes")]
+    public long BreakMinutes { get; set; }
+
+    /// <summary>
+    /// true: el descanso cuenta como jornada (LFT art. 64).
+    /// </summary>
+    [JsonPropertyName("break_paid")]
+    public bool BreakPaid { get; set; }
+
+    /// <summary>
+    /// Minutos de jornada del turno.
+    /// </summary>
+    [JsonPropertyName("minutes")]
+    public long Minutes { get; set; }
+
+    /// <summary>
+    /// La jornada por ley (LFT art. 60): diurna (entre 6:00 y 20:00), nocturna (entre 20:00 y 6:00) o mixta (con menos de 3 h 30 min de noche; con más es nocturna). Su máximo es de 8 h, 7 h y 7 h 30 min (art. 61).
+    /// <br/>
+    /// Valores: diurna, nocturna, mixta.
+    /// </summary>
+    [JsonPropertyName("jornada")]
+    public string Jornada { get; set; } = default!;
+
+    /// <summary>
+    /// true: termina al día siguiente.
+    /// </summary>
+    [JsonPropertyName("overnight")]
+    public bool Overnight { get; set; }
+
+    /// <summary>
+    /// Lo que dice la ley de este turno: pasa de la jornada del art. 61, o le falta la media hora de descanso del art. 63.
+    /// </summary>
+    [JsonPropertyName("warnings")]
+    public List<string> Warnings { get; set; } = default!;
+
+    /// <summary>
+    /// true: archivado, ya no se pone en días ni roles nuevos.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool Archived { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class AttendanceShiftList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<AttendanceShift> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;AttendanceShiftSegmentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class AttendanceShiftSegmentsItem
+{
+    /// <summary>
+    /// Entrada del tramo, HH:MM.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public string Start { get; set; } = default!;
+
+    /// <summary>
+    /// Salida del tramo, HH:MM (antes de la entrada: al día siguiente).
+    /// </summary>
+    [JsonPropertyName("end")]
+    public string End { get; set; } = default!;
 }
 
 /// <summary>
@@ -3381,7 +3883,7 @@ public sealed partial class BooksLogEntry
     /// <summary>
     /// Qué cambió: una póliza a mano (manual_journal_entry), los saldos iniciales, una cuenta, el catálogo completo (una importación o una renumeración), el cierre del mes (period_close), una eliminación de consolidación, una póliza modelo o la baja de un activo fijo.
     /// <br/>
-    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account, automatic_journal_entry.
+    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account, automatic_journal_entry, prepaid_expense.
     /// </summary>
     [JsonPropertyName("subject")]
     public string Subject { get; set; } = default!;
@@ -9347,6 +9849,92 @@ public sealed partial class CreateAttendanceMarkParams
     /// </summary>
     [JsonPropertyName("reason")]
     public string? Reason { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear un rol de turnos».
+/// </summary>
+public sealed partial class CreateAttendanceRotationParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Su nombre, como «4×4».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// El ciclo en orden, de 1 a 56 días: cada uno un turno (ats_…) o null para descanso. Al terminar vuelve a empezar.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public required List<string?> Days { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear un turno».
+/// </summary>
+public sealed partial class CreateAttendanceShiftParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Su nombre, como «Nocturno».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Sus tramos: uno, o dos o tres para un turno partido (el tiempo entre tramos no es jornada). Un tramo puede pasar de la medianoche (22:00 a 06:00).
+    /// </summary>
+    [JsonPropertyName("segments")]
+    public required List<CreateAttendanceShiftParamsSegmentsItem> Segments { get; set; }
+
+    /// <summary>
+    /// Minutos de descanso dentro de un turno de un tramo. Por omisión 0.
+    /// </summary>
+    [JsonPropertyName("break_minutes")]
+    public long? BreakMinutes { get; set; }
+
+    /// <summary>
+    /// El descanso cuenta como jornada: el trabajador no puede salir del lugar (LFT art. 64).
+    /// </summary>
+    [JsonPropertyName("break_paid")]
+    public bool? BreakPaid { get; set; }
+
+    /// <summary>
+    /// Su color en el calendario. Por omisión teal.
+    /// <br/>
+    /// Valores: teal, blue, violet, amber, rose, slate.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;CreateAttendanceShiftParamsSegmentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class CreateAttendanceShiftParamsSegmentsItem
+{
+    /// <summary>
+    /// Entrada del tramo, HH:MM.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public required string Start { get; set; }
+
+    /// <summary>
+    /// Salida del tramo, HH:MM. Antes de la entrada: termina al día siguiente.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public required string End { get; set; }
 }
 
 /// <summary>
@@ -24927,7 +25515,7 @@ public sealed partial class GeneralLedgerAccountsItemMovementsItem
     /// <summary>
     /// Tipo de comprobante (TipoDeComprobante): I ingreso, E egreso, P pago, T traslado, N nómina.
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification, foreign_supplier_operations.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification, foreign_supplier_operations, prepaid_amortization.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -25015,6 +25603,30 @@ public sealed partial class GetAnnualReturnParams
     /// </summary>
     [JsonPropertyName("through_month")]
     public long? ThroughMonth { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver el calendario de turnos».
+/// </summary>
+public sealed partial class GetAttendanceCalendarParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// El mes, AAAA-MM.
+    /// </summary>
+    [JsonPropertyName("month")]
+    public required string Month { get; set; }
+
+    /// <summary>
+    /// Solo este empleado (emp_…).
+    /// </summary>
+    [JsonPropertyName("employee")]
+    public string? Employee { get; set; }
 }
 
 /// <summary>
@@ -25915,6 +26527,18 @@ public sealed partial class GetPayrollTaxParams
     /// </summary>
     [JsonPropertyName("month")]
     public required string Month { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Ver si una factura se amortiza».
+/// </summary>
+public sealed partial class GetPrepaidExpenseParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -32550,7 +33174,7 @@ public sealed partial class JournalEntry
     /// <summary>
     /// De qué es: invoice (un CFDI de ingreso o egreso), payment_received o payment_made (un pago de un complemento), payroll (un recibo de nómina), employee_expenses (un anticipo, reembolso, devolución o comprobación de viáticos, contra 107.01 «Funcionarios y empleados»), depreciation (la depreciación del mes de los activos fijos), manual (una póliza capturada a mano, o la reversión de una provisión) o asset_disposal (la venta o baja de un activo fijo).
     /// <br/>
-    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification, foreign_supplier_operations.
+    /// Valores: invoice, payment_received, payment_made, payroll, employee_expenses, depreciation, manual, asset_disposal, bank_identification, foreign_supplier_operations, prepaid_amortization.
     /// </summary>
     [JsonPropertyName("type")]
     public string Type { get; set; } = default!;
@@ -32853,6 +33477,54 @@ public sealed partial class ListAdvancesParams
 }
 
 /// <summary>
+/// Los campos de «Listar los roles de turnos».
+/// </summary>
+public sealed partial class ListAttendanceRotationsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar los turnos».
+/// </summary>
+public sealed partial class ListAttendanceShiftsParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar los movimientos de banco sin factura».
 /// </summary>
 public sealed partial class ListBankMovementsParams
@@ -32910,7 +33582,7 @@ public sealed partial class ListBooksLogParams
     /// <summary>
     /// Solo los cambios de una cosa: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account (la cuenta de una factura) o automatic_journal_entry (una póliza automática editada).
     /// <br/>
-    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account, automatic_journal_entry.
+    /// Valores: manual_journal_entry, opening_balances, account, chart_of_accounts, period_close, consolidation_elimination, entry_template, fixed_asset, invoice_account, automatic_journal_entry, prepaid_expense.
     /// </summary>
     [JsonPropertyName("subject")]
     public string? Subject { get; set; }
@@ -40767,6 +41439,128 @@ public sealed partial class PostBankMovementParams
 }
 
 /// <summary>
+/// Un gasto pagado por anticipado (NIF C-5): una factura recibida de un seguro, una renta adelantada o una licencia que cubre varios meses. Queda en pagos anticipados y pasa a su gasto al final de cada mes que cubre. Impuestos no cambia.
+/// </summary>
+public sealed partial class PrepaidExpense
+{
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// El emisor (iss_…).
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string Issuer { get; set; } = default!;
+
+    /// <summary>
+    /// El UUID de la factura recibida.
+    /// </summary>
+    [JsonPropertyName("uuid")]
+    public string Uuid { get; set; } = default!;
+
+    /// <summary>
+    /// true si se amortiza; false si se registra como gasto del mes.
+    /// </summary>
+    [JsonPropertyName("active")]
+    public bool Active { get; set; }
+
+    /// <summary>
+    /// Qué pagó: insurance (seguros y fianzas), rent (rentas) u other.
+    /// <br/>
+    /// Valores: insurance, rent, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// La cuenta de pagos anticipados (código agrupador 109) a la que va su póliza.
+    /// </summary>
+    [JsonPropertyName("account")]
+    public string? Account { get; set; }
+
+    /// <summary>
+    /// La cuenta de costos o gastos a la que se amortiza.
+    /// </summary>
+    [JsonPropertyName("expense_account")]
+    public string? ExpenseAccount { get; set; }
+
+    /// <summary>
+    /// Su nombre en el catálogo.
+    /// </summary>
+    [JsonPropertyName("expense_account_name")]
+    public string? ExpenseAccountName { get; set; }
+
+    /// <summary>
+    /// Primer mes que cubre, AAAA-MM.
+    /// </summary>
+    [JsonPropertyName("start_month")]
+    public string? StartMonth { get; set; }
+
+    /// <summary>
+    /// Cuántos meses cubre, de 1 a 120: una póliza de amortización por mes.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public long? Months { get; set; }
+
+    /// <summary>
+    /// Pesos que se amortizan en total: lo que su póliza carga a la cuenta 109 (sin el IVA acreditable).
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Lo que queda en la cuenta 109: las pólizas de los meses que no han terminado.
+    /// </summary>
+    [JsonPropertyName("pending")]
+    public decimal? Pending { get; set; }
+
+    /// <summary>
+    /// Una póliza de amortización por mes: cargo a su gasto, abono a la cuenta 109. Todas iguales al centavo; la última lleva el redondeo.
+    /// </summary>
+    [JsonPropertyName("schedule")]
+    public List<PrepaidExpenseScheduleItem> Schedule { get; set; } = default!;
+}
+
+/// <summary>
+/// &lt;c&gt;PrepaidExpenseScheduleItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class PrepaidExpenseScheduleItem
+{
+    /// <summary>
+    /// Un solo mes, del 1 al 12 (MesIni y MesFin iguales).
+    /// </summary>
+    [JsonPropertyName("month")]
+    public long Month { get; set; }
+
+    /// <summary>
+    /// El último día del mes, AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string Date { get; set; } = default!;
+
+    /// <summary>
+    /// Importe.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public decimal Amount { get; set; }
+
+    /// <summary>
+    /// true si su fecha ya pasó.
+    /// </summary>
+    [JsonPropertyName("posted")]
+    public bool Posted { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Calcular un aguinaldo, PTU o finiquito sin timbrar».
 /// </summary>
 public sealed partial class PreviewExtraordinaryPayrollReceiptParams
@@ -42918,6 +43712,18 @@ public sealed partial class RemovePayrollDepartmentParams
     /// </summary>
     [JsonPropertyName("name")]
     public required string Name { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Dejar de amortizar una factura».
+/// </summary>
+public sealed partial class RemovePrepaidExpenseParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -50641,6 +51447,42 @@ public sealed partial class SendSalesOrderParams
 }
 
 /// <summary>
+/// Los campos de «Poner turnos en el calendario».
+/// </summary>
+public sealed partial class SetAttendanceCalendarParams
+{
+    /// <summary>
+    /// Los empleados (emp_…), todos del mismo emisor.
+    /// </summary>
+    [JsonPropertyName("employees")]
+    public required List<string> Employees { get; set; }
+
+    /// <summary>
+    /// Los días, AAAA-MM-DD (hasta 62).
+    /// </summary>
+    [JsonPropertyName("dates")]
+    public required List<string> Dates { get; set; }
+
+    /// <summary>
+    /// El turno (ats_…) que tienen esos días, o null para descanso. Gana sobre su rol y su horario.
+    /// </summary>
+    [JsonPropertyName("shift")]
+    public string? Shift { get; set; }
+
+    /// <summary>
+    /// true quita lo que se puso en el calendario: esos días vuelven a su rol de turnos o a su horario de la semana (shift se ignora).
+    /// </summary>
+    [JsonPropertyName("clear")]
+    public bool? Clear { get; set; }
+
+    /// <summary>
+    /// Por qué (un cambio de turno, un descanso extra).
+    /// </summary>
+    [JsonPropertyName("comment")]
+    public string? Comment { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cerrar o reabrir meses de la contabilidad».
 /// </summary>
 public sealed partial class SetClosedPeriodParams
@@ -54007,6 +54849,92 @@ public sealed partial class UpdateAnnualAdjustmentParams
 }
 
 /// <summary>
+/// Los campos de «Cambiar un rol de turnos».
+/// </summary>
+public sealed partial class UpdateAttendanceRotationParams
+{
+    /// <summary>
+    /// Su nombre, como «4×4».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// El ciclo en orden, de 1 a 56 días: cada uno un turno (ats_…) o null para descanso. Al terminar vuelve a empezar.
+    /// </summary>
+    [JsonPropertyName("days")]
+    public List<string?>? Days { get; set; }
+
+    /// <summary>
+    /// true lo archiva: quien lo tiene lo sigue usando; ya no se le puede poner a nadie más.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool? Archived { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambiar un turno».
+/// </summary>
+public sealed partial class UpdateAttendanceShiftParams
+{
+    /// <summary>
+    /// Su nombre, como «Nocturno».
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Sus tramos: uno, o dos o tres para un turno partido (el tiempo entre tramos no es jornada). Un tramo puede pasar de la medianoche (22:00 a 06:00).
+    /// </summary>
+    [JsonPropertyName("segments")]
+    public List<UpdateAttendanceShiftParamsSegmentsItem>? Segments { get; set; }
+
+    /// <summary>
+    /// Minutos de descanso dentro de un turno de un tramo. Por omisión 0.
+    /// </summary>
+    [JsonPropertyName("break_minutes")]
+    public long? BreakMinutes { get; set; }
+
+    /// <summary>
+    /// El descanso cuenta como jornada: el trabajador no puede salir del lugar (LFT art. 64).
+    /// </summary>
+    [JsonPropertyName("break_paid")]
+    public bool? BreakPaid { get; set; }
+
+    /// <summary>
+    /// Su color en el calendario. Por omisión teal.
+    /// <br/>
+    /// Valores: teal, blue, violet, amber, rose, slate.
+    /// </summary>
+    [JsonPropertyName("color")]
+    public string? Color { get; set; }
+
+    /// <summary>
+    /// true lo archiva: ya no se puede poner en días ni roles nuevos; los días que ya lo tienen lo conservan.
+    /// </summary>
+    [JsonPropertyName("archived")]
+    public bool? Archived { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateAttendanceShiftParamsSegmentsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateAttendanceShiftParamsSegmentsItem
+{
+    /// <summary>
+    /// Entrada del tramo, HH:MM.
+    /// </summary>
+    [JsonPropertyName("start")]
+    public required string Start { get; set; }
+
+    /// <summary>
+    /// Salida del tramo, HH:MM. Antes de la entrada: termina al día siguiente.
+    /// </summary>
+    [JsonPropertyName("end")]
+    public required string End { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Editar la póliza de un CFDI».
 /// </summary>
 public sealed partial class UpdateAutomaticEntryParams
@@ -56248,6 +57176,44 @@ public sealed partial class UpdatePayrollVacancyParams
     /// </summary>
     [JsonPropertyName("state")]
     public string? State { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Amortizar una factura pagada por anticipado».
+/// </summary>
+public sealed partial class UpdatePrepaidExpenseParams
+{
+    /// <summary>
+    /// El emisor (iss_…). Por omisión, su único emisor.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Qué pagó: insurance (109.01 Seguros y fianzas), rent (109.05 Rentas) u other (109.23 Otros pagos anticipados). Sin él, el que tiene, o el que sugiere su categoría.
+    /// <br/>
+    /// Valores: insurance, rent, other.
+    /// </summary>
+    [JsonPropertyName("kind")]
+    public string? Kind { get; set; }
+
+    /// <summary>
+    /// Meses que cubre, de 1 a 120.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public required long Months { get; set; }
+
+    /// <summary>
+    /// Primer mes que cubre, AAAA-MM: el de la factura o después. Sin él, el que tiene, o el de la factura.
+    /// </summary>
+    [JsonPropertyName("start_month")]
+    public string? StartMonth { get; set; }
+
+    /// <summary>
+    /// Número de la cuenta de costos o gastos (500, 600 o 700) a la que se amortiza. Sin él, la que tiene, o la de su categoría.
+    /// </summary>
+    [JsonPropertyName("expense_account")]
+    public string? ExpenseAccount { get; set; }
 }
 
 /// <summary>

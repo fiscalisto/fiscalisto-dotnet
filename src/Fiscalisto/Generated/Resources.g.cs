@@ -515,6 +515,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Contabilidad.</summary>
     public AutomaticEntriesResource AutomaticEntries => _automaticEntries ??= new AutomaticEntriesResource(this);
 
+    private PrepaidExpensesResource? _prepaidExpenses;
+
+    /// <summary>Contabilidad.</summary>
+    public PrepaidExpensesResource PrepaidExpenses => _prepaidExpenses ??= new PrepaidExpensesResource(this);
+
     private OpeningBalancesResource? _openingBalances;
 
     /// <summary>Contabilidad.</summary>
@@ -5276,6 +5281,130 @@ public sealed class AttendanceResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<AttendanceOvertime> ApproveOvertimeAsync(ApproveAttendanceOvertimeParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<AttendanceOvertime>("POST", "/v1/attendance/overtime", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar los turnos
+    /// </summary>
+    /// <remarks>
+    /// Los turnos de Asistencia › Turnos (ats_…), los archivados también: sus tramos, sus minutos y su jornada por ley (diurna, nocturna o mixta, LFT art. 60) con lo que dice la ley de ellos.
+    /// <br/>
+    /// <c>GET /v1/attendance/shifts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/list-attendance-shifts"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<AttendanceShift>> ListShiftsAsync(ListAttendanceShiftsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<AttendanceShift>("/v1/attendance/shifts", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar los turnos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<AttendanceShift> ListShiftsAutoPagingAsync(ListAttendanceShiftsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<AttendanceShift>("/v1/attendance/shifts", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Crear un turno
+    /// </summary>
+    /// <remarks>
+    /// Un turno con uno a tres tramos (con dos o tres es partido: el tiempo entre tramos no es jornada); un tramo puede pasar de la medianoche. Se guarda aunque pase de la jornada del art. 61 (con el acuerdo del trabajador, art. 58) y lo dice en warnings.
+    /// <br/>
+    /// <c>POST /v1/attendance/shifts</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/create-attendance-shift"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceShift> CreateShiftAsync(CreateAttendanceShiftParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceShift>("POST", "/v1/attendance/shifts", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un turno
+    /// </summary>
+    /// <remarks>
+    /// Cambia lo que mande y deja lo demás. Cambiar sus horas cambia los días que lo tienen desde hoy; archived: true lo archiva.
+    /// <br/>
+    /// <c>POST /v1/attendance/shifts/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/update-attendance-shift"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceShift> UpdateShiftAsync(string id, UpdateAttendanceShiftParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceShift>("POST", $"/v1/attendance/shifts/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar los roles de turnos
+    /// </summary>
+    /// <remarks>
+    /// Los roles de turnos (atr_…), los archivados también: el ciclo de turnos y descansos, el promedio a la semana y el aviso del art. 69 si pasan más de seis días de trabajo sin descanso.
+    /// <br/>
+    /// <c>GET /v1/attendance/rotations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/list-attendance-rotations"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<AttendanceRotation>> ListRotationsAsync(ListAttendanceRotationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<AttendanceRotation>("/v1/attendance/rotations", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar los roles de turnos: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<AttendanceRotation> ListRotationsAutoPagingAsync(ListAttendanceRotationsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<AttendanceRotation>("/v1/attendance/rotations", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Crear un rol de turnos
+    /// </summary>
+    /// <remarks>
+    /// Un ciclo de turnos y descansos en orden que vuelve a empezar al terminar (4×4: cuatro días un turno y cuatro null). A cada empleado se le pone en la app, en Asistencia › Personas, con el día en que cae su día 1.
+    /// <br/>
+    /// <c>POST /v1/attendance/rotations</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/create-attendance-rotation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceRotation> CreateRotationAsync(CreateAttendanceRotationParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceRotation>("POST", "/v1/attendance/rotations", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Cambiar un rol de turnos
+    /// </summary>
+    /// <remarks>
+    /// Cambia su nombre o su ciclo; archived: true lo archiva.
+    /// <br/>
+    /// <c>POST /v1/attendance/rotations/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/update-attendance-rotation"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceRotation> UpdateRotationAsync(string id, UpdateAttendanceRotationParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceRotation>("POST", $"/v1/attendance/rotations/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Ver el calendario de turnos
+    /// </summary>
+    /// <remarks>
+    /// El turno de cada empleado cada día de un mes y de dónde sale: un cambio puesto en el calendario, su rol de turnos o su horario de la semana.
+    /// <br/>
+    /// <c>GET /v1/attendance/calendar</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/get-attendance-calendar"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceCalendar> GetCalendarAsync(GetAttendanceCalendarParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceCalendar>("GET", "/v1/attendance/calendar", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Poner turnos en el calendario
+    /// </summary>
+    /// <remarks>
+    /// Pone un turno (o descanso, shift null) en unos días de unos empleados, y gana sobre su rol y su horario: un cambio de turno, un descanso extra. clear: true lo quita y esos días vuelven a su rol u horario. Hasta 62 días y 500 empleados a la vez.
+    /// <br/>
+    /// <c>POST /v1/attendance/calendar</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/asistencia/set-attendance-calendar"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<AttendanceCalendarChange> SetCalendarAsync(SetAttendanceCalendarParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<AttendanceCalendarChange>("POST", "/v1/attendance/calendar", @params, null, options, true, cancellationToken);
 }
 
 /// <summary>
@@ -8016,6 +8145,58 @@ public sealed class AutomaticEntriesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<AutomaticJournalEntry> RevertAsync(string uuid, RevertAutomaticEntryParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<AutomaticJournalEntry>("DELETE", $"/v1/accounting/automatic_entries/{Uri.EscapeDataString(uuid)}", null, @params, options, false, cancellationToken);
+}
+
+/// <summary>
+/// Contabilidad: <c>fiscalisto.PrepaidExpenses</c>.
+/// </summary>
+public sealed class PrepaidExpensesResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal PrepaidExpensesResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Ver si una factura se amortiza
+    /// </summary>
+    /// <remarks>
+    /// Si una factura recibida (por su UUID) es un gasto pagado por anticipado y su calendario: una póliza de amortización al final de cada mes que cubre.
+    /// <br/>
+    /// <c>GET /v1/accounting/prepaid_expenses/{uuid}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/get-prepaid-expense"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PrepaidExpense> GetAsync(string uuid, GetPrepaidExpenseParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PrepaidExpense>("GET", $"/v1/accounting/prepaid_expenses/{Uri.EscapeDataString(uuid)}", null, @params, options, false, cancellationToken);
+
+    /// <summary>
+    /// Amortizar una factura pagada por anticipado
+    /// </summary>
+    /// <remarks>
+    /// Su póliza va a pagos anticipados (109.01, 109.05 o 109.23) y los libros la pasan a su gasto al final de cada mes que cubre (NIF C-5). Solo una factura de ingreso recibida que se registra como gasto: un activo fijo, un movimiento o una por aclarar no se amortiza, ni una cuya póliza se editó a mano. Un mes cerrado contesta period_closed. Impuestos no cambia.
+    /// <br/>
+    /// <c>POST /v1/accounting/prepaid_expenses/{uuid}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-prepaid-expense"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PrepaidExpense> UpdateAsync(string uuid, UpdatePrepaidExpenseParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PrepaidExpense>("POST", $"/v1/accounting/prepaid_expenses/{Uri.EscapeDataString(uuid)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Dejar de amortizar una factura
+    /// </summary>
+    /// <remarks>
+    /// Vuelve a registrarse como gasto del mes en la cuenta a la que se amortizaba, y sus pólizas de amortización salen de los libros. Un mes cerrado contesta period_closed.
+    /// <br/>
+    /// <c>DELETE /v1/accounting/prepaid_expenses/{uuid}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/remove-prepaid-expense"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<PrepaidExpense> RemoveAsync(string uuid, RemovePrepaidExpenseParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<PrepaidExpense>("DELETE", $"/v1/accounting/prepaid_expenses/{Uri.EscapeDataString(uuid)}", null, @params, options, false, cancellationToken);
 }
 
 /// <summary>
