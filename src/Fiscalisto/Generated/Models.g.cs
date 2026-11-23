@@ -2931,7 +2931,7 @@ public sealed partial class Balance
     public long Available { get; set; }
 
     /// <summary>
-    /// true si la cuenta timbra sin usar timbres.
+    /// Obsoleto: siempre false. Solo las cuentas internas de Fiscalisto timbran sin usar timbres. Se conserva por compatibilidad; no lo use.
     /// </summary>
     [JsonPropertyName("unlimited")]
     public bool Unlimited { get; set; }
@@ -2943,19 +2943,19 @@ public sealed partial class Balance
     public long LowBalanceAt { get; set; }
 
     /// <summary>
-    /// La recarga automática con la tarjeta guardada, o null si está apagada.
+    /// La recarga automática con la tarjeta guardada, o null si está apagada (se enciende en Desarrolladores › Timbres y pagos).
     /// </summary>
     [JsonPropertyName("auto_recharge")]
     public BalanceAutoRecharge? AutoRecharge { get; set; }
 
     /// <summary>
-    /// Siempre true: los RFC de la empresa (type own) timbran primero con los timbres del mes de su plan y después con `available`, los paquetes de su único saldo (comprados en Desarrolladores o en Plan y pagos). Los emisores conectados usan solo `available`. Se conserva por compatibilidad.
+    /// Obsoleto: siempre true. Los RFC de la empresa (type own) timbran primero con los timbres del mes de su plan y después con `available`, los paquetes de su único saldo (comprados en Desarrolladores o en Plan y pagos). Los emisores conectados usan solo `available`. Se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("use_plan_timbres")]
     public bool UsePlanTimbres { get; set; }
 
     /// <summary>
-    /// Los timbres del mes del plan de su empresa, que los RFC de la empresa (type own) usan antes que `available`; no se suman a `available`. null si la empresa no tiene un plan de paga con timbres al mes (Gratis o una prueba sin pagar) o en modo de prueba.
+    /// Los timbres del mes del plan de su empresa, que los RFC de la empresa (type own) usan antes que `available`; no se suman a `available`. null si la empresa no tiene un plan de paga con timbres al mes (Gratis o una prueba sin pagar). Con llaves de prueba trae los mismos que en producción, como `available`.
     /// </summary>
     [JsonPropertyName("plan_timbres")]
     public BalancePlanTimbres? PlanTimbres { get; set; }
@@ -2997,7 +2997,7 @@ public sealed partial class BalanceAutoRecharge
 public sealed partial class BalancePacksItem
 {
     /// <summary>
-    /// welcome: los timbres de bienvenida (no vencen); purchase: un paquete comprado o una recarga automática; referral: los de una recomendación.
+    /// welcome: los timbres de bienvenida (no vencen): los 10 de cada empresa y, en las cuentas abiertas antes del 15 de noviembre de 2026, los 20 de regalo de la API, en paquetes aparte; purchase: un paquete comprado o una recarga automática; referral: los de una recomendación.
     /// <br/>
     /// Valores: welcome, purchase, referral.
     /// </summary>
