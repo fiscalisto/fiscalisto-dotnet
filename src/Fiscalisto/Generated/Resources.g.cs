@@ -8230,7 +8230,7 @@ public sealed class PrepaidExpensesResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/contabilidad/update-prepaid-expense"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<PrepaidExpense> UpdateAsync(string uuid, UpdatePrepaidExpenseParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+    public Task<PrepaidExpense> UpdateAsync(string uuid, UpdatePrepaidExpenseParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<PrepaidExpense>("POST", $"/v1/accounting/prepaid_expenses/{Uri.EscapeDataString(uuid)}", @params, null, options, true, cancellationToken);
 
     /// <summary>
