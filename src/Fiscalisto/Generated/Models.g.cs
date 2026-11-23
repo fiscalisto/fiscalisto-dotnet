@@ -8575,6 +8575,14 @@ public sealed partial class ComplianceOpinion
     /// </summary>
     [JsonPropertyName("last_error")]
     public string? LastError { get; set; }
+
+    /// <summary>
+    /// De quién es la falla de last_error, para decidir sin leer el texto. sat_unavailable: el servicio del SAT no está disponible o no respondió (es del SAT; se vuelve a pedir solo). sat_refused: el SAT respondió que no, con su motivo en el mensaje. account: le toca a su cliente (e.firma vencida, sin autorización, su plan). internal: ni lo uno ni lo otro; se vuelve a intentar. null si no falló.
+    /// <br/>
+    /// Valores: sat_unavailable, sat_refused, account, internal.
+    /// </summary>
+    [JsonPropertyName("last_error_cause")]
+    public string? LastErrorCause { get; set; }
 }
 
 /// <summary>
@@ -48480,6 +48488,14 @@ public sealed partial class SatDeclaration
     public string? FilesError { get; set; }
 
     /// <summary>
+    /// De quién es la falla de files_error, para decidir sin leer el texto. sat_unavailable: el servicio del SAT no está disponible o no respondió (es del SAT; se vuelve a pedir solo). sat_refused: el SAT respondió que no, con su motivo en el mensaje. account: le toca a su cliente (e.firma vencida, sin autorización, su plan). internal: ni lo uno ni lo otro; se vuelve a intentar. null si no falló.
+    /// <br/>
+    /// Valores: sat_unavailable, sat_refused, account, internal.
+    /// </summary>
+    [JsonPropertyName("files_error_cause")]
+    public string? FilesErrorCause { get; set; }
+
+    /// <summary>
     /// Cuándo se trajo por primera vez.
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -48996,6 +49012,14 @@ public sealed partial class SatDownload
     /// </summary>
     [JsonPropertyName("error")]
     public string? Error { get; set; }
+
+    /// <summary>
+    /// De quién es la falla de error, para decidir sin leer el texto. sat_unavailable: el servicio del SAT no está disponible o no respondió (es del SAT; se vuelve a pedir solo). sat_refused: el SAT respondió que no, con su motivo en el mensaje. account: le toca a su cliente (e.firma vencida, sin autorización, su plan). internal: ni lo uno ni lo otro; se vuelve a intentar. null si no falló.
+    /// <br/>
+    /// Valores: sat_unavailable, sat_refused, account, internal.
+    /// </summary>
+    [JsonPropertyName("error_cause")]
+    public string? ErrorCause { get; set; }
 
     /// <summary>
     /// Cuándo se pidió.
