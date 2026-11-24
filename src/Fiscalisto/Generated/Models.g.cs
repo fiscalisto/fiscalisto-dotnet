@@ -463,7 +463,7 @@ public sealed partial class Advance
     public decimal Total { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// </summary>
     [JsonPropertyName("iva")]
     public string Iva { get; set; } = default!;
@@ -2025,7 +2025,7 @@ public sealed partial class ApplyAdvanceParams
     public decimal? ExchangeRate { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// Folio (Folio) de esta factura en vez del siguiente de la serie: ese número toma su lugar en la numeración. También acepta un texto de hasta 40 caracteres sin «|» ("TIME002", "000120"), como lo acepta el SAT (Anexo 20): va solo en esta factura y la numeración no cambia; "120" es el folio 120. Si otro CFDI del RFC y la serie ya lo tiene, se rechaza.
     /// </summary>
     [JsonPropertyName("folio")]
     public long? Folio { get; set; }
@@ -9729,7 +9729,7 @@ public sealed partial class CreateAdvanceParams
     public required decimal Amount { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -12019,7 +12019,7 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     public decimal? ExchangeRate { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// Folio (Folio) de esta factura en vez del siguiente de la serie: ese número toma su lugar en la numeración. También acepta un texto de hasta 40 caracteres sin «|» ("TIME002", "000120"), como lo acepta el SAT (Anexo 20): va solo en esta factura y la numeración no cambia; "120" es el folio 120. Si otro CFDI del RFC y la serie ya lo tiene, se rechaza.
     /// </summary>
     [JsonPropertyName("folio")]
     public long? Folio { get; set; }
@@ -13779,7 +13779,7 @@ public sealed partial class CreateProductParams
     public string? Taxability { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -13801,13 +13801,13 @@ public sealed partial class CreateProductParams
     public string? IepsFactor { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal? IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
@@ -14235,7 +14235,7 @@ public sealed partial class CreateQuoteParamsItemsItem
     public string? Taxability { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -14263,13 +14263,13 @@ public sealed partial class CreateQuoteParamsItemsItem
     public decimal? IepsUnits { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal? IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
@@ -14733,7 +14733,7 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     public decimal? ExchangeRate { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// Folio (Folio) de esta factura en vez del siguiente de la serie: ese número toma su lugar en la numeración. También acepta un texto de hasta 40 caracteres sin «|» ("TIME002", "000120"), como lo acepta el SAT (Anexo 20): va solo en esta factura y la numeración no cambia; "120" es el folio 120. Si otro CFDI del RFC y la serie ya lo tiene, se rechaza.
     /// </summary>
     [JsonPropertyName("folio")]
     public long? Folio { get; set; }
@@ -17365,7 +17365,7 @@ public sealed partial class CreateSalesOrderParamsItemsItem
     public string? Taxability { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -17393,13 +17393,13 @@ public sealed partial class CreateSalesOrderParamsItemsItem
     public decimal? IepsUnits { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal? IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
@@ -18033,7 +18033,7 @@ public sealed partial class CreateStoreConnectionParamsSettings
     public string? UnitKey { get; set; }
 
     /// <summary>
-    /// Tasa de IVA incluida en los precios. Por omisión 0.16.
+    /// Tasa de IVA incluida en los precios. Por omisión 0.16; también como número (0.16 o 16).
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -18231,7 +18231,7 @@ public sealed partial class CreateTicketParams
     public string? UnitKey { get; set; }
 
     /// <summary>
-    /// Tasa de IVA incluida en el total. Por omisión 0.16.
+    /// Tasa de IVA incluida en el total. Por omisión 0.16; también como número (0.16 o 16).
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -18325,7 +18325,7 @@ public sealed partial class CreateTicketParamsLinesItem
     public string? UnitKey { get; set; }
 
     /// <summary>
-    /// Tasa de IVA incluida en su total. Por omisión 0.16.
+    /// Tasa de IVA incluida en su total. Por omisión 0.16; también como número (0.16 o 16).
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -28755,7 +28755,7 @@ public sealed partial class InvoiceCreate
     public decimal? ExchangeRate { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// Folio (Folio) de esta factura en vez del siguiente de la serie: ese número toma su lugar en la numeración. También acepta un texto de hasta 40 caracteres sin «|» ("TIME002", "000120"), como lo acepta el SAT (Anexo 20): va solo en esta factura y la numeración no cambia; "120" es el folio 120. Si otro CFDI del RFC y la serie ya lo tiene, se rechaza.
     /// </summary>
     [JsonPropertyName("folio")]
     public long? Folio { get; set; }
@@ -30931,7 +30931,7 @@ public sealed partial class InvoiceCreateItemsItem
     public string? Taxability { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -30959,13 +30959,13 @@ public sealed partial class InvoiceCreateItemsItem
     public decimal? IepsUnits { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal? IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
@@ -42322,7 +42322,7 @@ public sealed partial class Product
     public string Taxability { get; set; } = default!;
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// </summary>
     [JsonPropertyName("iva")]
     public string Iva { get; set; } = default!;
@@ -42340,13 +42340,13 @@ public sealed partial class Product
     public string? IepsFactor { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal IsrRetention { get; set; }
@@ -54142,7 +54142,7 @@ public sealed partial class TicketLinesItem
     public string UnitKey { get; set; } = default!;
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// </summary>
     [JsonPropertyName("iva")]
     public string? Iva { get; set; }
@@ -57688,7 +57688,7 @@ public sealed partial class UpdateProductParams
     public string? Taxability { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -57710,13 +57710,13 @@ public sealed partial class UpdateProductParams
     public string? IepsFactor { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal? IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
@@ -58058,7 +58058,7 @@ public sealed partial class UpdateQuoteParamsItemsItem
     public string? Taxability { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -58086,13 +58086,13 @@ public sealed partial class UpdateQuoteParamsItemsItem
     public decimal? IepsUnits { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal? IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
@@ -58556,7 +58556,7 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public decimal? ExchangeRate { get; set; }
 
     /// <summary>
-    /// Folio (Folio). Fiscalisto asigna el siguiente de la serie; mande uno solo si debe ser ese.
+    /// Folio (Folio) de esta factura en vez del siguiente de la serie: ese número toma su lugar en la numeración. También acepta un texto de hasta 40 caracteres sin «|» ("TIME002", "000120"), como lo acepta el SAT (Anexo 20): va solo en esta factura y la numeración no cambia; "120" es el folio 120. Si otro CFDI del RFC y la serie ya lo tiene, se rechaza.
     /// </summary>
     [JsonPropertyName("folio")]
     public long? Folio { get; set; }
@@ -60256,7 +60256,7 @@ public sealed partial class UpdateSalesOrderParamsItemsItem
     public string? Taxability { get; set; }
 
     /// <summary>
-    /// Tasa de IVA trasladado: 0.16 (por omisión), 0.08 (región fronteriza), 0 o exento.
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
@@ -60284,13 +60284,13 @@ public sealed partial class UpdateSalesOrderParamsItemsItem
     public decimal? IepsUnits { get; set; }
 
     /// <summary>
-    /// Tasa de IVA retenido (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
     /// </summary>
     [JsonPropertyName("iva_retention")]
     public decimal? IvaRetention { get; set; }
 
     /// <summary>
-    /// Tasa de ISR retenido (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
     /// </summary>
     [JsonPropertyName("isr_retention")]
     public decimal? IsrRetention { get; set; }
@@ -61640,7 +61640,7 @@ public sealed partial class UpdateStoreConnectionParamsSettings
     public string? UnitKey { get; set; }
 
     /// <summary>
-    /// Tasa de IVA incluida en los precios. Por omisión 0.16.
+    /// Tasa de IVA incluida en los precios. Por omisión 0.16; también como número (0.16 o 16).
     /// <br/>
     /// Valores: 0, 0.16, 0.08, exento.
     /// </summary>
