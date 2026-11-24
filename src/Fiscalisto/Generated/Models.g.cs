@@ -49474,6 +49474,12 @@ public sealed partial class SatInvoice
     public string? CashConfirmation { get; set; }
 
     /// <summary>
+    /// Cuándo alguien confirmó el pago en efectivo (cash_confirmation confirmed), en hora del centro de México. Null en las demás.
+    /// </summary>
+    [JsonPropertyName("cash_confirmed_at")]
+    public string? CashConfirmedAt { get; set; }
+
+    /// <summary>
     /// Su centro de costo (ccn_…), o null. Póngalo o cámbielo con POST /v1/sat_invoices/{id}.
     /// </summary>
     [JsonPropertyName("cost_center")]
