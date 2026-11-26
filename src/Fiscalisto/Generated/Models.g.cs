@@ -31193,7 +31193,7 @@ public sealed partial class InvoiceCreateDonation
 public sealed partial class InvoiceCreateGlobal
 {
     /// <summary>
-    /// Periodicidad (Periodicidad), c_Periodicidad: 01 diario, 02 semanal, 03 quincenal, 04 mensual, 05 bimestral.
+    /// Periodicidad (Periodicidad), c_Periodicidad: 01 diario, 02 semanal o 04 mensual; 05 bimestral solo en el Régimen de Incorporación Fiscal (621). La regla 2.7.1.21 de la RMF 2026 no permite 03 quincenal.
     /// </summary>
     [JsonPropertyName("periodicity")]
     public required string Periodicity { get; set; }
@@ -53872,9 +53872,9 @@ public sealed partial class SelfInvoicing
     public long WindowDays { get; set; }
 
     /// <summary>
-    /// Cada cuánto se timbra sola la factura global con lo que nadie facturó: 01 diaria, 02 semanal, 03 quincenal, 04 mensual.
+    /// Cada cuánto se timbra sola la factura global con lo que nadie facturó: 01 diaria, 02 semanal o 04 mensual (regla 2.7.1.21 de la RMF 2026).
     /// <br/>
-    /// Valores: 01, 02, 03, 04.
+    /// Valores: 01, 02, 04.
     /// </summary>
     [JsonPropertyName("global_periodicity")]
     public string GlobalPeriodicity { get; set; } = default!;
@@ -61674,7 +61674,7 @@ public sealed partial class UpdateInvoiceParamsDonation
 public sealed partial class UpdateInvoiceParamsGlobal
 {
     /// <summary>
-    /// Periodicidad (Periodicidad), c_Periodicidad: 01 diario, 02 semanal, 03 quincenal, 04 mensual, 05 bimestral.
+    /// Periodicidad (Periodicidad), c_Periodicidad: 01 diario, 02 semanal o 04 mensual; 05 bimestral solo en el Régimen de Incorporación Fiscal (621). La regla 2.7.1.21 de la RMF 2026 no permite 03 quincenal.
     /// </summary>
     [JsonPropertyName("periodicity")]
     public required string Periodicity { get; set; }
@@ -66056,9 +66056,9 @@ public sealed partial class UpdateSelfInvoicingParams
     public long? WindowDays { get; set; }
 
     /// <summary>
-    /// c_Periodicidad de la factura global con los tickets que nadie facturó: 01 diaria, 02 semanal, 03 quincenal, 04 mensual.
+    /// c_Periodicidad de la factura global con los tickets que nadie facturó: 01 diaria, 02 semanal o 04 mensual (regla 2.7.1.21 de la RMF 2026; 03 quincenal no).
     /// <br/>
-    /// Valores: 01, 02, 03, 04.
+    /// Valores: 01, 02, 04.
     /// </summary>
     [JsonPropertyName("global_periodicity")]
     public string? GlobalPeriodicity { get; set; }
