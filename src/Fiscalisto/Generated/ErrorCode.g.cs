@@ -27,6 +27,24 @@ public static class ErrorCode
     /// <summary>Ya se está armando la respuesta de esta revisión del SAT. Espere a que answer.status sea completed (GET /v1/sat_reviews/{id}).</summary>
     public const string AnswerRunning = "answer_running";
 
+    /// <summary>La cuenta ya hizo 30 llaves por la API (creadas o cambiadas) en la última hora. Espere (Retry-After) o escríbanos si necesita más.</summary>
+    public const string ApiKeyCreationLimit = "api_key_creation_limit";
+
+    /// <summary>La llave que se crea o se edita tendría más que la que hace la solicitud: un recurso con más acceso, otro emisor, IP fuera de las suyas o un vencimiento después del suyo. Una llave solo da lo que tiene. param dice qué campo.</summary>
+    public const string ApiKeyEscalation = "api_key_escalation";
+
+    /// <summary>La llave venció (eligió cuándo al crearla, o se cambió con «Cambiar llave» y pasó su plazo). El mensaje dice cuándo y expired_at lo trae en ISO 8601. Cree otra en Desarrolladores › Llaves; antes de que venza, «Cambiar llave» le da la nueva sin cortar el servicio.</summary>
+    public const string ApiKeyExpired = "api_key_expired";
+
+    /// <summary>La llave no se pudo crear, cambiar o revocar: ya hay 50 en el modo, el vencimiento no está entre 1 hora y 3 años, una IP no es válida, no tiene ningún recurso, o ya se cambió por otra. El mensaje dice cuál.</summary>
+    public const string ApiKeyRejected = "api_key_rejected";
+
+    /// <summary>La llave existió y se revocó: en Desarrolladores › Llaves, al borrar su entorno de prueba, o porque GitHub (u otro buscador de secretos) la encontró publicada. El mensaje dice cuándo y quién, y revoked_at lo trae en ISO 8601. Use otra llave; si se publicó, cree una nueva y guárdela como secreto de su servidor.</summary>
+    public const string ApiKeyRevoked = "api_key_revoked";
+
+    /// <summary>Solo una llave con permisos por recurso que tenga api_keys (lectura para listar y ver, escritura para crear, cambiar y revocar) usa /v1/api_keys. Una llave con todos los permisos o de solo lectura no lo incluye: se da a propósito, en Desarrolladores › Llaves.</summary>
+    public const string ApiKeysPermissionRequired = "api_keys_permission_required";
+
     /// <summary>No existe esa versión de la API (en Fiscalisto-Version o api_version). El mensaje dice cuáles hay; vea Versiones.</summary>
     public const string ApiVersionInvalid = "api_version_invalid";
 
@@ -108,6 +126,12 @@ public static class ErrorCode
     /// <summary>El mes no tiene pagos a proveedores: esa DIOT se presenta sin operaciones desde el portal del SAT.</summary>
     public const string DiotEmpty = "diot_empty";
 
+    /// <summary>El borrador espera la aprobación de un administrador en Fiscalisto y se timbra cuando la dé. Cambiarlo con POST /v1/invoices/{id} retira la solicitud.</summary>
+    public const string DraftAwaitingApproval = "draft_awaiting_approval";
+
+    /// <summary>El borrador (hecho en la app o con draft: true) no está completo para timbrarse. Complételo con POST /v1/invoices/{id}, con la factura completa.</summary>
+    public const string DraftIncomplete = "draft_incomplete";
+
     /// <summary>La e.firma no sirve: no es una e.firma (es un CSD), es de otro RFC, está vencida o la contraseña no abre la llave.</summary>
     public const string EfirmaInvalid = "efirma_invalid";
 
@@ -153,7 +177,7 @@ public static class ErrorCode
     /// <summary>El hallazgo ya no aplica: lo que lo causó cambió (status resolved). No hay nada que revisar.</summary>
     public const string FindingResolved = "finding_resolved";
 
-    /// <summary>Idempotency-Key es de 1 a 255 caracteres ASCII, sin acentos ni ñ: el id de su pedido o un UUID.</summary>
+    /// <summary>Idempotency-Key es de 1 a 255 caracteres ASCII, sin acentos ni ñ: el id de su pedido o un UUID. Lo que timbra o prepara un pago pide 8 o más: el mensaje dice cuántos llegaron.</summary>
     public const string IdempotencyKeyInvalid = "idempotency_key_invalid";
 
     /// <summary>Lo que timbra exige el encabezado Idempotency-Key (8 a 255 caracteres, uno nuevo por comprobante). Así un reintento nunca timbra dos veces.</summary>
@@ -168,7 +192,7 @@ public static class ErrorCode
     /// <summary>Algo falló de nuestro lado. Repita la solicitud con la misma Idempotency-Key: nunca se timbra dos veces. Si sigue, escríbanos con el request_id.</summary>
     public const string InternalError = "internal_error";
 
-    /// <summary>La llave no existe, se revocó o expiró. Cree otra en Desarrolladores › Llaves.</summary>
+    /// <summary>La llave no es de ninguna cuenta: mal copiada, inventada o de antes de que guardáramos las llaves revocadas. Revise que la copió completa; sus llaves están en Desarrolladores › Llaves.</summary>
     public const string InvalidApiKey = "invalid_api_key";
 
     /// <summary>El cuerpo no es un objeto JSON válido.</summary>
@@ -183,8 +207,14 @@ public static class ErrorCode
     /// <summary>La factura no cumple una regla del SAT que Fiscalisto revisa antes de mandarla al PAC (uso contra régimen, totales, complementos…). No se usó ningún timbre.</summary>
     public const string InvoiceInvalid = "invoice_invalid";
 
+    /// <summary>La factura es un borrador: todavía no tiene XML, PDF timbrado, correo ni cancelación. Timbrela con POST /v1/invoices/{id}/stamp.</summary>
+    public const string InvoiceIsDraft = "invoice_is_draft";
+
     /// <summary>El acuse de cancelación existe cuando el SAT ya canceló la factura (status canceled). Con una cancelación en espera del cliente (pending), espere invoice.canceled.</summary>
     public const string InvoiceNotCanceled = "invoice_not_canceled";
+
+    /// <summary>La factura ya está timbrada: no se edita con su cuerpo completo, no se borra (se cancela o se sustituye) y no hay nada que timbrar.</summary>
+    public const string InvoiceNotDraft = "invoice_not_draft";
 
     /// <summary>Solo una factura de ingreso PUE vigente se marca pagada o por cobrar; una PPD se paga con su complemento de pago (type P).</summary>
     public const string InvoiceNotMarkable = "invoice_not_markable";
@@ -210,7 +240,7 @@ public static class ErrorCode
     /// <summary>El emisor no tiene equipo: el equipo es el de una empresa, en sus emisores propios (type own) y con una llave fk_live_. Un emisor conectado o uno de pruebas no tiene miembros.</summary>
     public const string IssuerHasNoTeam = "issuer_has_no_team";
 
-    /// <summary>El emisor es una empresa de la app conectada a la cuenta (source empresa): con la API solo se usan su Portal de proveedores y, si alguien que puede los encendió, sus pagos a proveedores; o quien la conectó (o encendió sus pagos) ya no tiene en esa empresa el permiso que la ruta pide.</summary>
+    /// <summary>El emisor es una empresa de la app conectada a la cuenta (source empresa): con la API solo se usan su Portal de proveedores y, si alguien que puede los encendió, sus pagos a proveedores; o quien la conectó (o encendió sus pagos) ya no tiene en esa empresa el permiso que la ruta pide, o ya no tiene lo que esa empresa pide para entrar (verificación en dos pasos o llave de acceso).</summary>
     public const string IssuerLinkedEmpresa = "issuer_linked_empresa";
 
     /// <summary>No existe ese emisor en la cuenta (o es del otro modo).</summary>

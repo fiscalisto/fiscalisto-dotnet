@@ -112,7 +112,7 @@ public sealed partial class AccountKey
     /// El entorno de prueba (sbx_…) de la llave: solo ve sus emisores, webhooks y eventos. null si es de la cuenta.
     /// </summary>
     [JsonPropertyName("sandbox")]
-    public string? Sandbox { get; set; }
+    public StringOr<Sandbox>? Sandbox { get; set; }
 }
 
 /// <summary>
@@ -556,7 +556,7 @@ public sealed partial class AnnualAdjustment
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El ejercicio.
@@ -592,7 +592,7 @@ public sealed partial class AnnualAdjustmentEmployeesItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su número de empleado.
@@ -1828,6 +1828,132 @@ public sealed partial class AnnualReturnTaxAccountsYearEnd
 }
 
 /// <summary>
+/// Una llave secreta de la API, con permisos por recurso.
+/// </summary>
+public sealed partial class ApiKey
+{
+    /// <summary>
+    /// Identificador del objeto, con su prefijo (iss_, inv_, ret_, cus_, prd_, emp_, bat_, brn_, whs_, stm_, adj_, evt_, whe_).
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
+    /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
+    /// </summary>
+    [JsonPropertyName("livemode")]
+    public bool Livemode { get; set; }
+
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// El principio de la llave (fk_live_AbC…), para reconocerla. El secreto completo solo viene en secret.
+    /// </summary>
+    [JsonPropertyName("redacted")]
+    public string Redacted { get; set; } = default!;
+
+    /// <summary>
+    /// read o write en cada recurso; uno que no está es sin acceso.
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public Dictionary<string, string> Permissions { get; set; } = default!;
+
+    /// <summary>
+    /// Los emisores con que trabaja; vacío: todos los del modo.
+    /// </summary>
+    [JsonPropertyName("issuers")]
+    public List<string> Issuers { get; set; } = default!;
+
+    /// <summary>
+    /// Solo funciona desde estas IP o rangos; vacío: desde cualquiera.
+    /// </summary>
+    [JsonPropertyName("allowed_ips")]
+    public List<string> AllowedIps { get; set; } = default!;
+
+    /// <summary>
+    /// La duración que se le dio al crearla, en horas (la nueva al cambiarla dura lo mismo); null: no vence.
+    /// </summary>
+    [JsonPropertyName("lifetime_hours")]
+    public long? LifetimeHours { get; set; }
+
+    /// <summary>
+    /// Cuándo deja de funcionar (su duración, o el plazo de una llave que se cambió); null: no vence.
+    /// </summary>
+    [JsonPropertyName("expires_at")]
+    public string? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
+    /// </summary>
+    [JsonPropertyName("created_at")]
+    public string? CreatedAt { get; set; }
+
+    /// <summary>
+    /// Su última solicitud (al minuto), o null.
+    /// </summary>
+    [JsonPropertyName("last_used_at")]
+    public string? LastUsedAt { get; set; }
+
+    /// <summary>
+    /// Ya se cambió por otra (POST /v1/api_keys/{id}/roll): funciona solo hasta expires_at.
+    /// </summary>
+    [JsonPropertyName("rolled")]
+    public bool Rolled { get; set; }
+
+    /// <summary>
+    /// El entorno de prueba (sbx_…) en que funciona, o null.
+    /// </summary>
+    [JsonPropertyName("sandbox")]
+    public StringOr<Sandbox>? Sandbox { get; set; }
+
+    /// <summary>
+    /// La llave completa (fk_live_… o fk_test_…): solo en la respuesta que la crea o la cambia. Guárdela; no se vuelve a mostrar.
+    /// </summary>
+    [JsonPropertyName("secret")]
+    public string? Secret { get; set; }
+}
+
+/// <summary>
+/// Una página de la lista.
+/// </summary>
+public sealed partial class ApiKeyList
+{
+    /// <summary>
+    /// Qué tipo de objeto es («invoice», «customer»…).
+    /// </summary>
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = default!;
+
+    /// <summary>
+    /// Los objetos de esta página.
+    /// </summary>
+    [JsonPropertyName("data")]
+    public List<ApiKey> Data { get; set; } = default!;
+
+    /// <summary>
+    /// true si hay más: pida la siguiente con starting_after igual al id del último.
+    /// </summary>
+    [JsonPropertyName("has_more")]
+    public bool HasMore { get; set; }
+
+    /// <summary>
+    /// La ruta de esta lista.
+    /// </summary>
+    [JsonPropertyName("url")]
+    public string Url { get; set; } = default!;
+}
+
+/// <summary>
 /// El cuerpo de POST /v1/invoices (la factura de lo vendido) con method y remainder.
 /// </summary>
 public sealed partial class ApplyAdvanceParams
@@ -2043,7 +2169,7 @@ public sealed partial class ApplyAdvanceParams
     public string? Date { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -2059,6 +2185,12 @@ public sealed partial class ApplyAdvanceParams
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: la guarda como borrador (status draft) sin timbrar ni usar timbres, con las mismas revisiones que al timbrar (un error responde invoice_invalid; los avisos vienen en warnings). Se cambia con POST /v1/invoices/{id}, se timbra con POST /v1/invoices/{id}/stamp y se borra con DELETE /v1/invoices/{id}; también aparece en Por facturar de Fiscalisto. Idempotency-Key es opcional: con ella, repetir la solicitud devuelve el mismo borrador. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public bool? Draft { get; set; }
 
     /// <summary>
     /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
@@ -2256,7 +2388,7 @@ public sealed partial class AttendanceCalendar
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El mes, AAAA-MM.
@@ -2312,7 +2444,7 @@ public sealed partial class AttendanceCalendarChange
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// A cuántos empleados.
@@ -2348,7 +2480,7 @@ public sealed partial class AttendanceCalendarEmployeesItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su nombre.
@@ -2492,7 +2624,7 @@ public sealed partial class AttendanceMark
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// in: entrada; out: salida.
@@ -2604,7 +2736,7 @@ public sealed partial class AttendanceOvertime
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// El día, AAAA-MM-DD.
@@ -2652,7 +2784,7 @@ public sealed partial class AttendanceReport
     /// El emisor (iss_…), el patrón.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Primer día del periodo, AAAA-MM-DD.
@@ -2716,7 +2848,7 @@ public sealed partial class AttendanceReportEmployeesItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su nombre.
@@ -3463,7 +3595,7 @@ public sealed partial class Balance
     public bool Unlimited { get; set; }
 
     /// <summary>
-    /// Con esta cantidad o menos llega balance.low (y otra vez al acabarse). Se elige en Desarrolladores › Timbres y pagos.
+    /// Con esta cantidad o menos llega balance.low (y otra vez al acabarse). Se elige en Desarrolladores › Timbres y pagos. Si solo le quedan timbres de regalo, llega al quedar 2.
     /// </summary>
     [JsonPropertyName("low_balance_at")]
     public long LowBalanceAt { get; set; }
@@ -3718,13 +3850,13 @@ public sealed partial class BankTransaction
     /// Las facturas (inv_…) que pagó, si está conciliado.
     /// </summary>
     [JsonPropertyName("invoices")]
-    public List<string> Invoices { get; set; } = default!;
+    public List<StringOr<Invoice>> Invoices { get; set; } = default!;
 
     /// <summary>
     /// El complemento de pago (inv_…) timbrado con él, o null.
     /// </summary>
     [JsonPropertyName("payment")]
-    public string? Payment { get; set; }
+    public StringOr<Invoice>? Payment { get; set; }
 
     /// <summary>
     /// Si está abierto, las facturas que parece pagar (por monto, RFC, folio en el concepto y fecha): invoices, lo que toca a cada una (amounts), method, confidence (high o medium) y por qué (reasons). null si ninguna encaja.
@@ -4031,6 +4163,12 @@ public sealed partial class Branch
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor de la sucursal.
     /// </summary>
     [JsonPropertyName("issuer")]
@@ -4252,7 +4390,7 @@ public sealed partial class Budget
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Año (Ejercicio).
@@ -4557,6 +4695,12 @@ public sealed partial class CancelInvoiceParams
     /// </summary>
     [JsonPropertyName("substitution")]
     public string? Substitution { get; set; }
+
+    /// <summary>
+    /// true para avisarle al cliente por correo que se canceló, con el diseño de Fiscalisto, a las direcciones a las que se le mandó la factura (con la que la sustituye, si hay). Por omisión no se avisa. Solo si la factura se le mandó por correo; quien se dio de baja de los avisos no lo recibe.
+    /// </summary>
+    [JsonPropertyName("notify_customer")]
+    public bool? NotifyCustomer { get; set; }
 }
 
 /// <summary>
@@ -4662,7 +4806,7 @@ public sealed partial class Candidate
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// La vacante a la que se postuló (vac_…).
@@ -4728,7 +4872,7 @@ public sealed partial class Candidate
     /// El empleado (emp_…) si se le contrató.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
@@ -5102,7 +5246,7 @@ public sealed partial class CashForecast
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Hoy en la Ciudad de México (AAAA-MM-DD): el inicio.
@@ -5210,7 +5354,7 @@ public sealed partial class CashForecastItem
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Qué es: «Renta», «Crédito del banco».
@@ -6158,7 +6302,7 @@ public sealed partial class Climate
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Lo que se configura en POST /v1/climate/policy.
@@ -6212,7 +6356,7 @@ public sealed partial class ClimateAction
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// La encuesta de la que sale (cls_…).
@@ -6428,7 +6572,7 @@ public sealed partial class ClimateComplaint
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// violencia, entorno u otro.
@@ -6596,7 +6740,7 @@ public sealed partial class ClimateSurvey
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// nom035 o clima.
@@ -6746,7 +6890,7 @@ public sealed partial class ClimateSurveyInvitesItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -7190,7 +7334,7 @@ public sealed partial class ClimateTraumaticEvent
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -7328,7 +7472,7 @@ public sealed partial class CompanyReport
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Su RFC.
@@ -7887,8 +8031,8 @@ public sealed partial class CompanyReportYearsItem
     /// <summary>
     /// Ingresos facturados y cancelados.
     /// </summary>
-    [JsonPropertyName("income_cancelled")]
-    public decimal IncomeCancelled { get; set; }
+    [JsonPropertyName("income_canceled")]
+    public decimal IncomeCanceled { get; set; }
 
     /// <summary>
     /// Por ciento de ingresos en PUE.
@@ -7923,8 +8067,8 @@ public sealed partial class CompanyReportYearsItem
     /// <summary>
     /// Gastos recibidos y cancelados.
     /// </summary>
-    [JsonPropertyName("expenses_cancelled")]
-    public decimal ExpensesCancelled { get; set; }
+    [JsonPropertyName("expenses_canceled")]
+    public decimal ExpensesCanceled { get; set; }
 
     /// <summary>
     /// Por ciento de lo PPD ya pagado.
@@ -9357,6 +9501,12 @@ public sealed partial class CostCenter
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor del centro de costo.
     /// </summary>
     [JsonPropertyName("issuer")]
@@ -9767,7 +9917,7 @@ public sealed partial class CreateAdvanceParams
     public string? Notes { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -9849,6 +9999,48 @@ public sealed partial class CreateAdvanceParamsCustomerForeign
     /// </summary>
     [JsonPropertyName("tax_id")]
     public required string TaxId { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Crear una llave».
+/// </summary>
+public sealed partial class CreateApiKeyParams
+{
+    /// <summary>
+    /// Para qué es, para usted (por ejemplo, el nombre de su cliente).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Qué puede hacer la llave en cada recurso: `read` o `write` (escritura incluye lectura). Un recurso que no está es sin acceso. Cada uno, como mucho lo que tiene la llave que la crea.
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public required Dictionary<string, string> Permissions { get; set; }
+
+    /// <summary>
+    /// Los emisores con que trabaja (sus id). Vacío o sin mandar: todos los del modo; si la llave que la crea está limitada a algunos emisores, sin mandar son esos mismos y la nueva solo puede tener algunos de ellos.
+    /// </summary>
+    [JsonPropertyName("issuers")]
+    public List<string>? Issuers { get; set; }
+
+    /// <summary>
+    /// Solo funciona desde estas IP o rangos CIDR (203.0.113.7, 203.0.113.0/24, 2001:db8::/32). Vacío: desde cualquiera; si la llave que la crea tiene IP, sin mandar son esas mismas y la nueva solo puede tener direcciones dentro de ellas.
+    /// </summary>
+    [JsonPropertyName("allowed_ips")]
+    public List<string>? AllowedIps { get; set; }
+
+    /// <summary>
+    /// Horas hasta que deja de funcionar (1 hora a 3 años); null: no vence. Sin mandar: vence cuando vence la llave que la crea, o nunca. No puede pasar del vencimiento de la llave que la crea.
+    /// </summary>
+    [JsonPropertyName("lifetime_hours")]
+    public long? LifetimeHours { get; set; }
+
+    /// <summary>
+    /// En vez de lifetime_hours: el momento en que deja de funcionar (ISO 8601), entre 1 hora y 3 años después.
+    /// </summary>
+    [JsonPropertyName("expires_at")]
+    public string? ExpiresAt { get; set; }
 }
 
 /// <summary>
@@ -10103,6 +10295,12 @@ public sealed partial class CreateBranchParams
     /// </summary>
     [JsonPropertyName("time_zone")]
     public string? TimeZone { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -10475,6 +10673,12 @@ public sealed partial class CreateCostCenterParams
     /// </summary>
     [JsonPropertyName("code")]
     public string? Code { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -10539,7 +10743,7 @@ public sealed partial class CreateCreditNoteParams
     public string? Relationship { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -10591,6 +10795,12 @@ public sealed partial class CreateCustomerDataRequestParams
     /// </summary>
     [JsonPropertyName("expires_in_days")]
     public long? ExpiresInDays { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -10679,6 +10889,12 @@ public sealed partial class CreateCustomerGroupParams
     /// </summary>
     [JsonPropertyName("prep_days")]
     public long? PrepDays { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -10691,6 +10907,12 @@ public sealed partial class CreateCustomerParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 
     /// <summary>
     /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
@@ -11083,6 +11305,12 @@ public sealed partial class CreateEmployeeParams
     /// </summary>
     [JsonPropertyName("exit_reason")]
     public string? ExitReason { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -11401,6 +11629,12 @@ public sealed partial class CreateExpensePersonParams
     /// </summary>
     [JsonPropertyName("department")]
     public string? Department { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -11463,6 +11697,12 @@ public sealed partial class CreateExpenseReportParams
     /// </summary>
     [JsonPropertyName("end_date")]
     public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -11605,7 +11845,7 @@ public sealed partial class CreateExtraordinaryPayrollReceiptParams
     public decimal? VacationDaysOwed { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -12037,7 +12277,7 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     public string? Date { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -12053,6 +12293,12 @@ public sealed partial class CreateInvoiceBatchParamsInvoicesItem
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: la guarda como borrador (status draft) sin timbrar ni usar timbres, con las mismas revisiones que al timbrar (un error responde invoice_invalid; los avisos vienen en warnings). Se cambia con POST /v1/invoices/{id}, se timbra con POST /v1/invoices/{id}/stamp y se borra con DELETE /v1/invoices/{id}; también aparece en Por facturar de Fiscalisto. Idempotency-Key es opcional: con ella, repetir la solicitud devuelve el mismo borrador. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public bool? Draft { get; set; }
 
     /// <summary>
     /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
@@ -12563,7 +12809,7 @@ public sealed partial class CreatePaymentParams
     public required List<CreatePaymentParamsDocumentsItem> Documents { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -12665,6 +12911,12 @@ public sealed partial class CreatePayoutParams
     /// </summary>
     [JsonPropertyName("payments")]
     public List<CreatePayoutParamsPaymentsItem>? Payments { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -13143,7 +13395,7 @@ public sealed partial class CreatePayrollBatchParamsExternalReceiptsItem
     public string? Replaces { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -13279,6 +13531,12 @@ public sealed partial class CreatePayrollPayoutParams
     /// </summary>
     [JsonPropertyName("pay_on")]
     public string? PayOn { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -13371,7 +13629,7 @@ public sealed partial class CreatePayrollReceiptParams
     public string? Replaces { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -13673,6 +13931,12 @@ public sealed partial class CreatePriceListParams
     /// </summary>
     [JsonPropertyName("items")]
     public List<CreatePriceListParamsItemsItem>? Items { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -13721,6 +13985,12 @@ public sealed partial class CreateProductParams
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 
     /// <summary>
     /// Nombre corto para encontrarlo, solo para usted; en el CFDI va description.
@@ -13967,6 +14237,12 @@ public sealed partial class CreateProductionOrderParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -14067,6 +14343,12 @@ public sealed partial class CreatePurchaseReceiptParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -14137,6 +14419,12 @@ public sealed partial class CreateQuoteParams
     public string? PaymentMethod { get; set; }
 
     /// <summary>
+    /// Con PUE: true si aún no le pagan («Por cobrar» en la app) aunque se pagará este mes.
+    /// </summary>
+    [JsonPropertyName("paid_later")]
+    public bool? PaidLater { get; set; }
+
+    /// <summary>
     /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
     /// </summary>
     [JsonPropertyName("use")]
@@ -14147,6 +14435,12 @@ public sealed partial class CreateQuoteParams
     /// </summary>
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 
     /// <summary>
     /// Hasta cuándo es válida (AAAA-MM-DD, hasta un año). Por omisión, en 15 días.
@@ -14547,6 +14841,12 @@ public sealed partial class CreateRecurringInvoiceParams
     /// </summary>
     [JsonPropertyName("catch_up")]
     public string? CatchUp { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -14751,7 +15051,7 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     public string? Date { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -14767,6 +15067,12 @@ public sealed partial class CreateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: la guarda como borrador (status draft) sin timbrar ni usar timbres, con las mismas revisiones que al timbrar (un error responde invoice_invalid; los avisos vienen en warnings). Se cambia con POST /v1/invoices/{id}, se timbra con POST /v1/invoices/{id}/stamp y se borra con DELETE /v1/invoices/{id}; también aparece en Por facturar de Fiscalisto. Idempotency-Key es opcional: con ella, repetir la solicitud devuelve el mismo borrador. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public bool? Draft { get; set; }
 
     /// <summary>
     /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
@@ -14915,6 +15221,12 @@ public sealed partial class CreateRepseContractParams
     /// </summary>
     [JsonPropertyName("workers")]
     public required List<CreateRepseContractParamsWorkersItem> Workers { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -15163,7 +15475,7 @@ public sealed partial class CreateRetentionParams
     public string? Replaces { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -16269,9 +16581,9 @@ public sealed partial class CreateRuleParams
     public string? Name { get; set; }
 
     /// <summary>
-    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), invoice.approved (se aprueba en el Portal de proveedores), invoice.rejected (se rechaza en el portal), payout.submitted (se manda a firmar un pago que la incluye), payout.paid (se le paga una factura a un proveedor), payout.failed (falla o se devuelve su pago), invoice.daily (cada mañana a las 8, a cada factura con saldo, recibida o emitida, de Ingreso y no cancelada), purchase_order.daily (cada mañana a las 8, a cada orden que aún no llega toda ni está cerrada o cancelada), finding.created (aparece un hallazgo en una factura de los últimos 45 días), purchase_order.saved, .approved, .rejected, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered, bank.movement (llega un movimiento del banco: un retiro al importar el estado de cuenta, un depósito cuando Conciliación lo clasifica como préstamo, traspaso, devolución o intereses), sat.listed (un proveedor, cliente o RFC suyo aparece en una lista del SAT; cada mañana, una vez por RFC, lista y situación), sat.opinion (cambia la opinión de cumplimiento de un RFC suyo), sat.buzon (llega un comunicado, una notificación por abrir o el buzón no tiene medios de contacto), sat.certificate (cada mañana a las 8, a cada CSD y e.firma, con sus días para vencer).
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.canceled (el SAT la cancela; también se acepta invoice.cancelled), invoice.approved (se aprueba en el Portal de proveedores), invoice.rejected (se rechaza en el portal), payout.submitted (se manda a firmar un pago que la incluye), payout.paid (se le paga una factura a un proveedor), payout.failed (falla o se devuelve su pago), invoice.daily (cada mañana a las 8, a cada factura con saldo, recibida o emitida, de Ingreso y no cancelada), purchase_order.daily (cada mañana a las 8, a cada orden que aún no llega toda ni está cerrada o cancelada), finding.created (aparece un hallazgo en una factura de los últimos 45 días), purchase_order.saved, .approved, .rejected, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered, bank.movement (llega un movimiento del banco: un retiro al importar el estado de cuenta, un depósito cuando Conciliación lo clasifica como préstamo, traspaso, devolución o intereses), sat.listed (un proveedor, cliente o RFC suyo aparece en una lista del SAT; cada mañana, una vez por RFC, lista y situación), sat.opinion (cambia la opinión de cumplimiento de un RFC suyo), sat.buzon (llega un comunicado, una notificación por abrir o el buzón no tiene medios de contacto), sat.certificate (cada mañana a las 8, a cada CSD y e.firma, con sus días para vencer).
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
+    /// Valores: invoice.cancelled, invoice.received, invoice.issued, invoice.paid, invoice.canceled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
     /// </summary>
     [JsonPropertyName("trigger")]
     public required string Trigger { get; set; }
@@ -16543,7 +16855,7 @@ public sealed partial class CreateRuleParamsConditions
 public sealed partial class CreateRuleParamsConditionsConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.canceled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -16613,7 +16925,7 @@ public sealed partial class CreateRuleParamsConditionsGroupsItem
 public sealed partial class CreateRuleParamsConditionsGroupsItemConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.canceled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -17143,6 +17455,12 @@ public sealed partial class CreateSalesOrderParams
     public bool? Confirm { get; set; }
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
     /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
     /// </summary>
     [JsonPropertyName("currency")]
@@ -17167,6 +17485,12 @@ public sealed partial class CreateSalesOrderParams
     /// </summary>
     [JsonPropertyName("payment_method")]
     public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// Con PUE: true si aún no le pagan («Por cobrar» en la app) aunque se pagará este mes.
+    /// </summary>
+    [JsonPropertyName("paid_later")]
+    public bool? PaidLater { get; set; }
 
     /// <summary>
     /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
@@ -17885,6 +18209,12 @@ public sealed partial class CreateStockAdjustmentParams
     /// </summary>
     [JsonPropertyName("lines")]
     public required List<CreateStockAdjustmentParamsLinesItem> Lines { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -18107,6 +18437,12 @@ public sealed partial class CreateSupplierGroupParams
     /// </summary>
     [JsonPropertyName("suppliers")]
     public List<string>? Suppliers { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -18133,6 +18469,12 @@ public sealed partial class CreateTagParams
     /// </summary>
     [JsonPropertyName("color")]
     public string? Color { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -18275,6 +18617,12 @@ public sealed partial class CreateTicketParams
     /// </summary>
     [JsonPropertyName("lines")]
     public List<CreateTicketParamsLinesItem>? Lines { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -18553,6 +18901,12 @@ public sealed partial class CreateWebhookEndpointParams
     /// </summary>
     [JsonPropertyName("api_version")]
     public string? ApiVersion { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -18731,7 +19085,7 @@ public sealed partial class CrossCheckCfdiExplanationCausesItem
     /// <summary>
     /// El motivo que comparten.
     /// <br/>
-    /// Valores: cancelled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
+    /// Valores: canceled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
     /// </summary>
     [JsonPropertyName("reason")]
     public string Reason { get; set; } = default!;
@@ -18793,7 +19147,7 @@ public sealed partial class CrossCheckCfdiExplanationCausesItemCfdiItem
     /// <summary>
     /// Por qué lo explicaría.
     /// <br/>
-    /// Valores: cancelled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
+    /// Valores: canceled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
     /// </summary>
     [JsonPropertyName("reason")]
     public string Reason { get; set; } = default!;
@@ -18867,7 +19221,7 @@ public sealed partial class CrossCheckCfdiExplanationExactCfdiItem
     /// <summary>
     /// Por qué lo explicaría.
     /// <br/>
-    /// Valores: cancelled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
+    /// Valores: canceled, ppd_not_collected, other_month, month_edge, credit_note, ppd_payment, duplicate, left_out, withholding_certificate.
     /// </summary>
     [JsonPropertyName("reason")]
     public string Reason { get; set; } = default!;
@@ -19140,7 +19494,7 @@ public sealed partial class Customer
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
@@ -19227,6 +19581,12 @@ public sealed partial class Customer
     public decimal? DiscountPercent { get; set; }
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -19299,6 +19659,12 @@ public sealed partial class CustomerDataRequest
     /// </summary>
     [JsonPropertyName("expires_at")]
     public string? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se creó.
@@ -19396,7 +19762,7 @@ public sealed partial class CustomerDataRequestSubmission
     /// El cliente (cus_…) en el catálogo del emisor: el nuevo, o el que ya existía con ese RFC.
     /// </summary>
     [JsonPropertyName("customer")]
-    public string? Customer { get; set; }
+    public StringOr<Customer>? Customer { get; set; }
 
     /// <summary>
     /// true si quedó en el catálogo. false si el cliente ya existía con otros datos: aplíquelos con POST /v1/customers/{id} si son correctos.
@@ -19453,10 +19819,16 @@ public sealed partial class CustomerGroup
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -19632,7 +20004,7 @@ public sealed partial class CustomerPaymentBehavior
     /// El cliente (cus_…).
     /// </summary>
     [JsonPropertyName("customer")]
-    public string Customer { get; set; } = default!;
+    public StringOr<Customer> Customer { get; set; } = default!;
 
     /// <summary>
     /// Su RFC.
@@ -19899,7 +20271,7 @@ public sealed partial class DeleteCostCenterParams
 public sealed partial class DeleteCostOfSalesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -19911,7 +20283,7 @@ public sealed partial class DeleteCostOfSalesParams
 public sealed partial class DeleteFxRevaluationParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -19935,7 +20307,7 @@ public sealed partial class DeleteMemberParams
 public sealed partial class DeletePayrollProvisionParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -19947,7 +20319,7 @@ public sealed partial class DeletePayrollProvisionParams
 public sealed partial class DeleteRoleParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -19959,7 +20331,7 @@ public sealed partial class DeleteRoleParams
 public sealed partial class DeleteTaxDeterminationParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -20360,7 +20732,7 @@ public sealed partial class Employee
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Número de empleado (NumEmpleado).
@@ -20585,6 +20957,12 @@ public sealed partial class Employee
     public List<string> Warnings { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -20618,13 +20996,13 @@ public sealed partial class EmployeeDeduction
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// infonavit, fonacot, pension (pensión alimenticia), prestamo, anticipo (de salarios), caja (de ahorro) o sindical.
@@ -20784,7 +21162,7 @@ public sealed partial class EmployeeNoticeSettings
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Avisar cada recibo nuevo en cuanto se timbra.
@@ -20862,7 +21240,7 @@ public sealed partial class EmployeePortal
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su enlace personal (sin cuenta) para ver, descargar y firmar de recibido sus recibos y pedir vacaciones; null si está apagado.
@@ -20980,7 +21358,7 @@ public sealed partial class EmployeeRaise
     /// iss_…
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// false con dry_run: no se guardó nada.
@@ -21016,7 +21394,7 @@ public sealed partial class EmployeeRaiseEmployeesItem
     /// emp_…
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su número de empleado.
@@ -21082,13 +21460,13 @@ public sealed partial class EmployeeTraining
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su ocupación: la suya o la de su puesto.
@@ -21214,7 +21592,7 @@ public sealed partial class EmployeeVacations
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// El día del saldo.
@@ -21771,6 +22149,18 @@ public sealed partial class ErrorErrorValue
     public string? MessageEs { get; set; }
 
     /// <summary>
+    /// Con api_key_expired, cuándo dejó de servir la llave (ISO 8601, UTC).
+    /// </summary>
+    [JsonPropertyName("expired_at")]
+    public string? ExpiredAt { get; set; }
+
+    /// <summary>
+    /// Con api_key_revoked, cuándo se revocó la llave (ISO 8601, UTC).
+    /// </summary>
+    [JsonPropertyName("revoked_at")]
+    public string? RevokedAt { get; set; }
+
+    /// <summary>
     /// La explicación de este código en la documentación.
     /// </summary>
     [JsonPropertyName("doc_url")]
@@ -21900,7 +22290,7 @@ public sealed partial class EventResend
     /// El evento (evt_…) que se mandó otra vez.
     /// </summary>
     [JsonPropertyName("event")]
-    public string Event { get; set; } = default!;
+    public StringOr<Event> Event { get; set; } = default!;
 
     /// <summary>
     /// A cuántos webhooks salió. 0 si ninguno encendido escucha ese tipo de evento.
@@ -22172,7 +22562,7 @@ public sealed partial class ExpensePerson
     /// Su empleado de Nómina (emp_…), o null si es por honorarios.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Su nombre.
@@ -22215,6 +22605,12 @@ public sealed partial class ExpensePerson
     /// </summary>
     [JsonPropertyName("archived")]
     public bool Archived { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se agregó.
@@ -22575,6 +22971,12 @@ public sealed partial class ExpenseReport
     public List<ExpenseMovement> Movements { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo se abrió.
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -22700,7 +23102,7 @@ public sealed partial class Export
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// zip (los archivos de cada factura) o xlsx (un Excel con una fila por factura).
@@ -22925,7 +23327,7 @@ public sealed partial class ExternalPayrollReceiptCreate
     public string? Replaces { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -23564,7 +23966,7 @@ public sealed partial class ExternalPayrollReceiptPreview
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El empleado como receptor del CFDI (Receptor).
@@ -23684,7 +24086,7 @@ public sealed partial class ExtraordinaryPayrollReceiptPreview
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Qué paga: aguinaldo, ptu o finiquito.
@@ -24878,7 +25280,7 @@ public sealed partial class Finding
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// purchase_orders (órdenes de compra), payouts (pagos a proveedores), suppliers (proveedores), accounting (contabilidad), bank (movimientos del banco), expense_reports (comprobaciones de viáticos), purchase_receipts (tickets de compra), inventory (inventario), customers (clientes y cobranza) o payroll (nómina).
@@ -25601,7 +26003,7 @@ public sealed partial class GeneralLedgerAccountsItemMovementsItem
 public sealed partial class GetAccountingSettingsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25613,7 +26015,7 @@ public sealed partial class GetAccountingSettingsParams
 public sealed partial class GetAnnualAdjustmentParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25631,7 +26033,7 @@ public sealed partial class GetAnnualAdjustmentParams
 public sealed partial class GetAnnualReturnParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25649,7 +26051,7 @@ public sealed partial class GetAnnualReturnParams
 public sealed partial class GetAttendanceCalendarParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25673,7 +26075,7 @@ public sealed partial class GetAttendanceCalendarParams
 public sealed partial class GetAttendanceParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25703,7 +26105,7 @@ public sealed partial class GetAttendanceParams
 public sealed partial class GetAutomaticEntryParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25727,7 +26129,7 @@ public sealed partial class GetBooksExportParams
     public string? ToMonth { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25739,7 +26141,7 @@ public sealed partial class GetBooksExportParams
 public sealed partial class GetBudgetParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25777,7 +26179,7 @@ public sealed partial class GetCashFlowParams
     public string? Period { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25789,7 +26191,7 @@ public sealed partial class GetCashFlowParams
 public sealed partial class GetCashForecastParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25831,7 +26233,7 @@ public sealed partial class GetCashForecastParams
 public sealed partial class GetClimateParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25843,7 +26245,7 @@ public sealed partial class GetClimateParams
 public sealed partial class GetClosedPeriodParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25855,7 +26257,7 @@ public sealed partial class GetClosedPeriodParams
 public sealed partial class GetCompanyReportParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25901,7 +26303,7 @@ public sealed partial class GetComparativeStatementsParams
     public string? CompareTo { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25925,7 +26327,7 @@ public sealed partial class GetConsolidatedStatementsParams
     public required string Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25937,7 +26339,7 @@ public sealed partial class GetConsolidatedStatementsParams
 public sealed partial class GetCostCenterResultsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25949,7 +26351,7 @@ public sealed partial class GetCostCenterResultsParams
 public sealed partial class GetCostOfSalesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25975,7 +26377,7 @@ public sealed partial class GetCrossCheckCfdiParams
     public required string Key { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -25993,7 +26395,7 @@ public sealed partial class GetCrossChecksParams
     public long? Year { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26005,7 +26407,7 @@ public sealed partial class GetCrossChecksParams
 public sealed partial class GetDepreciationReconciliationParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26029,7 +26431,7 @@ public sealed partial class GetDiotFileParams
     public bool? GroupSmallSuppliers { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26047,7 +26449,7 @@ public sealed partial class GetDiotParams
     public required string Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26107,7 +26509,7 @@ public sealed partial class GetElectronicAccountingParams
     public string? ProcedureNumber { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26119,7 +26521,7 @@ public sealed partial class GetElectronicAccountingParams
 public sealed partial class GetEmployeeNoticeSettingsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26185,7 +26587,7 @@ public sealed partial class GetEquityChangesParams
     public required string Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26197,7 +26599,7 @@ public sealed partial class GetEquityChangesParams
 public sealed partial class GetExpensePolicyParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26215,7 +26617,7 @@ public sealed partial class GetFinancialRatiosParams
     public required string Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26233,7 +26635,7 @@ public sealed partial class GetFinancialStatementsParams
     public required string Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26245,7 +26647,7 @@ public sealed partial class GetFinancialStatementsParams
 public sealed partial class GetFxRevaluationParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26281,7 +26683,7 @@ public sealed partial class GetGeneralLedgerParams
     public string? GroupingCode { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26293,7 +26695,7 @@ public sealed partial class GetGeneralLedgerParams
 public sealed partial class GetHiringParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26319,7 +26721,7 @@ public sealed partial class GetIepsCustomersFileParams
     public required string Quarter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26345,7 +26747,7 @@ public sealed partial class GetIepsCustomersParams
     public string? Quarter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26357,7 +26759,7 @@ public sealed partial class GetIepsCustomersParams
 public sealed partial class GetInflationAdjustmentParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26435,7 +26837,7 @@ public sealed partial class GetInvoiceXmlParams
 public sealed partial class GetOpeningBalancesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26447,7 +26849,7 @@ public sealed partial class GetOpeningBalancesParams
 public sealed partial class GetPayoutsPauseParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26459,7 +26861,7 @@ public sealed partial class GetPayoutsPauseParams
 public sealed partial class GetPayrollAccumulatedParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26483,7 +26885,7 @@ public sealed partial class GetPayrollAccumulatedParams
 public sealed partial class GetPayrollCalendarParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26507,7 +26909,7 @@ public sealed partial class GetPayrollCalendarParams
 public sealed partial class GetPayrollCostParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26525,7 +26927,7 @@ public sealed partial class GetPayrollCostParams
 public sealed partial class GetPayrollOrgChartParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26543,7 +26945,7 @@ public sealed partial class GetPayrollOrgChartParams
 public sealed partial class GetPayrollProvisionParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26555,7 +26957,7 @@ public sealed partial class GetPayrollProvisionParams
 public sealed partial class GetPayrollTaxParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26573,7 +26975,7 @@ public sealed partial class GetPayrollTaxParams
 public sealed partial class GetPrepaidExpenseParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26585,7 +26987,7 @@ public sealed partial class GetPrepaidExpenseParams
 public sealed partial class GetRepseProfileParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26597,7 +26999,7 @@ public sealed partial class GetRepseProfileParams
 public sealed partial class GetRepseReturnParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26651,7 +27053,7 @@ public sealed partial class GetRetentionXmlParams
 public sealed partial class GetSatAnnualPreloadParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26687,7 +27089,7 @@ public sealed partial class GetSatCatalogParams
 public sealed partial class GetSatDeclarationCalendarParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26705,7 +27107,7 @@ public sealed partial class GetSatDeclarationCalendarParams
 public sealed partial class GetSatRiskCheckParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26717,7 +27119,7 @@ public sealed partial class GetSatRiskCheckParams
 public sealed partial class GetScheduleSettingsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26729,7 +27131,7 @@ public sealed partial class GetScheduleSettingsParams
 public sealed partial class GetTaxDeterminationParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26741,7 +27143,7 @@ public sealed partial class GetTaxDeterminationParams
 public sealed partial class GetTaxDiscrepancyParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26777,7 +27179,7 @@ public sealed partial class GetTrainingCertificatesPdfParams
 public sealed partial class GetTrainingParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26795,7 +27197,7 @@ public sealed partial class GetTrialBalanceParams
     public required string Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26807,7 +27209,7 @@ public sealed partial class GetTrialBalanceParams
 public sealed partial class GetVariableSalaryParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26831,7 +27233,7 @@ public sealed partial class GetVatRefundParams
     public string? Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -26870,7 +27272,7 @@ public sealed partial class Hiring
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// La página de empleos del emisor.
@@ -27064,7 +27466,7 @@ public sealed partial class IepsCustomers
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El año.
@@ -27288,7 +27690,7 @@ public sealed partial class ImssFiles
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// idse o sua.
@@ -27362,7 +27764,7 @@ public sealed partial class ImssFilesRefusedItem
     /// El movimiento (imv_…).
     /// </summary>
     [JsonPropertyName("movement")]
-    public string Movement { get; set; } = default!;
+    public StringOr<ImssMovement> Movement { get; set; } = default!;
 
     /// <summary>
     /// El nombre del empleado.
@@ -27404,13 +27806,13 @@ public sealed partial class ImssMovement
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su número de empleado.
@@ -27826,7 +28228,7 @@ public sealed partial class Invitation
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Correo a donde se envía (varios separados por comas). Solo se usa si se pide enviarlo.
@@ -27942,7 +28344,7 @@ public sealed partial class Invoice
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// La sucursal (brn_…) desde donde se timbró, o null (el domicilio fiscal del emisor). Sus pagos y notas de crédito la siguen.
@@ -27965,9 +28367,9 @@ public sealed partial class Invoice
     public string Type { get; set; } = default!;
 
     /// <summary>
-    /// processing: el PAC no ha contestado (se resuelve sola; escuche invoice.stamped). valid: timbrada. pending: timbrada, sin el UUID aún (se resuelve sola, como processing). Una cancelación en espera del cliente no cambia status: sigue valid, con cancellation.status pending. rejected: el SAT o el PAC no la aceptaron (ver error). canceled: cancelada.
+    /// draft: un borrador, sin timbrar (POST /v1/invoices con draft: true, o hecho en Fiscalisto): se cambia con POST /v1/invoices/{id}, se timbra con POST /v1/invoices/{id}/stamp y se borra con DELETE /v1/invoices/{id}. processing: el PAC no ha contestado (se resuelve sola; escuche invoice.stamped). valid: timbrada. pending: timbrada, sin el UUID aún (se resuelve sola, como processing). Una cancelación en espera del cliente no cambia status: sigue valid, con cancellation.status pending. rejected: el SAT o el PAC no la aceptaron (ver error). canceled: cancelada.
     /// <br/>
-    /// Valores: processing, pending, valid, rejected, canceled.
+    /// Valores: draft, processing, pending, valid, rejected, canceled.
     /// </summary>
     [JsonPropertyName("status")]
     public string Status { get; set; } = default!;
@@ -28152,13 +28554,13 @@ public sealed partial class Invoice
     /// La factura recurrente (rin_…) que la timbró sola, o null si se timbró con una llamada.
     /// </summary>
     [JsonPropertyName("recurring_invoice")]
-    public string? RecurringInvoice { get; set; }
+    public StringOr<RecurringInvoice>? RecurringInvoice { get; set; }
 
     /// <summary>
     /// Los tickets (`tkt_…`) que factura: el que su cliente facturó en la autofactura, el que su equipo facturó desde la página del ticket o los que asoció a ella. Vacío en las demás; los de una factura global están en GET /v1/tickets con `status=global`.
     /// </summary>
     [JsonPropertyName("tickets")]
-    public List<string> Tickets { get; set; } = default!;
+    public List<StringOr<Ticket>> Tickets { get; set; } = default!;
 
     /// <summary>
     /// Qué timbró la factura; `null` si se timbró fuera de Fiscalisto.
@@ -28177,6 +28579,12 @@ public sealed partial class Invoice
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
+    /// Solo en un borrador (status draft).
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public InvoiceDraft? Draft { get; set; }
 
     /// <summary>
     /// Avisos sobre la factura (solo en la respuesta que la timbra o, con 202, la que la deja en proceso): se timbra como se mandó.
@@ -28212,7 +28620,7 @@ public sealed partial class InvoiceAdvanceApplication
     /// El anticipo, como factura (inv_…).
     /// </summary>
     [JsonPropertyName("advance")]
-    public string? Advance { get; set; }
+    public StringOr<Invoice>? Advance { get; set; }
 
     /// <summary>
     /// El folio fiscal del anticipo.
@@ -28240,7 +28648,7 @@ public sealed partial class InvoiceAdvanceApplication
     /// La nota de aplicación del anticipo (inv_…), con method egreso.
     /// </summary>
     [JsonPropertyName("credit_note")]
-    public string? CreditNote { get; set; }
+    public StringOr<Invoice>? CreditNote { get; set; }
 
     /// <summary>
     /// Por qué no se timbró la nota de aplicación (repita con la misma Idempotency-Key).
@@ -28276,7 +28684,7 @@ public sealed partial class InvoiceBatch
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre del lote, para usted.
@@ -28364,7 +28772,7 @@ public sealed partial class InvoiceBatchInvoicesItem
     /// La factura timbrada (inv_…).
     /// </summary>
     [JsonPropertyName("invoice")]
-    public string? Invoice { get; set; }
+    public StringOr<Invoice>? Invoice { get; set; }
 
     /// <summary>
     /// Folio fiscal que asigna el SAT (UUID del Timbre Fiscal Digital), en mayúsculas.
@@ -28773,7 +29181,7 @@ public sealed partial class InvoiceCreate
     public string? Date { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -28789,6 +29197,12 @@ public sealed partial class InvoiceCreate
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: la guarda como borrador (status draft) sin timbrar ni usar timbres, con las mismas revisiones que al timbrar (un error responde invoice_invalid; los avisos vienen en warnings). Se cambia con POST /v1/invoices/{id}, se timbra con POST /v1/invoices/{id}/stamp y se borra con DELETE /v1/invoices/{id}; también aparece en Por facturar de Fiscalisto. Idempotency-Key es opcional: con ella, repetir la solicitud devuelve el mismo borrador. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public bool? Draft { get; set; }
 
     /// <summary>
     /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
@@ -31310,6 +31724,48 @@ public sealed partial class InvoiceCustomer
 }
 
 /// <summary>
+/// Solo en un borrador (status draft).
+/// </summary>
+public sealed partial class InvoiceDraft
+{
+    /// <summary>
+    /// Cuándo cambió por última vez.
+    /// </summary>
+    [JsonPropertyName("updated_at")]
+    public string? UpdatedAt { get; set; }
+
+    /// <summary>
+    /// Alguien del equipo lo mandó a aprobar en Fiscalisto: no se timbra por la API hasta que un administrador lo apruebe. Cambiarlo retira la solicitud.
+    /// </summary>
+    [JsonPropertyName("awaiting_approval")]
+    public bool AwaitingApproval { get; set; }
+
+    /// <summary>
+    /// Se está timbrando en este momento (desde la API o desde Fiscalisto).
+    /// </summary>
+    [JsonPropertyName("stamping")]
+    public bool Stamping { get; set; }
+
+    /// <summary>
+    /// Programado en Fiscalisto («Programar timbrado») para timbrarse solo a esa hora; null si no.
+    /// </summary>
+    [JsonPropertyName("scheduled_at")]
+    public string? ScheduledAt { get; set; }
+
+    /// <summary>
+    /// Al timbrarlo se manda por correo a customer.email.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool SendEmail { get; set; }
+
+    /// <summary>
+    /// Copias del correo al timbrarlo.
+    /// </summary>
+    [JsonPropertyName("email_cc")]
+    public string? EmailCc { get; set; }
+}
+
+/// <summary>
 /// &lt;c&gt;InvoiceEmail&lt;/c&gt;.
 /// </summary>
 public sealed partial class InvoiceEmail
@@ -32343,7 +32799,7 @@ public sealed partial class InvoicePreview
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
@@ -32603,7 +33059,7 @@ public sealed partial class InvoiceSubstitutes
     /// La factura sustituida (inv_…).
     /// </summary>
     [JsonPropertyName("invoice")]
-    public string Invoice { get; set; } = default!;
+    public StringOr<Invoice> Invoice { get; set; } = default!;
 
     /// <summary>
     /// true si la sustituida ya quedó cancelada. false no es definitivo: vea substitutes.cancellation.
@@ -32837,7 +33293,7 @@ public sealed partial class Issuer
     /// El entorno de prueba (sbx_…) al que pertenece, o null si es de la cuenta. Vea /v1/sandboxes.
     /// </summary>
     [JsonPropertyName("sandbox")]
-    public string? Sandbox { get; set; }
+    public StringOr<Sandbox>? Sandbox { get; set; }
 
     /// <summary>
     /// Su reloj de prueba (solo emisores de prueba): la hora que es «hoy» para él, o null si va con la hora real. Vea POST /v1/issuers/{id}/test_clock.
@@ -32879,7 +33335,7 @@ public sealed partial class IssuerBranding
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
@@ -33239,7 +33695,7 @@ public sealed partial class JournalEntry
     /// La factura (inv_…) si es la póliza de un CFDI que timbró este emisor; null en los demás casos.
     /// </summary>
     [JsonPropertyName("invoice")]
-    public string? Invoice { get; set; }
+    public StringOr<Invoice>? Invoice { get; set; }
 
     /// <summary>
     /// El folio fiscal del CFDI (o del complemento de pago); null en la depreciación.
@@ -33515,6 +33971,48 @@ public sealed partial class ListAdvancesParams
 }
 
 /// <summary>
+/// Los campos de «Listar llaves».
+/// </summary>
+public sealed partial class ListApiKeysParams
+{
+    /// <summary>
+    /// Cuántos por página, de 1 a 100. Por omisión 10.
+    /// </summary>
+    [JsonPropertyName("limit")]
+    public long? Limit { get; set; }
+
+    /// <summary>
+    /// El id del último de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Listar los roles de turnos».
 /// </summary>
 public sealed partial class ListAttendanceRotationsParams
@@ -33574,7 +34072,7 @@ public sealed partial class ListBankMovementsParams
     public string? Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33598,7 +34096,7 @@ public sealed partial class ListBankTransactionsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33610,6 +34108,54 @@ public sealed partial class ListBankTransactionsParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+
+    /// <summary>
+    /// Con fecha del movimiento desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[gte]")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// Con fecha del movimiento después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// Con fecha del movimiento hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Con fecha del movimiento antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -33626,18 +34172,6 @@ public sealed partial class ListBooksLogParams
     public string? Subject { get; set; }
 
     /// <summary>
-    /// Desde este día (AAAA-MM-DD, hora de la Ciudad de México).
-    /// </summary>
-    [JsonPropertyName("from")]
-    public string? From { get; set; }
-
-    /// <summary>
-    /// Hasta este día, incluido.
-    /// </summary>
-    [JsonPropertyName("to")]
-    public string? To { get; set; }
-
-    /// <summary>
     /// Cuántos por página, de 1 a 100. Por omisión 10.
     /// </summary>
     [JsonPropertyName("limit")]
@@ -33650,10 +34184,46 @@ public sealed partial class ListBooksLogParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Igual que created[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("from")]
+    public string? From { get; set; }
+
+    /// <summary>
+    /// Igual que created[lte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("to")]
+    public string? To { get; set; }
 }
 
 /// <summary>
@@ -33674,7 +34244,7 @@ public sealed partial class ListBranchesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33690,6 +34260,36 @@ public sealed partial class ListBranchesParams
     /// </summary>
     [JsonPropertyName("zip")]
     public string? Zip { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -33710,7 +34310,7 @@ public sealed partial class ListCandidatesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33726,6 +34326,30 @@ public sealed partial class ListCandidatesParams
     /// </summary>
     [JsonPropertyName("stage")]
     public string? Stage { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -33758,7 +34382,7 @@ public sealed partial class ListClimateActionsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33768,6 +34392,30 @@ public sealed partial class ListClimateActionsParams
     /// </summary>
     [JsonPropertyName("survey")]
     public string? Survey { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -33788,7 +34436,7 @@ public sealed partial class ListClimateComplaintsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33818,10 +34466,34 @@ public sealed partial class ListClimateSurveysParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -33836,7 +34508,7 @@ public sealed partial class ListConsolidationEliminationsParams
     public required string Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33860,7 +34532,7 @@ public sealed partial class ListCostCentersParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33870,6 +34542,36 @@ public sealed partial class ListCostCentersParams
     /// </summary>
     [JsonPropertyName("include_archived")]
     public bool? IncludeArchived { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -33890,10 +34592,40 @@ public sealed partial class ListCustomerDataRequestsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -33914,10 +34646,40 @@ public sealed partial class ListCustomerGroupsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -33938,7 +34700,7 @@ public sealed partial class ListCustomersParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33948,6 +34710,36 @@ public sealed partial class ListCustomersParams
     /// </summary>
     [JsonPropertyName("tax_id")]
     public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -33956,7 +34748,7 @@ public sealed partial class ListCustomersParams
 public sealed partial class ListEmployeeDeductionsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -33986,10 +34778,40 @@ public sealed partial class ListEmployeesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -33998,7 +34820,7 @@ public sealed partial class ListEmployeesParams
 public sealed partial class ListEntryTemplatesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34022,9 +34844,15 @@ public sealed partial class ListEventsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
+    /// Un evento (evt_…): contesta los limit que llegaron justo después de él, los más recientes primero; has_more dice si hay más nuevos. Para la página siguiente hacia adelante use el primero de data. No va con starting_after.
+    /// </summary>
+    [JsonPropertyName("ending_before")]
+    public string? EndingBefore { get; set; }
+
+    /// <summary>
     /// Solo de este tipo (invoice.stamped), o todos los de un recurso con un comodín (invoice.*).
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer.created, customer.updated, customer.deleted, product.created, product.updated, product.deleted, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, payout.*, payout_transfer.*, ticket.*, retention.*, customer.*, product.*, customer_data_request.*, sat_download.*, sat_declaration.*, sat_refresh.*, issuer.*, balance.*, usage.*, test_clock.*, rule.*.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, invoice.draft_created, invoice.draft_updated, invoice.draft_deleted, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer.created, customer.updated, customer.deleted, product.created, product.updated, product.deleted, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched, invoice.*, invoice_batch.*, payroll_batch.*, recurring_invoice.*, quote.*, sales_order.*, supplier_invoice.*, portal_supplier.*, payout.*, payout_transfer.*, ticket.*, retention.*, customer.*, product.*, customer_data_request.*, sat_download.*, sat_declaration.*, sat_refresh.*, issuer.*, balance.*, usage.*, test_clock.*, rule.*.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -34040,6 +34868,30 @@ public sealed partial class ListEventsParams
     /// </summary>
     [JsonPropertyName("delivery_success")]
     public bool? DeliverySuccess { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34060,7 +34912,7 @@ public sealed partial class ListExpensePeopleParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34070,6 +34922,36 @@ public sealed partial class ListExpensePeopleParams
     /// </summary>
     [JsonPropertyName("include_archived")]
     public bool? IncludeArchived { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34090,7 +34972,7 @@ public sealed partial class ListExpenseReportsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34106,6 +34988,36 @@ public sealed partial class ListExpenseReportsParams
     /// </summary>
     [JsonPropertyName("person")]
     public string? Person { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34126,10 +35038,34 @@ public sealed partial class ListExportsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34138,7 +35074,7 @@ public sealed partial class ListExportsParams
 public sealed partial class ListFindingsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34190,6 +35126,30 @@ public sealed partial class ListFindingsParams
     /// </summary>
     [JsonPropertyName("counterparty_tax_id")]
     public string? CounterpartyTaxId { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34204,7 +35164,7 @@ public sealed partial class ListFixedAssetsParams
     public string? Month { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34228,7 +35188,7 @@ public sealed partial class ListImssMovementsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34248,7 +35208,7 @@ public sealed partial class ListImssMovementsParams
 public sealed partial class ListInvitationsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34272,10 +35232,34 @@ public sealed partial class ListInvoiceBatchesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34296,15 +35280,15 @@ public sealed partial class ListInvoicesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// valid, pending, canceled, rejected o processing.
+    /// valid, pending, canceled, rejected o processing; draft lista solo los borradores (sin él no salen). Con draft no van payment_status ni cost_center.
     /// <br/>
-    /// Valores: valid, pending, canceled, rejected, processing.
+    /// Valores: valid, pending, canceled, rejected, processing, draft.
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
@@ -34332,22 +35316,76 @@ public sealed partial class ListInvoicesParams
     public string? PaymentStatus { get; set; }
 
     /// <summary>
-    /// Creadas desde, en ISO 8601. Un día solo (2026-10-01) cuenta desde su inicio en hora de la Ciudad de México.
+    /// Con fecha del CFDI desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("created_gte")]
-    public string? CreatedGte { get; set; }
+    [JsonPropertyName("date[gte]")]
+    public string? DateGte { get; set; }
 
     /// <summary>
-    /// Creadas hasta, en ISO 8601. Un día solo (2026-10-31) incluye el día completo en hora de la Ciudad de México.
+    /// Con fecha del CFDI después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("created_lte")]
-    public string? CreatedLte { get; set; }
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// Con fecha del CFDI hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Con fecha del CFDI antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
 
     /// <summary>
     /// Solo las de este centro de costo (ccn_…), o none para las que no tienen.
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Igual que created[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("created_gte")]
+    public string? CreatedGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que created[lte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("created_lte")]
+    public string? CreatedLteValue { get; set; }
 }
 
 /// <summary>
@@ -34378,6 +35416,36 @@ public sealed partial class ListIssuersParams
     /// </summary>
     [JsonPropertyName("include_archived")]
     public bool? IncludeArchived { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34404,7 +35472,7 @@ public sealed partial class ListJournalEntriesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34428,7 +35496,7 @@ public sealed partial class ListLedgerAccountsParams
 public sealed partial class ListLedgerBankAccountsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34452,22 +35520,70 @@ public sealed partial class ListManualEntriesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// Desde este día (AAAA-MM-DD).
+    /// Con fecha de la póliza desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[gte]")]
+    public string? DateGte { get; set; }
+
+    /// <summary>
+    /// Con fecha de la póliza después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// Con fecha de la póliza hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Con fecha de la póliza antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
+
+    /// <summary>
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Igual que date[gte]; se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("from")]
     public string? From { get; set; }
 
     /// <summary>
-    /// Hasta este día (AAAA-MM-DD).
+    /// Igual que date[lte]; se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("to")]
     public string? To { get; set; }
-
-    /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
-    /// </summary>
-    [JsonPropertyName("issuer")]
-    public string? Issuer { get; set; }
 }
 
 /// <summary>
@@ -34476,22 +35592,34 @@ public sealed partial class ListManualEntriesParams
 public sealed partial class ListMaterialityInvoicesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// Facturas desde este día (AAAA-MM-DD).
+    /// Facturas con fecha desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_gte")]
+    [JsonPropertyName("date[gte]")]
     public string? DateGte { get; set; }
 
     /// <summary>
-    /// Facturas hasta este día (AAAA-MM-DD, completo).
+    /// Facturas con fecha después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_lte")]
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// Facturas con fecha hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
     public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Facturas con fecha antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
 
     /// <summary>
     /// Solo las de este proveedor (su RFC).
@@ -34506,6 +35634,18 @@ public sealed partial class ListMaterialityInvoicesParams
     /// </summary>
     [JsonPropertyName("state")]
     public string? State { get; set; }
+
+    /// <summary>
+    /// Igual que date[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que date[lte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLteValue { get; set; }
 }
 
 /// <summary>
@@ -34514,28 +35654,52 @@ public sealed partial class ListMaterialityInvoicesParams
 public sealed partial class ListMaterialitySuppliersParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// Facturas desde este día (AAAA-MM-DD).
+    /// De las facturas con fecha desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_gte")]
+    [JsonPropertyName("date[gte]")]
     public string? DateGte { get; set; }
 
     /// <summary>
-    /// Facturas hasta este día (AAAA-MM-DD, completo).
+    /// De las facturas con fecha después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_lte")]
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// De las facturas con fecha hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
     public string? DateLte { get; set; }
+
+    /// <summary>
+    /// De las facturas con fecha antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
 
     /// <summary>
     /// Solo este proveedor (su RFC).
     /// </summary>
     [JsonPropertyName("supplier_tax_id")]
     public string? SupplierTaxId { get; set; }
+
+    /// <summary>
+    /// Igual que date[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que date[lte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLteValue { get; set; }
 }
 
 /// <summary>
@@ -34544,10 +35708,34 @@ public sealed partial class ListMaterialitySuppliersParams
 public sealed partial class ListMembersParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34568,6 +35756,12 @@ public sealed partial class ListPayableInvoicesParams
     public long? Limit { get; set; }
 
     /// <summary>
+    /// El id (folio fiscal) de la última de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
     /// Solo las de este proveedor (su RFC).
     /// </summary>
     [JsonPropertyName("supplier_tax_id")]
@@ -34586,7 +35780,7 @@ public sealed partial class ListPayableInvoicesParams
 public sealed partial class ListPayeeAccountsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34596,6 +35790,30 @@ public sealed partial class ListPayeeAccountsParams
     /// </summary>
     [JsonPropertyName("supplier_tax_id")]
     public string? SupplierTaxId { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34604,10 +35822,34 @@ public sealed partial class ListPayeeAccountsParams
 public sealed partial class ListPayoutMandatesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34628,7 +35870,7 @@ public sealed partial class ListPayoutsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34642,13 +35884,67 @@ public sealed partial class ListPayoutsParams
     public string? Status { get; set; }
 
     /// <summary>
-    /// Solo los que salen desde este día (AAAA-MM-DD).
+    /// Con fecha de pago desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("pay_on[gte]")]
+    public string? PayOnGte { get; set; }
+
+    /// <summary>
+    /// Con fecha de pago después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("pay_on[gt]")]
+    public string? PayOnGt { get; set; }
+
+    /// <summary>
+    /// Con fecha de pago hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("pay_on[lte]")]
+    public string? PayOnLte { get; set; }
+
+    /// <summary>
+    /// Con fecha de pago antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("pay_on[lt]")]
+    public string? PayOnLt { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Igual que pay_on[gte]; se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("pay_on_from")]
     public string? PayOnFrom { get; set; }
 
     /// <summary>
-    /// Solo los que salen hasta este día (AAAA-MM-DD).
+    /// Igual que pay_on[lte]; se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("pay_on_to")]
     public string? PayOnTo { get; set; }
@@ -34680,7 +35976,7 @@ public sealed partial class ListPayrollApprovalsParams
     public string? Status { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34704,10 +36000,34 @@ public sealed partial class ListPayrollBatchesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34728,7 +36048,7 @@ public sealed partial class ListPortalSuppliersParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34746,6 +36066,30 @@ public sealed partial class ListPortalSuppliersParams
     /// </summary>
     [JsonPropertyName("tax_id")]
     public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -34766,10 +36110,40 @@ public sealed partial class ListPriceListsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34790,7 +36164,7 @@ public sealed partial class ListProductionOrdersParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34802,12 +36176,42 @@ public sealed partial class ListProductionOrdersParams
     public string? Product { get; set; }
 
     /// <summary>
-    /// draft, in_process, completed o cancelled.
+    /// draft, in_process, completed o canceled (también se acepta cancelled).
     /// <br/>
-    /// Valores: draft, in_process, completed, cancelled.
+    /// Valores: draft, in_process, completed, canceled, cancelled.
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34828,7 +36232,7 @@ public sealed partial class ListProductsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34850,6 +36254,36 @@ public sealed partial class ListProductsParams
     /// </summary>
     [JsonPropertyName("category")]
     public string? Category { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34870,7 +36304,7 @@ public sealed partial class ListPurchaseReceiptsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34882,6 +36316,36 @@ public sealed partial class ListPurchaseReceiptsParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34902,7 +36366,7 @@ public sealed partial class ListQuotesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34914,6 +36378,36 @@ public sealed partial class ListQuotesParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34934,7 +36428,7 @@ public sealed partial class ListReceivablesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34964,7 +36458,7 @@ public sealed partial class ListRecurringInvoicesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -34976,6 +36470,36 @@ public sealed partial class ListRecurringInvoicesParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -34996,10 +36520,40 @@ public sealed partial class ListRepseContractsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -35020,7 +36574,7 @@ public sealed partial class ListRetentionsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35044,6 +36598,36 @@ public sealed partial class ListRetentionsParams
     /// </summary>
     [JsonPropertyName("year")]
     public string? Year { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -35064,10 +36648,34 @@ public sealed partial class ListReviewCyclesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35076,7 +36684,7 @@ public sealed partial class ListReviewCyclesParams
 public sealed partial class ListRolesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35098,6 +36706,60 @@ public sealed partial class ListRuleRunsParams
     /// </summary>
     [JsonPropertyName("starting_after")]
     public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Cambios de una regla».
+/// </summary>
+public sealed partial class ListRuleVersionsParams
+{
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35118,7 +36780,7 @@ public sealed partial class ListRulesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35128,6 +36790,30 @@ public sealed partial class ListRulesParams
     /// </summary>
     [JsonPropertyName("trigger")]
     public string? Trigger { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35148,7 +36834,7 @@ public sealed partial class ListSalesOrdersParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35166,6 +36852,66 @@ public sealed partial class ListSalesOrdersParams
     /// </summary>
     [JsonPropertyName("customer")]
     public string? Customer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+}
+
+/// <summary>
+/// Los campos de «Listar entornos de prueba».
+/// </summary>
+public sealed partial class ListSandboxesParams
+{
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35186,7 +36932,7 @@ public sealed partial class ListSatDeclarationsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35218,6 +36964,30 @@ public sealed partial class ListSatDeclarationsParams
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35238,10 +37008,34 @@ public sealed partial class ListSatDownloadsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35250,7 +37044,7 @@ public sealed partial class ListSatDownloadsParams
 public sealed partial class ListSatFindingCounterpartiesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35276,16 +37070,28 @@ public sealed partial class ListSatFindingCounterpartiesParams
     public string? Direction { get; set; }
 
     /// <summary>
-    /// CFDI desde este día (AAAA-MM-DD).
+    /// De los CFDI con fecha desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_gte")]
+    [JsonPropertyName("date[gte]")]
     public string? DateGte { get; set; }
 
     /// <summary>
-    /// CFDI hasta este día (AAAA-MM-DD, completo).
+    /// De los CFDI con fecha después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_lte")]
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// De los CFDI con fecha hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
     public string? DateLte { get; set; }
+
+    /// <summary>
+    /// De los CFDI con fecha antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
 
     /// <summary>
     /// Solo los de esta gravedad: critical, warning o info.
@@ -35300,6 +37106,18 @@ public sealed partial class ListSatFindingCounterpartiesParams
     /// </summary>
     [JsonPropertyName("code")]
     public string? Code { get; set; }
+
+    /// <summary>
+    /// Igual que date[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que date[lte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLteValue { get; set; }
 }
 
 /// <summary>
@@ -35308,7 +37126,7 @@ public sealed partial class ListSatFindingCounterpartiesParams
 public sealed partial class ListSatFindingsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35322,16 +37140,28 @@ public sealed partial class ListSatFindingsParams
     public string? Direction { get; set; }
 
     /// <summary>
-    /// CFDI desde este día (AAAA-MM-DD).
+    /// De los CFDI con fecha desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_gte")]
+    [JsonPropertyName("date[gte]")]
     public string? DateGte { get; set; }
 
     /// <summary>
-    /// CFDI hasta este día (AAAA-MM-DD, completo).
+    /// De los CFDI con fecha después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_lte")]
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// De los CFDI con fecha hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
     public string? DateLte { get; set; }
+
+    /// <summary>
+    /// De los CFDI con fecha antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
 
     /// <summary>
     /// Solo los de esta gravedad: critical, warning o info.
@@ -35346,6 +37176,18 @@ public sealed partial class ListSatFindingsParams
     /// </summary>
     [JsonPropertyName("counterparty")]
     public string? Counterparty { get; set; }
+
+    /// <summary>
+    /// Igual que date[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que date[lte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLteValue { get; set; }
 }
 
 /// <summary>
@@ -35366,7 +37208,7 @@ public sealed partial class ListSatInvoicesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35394,16 +37236,28 @@ public sealed partial class ListSatInvoicesParams
     public string? CounterpartyTaxId { get; set; }
 
     /// <summary>
-    /// Con fecha desde este día (AAAA-MM-DD).
+    /// Con fecha desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_gte")]
+    [JsonPropertyName("date[gte]")]
     public string? DateGte { get; set; }
 
     /// <summary>
-    /// Con fecha hasta este día (AAAA-MM-DD), incluido.
+    /// Con fecha después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_lte")]
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// Con fecha hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
     public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Con fecha antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
 
     /// <summary>
     /// Solo las de este centro de costo (ccn_…), o none para las que no tienen.
@@ -35424,6 +37278,18 @@ public sealed partial class ListSatInvoicesParams
     /// </summary>
     [JsonPropertyName("cash_confirmation")]
     public string? CashConfirmation { get; set; }
+
+    /// <summary>
+    /// Igual que date[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que date[lte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_lte")]
+    public string? DateLteValue { get; set; }
 }
 
 /// <summary>
@@ -35444,7 +37310,7 @@ public sealed partial class ListSatMailboxMessagesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35454,6 +37320,30 @@ public sealed partial class ListSatMailboxMessagesParams
     /// </summary>
     [JsonPropertyName("unread")]
     public bool? Unread { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35486,6 +37376,30 @@ public sealed partial class ListSatRefreshesParams
     /// </summary>
     [JsonPropertyName("document")]
     public string? Document { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35506,7 +37420,7 @@ public sealed partial class ListSatRetentionsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35558,7 +37472,7 @@ public sealed partial class ListSatRetentionsParams
 public sealed partial class ListSatReviewsParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35570,6 +37484,30 @@ public sealed partial class ListSatReviewsParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35590,7 +37528,7 @@ public sealed partial class ListSettingChangesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35620,7 +37558,7 @@ public sealed partial class ListStockAdjustmentsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35638,6 +37576,36 @@ public sealed partial class ListStockAdjustmentsParams
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -35658,7 +37626,7 @@ public sealed partial class ListStockMovementsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35684,16 +37652,64 @@ public sealed partial class ListStockMovementsParams
     public string? Type { get; set; }
 
     /// <summary>
-    /// Desde este día (AAAA-MM-DD) u hora (AAAA-MM-DDTHH:MM:SS) de la Ciudad de México.
+    /// Con fecha desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("date_gte")]
+    [JsonPropertyName("date[gte]")]
     public string? DateGte { get; set; }
 
     /// <summary>
-    /// Hasta este día (completo) u hora de la Ciudad de México.
+    /// Con fecha después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[gt]")]
+    public string? DateGt { get; set; }
+
+    /// <summary>
+    /// Con fecha hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lte]")]
+    public string? DateLte { get; set; }
+
+    /// <summary>
+    /// Con fecha antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("date[lt]")]
+    public string? DateLt { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Igual que date[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("date_gte")]
+    public string? DateGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que date[lte]; se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("date_lte")]
-    public string? DateLte { get; set; }
+    public string? DateLteValue { get; set; }
 }
 
 /// <summary>
@@ -35714,10 +37730,34 @@ public sealed partial class ListStoreConnectionsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35738,10 +37778,40 @@ public sealed partial class ListSupplierGroupsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -35762,7 +37832,7 @@ public sealed partial class ListSupplierInvoicesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35782,7 +37852,31 @@ public sealed partial class ListSupplierInvoicesParams
     public string? Supplier { get; set; }
 
     /// <summary>
-    /// Solo las que llegaron desde este día (AAAA-MM-DD).
+    /// Llegadas desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("received[gte]")]
+    public string? ReceivedGte { get; set; }
+
+    /// <summary>
+    /// Llegadas después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("received[gt]")]
+    public string? ReceivedGt { get; set; }
+
+    /// <summary>
+    /// Llegadas hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("received[lte]")]
+    public string? ReceivedLte { get; set; }
+
+    /// <summary>
+    /// Llegadas antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("received[lt]")]
+    public string? ReceivedLt { get; set; }
+
+    /// <summary>
+    /// Igual que received[gte]; se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("received_since")]
     public string? ReceivedSince { get; set; }
@@ -35806,10 +37900,40 @@ public sealed partial class ListTagsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -35830,30 +37954,84 @@ public sealed partial class ListTicketsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
 
     /// <summary>
-    /// pending, invoiced, global o cancelled.
+    /// pending, invoiced, global o canceled (también se acepta cancelled).
     /// <br/>
-    /// Valores: pending, invoiced, global, cancelled.
+    /// Valores: pending, invoiced, global, canceled, cancelled.
     /// </summary>
     [JsonPropertyName("status")]
     public string? Status { get; set; }
 
     /// <summary>
-    /// Vendidos desde (ISO 8601 o AAAA-MM-DD).
+    /// Vendidos desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
     /// </summary>
-    [JsonPropertyName("sold_at_gte")]
+    [JsonPropertyName("sold_at[gte]")]
     public string? SoldAtGte { get; set; }
 
     /// <summary>
-    /// Vendidos hasta (ISO 8601 o AAAA-MM-DD, el día completo).
+    /// Vendidos después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("sold_at[gt]")]
+    public string? SoldAtGt { get; set; }
+
+    /// <summary>
+    /// Vendidos hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("sold_at[lte]")]
+    public string? SoldAtLte { get; set; }
+
+    /// <summary>
+    /// Vendidos antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("sold_at[lt]")]
+    public string? SoldAtLt { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Igual que sold_at[gte]; se conserva por compatibilidad.
+    /// </summary>
+    [JsonPropertyName("sold_at_gte")]
+    public string? SoldAtGteValue { get; set; }
+
+    /// <summary>
+    /// Igual que sold_at[lte]; se conserva por compatibilidad.
     /// </summary>
     [JsonPropertyName("sold_at_lte")]
-    public string? SoldAtLte { get; set; }
+    public string? SoldAtLteValue { get; set; }
 }
 
 /// <summary>
@@ -35898,7 +38076,7 @@ public sealed partial class ListTrainingCoursesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35930,10 +38108,40 @@ public sealed partial class ListVacationRequestsParams
     public long? Limit { get; set; }
 
     /// <summary>
+    /// El id (vrq_…) de la última de la página anterior, para la siguiente.
+    /// </summary>
+    [JsonPropertyName("starting_after")]
+    public string? StartingAfter { get; set; }
+
+    /// <summary>
     /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -35966,7 +38174,7 @@ public sealed partial class ListWarehouseStockParams
 public sealed partial class ListWarehousesParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -35976,6 +38184,30 @@ public sealed partial class ListWarehousesParams
     /// </summary>
     [JsonPropertyName("include_archived")]
     public bool? IncludeArchived { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -36000,6 +38232,30 @@ public sealed partial class ListWebhookDeliveriesParams
     /// </summary>
     [JsonPropertyName("succeeded")]
     public bool? Succeeded { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
 }
 
 /// <summary>
@@ -36018,6 +38274,36 @@ public sealed partial class ListWebhookEndpointsParams
     /// </summary>
     [JsonPropertyName("starting_after")]
     public string? StartingAfter { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -36809,7 +39095,7 @@ public sealed partial class Member
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -36923,7 +39209,7 @@ public sealed partial class NetToGross
     /// El empleado (emp_…) cuyas prestaciones usó, o null.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// 02 semanal, 03 catorcenal, 04 quincenal o 05 mensual.
@@ -37180,6 +39466,12 @@ public sealed partial class PausePayoutsParams
 public sealed partial class PayableInvoice
 {
     /// <summary>
+    /// Su folio fiscal (el mismo que uuid). Sirve como starting_after.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = default!;
+
+    /// <summary>
     /// Qué tipo de objeto es («invoice», «customer»…).
     /// </summary>
     [JsonPropertyName("object")]
@@ -37195,7 +39487,7 @@ public sealed partial class PayableInvoice
     /// La factura descargada del SAT (sat_…).
     /// </summary>
     [JsonPropertyName("sat_invoice")]
-    public string SatInvoice { get; set; } = default!;
+    public StringOr<SatInvoice> SatInvoice { get; set; } = default!;
 
     /// <summary>
     /// El RFC del proveedor.
@@ -37503,7 +39795,7 @@ public sealed partial class PayeeAccount
     /// El emisor (iss_…) que paga.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El RFC del proveedor.
@@ -37663,7 +39955,7 @@ public sealed partial class Payout
     /// El emisor (iss_…) que paga.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Su número en la empresa (Pago 12), como en la app.
@@ -37762,6 +40054,12 @@ public sealed partial class Payout
     public bool CreatedByApi { get; set; }
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo se preparó.
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -37849,7 +40147,7 @@ public sealed partial class PayoutMandate
     /// El emisor (iss_…) que paga.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El RFC del proveedor.
@@ -38025,7 +40323,7 @@ public sealed partial class PayoutTransfer
     /// El emisor (iss_…) que paga.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El pago (pyo_…) al que pertenece.
@@ -38189,7 +40487,7 @@ public sealed partial class PayoutsPause
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// true mientras los pagos están en pausa.
@@ -38237,7 +40535,7 @@ public sealed partial class PayrollAccumulated
     /// iss_…
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Año (Ejercicio).
@@ -38249,7 +40547,7 @@ public sealed partial class PayrollAccumulated
     /// El empleado que pidió (emp_…), o null.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Los recibos vigentes con fecha de pago en el año.
@@ -38341,7 +40639,7 @@ public sealed partial class PayrollAccumulatedEmployeesItem
     /// emp_…, o null.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Nombre.
@@ -38449,7 +40747,7 @@ public sealed partial class PayrollApproval
     /// iss_…
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Periodicidad de la nómina (c_PeriodicidadPago): 02, 03, 04 o 05.
@@ -38571,7 +40869,7 @@ public sealed partial class PayrollApprovalReceiptsItem
     /// emp_…
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su nombre.
@@ -38685,7 +40983,7 @@ public sealed partial class PayrollBankFile
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El formato del banco: bbva, banamex, banorte, santander o spei (CSV).
@@ -38767,7 +41065,7 @@ public sealed partial class PayrollBankFileExcludedItem
     /// El empleado (emp_…); null si el recibo lo timbró otro sistema y no hay empleado con ese RFC.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Número de empleado (NumEmpleado).
@@ -38809,7 +41107,7 @@ public sealed partial class PayrollBankFilePaymentsItem
     /// El empleado (emp_…); null si el recibo lo timbró otro sistema y no hay empleado con ese RFC.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Número de empleado (NumEmpleado).
@@ -38881,7 +41179,7 @@ public sealed partial class PayrollBatch
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre del lote, para usted.
@@ -38999,7 +41297,7 @@ public sealed partial class PayrollBatchReceiptsItem
     /// El empleado (emp_…), cuando Fiscalisto calculó el recibo.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// El RFC del empleado.
@@ -39025,7 +41323,7 @@ public sealed partial class PayrollBatchReceiptsItem
     /// El recibo (inv_…, una factura tipo N); también el que el SAT rechazó.
     /// </summary>
     [JsonPropertyName("invoice")]
-    public string? Invoice { get; set; }
+    public StringOr<Invoice>? Invoice { get; set; }
 
     /// <summary>
     /// Folio fiscal que asigna el SAT (UUID del Timbre Fiscal Digital), en mayúsculas.
@@ -39085,7 +41383,7 @@ public sealed partial class PayrollCalendar
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Hoy en la Ciudad de México (YYYY-MM-DD).
@@ -39255,7 +41553,7 @@ public sealed partial class PayrollCost
     /// iss_…
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Año (Ejercicio).
@@ -39405,7 +41703,7 @@ public sealed partial class PayrollOrgChart
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El día del organigrama (YYYY-MM-DD): salen quienes trabajan ese día.
@@ -39465,7 +41763,7 @@ public sealed partial class PayrollOrgChartDepartmentsItem
     /// Su responsable (emp_…).
     /// </summary>
     [JsonPropertyName("lead")]
-    public string? Lead { get; set; }
+    public StringOr<Employee>? Lead { get; set; }
 
     /// <summary>
     /// Personas en él.
@@ -39495,7 +41793,7 @@ public sealed partial class PayrollOrgChartEmployeesItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su número de empleado.
@@ -39531,7 +41829,7 @@ public sealed partial class PayrollOrgChartEmployeesItem
     /// Su jefe directo (emp_…); null si está arriba.
     /// </summary>
     [JsonPropertyName("manager")]
-    public string? Manager { get; set; }
+    public StringOr<Employee>? Manager { get; set; }
 
     /// <summary>
     /// Personas directamente a su cargo.
@@ -39633,7 +41931,7 @@ public sealed partial class PayrollOrgChartVacanciesItem
     /// Bajo qué jefe (emp_…).
     /// </summary>
     [JsonPropertyName("manager")]
-    public string? Manager { get; set; }
+    public StringOr<Employee>? Manager { get; set; }
 
     /// <summary>
     /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
@@ -39779,7 +42077,7 @@ public sealed partial class PayrollPayout
     /// El emisor (iss_…) que paga.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// La fecha de pago de los recibos que paga.
@@ -39809,7 +42107,7 @@ public sealed partial class PayrollPayoutExcludedItem
     /// El empleado (emp_…); null si el recibo lo timbró otro sistema y no hay empleado con ese RFC.
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Nombre.
@@ -39961,7 +42259,7 @@ public sealed partial class PayrollProvisionEmployeesItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string? Employee { get; set; }
+    public StringOr<Employee>? Employee { get; set; }
 
     /// <summary>
     /// Nombre.
@@ -40099,7 +42397,7 @@ public sealed partial class PayrollReceiptPreview
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Periodicidad del pago (PeriodicidadPago): 02 semanal, 03 catorcenal, 04 quincenal (por omisión), 05 mensual.
@@ -40697,7 +42995,7 @@ public sealed partial class PayrollTax
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El mes: 2026-11.
@@ -40781,7 +43079,7 @@ public sealed partial class PayrollTaxSettings
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Las percepciones que no suman a la base; null, las comunes.
@@ -41243,7 +43541,7 @@ public sealed partial class PortalSupplier
     /// El emisor de su cuenta (iss_…) cuyo portal es.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El RFC del proveedor; uno del extranjero, sin RFC, trae su clave `EXT-&lt;país&gt;-&lt;tax ID&gt;` (país en c_Pais del SAT, «EXT-USA-123456789»).
@@ -41527,7 +43825,7 @@ public sealed partial class PrepaidExpense
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El UUID de la factura recibida.
@@ -41718,7 +44016,7 @@ public sealed partial class PreviewExtraordinaryPayrollReceiptParams
     public decimal? VacationDaysOwed { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -41778,7 +44076,7 @@ public sealed partial class PreviewPayrollReceiptParams
     public string? Replaces { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -41974,10 +44272,16 @@ public sealed partial class PriceList
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -42073,7 +44377,7 @@ public sealed partial class PriceListItemsItem
     /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
     /// </summary>
     [JsonPropertyName("product")]
-    public string Product { get; set; } = default!;
+    public StringOr<Product> Product { get; set; } = default!;
 
     /// <summary>
     /// Unidad aduana (UnidadAduana), c_UnidadAduana.
@@ -42151,7 +44455,7 @@ public sealed partial class PriceQuote
     /// El cliente (cus_…) cuyos precios se calcularon.
     /// </summary>
     [JsonPropertyName("customer")]
-    public string Customer { get; set; } = default!;
+    public StringOr<Customer> Customer { get; set; } = default!;
 
     /// <summary>
     /// Conceptos (Conceptos), al menos uno.
@@ -42169,7 +44473,7 @@ public sealed partial class PriceQuoteItemsItem
     /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
     /// </summary>
     [JsonPropertyName("product")]
-    public string Product { get; set; } = default!;
+    public StringOr<Product> Product { get; set; } = default!;
 
     /// <summary>
     /// Cantidad (Cantidad). Por omisión 1.
@@ -42259,7 +44563,7 @@ public sealed partial class Product
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre corto para encontrarlo, solo para usted.
@@ -42406,6 +44710,12 @@ public sealed partial class Product
     public decimal? OrderStep { get; set; }
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -42520,6 +44830,12 @@ public sealed partial class ProductionOrder
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor.
     /// </summary>
     [JsonPropertyName("issuer")]
@@ -42532,9 +44848,9 @@ public sealed partial class ProductionOrder
     public string Number { get; set; } = default!;
 
     /// <summary>
-    /// draft (borrador, nada se ha movido), in_process (los componentes ya salieron), completed (lo producido ya entró) o cancelled (todo regresó).
+    /// draft (borrador, nada se ha movido), in_process (los componentes ya salieron), completed (lo producido ya entró) o canceled (todo regresó).
     /// <br/>
-    /// Valores: draft, in_process, completed, cancelled.
+    /// Valores: draft, in_process, completed, canceled.
     /// </summary>
     [JsonPropertyName("status")]
     public string Status { get; set; } = default!;
@@ -42543,7 +44859,7 @@ public sealed partial class ProductionOrder
     /// Lo que se produce (prd_…).
     /// </summary>
     [JsonPropertyName("product")]
-    public string Product { get; set; } = default!;
+    public StringOr<Product> Product { get; set; } = default!;
 
     /// <summary>
     /// Cuántas unidades se planearon.
@@ -42632,8 +44948,8 @@ public sealed partial class ProductionOrder
     /// <summary>
     /// Cuándo se canceló, o null.
     /// </summary>
-    [JsonPropertyName("cancelled_at")]
-    public string? CancelledAt { get; set; }
+    [JsonPropertyName("canceled_at")]
+    public string? CanceledAt { get; set; }
 }
 
 /// <summary>
@@ -42645,7 +44961,7 @@ public sealed partial class ProductionOrderComponentsItem
     /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
     /// </summary>
     [JsonPropertyName("product")]
-    public string Product { get; set; } = default!;
+    public StringOr<Product> Product { get; set; } = default!;
 
     /// <summary>
     /// Cantidad (Cantidad). Por omisión 1.
@@ -42802,6 +45118,12 @@ public sealed partial class PurchaseReceipt
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor (el que compró).
     /// </summary>
     [JsonPropertyName("issuer")]
@@ -42899,7 +45221,7 @@ public sealed partial class PurchaseReceipt
     /// La factura recibida (sat_…) que lo cubre, si ya llegó con las descargas del SAT, o null.
     /// </summary>
     [JsonPropertyName("invoice")]
-    public string? Invoice { get; set; }
+    public StringOr<SatInvoice>? Invoice { get; set; }
 
     /// <summary>
     /// Cuándo quedó facturado, o null.
@@ -43055,7 +45377,7 @@ public sealed partial class Quote
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Su serie y folio, como lo ve el cliente (COT-12).
@@ -43179,7 +45501,13 @@ public sealed partial class Quote
     /// La factura (inv_…) que se timbró de ella, o null.
     /// </summary>
     [JsonPropertyName("invoice")]
-    public string? Invoice { get; set; }
+    public StringOr<Invoice>? Invoice { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se creó.
@@ -43215,7 +45543,7 @@ public sealed partial class QuoteCustomer
     /// El cliente (cus_…) en su catálogo, o null si no está en él.
     /// </summary>
     [JsonPropertyName("catalog_id")]
-    public string? CatalogId { get; set; }
+    public StringOr<Customer>? CatalogId { get; set; }
 }
 
 /// <summary>
@@ -43485,7 +45813,7 @@ public sealed partial class RecurringInvoice
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Para reconocerla.
@@ -43523,7 +45851,7 @@ public sealed partial class RecurringInvoice
     /// La última factura (inv_…) que timbró, o null.
     /// </summary>
     [JsonPropertyName("last_invoice")]
-    public string? LastInvoice { get; set; }
+    public StringOr<Invoice>? LastInvoice { get; set; }
 
     /// <summary>
     /// Por qué no se pudo timbrar la última vez (sin timbres, el cliente borrado, el SAT la rechazó…), o null. Se vuelve a intentar a la siguiente hora del día siguiente; también llega recurring_invoice.failed.
@@ -43568,6 +45896,12 @@ public sealed partial class RecurringInvoice
     /// </summary>
     [JsonPropertyName("total")]
     public decimal? Total { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se creó.
@@ -43800,7 +46134,7 @@ public sealed partial class RemovePayrollDepartmentParams
 public sealed partial class RemovePrepaidExpenseParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -43937,7 +46271,7 @@ public sealed partial class RepseContract
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Número de contrato (dígitos, hasta 20).
@@ -44022,6 +46356,12 @@ public sealed partial class RepseContract
     /// </summary>
     [JsonPropertyName("workers")]
     public List<RepseContractWorkersItem> Workers { get; set; } = default!;
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
@@ -44165,7 +46505,7 @@ public sealed partial class RepseContractWorkersItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su nombre.
@@ -44207,7 +46547,7 @@ public sealed partial class RepseProfile
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Folio de su registro en el REPSE que dio la STPS.
@@ -44327,7 +46667,7 @@ public sealed partial class RepseReturn
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El cuatrimestre: AAAA-1 (enero a abril), AAAA-2 o AAAA-3.
@@ -44417,7 +46757,7 @@ public sealed partial class RepseReturnContractsItemWorkersItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su nombre.
@@ -44503,7 +46843,7 @@ public sealed partial class RepseReturnWorkersItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su nombre.
@@ -44661,7 +47001,7 @@ public sealed partial class Retention
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// processing: el PAC no ha contestado. valid: timbrada. rejected: el SAT o el PAC no la aceptaron (ver error). canceled: cancelada.
@@ -45110,7 +47450,7 @@ public sealed partial class ReturnExpenseReportParams
 public sealed partial class RevertAutomaticEntryParams
 {
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
@@ -45143,7 +47483,7 @@ public sealed partial class ReviewCycle
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Su nombre, como «Evaluación 2026».
@@ -45341,7 +47681,7 @@ public sealed partial class ReviewCycleParticipantsItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -45365,13 +47705,13 @@ public sealed partial class ReviewCycleParticipantsItem
     /// Su jefe en el organigrama (emp_…), quien la evalúa como jefe.
     /// </summary>
     [JsonPropertyName("manager")]
-    public string? Manager { get; set; }
+    public StringOr<Employee>? Manager { get; set; }
 
     /// <summary>
     /// Los compañeros elegidos para evaluarla (emp_…).
     /// </summary>
     [JsonPropertyName("peers")]
-    public List<string> Peers { get; set; } = default!;
+    public List<StringOr<Employee>> Peers { get; set; } = default!;
 
     /// <summary>
     /// Quién la evalúa, desde que se abre el ciclo.
@@ -45437,7 +47777,7 @@ public sealed partial class ReviewCycleParticipantsItemRatersItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -45623,7 +47963,7 @@ public sealed partial class ReviewObjective
     /// De quién es (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Qué tiene que lograr.
@@ -45725,7 +48065,7 @@ public sealed partial class ReviewResult
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -45881,7 +48221,7 @@ public sealed partial class Role
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -45959,6 +48299,18 @@ public sealed partial class RoleList
 }
 
 /// <summary>
+/// Los campos de «Cambiar una llave».
+/// </summary>
+public sealed partial class RollApiKeyParams
+{
+    /// <summary>
+    /// Segundos que la llave anterior sigue funcionando (0: deja de funcionar ya; hasta 7 días). Sin mandar: 24 horas.
+    /// </summary>
+    [JsonPropertyName("expires_in")]
+    public long? ExpiresIn { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cambiar el secreto».
 /// </summary>
 public sealed partial class RollWebhookSecretParams
@@ -45997,7 +48349,7 @@ public sealed partial class Rule
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -46008,7 +48360,7 @@ public sealed partial class Rule
     /// <summary>
     /// Cuándo corre.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.canceled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string Trigger { get; set; } = default!;
@@ -47058,7 +49410,7 @@ public sealed partial class RuleRun
     /// <summary>
     /// Cuándo corre.
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
+    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.canceled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string Trigger { get; set; } = default!;
@@ -47167,7 +49519,7 @@ public sealed partial class RuleTest
     /// El movimiento del banco, su id en /v1/accounting/bank_movements: bwd_… un retiro, btx_… un depósito.
     /// </summary>
     [JsonPropertyName("bank_movement")]
-    public string? BankMovement { get; set; }
+    public StringOr<BankTransaction>? BankMovement { get; set; }
 
     /// <summary>
     /// Si se cumplen sus condiciones.
@@ -47349,7 +49701,7 @@ public sealed partial class SalesOrder
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Su serie y folio (PED-12).
@@ -47393,7 +49745,7 @@ public sealed partial class SalesOrder
     /// La cotización (quo_…) de donde salió, o null.
     /// </summary>
     [JsonPropertyName("quote")]
-    public string? Quote { get; set; }
+    public StringOr<Quote>? Quote { get; set; }
 
     /// <summary>
     /// La moneda.
@@ -47548,6 +49900,12 @@ public sealed partial class SalesOrder
     public string? CancelReason { get; set; }
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// Cuándo se creó.
     /// </summary>
     [JsonPropertyName("created_at")]
@@ -47581,7 +49939,7 @@ public sealed partial class SalesOrderCustomer
     /// El cliente (cus_…) en su catálogo, o null si no está en él.
     /// </summary>
     [JsonPropertyName("catalog_id")]
-    public string? CatalogId { get; set; }
+    public StringOr<Customer>? CatalogId { get; set; }
 }
 
 /// <summary>
@@ -48599,7 +50957,7 @@ public sealed partial class SatDeclarationCalendarMonthsItemObligationsItem
     /// Las declaraciones (dcl_…) que la presentaron, la normal y sus complementarias.
     /// </summary>
     [JsonPropertyName("declarations")]
-    public List<string> Declarations { get; set; } = default!;
+    public List<StringOr<SatDeclaration>> Declarations { get; set; } = default!;
 }
 
 /// <summary>
@@ -49349,7 +51707,7 @@ public sealed partial class SatInvoice
     /// El emisor de su cuenta (iss_…) a quien pertenece esta factura.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El folio fiscal (UUID del timbre).
@@ -49501,7 +51859,7 @@ public sealed partial class SatInvoice
     /// La descarga (sdl_…) que la trajo, o null.
     /// </summary>
     [JsonPropertyName("sat_download")]
-    public string? SatDownload { get; set; }
+    public StringOr<SatDownload>? SatDownload { get; set; }
 
     /// <summary>
     /// Cuándo llegó.
@@ -50103,7 +52461,7 @@ public sealed partial class SatRetention
     /// El emisor de su cuenta (iss_…) a quien pertenece esta constancia.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El folio fiscal (UUID del timbre).
@@ -50729,7 +53087,7 @@ public sealed partial class SatRiskCheck
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Su RFC.
@@ -51233,7 +53591,7 @@ public sealed partial class ScheduleSettings
     /// El emisor (iss_…) con que se leyeron; valen para toda la empresa.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
@@ -51314,10 +53672,40 @@ public sealed partial class SearchCustomersParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -51344,10 +53732,40 @@ public sealed partial class SearchInvoicesParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -51374,10 +53792,40 @@ public sealed partial class SearchProductsParams
     public string? StartingAfter { get; set; }
 
     /// <summary>
-    /// El emisor (iss_…). Puede omitirse si la llave o la cuenta tienen uno solo.
+    /// Solo los de este emisor (iss_…). Sin él, los de todos los emisores que la llave puede usar, emisor por emisor (cada objeto dice el suyo en issuer); con más de 25, mándelo.
     /// </summary>
     [JsonPropertyName("issuer")]
     public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Creados desde, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gte]")]
+    public string? CreatedGte { get; set; }
+
+    /// <summary>
+    /// Creados después de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[gt]")]
+    public string? CreatedGt { get; set; }
+
+    /// <summary>
+    /// Creados hasta, incluido. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lte]")]
+    public string? CreatedLte { get; set; }
+
+    /// <summary>
+    /// Creados antes de, sin incluirlo. Una fecha ISO 8601: un día (2026-10-01) es ese día en hora de la Ciudad de México; con hora (2026-10-01T09:00:00-06:00), ese segundo.
+    /// </summary>
+    [JsonPropertyName("created[lt]")]
+    public string? CreatedLt { get; set; }
+
+    /// <summary>
+    /// Solo los que tienen este valor en esta llave de su metadata: metadata[pedido]=A-1042. Hasta 10 llaves, todas deben coincidir.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -51847,7 +54295,7 @@ public sealed partial class SettingChange
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// true en producción (llaves fk_live_), false en pruebas (fk_test_). Lo de pruebas no vale ante el SAT.
@@ -52026,6 +54474,12 @@ public sealed partial class StockAdjustment
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor.
     /// </summary>
     [JsonPropertyName("issuer")]
@@ -52087,7 +54541,7 @@ public sealed partial class StockAdjustmentLinesItem
     /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
     /// </summary>
     [JsonPropertyName("product")]
-    public string Product { get; set; } = default!;
+    public StringOr<Product> Product { get; set; } = default!;
 
     /// <summary>
     /// Cantidad (Cantidad). Por omisión 1.
@@ -52165,7 +54619,7 @@ public sealed partial class StockLevel
     /// El producto (prd_…).
     /// </summary>
     [JsonPropertyName("product")]
-    public string Product { get; set; } = default!;
+    public StringOr<Product> Product { get; set; } = default!;
 
     /// <summary>
     /// El almacén (whs_…).
@@ -52267,7 +54721,7 @@ public sealed partial class StockMovement
     /// El producto (prd_…).
     /// </summary>
     [JsonPropertyName("product")]
-    public string Product { get; set; } = default!;
+    public StringOr<Product> Product { get; set; } = default!;
 
     /// <summary>
     /// El almacén (whs_…).
@@ -52611,7 +55065,7 @@ public sealed partial class StoreImport
     /// La conexión (stc_…).
     /// </summary>
     [JsonPropertyName("store_connection")]
-    public string StoreConnection { get; set; } = default!;
+    public StringOr<StoreConnection> StoreConnection { get; set; } = default!;
 
     /// <summary>
     /// Desde qué día se buscaron pedidos.
@@ -52878,10 +55332,16 @@ public sealed partial class SupplierGroup
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -52965,13 +55425,13 @@ public sealed partial class SupplierInvoice
     /// El emisor de su cuenta (iss_…) que la recibió.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El proveedor (sup_…) que la mandó.
     /// </summary>
     [JsonPropertyName("supplier")]
-    public string Supplier { get; set; } = default!;
+    public StringOr<PortalSupplier> Supplier { get; set; } = default!;
 
     /// <summary>
     /// El RFC del proveedor, o la clave `EXT-&lt;país&gt;-&lt;tax ID&gt;` de uno del extranjero.
@@ -52989,7 +55449,7 @@ public sealed partial class SupplierInvoice
     /// La misma factura en sus facturas recibidas (sat_…), para su XML y su PDF, o null.
     /// </summary>
     [JsonPropertyName("sat_invoice")]
-    public string? SatInvoice { get; set; }
+    public StringOr<SatInvoice>? SatInvoice { get; set; }
 
     /// <summary>
     /// Su serie, o null.
@@ -53194,6 +55654,12 @@ public sealed partial class Tag
     public string Object { get; set; } = default!;
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
+
+    /// <summary>
     /// El emisor de la etiqueta.
     /// </summary>
     [JsonPropertyName("issuer")]
@@ -53373,7 +55839,7 @@ public sealed partial class TaxDiscrepancy
     /// El emisor (iss_…), una persona física.
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Su RFC (13 caracteres).
@@ -53930,7 +56396,7 @@ public sealed partial class TestWebhookEndpointParams
     /// <summary>
     /// El evento a mandar. Por omisión invoice.stamped.
     /// <br/>
-    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer.created, customer.updated, customer.deleted, product.created, product.updated, product.deleted, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched.
+    /// Valores: invoice.stamped, invoice.failed, invoice.canceled, invoice.cancellation_pending, invoice.cancellation_rejected, invoice.cancellation_failed, invoice.paid, invoice.partially_paid, invoice.email_bounced, invoice.email_complained, invoice.draft_created, invoice.draft_updated, invoice.draft_deleted, retention.stamped, retention.failed, retention.canceled, invoice_batch.completed, payroll_batch.completed, customer.created, customer.updated, customer.deleted, product.created, product.updated, product.deleted, customer_data_request.completed, sat_download.completed, sat_download.failed, sat_declaration.created, sat_declaration.updated, sat_refresh.completed, sat_refresh.failed, ticket.invoiced, ticket.included_in_global, recurring_invoice.failed, quote.viewed, quote.accepted, quote.changes_requested, quote.rejected, quote.withdrawn, sales_order.confirmed, sales_order.customer_confirmed, sales_order.delivered, sales_order.paid, sales_order.canceled, supplier_invoice.received, supplier_invoice.approved, supplier_invoice.rejected, supplier_invoice.scheduled, supplier_invoice.paid, portal_supplier.approved, payout.approved, payout.paid, payout.partially_paid, payout.failed, payout.canceled, payout_transfer.succeeded, payout_transfer.failed, payout_transfer.returned, issuer.ready, balance.low, usage.high, test_clock.ready, rule.matched.
     /// </summary>
     [JsonPropertyName("type")]
     public string? Type { get; set; }
@@ -53978,9 +56444,9 @@ public sealed partial class Ticket
     public string Code { get; set; } = default!;
 
     /// <summary>
-    /// pending (se puede facturar), invoiced (su comprador lo facturó: la factura en invoice), global (entró en la factura global del periodo) o cancelled.
+    /// pending (se puede facturar), invoiced (su comprador lo facturó: la factura en invoice), global (entró en la factura global del periodo) o canceled.
     /// <br/>
-    /// Valores: pending, invoiced, global, cancelled.
+    /// Valores: pending, invoiced, global, canceled.
     /// </summary>
     [JsonPropertyName("status")]
     public string Status { get; set; } = default!;
@@ -54043,13 +56509,13 @@ public sealed partial class Ticket
     /// La factura (inv_…) que hizo su comprador, o null.
     /// </summary>
     [JsonPropertyName("invoice")]
-    public string? Invoice { get; set; }
+    public StringOr<Invoice>? Invoice { get; set; }
 
     /// <summary>
     /// La factura global (inv_…) en que entró, o null.
     /// </summary>
     [JsonPropertyName("global_invoice")]
-    public string? GlobalInvoice { get; set; }
+    public StringOr<Invoice>? GlobalInvoice { get; set; }
 
     /// <summary>
     /// Lo que ya cubren las facturas de un ticket dividido en varias (la autofactura lo permite con `split_max`), con impuestos. 0 si no se ha dividido; un ticket `pending` con más de 0 tiene `total - invoiced_amount` por facturar con el mismo código, y un ticket `invoiced` dividido tiene `invoice` null.
@@ -54074,6 +56540,12 @@ public sealed partial class Ticket
     /// </summary>
     [JsonPropertyName("buyer")]
     public TicketBuyer? Buyer { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se registró.
@@ -54127,7 +56599,7 @@ public sealed partial class TicketLinesItem
     /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
     /// </summary>
     [JsonPropertyName("product")]
-    public string? Product { get; set; }
+    public StringOr<Product>? Product { get; set; }
 
     /// <summary>
     /// Descripción.
@@ -54267,7 +56739,7 @@ public sealed partial class Training
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// Lo que se configura en POST /v1/training/settings.
@@ -54465,7 +56937,7 @@ public sealed partial class TrainingCourse
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// El nombre del curso.
@@ -54518,8 +56990,8 @@ public sealed partial class TrainingCourse
     /// <summary>
     /// Si se canceló teniendo constancias emitidas (se conservan).
     /// </summary>
-    [JsonPropertyName("cancelled")]
-    public bool Cancelled { get; set; }
+    [JsonPropertyName("canceled")]
+    public bool Canceled { get; set; }
 
     /// <summary>
     /// El registro del agente externo ante la STPS.
@@ -54650,8 +57122,8 @@ public sealed partial class TrainingCourseDeleted
     /// <summary>
     /// true si se canceló porque tenía constancias emitidas.
     /// </summary>
-    [JsonPropertyName("cancelled")]
-    public bool Cancelled { get; set; }
+    [JsonPropertyName("canceled")]
+    public bool Canceled { get; set; }
 }
 
 /// <summary>
@@ -54705,7 +57177,7 @@ public sealed partial class TrainingParticipant
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -54819,7 +57291,7 @@ public sealed partial class TrainingRenewalsItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Nombre.
@@ -55157,6 +57629,36 @@ public sealed partial class UpdateAnnualAdjustmentParams
 }
 
 /// <summary>
+/// Los campos de «Actualizar una llave».
+/// </summary>
+public sealed partial class UpdateApiKeyParams
+{
+    /// <summary>
+    /// Nombre.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Qué puede hacer la llave en cada recurso: `read` o `write` (escritura incluye lectura). Un recurso que no está es sin acceso. Cada uno, como mucho lo que tiene la llave que la crea.
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public Dictionary<string, string>? Permissions { get; set; }
+
+    /// <summary>
+    /// Los emisores con que trabaja (sus id). Vacío o sin mandar: todos los del modo; si la llave que la crea está limitada a algunos emisores, sin mandar son esos mismos y la nueva solo puede tener algunos de ellos.
+    /// </summary>
+    [JsonPropertyName("issuers")]
+    public List<string>? Issuers { get; set; }
+
+    /// <summary>
+    /// Solo funciona desde estas IP o rangos CIDR (203.0.113.7, 203.0.113.0/24, 2001:db8::/32). Vacío: desde cualquiera; si la llave que la crea tiene IP, sin mandar son esas mismas y la nueva solo puede tener direcciones dentro de ellas.
+    /// </summary>
+    [JsonPropertyName("allowed_ips")]
+    public List<string>? AllowedIps { get; set; }
+}
+
+/// <summary>
 /// Los campos de «Cambiar un rol de turnos».
 /// </summary>
 public sealed partial class UpdateAttendanceRotationParams
@@ -55400,6 +57902,12 @@ public sealed partial class UpdateBranchParams
     /// </summary>
     [JsonPropertyName("archived")]
     public bool? Archived { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -55918,6 +58426,12 @@ public sealed partial class UpdateCostCenterParams
     /// </summary>
     [JsonPropertyName("archived")]
     public bool? Archived { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -56000,6 +58514,12 @@ public sealed partial class UpdateCustomerGroupParams
     /// </summary>
     [JsonPropertyName("prep_days")]
     public long? PrepDays { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -56007,6 +58527,12 @@ public sealed partial class UpdateCustomerGroupParams
 /// </summary>
 public sealed partial class UpdateCustomerParams
 {
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
     /// <summary>
     /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
     /// </summary>
@@ -56446,6 +58972,12 @@ public sealed partial class UpdateEmployeeParams
     /// </summary>
     [JsonPropertyName("exit_reason")]
     public string? ExitReason { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -56728,6 +59260,12 @@ public sealed partial class UpdateExpensePersonParams
     /// </summary>
     [JsonPropertyName("archived")]
     public bool? Archived { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -56830,6 +59368,12 @@ public sealed partial class UpdateExpenseReportParams
     /// </summary>
     [JsonPropertyName("end_date")]
     public string? EndDate { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -56917,21 +59461,2711 @@ public sealed partial class UpdateImssMovementParams
 }
 
 /// <summary>
-/// Los campos de «Actualizar una factura».
+/// De un borrador, la factura entera, como en POST /v1/invoices (draft no se manda). De una factura timbrada, solo cost_center y notes.
 /// </summary>
 public sealed partial class UpdateInvoiceParams
 {
     /// <summary>
-    /// Su centro de costo (ccn_…), o null para quitárselo. Solo facturas, notas de crédito y recibos de nómina timbrados.
+    /// Emisor (iss_…). Si la llave tiene un solo emisor o la cuenta tiene uno solo, puede omitirse.
+    /// </summary>
+    [JsonPropertyName("issuer")]
+    public string? Issuer { get; set; }
+
+    /// <summary>
+    /// Sucursal (brn_…) desde donde se factura: su código postal va en LugarExpedicion, su dirección en el PDF y, si las tiene, sus series. Sin ella, el domicilio fiscal del emisor (la Matriz).
+    /// </summary>
+    [JsonPropertyName("branch")]
+    public string? Branch { get; set; }
+
+    /// <summary>
+    /// Su centro de costo (ccn_…): la obra, proyecto, sucursal o área a la que pertenece, para ver ingresos y gastos por centro en Reportes. No cambia el CFDI. Sus notas de crédito lo toman solas.
     /// </summary>
     [JsonPropertyName("cost_center")]
     public string? CostCenter { get; set; }
 
     /// <summary>
-    /// Nota para el cliente en el PDF (hasta 1,000 caracteres), o null para quitarla. No va en el XML: la factura timbrada no cambia y el siguiente PDF (GET /v1/invoices/{id}/pdf, el correo) ya la lleva. Cada cambio queda en el historial de la factura en Fiscalisto.
+    /// Almacén (whs_…) de donde salen sus productos con track_stock. Por omisión, el de su sucursal (o el de la Matriz).
+    /// </summary>
+    [JsonPropertyName("warehouse")]
+    public string? Warehouse { get; set; }
+
+    /// <summary>
+    /// El cliente (Receptor): el id de uno de su catálogo (cus_…) o sus datos. Obligatorio salvo en un traslado (type T), cuyo receptor es el propio emisor.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public StringOr<UpdateInvoiceParamsCustomer>? Customer { get; set; }
+
+    /// <summary>
+    /// Conceptos (Conceptos), al menos uno.
+    /// </summary>
+    [JsonPropertyName("items")]
+    public List<UpdateInvoiceParamsItemsItem>? Items { get; set; }
+
+    /// <summary>
+    /// I ingreso (por omisión; con global, factura global) o T traslado. Notas de crédito: POST /v1/credit_notes. Pagos: POST /v1/payments.
+    /// <br/>
+    /// Valores: I, T.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Complemento Carta Porte 3.1 (traslado de mercancías).
+    /// </summary>
+    [JsonPropertyName("carta_porte")]
+    public UpdateInvoiceParamsCartaPorte? CartaPorte { get; set; }
+
+    /// <summary>
+    /// Solo en un traslado (type T) sin carta_porte: la regla de la RMF 2026 que lo permite. 2.7.7.2.1 mercancías propias en un traslado local (no medicamentos, hidrocarburos ni mercancías para despacho aduanero); 2.7.7.2.2 paquetería o mensajería en primera o última milla, un concepto por paquete con su número de guía en sku; 2.7.7.2.3 grúa de arrastre o salvamento local, relacionando con related (05) la factura de ingreso del servicio. Mandarlo es declarar que el traslado no transita por ningún tramo de jurisdicción federal. Los conceptos van con unit_price 0 y taxability 01 (por omisión en un traslado).
+    /// <br/>
+    /// Valores: 2.7.7.2.1, 2.7.7.2.2, 2.7.7.2.3.
+    /// </summary>
+    [JsonPropertyName("carta_porte_exemption")]
+    public string? CartaPorteExemption { get; set; }
+
+    /// <summary>
+    /// Complemento INE (procesos electorales).
+    /// </summary>
+    [JsonPropertyName("ine")]
+    public UpdateInvoiceParamsIne? Ine { get; set; }
+
+    /// <summary>
+    /// Complemento de leyendas fiscales.
+    /// </summary>
+    [JsonPropertyName("leyendas")]
+    public List<UpdateInvoiceParamsLeyendasItem>? Leyendas { get; set; }
+
+    /// <summary>
+    /// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
+    /// </summary>
+    [JsonPropertyName("donation")]
+    public UpdateInvoiceParamsDonation? Donation { get; set; }
+
+    /// <summary>
+    /// Impuestos locales (complemento implocal): traslados y retenciones estatales.
+    /// </summary>
+    [JsonPropertyName("local_taxes")]
+    public List<UpdateInvoiceParamsLocalTaxesItem>? LocalTaxes { get; set; }
+
+    /// <summary>
+    /// Exportación (Exportacion), c_Exportacion: 01 no aplica (por omisión), 02 definitiva con clave A1 (lleva comercio_exterior), 03 temporal (sin él), 04 definitiva con clave distinta a A1 o sin enajenación (con o sin comercio_exterior; con él, incoterm opcional).
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("export")]
+    public string? Export { get; set; }
+
+    /// <summary>
+    /// Complemento de comercio exterior 2.0.
+    /// </summary>
+    [JsonPropertyName("comercio_exterior")]
+    public UpdateInvoiceParamsComercioExterior? ComercioExterior { get; set; }
+
+    /// <summary>
+    /// Factura global a público en general (InformacionGlobal): periodicidad, meses y año.
+    /// </summary>
+    [JsonPropertyName("global")]
+    public UpdateInvoiceParamsGlobal? Global { get; set; }
+
+    /// <summary>
+    /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
+    /// </summary>
+    [JsonPropertyName("use")]
+    public string? Use { get; set; }
+
+    /// <summary>
+    /// Forma de pago (FormaPago), clave de c_FormaPago: 01 efectivo, 03 transferencia, 04 tarjeta de crédito, 28 débito, 99 por definir… Obligatoria con PUE; con PPD es 99.
+    /// </summary>
+    [JsonPropertyName("payment_form")]
+    public string? PaymentForm { get; set; }
+
+    /// <summary>
+    /// Método de pago (MetodoPago): PUE (una sola exhibición, por omisión) o PPD (en parcialidades o diferido, se cobra con complementos de pago).
+    /// <br/>
+    /// Valores: PUE, PPD.
+    /// </summary>
+    [JsonPropertyName("payment_method")]
+    public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// Con PUE: true si aún no le pagan («Por cobrar» en la app) aunque se pagará este mes.
+    /// </summary>
+    [JsonPropertyName("paid_later")]
+    public bool? PaidLater { get; set; }
+
+    /// <summary>
+    /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// Serie (Serie), hasta 25 caracteres. Cada serie lleva sus propios folios.
+    /// </summary>
+    [JsonPropertyName("series")]
+    public string? Series { get; set; }
+
+    /// <summary>
+    /// Observaciones que aparecen en el PDF (no van en el XML).
     /// </summary>
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
+
+    /// <summary>
+    /// Condiciones de pago (CondicionesDePago), hasta 1,000 caracteres sin «|»: «Crédito a 30 días», «50 % anticipo». Van en el XML y en el PDF; solo en ingresos y egresos. No cambian cuándo vence (due_date usa los días de crédito del cliente).
+    /// </summary>
+    [JsonPropertyName("payment_terms")]
+    public string? PaymentTerms { get; set; }
+
+    /// <summary>
+    /// Idioma del PDF: es (por omisión) o en.
+    /// <br/>
+    /// Valores: es, en, bi.
+    /// </summary>
+    [JsonPropertyName("pdf_language")]
+    public string? PdfLanguage { get; set; }
+
+    /// <summary>
+    /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
+    /// </summary>
+    [JsonPropertyName("addenda")]
+    public UpdateInvoiceParamsAddenda? Addenda { get; set; }
+
+    /// <summary>
+    /// CFDI relacionados (CfdiRelacionados): tipo de relación de c_TipoRelacion y los UUID.
+    /// </summary>
+    [JsonPropertyName("related")]
+    public UpdateInvoiceParamsRelated? Related { get; set; }
+
+    /// <summary>
+    /// Tipo de cambio a pesos (TipoCambio). Obligatorio si la moneda no es MXN; use el del DOF del día anterior.
+    /// </summary>
+    [JsonPropertyName("exchange_rate")]
+    public decimal? ExchangeRate { get; set; }
+
+    /// <summary>
+    /// Folio (Folio) de esta factura en vez del siguiente de la serie: ese número toma su lugar en la numeración. También acepta un texto de hasta 40 caracteres sin «|» ("TIME002", "000120"), como lo acepta el SAT (Anexo 20): va solo en esta factura y la numeración no cambia; "120" es el folio 120. Si otro CFDI del RFC y la serie ya lo tiene, se rechaza.
+    /// </summary>
+    [JsonPropertyName("folio")]
+    public long? Folio { get; set; }
+
+    /// <summary>
+    /// Con un folio elegido: true para que los siguientes sigan desde ese número.
+    /// </summary>
+    [JsonPropertyName("continue_sequence")]
+    public bool? ContinueSequence { get; set; }
+
+    /// <summary>
+    /// Fecha de emisión (Fecha) si no es ahora, AAAA-MM-DDTHH:MM:SS hora de la Ciudad de México: hasta 72 horas antes.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public string? Date { get; set; }
+
+    /// <summary>
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
+    /// </summary>
+    [JsonPropertyName("send_email")]
+    public bool? SendEmail { get; set; }
+
+    /// <summary>
+    /// Correos con copia, separados por comas.
+    /// </summary>
+    [JsonPropertyName("email_cc")]
+    public string? EmailCc { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: la guarda como borrador (status draft) sin timbrar ni usar timbres, con las mismas revisiones que al timbrar (un error responde invoice_invalid; los avisos vienen en warnings). Se cambia con POST /v1/invoices/{id}, se timbra con POST /v1/invoices/{id}/stamp y se borra con DELETE /v1/invoices/{id}; también aparece en Por facturar de Fiscalisto. Idempotency-Key es opcional: con ella, repetir la solicitud devuelve el mismo borrador. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public bool? Draft { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("async")]
+    public bool? Async { get; set; }
+}
+
+/// <summary>
+/// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsAddenda
+{
+    /// <summary>
+    /// &lt;c&gt;type&lt;/c&gt;.
+    /// <br/>
+    /// Valores: walmart, soriana, liverpool, homedepot, chedraui, generic.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// &lt;c&gt;values&lt;/c&gt;.
+    /// </summary>
+    [JsonPropertyName("values")]
+    public required Dictionary<string, string> Values { get; set; }
+
+    /// <summary>
+    /// &lt;c&gt;customer&lt;/c&gt;.
+    /// </summary>
+    [JsonPropertyName("customer")]
+    public Dictionary<string, string>? Customer { get; set; }
+}
+
+/// <summary>
+/// Complemento Carta Porte 3.1 (traslado de mercancías).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorte
+{
+    /// <summary>
+    /// Cómo viajan las mercancías (c_CveTransporte): 01 autotransporte, 02 marítimo, 03 aéreo, 04 ferroviario; varios si es intermodal. Por omisión 01.
+    /// </summary>
+    [JsonPropertyName("modes")]
+    public List<string>? Modes { get; set; }
+
+    /// <summary>
+    /// Transporte internacional (TranspInternac Sí): entrada o salida, país, vía y regímenes aduaneros.
+    /// </summary>
+    [JsonPropertyName("international")]
+    public UpdateInvoiceParamsCartaPorteInternational? International { get; set; }
+
+    /// <summary>
+    /// Corredor Interoceánico del Istmo de Tehuantepec: polos de origen y destino (c_RegistroISTMO).
+    /// </summary>
+    [JsonPropertyName("istmo")]
+    public UpdateInvoiceParamsCartaPorteIstmo? Istmo { get; set; }
+
+    /// <summary>
+    /// Autotransporte: true si es logística inversa, recolección o devolución.
+    /// </summary>
+    [JsonPropertyName("reverse_logistics")]
+    public bool? ReverseLogistics { get; set; }
+
+    /// <summary>
+    /// Ubicación de origen (Ubicacion TipoUbicacion Origen): remitente, fecha y hora de salida y domicilio.
+    /// </summary>
+    [JsonPropertyName("origin")]
+    public required UpdateInvoiceParamsCartaPorteOrigin Origin { get; set; }
+
+    /// <summary>
+    /// Ubicaciones de destino (TipoUbicacion Destino), en orden: destinatario, llegada, distancia y domicilio.
+    /// </summary>
+    [JsonPropertyName("destinations")]
+    public required List<UpdateInvoiceParamsCartaPorteDestinationsItem> Destinations { get; set; }
+
+    /// <summary>
+    /// Mercancías (Mercancia) que se transportan.
+    /// </summary>
+    [JsonPropertyName("goods")]
+    public required List<UpdateInvoiceParamsCartaPorteGoodsItem> Goods { get; set; }
+
+    /// <summary>
+    /// Autotransporte (Autotransporte): vehículo, permiso SCT, seguros y remolques.
+    /// </summary>
+    [JsonPropertyName("vehicle")]
+    public UpdateInvoiceParamsCartaPorteVehicle? Vehicle { get; set; }
+
+    /// <summary>
+    /// Transporte marítimo (TransporteMaritimo): embarcación, naviero y contenedores.
+    /// </summary>
+    [JsonPropertyName("sea")]
+    public UpdateInvoiceParamsCartaPorteSea? Sea { get; set; }
+
+    /// <summary>
+    /// Transporte aéreo (TransporteAereo): permiso, guía y transportista.
+    /// </summary>
+    [JsonPropertyName("air")]
+    public UpdateInvoiceParamsCartaPorteAir? Air { get; set; }
+
+    /// <summary>
+    /// Transporte ferroviario (TransporteFerroviario): servicio, tráfico, derechos de paso y carros.
+    /// </summary>
+    [JsonPropertyName("rail")]
+    public UpdateInvoiceParamsCartaPorteRail? Rail { get; set; }
+
+    /// <summary>
+    /// Operadores (FiguraTransporte tipo 01): RFC, licencia y nombre.
+    /// </summary>
+    [JsonPropertyName("drivers")]
+    public required List<UpdateInvoiceParamsCartaPorteDriversItem> Drivers { get; set; }
+
+    /// <summary>
+    /// Otras figuras de transporte: 02 propietario, 03 arrendador, 04 notificado, 05 integrante de coordinados.
+    /// </summary>
+    [JsonPropertyName("figures")]
+    public List<UpdateInvoiceParamsCartaPorteFiguresItem>? Figures { get; set; }
+}
+
+/// <summary>
+/// Transporte aéreo (TransporteAereo): permiso, guía y transportista.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteAir
+{
+    /// <summary>
+    /// Tipo de permiso SCT (PermSCT), c_TipoPermiso.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso SCT (NumPermisoSCT).
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Matrícula de la aeronave (MatriculaAeronave).
+    /// </summary>
+    [JsonPropertyName("aircraft")]
+    public string? Aircraft { get; set; }
+
+    /// <summary>
+    /// Aseguradora de responsabilidad civil (AseguraRespCivil).
+    /// </summary>
+    [JsonPropertyName("insurer")]
+    public string? Insurer { get; set; }
+
+    /// <summary>
+    /// Póliza de responsabilidad civil (PolizaRespCivil).
+    /// </summary>
+    [JsonPropertyName("policy")]
+    public string? Policy { get; set; }
+
+    /// <summary>
+    /// Número de guía aérea (NumeroGuia), de 12 a 15 caracteres.
+    /// </summary>
+    [JsonPropertyName("waybill")]
+    public required string Waybill { get; set; }
+
+    /// <summary>
+    /// Lugar del contrato (LugarContrato).
+    /// </summary>
+    [JsonPropertyName("contract_place")]
+    public string? ContractPlace { get; set; }
+
+    /// <summary>
+    /// Código del transportista (CodigoTransportista), c_CodigoTransporteAereo.
+    /// </summary>
+    [JsonPropertyName("carrier")]
+    public required string Carrier { get; set; }
+
+    /// <summary>
+    /// Embarcador (RFCEmbarcador o NumRegIdTribEmbarc y ResidenciaFiscalEmbarc, NombreEmbarcador).
+    /// </summary>
+    [JsonPropertyName("shipper")]
+    public UpdateInvoiceParamsCartaPorteAirShipper? Shipper { get; set; }
+
+    /// <summary>
+    /// Cargo por tasación (CargoPorTasacion).
+    /// </summary>
+    [JsonPropertyName("rate_charge")]
+    public decimal? RateCharge { get; set; }
+}
+
+/// <summary>
+/// Embarcador (RFCEmbarcador o NumRegIdTribEmbarc y ResidenciaFiscalEmbarc, NombreEmbarcador).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteAirShipper
+{
+    /// <summary>
+    /// RFC del embarcador (RFCEmbarcador).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public UpdateInvoiceParamsCartaPorteAirShipperForeign? Foreign { get; set; }
+
+    /// <summary>
+    /// Nombre del embarcador (NombreEmbarcador).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+}
+
+/// <summary>
+/// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteAirShipperForeign
+{
+    /// <summary>
+    /// Número de registro de identidad fiscal en su país (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// País de residencia fiscal, clave de 3 letras de c_Pais (USA, CAN…).
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteDestinationsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteDestinationsItem
+{
+    /// <summary>
+    /// RFC del destinatario (RFCRemitenteDestinatario); XEXX010101000 si es extranjero.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre del destinatario (NombreRemitenteDestinatario).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public UpdateInvoiceParamsCartaPorteDestinationsItemForeign? Foreign { get; set; }
+
+    /// <summary>
+    /// Fecha y hora de salida (origen) o llegada (destino), AAAA-MM-DDTHH:MM, hora local.
+    /// </summary>
+    [JsonPropertyName("date_time")]
+    public required string DateTime { get; set; }
+
+    /// <summary>
+    /// Distancia recorrida desde la ubicación anterior, en km (DistanciaRecorrida). Autotransporte y ferroviario.
+    /// </summary>
+    [JsonPropertyName("distance_km")]
+    public decimal? DistanceKm { get; set; }
+
+    /// <summary>
+    /// Estación, puerto o aeropuerto (TipoEstacion y NumEstacion de c_Estaciones). Solo sin autotransporte.
+    /// </summary>
+    [JsonPropertyName("station")]
+    public UpdateInvoiceParamsCartaPorteDestinationsItemStation? Station { get; set; }
+
+    /// <summary>
+    /// Marítimo: tipo de tráfico (NavegacionTrafico), Altura o Cabotaje.
+    /// <br/>
+    /// Valores: Altura, Cabotaje.
+    /// </summary>
+    [JsonPropertyName("navigation")]
+    public string? Navigation { get; set; }
+
+    /// <summary>
+    /// Domicilio (Domicilio). En México basta el código postal: estado, municipio y localidad se toman de c_CodigoPostal.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public required UpdateInvoiceParamsCartaPorteDestinationsItemAddress Address { get; set; }
+}
+
+/// <summary>
+/// Domicilio (Domicilio). En México basta el código postal: estado, municipio y localidad se toman de c_CodigoPostal.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteDestinationsItemAddress
+{
+    /// <summary>
+    /// Calle (Calle).
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string? Street { get; set; }
+
+    /// <summary>
+    /// Número exterior (NumeroExterior).
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior (NumeroInterior).
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Código postal (CodigoPostal). En México se deducen de él estado, municipio y localidad.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// País (Pais), c_Pais. Por omisión MEX.
+    /// </summary>
+    [JsonPropertyName("country")]
+    public string? Country { get; set; }
+
+    /// <summary>
+    /// Estado (Estado): en el extranjero c_Estado para USA y CAN, o texto.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    /// <summary>
+    /// Municipio (Municipio), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public string? Municipality { get; set; }
+
+    /// <summary>
+    /// Localidad (Localidad), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("locality")]
+    public string? Locality { get; set; }
+
+    /// <summary>
+    /// Colonia (Colonia), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("colony")]
+    public string? Colony { get; set; }
+}
+
+/// <summary>
+/// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteDestinationsItemForeign
+{
+    /// <summary>
+    /// Número de registro de identidad fiscal en su país (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// País de residencia fiscal, clave de 3 letras de c_Pais (USA, CAN…).
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+}
+
+/// <summary>
+/// Estación, puerto o aeropuerto (TipoEstacion y NumEstacion de c_Estaciones). Solo sin autotransporte.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteDestinationsItemStation
+{
+    /// <summary>
+    /// Tipo de estación (TipoEstacion): 01 origen, 02 intermedia, 03 destino final.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Clave de la estación, puerto o aeropuerto (NumEstacion), c_Estaciones.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Nombre de la estación (NombreEstacion).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// true si la estación está en el extranjero (va sin TipoEstacion).
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public bool? Foreign { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteDriversItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteDriversItem
+{
+    /// <summary>
+    /// RFC del operador (RFCFigura); vacío si es extranjero (con foreign).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// Número de licencia (NumLicencia).
+    /// </summary>
+    [JsonPropertyName("license")]
+    public required string License { get; set; }
+
+    /// <summary>
+    /// Nombre del operador (NombreFigura).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public UpdateInvoiceParamsCartaPorteDriversItemForeign? Foreign { get; set; }
+}
+
+/// <summary>
+/// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteDriversItemForeign
+{
+    /// <summary>
+    /// Número de registro de identidad fiscal en su país (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// País de residencia fiscal, clave de 3 letras de c_Pais (USA, CAN…).
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteFiguresItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteFiguresItem
+{
+    /// <summary>
+    /// Tipo de figura (TipoFigura): 02 propietario, 03 arrendador, 04 notificado, 05 integrante.
+    /// <br/>
+    /// Valores: 02, 03, 04, 05.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// RFC de la figura (RFCFigura).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public UpdateInvoiceParamsCartaPorteFiguresItemForeign? Foreign { get; set; }
+
+    /// <summary>
+    /// Nombre de la figura (NombreFigura).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Partes del transporte que posee o arrienda (ParteTransporte), c_ParteTransporte.
+    /// </summary>
+    [JsonPropertyName("parts")]
+    public List<string>? Parts { get; set; }
+
+    /// <summary>
+    /// Domicilio (Domicilio). En México basta el código postal: estado, municipio y localidad se toman de c_CodigoPostal.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public UpdateInvoiceParamsCartaPorteFiguresItemAddress? Address { get; set; }
+}
+
+/// <summary>
+/// Domicilio (Domicilio). En México basta el código postal: estado, municipio y localidad se toman de c_CodigoPostal.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteFiguresItemAddress
+{
+    /// <summary>
+    /// Calle (Calle).
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string? Street { get; set; }
+
+    /// <summary>
+    /// Número exterior (NumeroExterior).
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior (NumeroInterior).
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Código postal (CodigoPostal). En México se deducen de él estado, municipio y localidad.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// País (Pais), c_Pais. Por omisión MEX.
+    /// </summary>
+    [JsonPropertyName("country")]
+    public string? Country { get; set; }
+
+    /// <summary>
+    /// Estado (Estado): en el extranjero c_Estado para USA y CAN, o texto.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    /// <summary>
+    /// Municipio (Municipio), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public string? Municipality { get; set; }
+
+    /// <summary>
+    /// Localidad (Localidad), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("locality")]
+    public string? Locality { get; set; }
+
+    /// <summary>
+    /// Colonia (Colonia), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("colony")]
+    public string? Colony { get; set; }
+}
+
+/// <summary>
+/// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteFiguresItemForeign
+{
+    /// <summary>
+    /// Número de registro de identidad fiscal en su país (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// País de residencia fiscal, clave de 3 letras de c_Pais (USA, CAN…).
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteGoodsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItem
+{
+    /// <summary>
+    /// Clave del bien transportado (BienesTransp), c_ClaveProdServCP.
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public required string ProductKey { get; set; }
+
+    /// <summary>
+    /// Descripción de la mercancía (Descripcion).
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// Cantidad (Cantidad).
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public required decimal Quantity { get; set; }
+
+    /// <summary>
+    /// Clave de unidad (ClaveUnidad), c_ClaveUnidad.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public required string UnitKey { get; set; }
+
+    /// <summary>
+    /// Peso en kilogramos (PesoEnKg).
+    /// </summary>
+    [JsonPropertyName("weight_kg")]
+    public required decimal WeightKg { get; set; }
+
+    /// <summary>
+    /// Dimensiones (Dimensiones), como 30/40/30cm o en plg.
+    /// </summary>
+    [JsonPropertyName("dimensions")]
+    public string? Dimensions { get; set; }
+
+    /// <summary>
+    /// Material peligroso (MaterialPeligroso Sí): clave UN y embalaje.
+    /// </summary>
+    [JsonPropertyName("hazmat")]
+    public UpdateInvoiceParamsCartaPorteGoodsItemHazmat? Hazmat { get; set; }
+
+    /// <summary>
+    /// Datos COFEPRIS de la mercancía: sector y lo que pide cada uno (medicamentos, precursores, psicotrópicos, sustancias tóxicas, plaguicidas).
+    /// </summary>
+    [JsonPropertyName("cofepris")]
+    public UpdateInvoiceParamsCartaPorteGoodsItemCofepris? Cofepris { get; set; }
+
+    /// <summary>
+    /// Valor de la mercancía (ValorMercancia); obligatorio en transporte aéreo.
+    /// </summary>
+    [JsonPropertyName("value")]
+    public decimal? Value { get; set; }
+
+    /// <summary>
+    /// Moneda del valor de la mercancía (Moneda), c_Moneda.
+    /// </summary>
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+
+    /// <summary>
+    /// Fracción arancelaria (FraccionArancelaria), 10 dígitos. Transporte internacional.
+    /// </summary>
+    [JsonPropertyName("tariff")]
+    public string? Tariff { get; set; }
+
+    /// <summary>
+    /// UUID del CFDI con complemento de comercio exterior (UUIDComercioExt).
+    /// </summary>
+    [JsonPropertyName("cce_uuid")]
+    public string? CceUuid { get; set; }
+
+    /// <summary>
+    /// Tipo de materia (TipoMateria, c_TipoMateria) y su descripción si es «otra».
+    /// </summary>
+    [JsonPropertyName("material")]
+    public UpdateInvoiceParamsCartaPorteGoodsItemMaterial? Material { get; set; }
+
+    /// <summary>
+    /// Documentación aduanera (DocumentacionAduanera) de la mercancía en transporte internacional.
+    /// </summary>
+    [JsonPropertyName("customs_docs")]
+    public List<UpdateInvoiceParamsCartaPorteGoodsItemCustomsDocsItem>? CustomsDocs { get; set; }
+
+    /// <summary>
+    /// Paquetería: guías de los paquetes o tarimas (GuiasIdentificacion).
+    /// </summary>
+    [JsonPropertyName("guides")]
+    public List<UpdateInvoiceParamsCartaPorteGoodsItemGuidesItem>? Guides { get; set; }
+
+    /// <summary>
+    /// Cuánto va a cada destino (CantidadTransporta), por destino.
+    /// </summary>
+    [JsonPropertyName("quantities")]
+    public List<UpdateInvoiceParamsCartaPorteGoodsItemQuantitiesItem>? Quantities { get; set; }
+
+    /// <summary>
+    /// Marítimo: detalle de la mercancía (DetalleMercancia): kilos netos, tara y piezas.
+    /// </summary>
+    [JsonPropertyName("detail")]
+    public UpdateInvoiceParamsCartaPorteGoodsItemDetail? Detail { get; set; }
+
+    /// <summary>
+    /// Ferroviario: clave STCC (ClaveSTCC).
+    /// </summary>
+    [JsonPropertyName("stcc")]
+    public string? Stcc { get; set; }
+}
+
+/// <summary>
+/// Datos COFEPRIS de la mercancía: sector y lo que pide cada uno (medicamentos, precursores, psicotrópicos, sustancias tóxicas, plaguicidas).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItemCofepris
+{
+    /// <summary>
+    /// Sector COFEPRIS (SectorCOFEPRIS): 01 medicamento, 02 precursores y químicos de uso dual, 03 psicotrópicos y estupefacientes, 04 sustancias tóxicas, 05 plaguicidas y fertilizantes.
+    /// </summary>
+    [JsonPropertyName("sector")]
+    public required string Sector { get; set; }
+
+    /// <summary>
+    /// Nombre del ingrediente activo (NombreIngredienteActivo).
+    /// </summary>
+    [JsonPropertyName("active_ingredient")]
+    public string? ActiveIngredient { get; set; }
+
+    /// <summary>
+    /// Nombre químico (NomQuimico).
+    /// </summary>
+    [JsonPropertyName("chemical_name")]
+    public string? ChemicalName { get; set; }
+
+    /// <summary>
+    /// Denominación genérica del producto (DenominacionGenericaProd).
+    /// </summary>
+    [JsonPropertyName("generic_name")]
+    public string? GenericName { get; set; }
+
+    /// <summary>
+    /// Denominación distintiva o marca (DenominacionDistintivaProd).
+    /// </summary>
+    [JsonPropertyName("brand_name")]
+    public string? BrandName { get; set; }
+
+    /// <summary>
+    /// Fabricante (Fabricante).
+    /// </summary>
+    [JsonPropertyName("manufacturer")]
+    public string? Manufacturer { get; set; }
+
+    /// <summary>
+    /// Fecha de caducidad (FechaCaducidad), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("expiry")]
+    public string? Expiry { get; set; }
+
+    /// <summary>
+    /// Lote del medicamento (LoteMedicamento).
+    /// </summary>
+    [JsonPropertyName("lot")]
+    public string? Lot { get; set; }
+
+    /// <summary>
+    /// Forma farmacéutica (FormaFarmaceutica), c_FormaFarmaceutica.
+    /// </summary>
+    [JsonPropertyName("form")]
+    public string? Form { get; set; }
+
+    /// <summary>
+    /// Condiciones especiales de transporte (CondicionesEspTransp), c_CondicionesEspeciales.
+    /// </summary>
+    [JsonPropertyName("conditions")]
+    public string? Conditions { get; set; }
+
+    /// <summary>
+    /// Registro sanitario o folio de autorización (RegistroSanitarioFolioAutorizacion).
+    /// </summary>
+    [JsonPropertyName("sanitary_registry")]
+    public string? SanitaryRegistry { get; set; }
+
+    /// <summary>
+    /// Permiso de importación (PermisoImportacion).
+    /// </summary>
+    [JsonPropertyName("import_permit")]
+    public string? ImportPermit { get; set; }
+
+    /// <summary>
+    /// Folio de importación VUCEM (FolioImpoVUCEM).
+    /// </summary>
+    [JsonPropertyName("vucem_folio")]
+    public string? VucemFolio { get; set; }
+
+    /// <summary>
+    /// Número CAS de la sustancia (NumCAS).
+    /// </summary>
+    [JsonPropertyName("cas")]
+    public string? Cas { get; set; }
+
+    /// <summary>
+    /// Razón social de la empresa importadora (RazonSocialEmpImp).
+    /// </summary>
+    [JsonPropertyName("importer")]
+    public string? Importer { get; set; }
+
+    /// <summary>
+    /// Registro sanitario de plaguicidas COFEPRIS (NumRegSanPlagCOFEPRIS).
+    /// </summary>
+    [JsonPropertyName("pesticide_registry")]
+    public string? PesticideRegistry { get; set; }
+
+    /// <summary>
+    /// Datos del fabricante (DatosFabricante).
+    /// </summary>
+    [JsonPropertyName("manufacturer_data")]
+    public string? ManufacturerData { get; set; }
+
+    /// <summary>
+    /// Datos del formulador (DatosFormulador).
+    /// </summary>
+    [JsonPropertyName("formulator_data")]
+    public string? FormulatorData { get; set; }
+
+    /// <summary>
+    /// Datos del maquilador (DatosMaquilador).
+    /// </summary>
+    [JsonPropertyName("maquilador_data")]
+    public string? MaquiladorData { get; set; }
+
+    /// <summary>
+    /// Uso autorizado (UsoAutorizado).
+    /// </summary>
+    [JsonPropertyName("authorized_use")]
+    public string? AuthorizedUse { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteGoodsItemCustomsDocsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItemCustomsDocsItem
+{
+    /// <summary>
+    /// Tipo de documento (TipoDocumento), c_DocumentoAduanero: 01 pedimento…
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Número de pedimento (NumPedimento), con el formato «NN  NN  NNNN  NNNNNNN». Solo con el tipo 01.
+    /// </summary>
+    [JsonPropertyName("pedimento")]
+    public string? Pedimento { get; set; }
+
+    /// <summary>
+    /// Identificador del documento aduanero (IdentDocAduanero), con un tipo distinto de 01.
+    /// </summary>
+    [JsonPropertyName("doc_id")]
+    public string? DocId { get; set; }
+
+    /// <summary>
+    /// RFC del importador (RFCImpo), con un pedimento.
+    /// </summary>
+    [JsonPropertyName("importer_tax_id")]
+    public string? ImporterTaxId { get; set; }
+}
+
+/// <summary>
+/// Marítimo: detalle de la mercancía (DetalleMercancia): kilos netos, tara y piezas.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItemDetail
+{
+    /// <summary>
+    /// Peso neto en kg (PesoNeto).
+    /// </summary>
+    [JsonPropertyName("net_kg")]
+    public required decimal NetKg { get; set; }
+
+    /// <summary>
+    /// Tara en kg (PesoTara).
+    /// </summary>
+    [JsonPropertyName("tare_kg")]
+    public required decimal TareKg { get; set; }
+
+    /// <summary>
+    /// Número de piezas (NumPiezas).
+    /// </summary>
+    [JsonPropertyName("pieces")]
+    public long? Pieces { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteGoodsItemGuidesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItemGuidesItem
+{
+    /// <summary>
+    /// Número de guía (NumeroGuiaIdentificacion).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public required string Number { get; set; }
+
+    /// <summary>
+    /// Descripción del contenido (DescripGuiaIdentificacion).
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
+
+    /// <summary>
+    /// Peso en kilogramos (PesoEnKg).
+    /// </summary>
+    [JsonPropertyName("weight_kg")]
+    public required decimal WeightKg { get; set; }
+}
+
+/// <summary>
+/// Material peligroso (MaterialPeligroso Sí): clave UN y embalaje.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItemHazmat
+{
+    /// <summary>
+    /// Clave del material peligroso (CveMaterialPeligroso), c_MaterialPeligroso (número UN).
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Tipo de embalaje (Embalaje), c_TipoEmbalaje.
+    /// </summary>
+    [JsonPropertyName("packaging")]
+    public required string Packaging { get; set; }
+
+    /// <summary>
+    /// Descripción del embalaje (DescripEmbalaje).
+    /// </summary>
+    [JsonPropertyName("packaging_description")]
+    public string? PackagingDescription { get; set; }
+}
+
+/// <summary>
+/// Tipo de materia (TipoMateria, c_TipoMateria) y su descripción si es «otra».
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItemMaterial
+{
+    /// <summary>
+    /// Tipo de materia (TipoMateria), c_TipoMateria.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Descripción de la materia (DescripcionMateria), con el tipo 05 otra.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteGoodsItemQuantitiesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteGoodsItemQuantitiesItem
+{
+    /// <summary>
+    /// Cantidad que va a ese destino.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public required decimal Quantity { get; set; }
+
+    /// <summary>
+    /// El destino, por su posición en destinations (desde 0).
+    /// </summary>
+    [JsonPropertyName("destination")]
+    public required long Destination { get; set; }
+
+    /// <summary>
+    /// Medio en que va esa cantidad (CvesTransporte), c_CveTransporte.
+    /// <br/>
+    /// Valores: 01, 02, 03, 04.
+    /// </summary>
+    [JsonPropertyName("mode")]
+    public string? Mode { get; set; }
+}
+
+/// <summary>
+/// Transporte internacional (TranspInternac Sí): entrada o salida, país, vía y regímenes aduaneros.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteInternational
+{
+    /// <summary>
+    /// EntradaSalidaMerc: Entrada o Salida.
+    /// <br/>
+    /// Valores: Entrada, Salida.
+    /// </summary>
+    [JsonPropertyName("direction")]
+    public required string Direction { get; set; }
+
+    /// <summary>
+    /// País de origen o destino (PaisOrigenDestino), c_Pais.
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+
+    /// <summary>
+    /// Vía de entrada o salida (ViaEntradaSalida), c_CveTransporte (05 ducto incluido).
+    /// </summary>
+    [JsonPropertyName("via")]
+    public required string Via { get; set; }
+
+    /// <summary>
+    /// Regímenes aduaneros (RegimenAduanero), c_RegimenAduanero.
+    /// </summary>
+    [JsonPropertyName("regimes")]
+    public required List<string> Regimes { get; set; }
+}
+
+/// <summary>
+/// Corredor Interoceánico del Istmo de Tehuantepec: polos de origen y destino (c_RegistroISTMO).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteIstmo
+{
+    /// <summary>
+    /// Polo de origen (UbicacionPoloOrigen).
+    /// </summary>
+    [JsonPropertyName("origin")]
+    public required string Origin { get; set; }
+
+    /// <summary>
+    /// Polo de destino (UbicacionPoloDestino).
+    /// </summary>
+    [JsonPropertyName("destination")]
+    public required string Destination { get; set; }
+}
+
+/// <summary>
+/// Ubicación de origen (Ubicacion TipoUbicacion Origen): remitente, fecha y hora de salida y domicilio.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteOrigin
+{
+    /// <summary>
+    /// RFC del remitente (RFCRemitenteDestinatario); XEXX010101000 si es extranjero.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre del remitente (NombreRemitenteDestinatario).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public UpdateInvoiceParamsCartaPorteOriginForeign? Foreign { get; set; }
+
+    /// <summary>
+    /// Fecha y hora de salida (origen) o llegada (destino), AAAA-MM-DDTHH:MM, hora local.
+    /// </summary>
+    [JsonPropertyName("date_time")]
+    public required string DateTime { get; set; }
+
+    /// <summary>
+    /// Distancia recorrida desde la ubicación anterior, en km (DistanciaRecorrida). Autotransporte y ferroviario.
+    /// </summary>
+    [JsonPropertyName("distance_km")]
+    public decimal? DistanceKm { get; set; }
+
+    /// <summary>
+    /// Estación, puerto o aeropuerto (TipoEstacion y NumEstacion de c_Estaciones). Solo sin autotransporte.
+    /// </summary>
+    [JsonPropertyName("station")]
+    public UpdateInvoiceParamsCartaPorteOriginStation? Station { get; set; }
+
+    /// <summary>
+    /// Marítimo: tipo de tráfico (NavegacionTrafico), Altura o Cabotaje.
+    /// <br/>
+    /// Valores: Altura, Cabotaje.
+    /// </summary>
+    [JsonPropertyName("navigation")]
+    public string? Navigation { get; set; }
+
+    /// <summary>
+    /// Domicilio (Domicilio). En México basta el código postal: estado, municipio y localidad se toman de c_CodigoPostal.
+    /// </summary>
+    [JsonPropertyName("address")]
+    public required UpdateInvoiceParamsCartaPorteOriginAddress Address { get; set; }
+}
+
+/// <summary>
+/// Domicilio (Domicilio). En México basta el código postal: estado, municipio y localidad se toman de c_CodigoPostal.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteOriginAddress
+{
+    /// <summary>
+    /// Calle (Calle).
+    /// </summary>
+    [JsonPropertyName("street")]
+    public string? Street { get; set; }
+
+    /// <summary>
+    /// Número exterior (NumeroExterior).
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior (NumeroInterior).
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Código postal (CodigoPostal). En México se deducen de él estado, municipio y localidad.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// País (Pais), c_Pais. Por omisión MEX.
+    /// </summary>
+    [JsonPropertyName("country")]
+    public string? Country { get; set; }
+
+    /// <summary>
+    /// Estado (Estado): en el extranjero c_Estado para USA y CAN, o texto.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    /// <summary>
+    /// Municipio (Municipio), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public string? Municipality { get; set; }
+
+    /// <summary>
+    /// Localidad (Localidad), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("locality")]
+    public string? Locality { get; set; }
+
+    /// <summary>
+    /// Colonia (Colonia), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("colony")]
+    public string? Colony { get; set; }
+}
+
+/// <summary>
+/// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteOriginForeign
+{
+    /// <summary>
+    /// Número de registro de identidad fiscal en su país (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// País de residencia fiscal, clave de 3 letras de c_Pais (USA, CAN…).
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+}
+
+/// <summary>
+/// Estación, puerto o aeropuerto (TipoEstacion y NumEstacion de c_Estaciones). Solo sin autotransporte.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteOriginStation
+{
+    /// <summary>
+    /// Tipo de estación (TipoEstacion): 01 origen, 02 intermedia, 03 destino final.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    /// <summary>
+    /// Clave de la estación, puerto o aeropuerto (NumEstacion), c_Estaciones.
+    /// </summary>
+    [JsonPropertyName("number")]
+    public string? Number { get; set; }
+
+    /// <summary>
+    /// Nombre de la estación (NombreEstacion).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// true si la estación está en el extranjero (va sin TipoEstacion).
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public bool? Foreign { get; set; }
+}
+
+/// <summary>
+/// Transporte ferroviario (TransporteFerroviario): servicio, tráfico, derechos de paso y carros.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteRail
+{
+    /// <summary>
+    /// Tipo de servicio (TipoDeServicio), c_TipoDeServicio.
+    /// </summary>
+    [JsonPropertyName("service")]
+    public required string Service { get; set; }
+
+    /// <summary>
+    /// Tipo de tráfico (TipoDeTrafico), c_TipoDeTrafico.
+    /// </summary>
+    [JsonPropertyName("traffic")]
+    public required string Traffic { get; set; }
+
+    /// <summary>
+    /// Aseguradora de responsabilidad civil (AseguraRespCivil).
+    /// </summary>
+    [JsonPropertyName("insurer")]
+    public string? Insurer { get; set; }
+
+    /// <summary>
+    /// Póliza de responsabilidad civil (PolizaRespCivil).
+    /// </summary>
+    [JsonPropertyName("policy")]
+    public string? Policy { get; set; }
+
+    /// <summary>
+    /// Derechos de paso (DerechosDePaso): tipo y kilómetros.
+    /// </summary>
+    [JsonPropertyName("rights")]
+    public List<UpdateInvoiceParamsCartaPorteRailRightsItem>? Rights { get; set; }
+
+    /// <summary>
+    /// Carros (Carro).
+    /// </summary>
+    [JsonPropertyName("cars")]
+    public required List<UpdateInvoiceParamsCartaPorteRailCarsItem> Cars { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteRailCarsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteRailCarsItem
+{
+    /// <summary>
+    /// Tipo de carro (TipoCarro), c_TipoCarro.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Matrícula (Matricula).
+    /// </summary>
+    [JsonPropertyName("registration")]
+    public required string Registration { get; set; }
+
+    /// <summary>
+    /// Guía del carro (GuiaCarro).
+    /// </summary>
+    [JsonPropertyName("guide")]
+    public required string Guide { get; set; }
+
+    /// <summary>
+    /// Toneladas netas del carro (ToneladasNetasCarro).
+    /// </summary>
+    [JsonPropertyName("net_tons")]
+    public required decimal NetTons { get; set; }
+
+    /// <summary>
+    /// Contenedores (Contenedor).
+    /// </summary>
+    [JsonPropertyName("containers")]
+    public List<UpdateInvoiceParamsCartaPorteRailCarsItemContainersItem>? Containers { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteRailCarsItemContainersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteRailCarsItemContainersItem
+{
+    /// <summary>
+    /// Tipo de contenedor (TipoContenedor), c_ContenedorMaritimo o c_Contenedor en ferroviario.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Peso del contenedor vacío en kg (PesoContenedorVacio).
+    /// </summary>
+    [JsonPropertyName("empty_kg")]
+    public required decimal EmptyKg { get; set; }
+
+    /// <summary>
+    /// Peso neto en kg (PesoNeto).
+    /// </summary>
+    [JsonPropertyName("net_kg")]
+    public required decimal NetKg { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteRailRightsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteRailRightsItem
+{
+    /// <summary>
+    /// Tipo de derecho de paso (TipoDerechoDePaso), c_DerechosDePaso.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Kilometraje pagado (KilometrajePagado).
+    /// </summary>
+    [JsonPropertyName("km")]
+    public required decimal Km { get; set; }
+}
+
+/// <summary>
+/// Transporte marítimo (TransporteMaritimo): embarcación, naviero y contenedores.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteSea
+{
+    /// <summary>
+    /// Tipo de permiso SCT (PermSCT), c_TipoPermiso.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public string? PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso SCT (NumPermisoSCT).
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public string? PermitNumber { get; set; }
+
+    /// <summary>
+    /// Aseguradora de responsabilidad civil (AseguraRespCivil).
+    /// </summary>
+    [JsonPropertyName("insurer")]
+    public string? Insurer { get; set; }
+
+    /// <summary>
+    /// Póliza de responsabilidad civil (PolizaRespCivil).
+    /// </summary>
+    [JsonPropertyName("policy")]
+    public string? Policy { get; set; }
+
+    /// <summary>
+    /// Tipo de embarcación (TipoEmbarcacion), c_ConfigMaritima.
+    /// </summary>
+    [JsonPropertyName("vessel_type")]
+    public required string VesselType { get; set; }
+
+    /// <summary>
+    /// Matrícula (Matricula).
+    /// </summary>
+    [JsonPropertyName("registration")]
+    public required string Registration { get; set; }
+
+    /// <summary>
+    /// Número IMO (NumeroOMI): IMO y 7 dígitos.
+    /// </summary>
+    [JsonPropertyName("imo")]
+    public required string Imo { get; set; }
+
+    /// <summary>
+    /// Año de la embarcación (AnioEmbarcacion).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public long? Year { get; set; }
+
+    /// <summary>
+    /// Nombre de la embarcación (NombreEmbarc).
+    /// </summary>
+    [JsonPropertyName("vessel_name")]
+    public string? VesselName { get; set; }
+
+    /// <summary>
+    /// Nacionalidad de la embarcación (NacionalidadEmbarc), c_Pais.
+    /// </summary>
+    [JsonPropertyName("flag")]
+    public required string Flag { get; set; }
+
+    /// <summary>
+    /// Unidades de arqueo bruto (UnidadesDeArqBruto).
+    /// </summary>
+    [JsonPropertyName("gross_tonnage")]
+    public required decimal GrossTonnage { get; set; }
+
+    /// <summary>
+    /// Tipo de carga (TipoCarga), c_ClaveTipoCarga.
+    /// </summary>
+    [JsonPropertyName("cargo_type")]
+    public required string CargoType { get; set; }
+
+    /// <summary>
+    /// Eslora en metros (Eslora).
+    /// </summary>
+    [JsonPropertyName("length")]
+    public decimal? Length { get; set; }
+
+    /// <summary>
+    /// Manga en metros (Manga).
+    /// </summary>
+    [JsonPropertyName("beam")]
+    public decimal? Beam { get; set; }
+
+    /// <summary>
+    /// Calado en metros (Calado).
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public decimal? Draft { get; set; }
+
+    /// <summary>
+    /// Puntal en metros (Puntal).
+    /// </summary>
+    [JsonPropertyName("depth")]
+    public decimal? Depth { get; set; }
+
+    /// <summary>
+    /// Línea naviera (LineaNaviera).
+    /// </summary>
+    [JsonPropertyName("line")]
+    public string? Line { get; set; }
+
+    /// <summary>
+    /// Nombre del agente naviero consignatario (NombreAgenteNaviero).
+    /// </summary>
+    [JsonPropertyName("agent_name")]
+    public required string AgentName { get; set; }
+
+    /// <summary>
+    /// Autorización del agente naviero (NumAutorizacionNaviero), c_NumAutorizacionNaviero.
+    /// </summary>
+    [JsonPropertyName("agent_authorization")]
+    public required string AgentAuthorization { get; set; }
+
+    /// <summary>
+    /// Número de viaje (NumViaje).
+    /// </summary>
+    [JsonPropertyName("voyage")]
+    public string? Voyage { get; set; }
+
+    /// <summary>
+    /// Número de conocimiento de embarque (NumConocEmbarc).
+    /// </summary>
+    [JsonPropertyName("bill_of_lading")]
+    public string? BillOfLading { get; set; }
+
+    /// <summary>
+    /// Permiso temporal de navegación (PermisoTempNavegacion), para una embarcación extranjera.
+    /// </summary>
+    [JsonPropertyName("temp_permit")]
+    public string? TempPermit { get; set; }
+
+    /// <summary>
+    /// Contenedores (Contenedor).
+    /// </summary>
+    [JsonPropertyName("containers")]
+    public List<UpdateInvoiceParamsCartaPorteSeaContainersItem>? Containers { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteSeaContainersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteSeaContainersItem
+{
+    /// <summary>
+    /// Tipo de contenedor (TipoContenedor), c_ContenedorMaritimo o c_Contenedor en ferroviario.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Matrícula (Matricula).
+    /// </summary>
+    [JsonPropertyName("registration")]
+    public string? Registration { get; set; }
+
+    /// <summary>
+    /// Número de precinto (NumPrecinto).
+    /// </summary>
+    [JsonPropertyName("seal")]
+    public string? Seal { get; set; }
+
+    /// <summary>
+    /// Ferri: el IdCCP de la Carta Porte del autotransporte a bordo (IdCCPRelacionado).
+    /// </summary>
+    [JsonPropertyName("related_id_ccp")]
+    public string? RelatedIdCcp { get; set; }
+
+    /// <summary>
+    /// Ferri: placa del vehículo a bordo (PlacaVMCCP).
+    /// </summary>
+    [JsonPropertyName("truck_plate")]
+    public string? TruckPlate { get; set; }
+
+    /// <summary>
+    /// Ferri: fecha de certificación de la Carta Porte del vehículo (FechaCertificacionCCP).
+    /// </summary>
+    [JsonPropertyName("certified_at")]
+    public string? CertifiedAt { get; set; }
+
+    /// <summary>
+    /// Remolques o semirremolques (Remolque): tipo (c_SubTipoRem) y placa.
+    /// </summary>
+    [JsonPropertyName("trailers")]
+    public List<UpdateInvoiceParamsCartaPorteSeaContainersItemTrailersItem>? Trailers { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteSeaContainersItemTrailersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteSeaContainersItemTrailersItem
+{
+    /// <summary>
+    /// Subtipo de remolque (SubTipoRem), c_SubTipoRem.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Placa del remolque (Placa).
+    /// </summary>
+    [JsonPropertyName("plate")]
+    public required string Plate { get; set; }
+}
+
+/// <summary>
+/// Autotransporte (Autotransporte): vehículo, permiso SCT, seguros y remolques.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteVehicle
+{
+    /// <summary>
+    /// Configuración vehicular (ConfigVehicular), c_ConfigAutotransporte: C2, T3S2…
+    /// </summary>
+    [JsonPropertyName("config")]
+    public required string Config { get; set; }
+
+    /// <summary>
+    /// Placa (PlacaVM), sin guiones ni espacios.
+    /// </summary>
+    [JsonPropertyName("plate")]
+    public required string Plate { get; set; }
+
+    /// <summary>
+    /// Año del modelo (AnioModeloVM).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required long Year { get; set; }
+
+    /// <summary>
+    /// Peso bruto vehicular en toneladas (PesoBrutoVehicular).
+    /// </summary>
+    [JsonPropertyName("gross_weight")]
+    public required decimal GrossWeight { get; set; }
+
+    /// <summary>
+    /// Tipo de permiso SCT (PermSCT), c_TipoPermiso.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso SCT (NumPermisoSCT).
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Aseguradora de responsabilidad civil (AseguraRespCivil).
+    /// </summary>
+    [JsonPropertyName("insurer")]
+    public required string Insurer { get; set; }
+
+    /// <summary>
+    /// Póliza de responsabilidad civil (PolizaRespCivil).
+    /// </summary>
+    [JsonPropertyName("policy")]
+    public required string Policy { get; set; }
+
+    /// <summary>
+    /// Aseguradora de daños al medio ambiente (AseguraMedAmbiente); obligatoria con material peligroso.
+    /// </summary>
+    [JsonPropertyName("env_insurer")]
+    public string? EnvInsurer { get; set; }
+
+    /// <summary>
+    /// Póliza de daños al medio ambiente (PolizaMedAmbiente).
+    /// </summary>
+    [JsonPropertyName("env_policy")]
+    public string? EnvPolicy { get; set; }
+
+    /// <summary>
+    /// Aseguradora de la carga (AseguraCarga).
+    /// </summary>
+    [JsonPropertyName("cargo_insurer")]
+    public string? CargoInsurer { get; set; }
+
+    /// <summary>
+    /// Póliza de la carga (PolizaCarga).
+    /// </summary>
+    [JsonPropertyName("cargo_policy")]
+    public string? CargoPolicy { get; set; }
+
+    /// <summary>
+    /// Prima del seguro (PrimaSeguro).
+    /// </summary>
+    [JsonPropertyName("premium")]
+    public decimal? Premium { get; set; }
+
+    /// <summary>
+    /// Remolques o semirremolques (Remolque): tipo (c_SubTipoRem) y placa.
+    /// </summary>
+    [JsonPropertyName("trailers")]
+    public List<UpdateInvoiceParamsCartaPorteVehicleTrailersItem>? Trailers { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCartaPorteVehicleTrailersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCartaPorteVehicleTrailersItem
+{
+    /// <summary>
+    /// Subtipo de remolque (SubTipoRem), c_SubTipoRem.
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Placa del remolque (Placa).
+    /// </summary>
+    [JsonPropertyName("plate")]
+    public required string Plate { get; set; }
+}
+
+/// <summary>
+/// Complemento de comercio exterior 2.0.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsComercioExterior
+{
+    /// <summary>
+    /// Motivo de traslado (MotivoTraslado), c_MotivoTraslado, solo en un traslado: 01 mercancías facturadas con anterioridad (relacione la factura de venta en related), 02 reubicación de mercancías propias, 03 consignación, 04 para posterior enajenación, 05 propiedad de terceros (con owners), 99 otros.
+    /// <br/>
+    /// Valores: 99, 01, 02, 03, 04, 05.
+    /// </summary>
+    [JsonPropertyName("motive")]
+    public string? Motive { get; set; }
+
+    /// <summary>
+    /// Propietarios de la mercancía si no es el emisor (Propietario), con motive 05.
+    /// </summary>
+    [JsonPropertyName("owners")]
+    public List<UpdateInvoiceParamsComercioExteriorOwnersItem>? Owners { get; set; }
+
+    /// <summary>
+    /// Incoterm (Incoterm), c_INCOTERM: EXW, FOB, CIF, DAP, DDP…
+    /// </summary>
+    [JsonPropertyName("incoterm")]
+    public string? Incoterm { get; set; }
+
+    /// <summary>
+    /// Número de certificado de origen (NumCertificadoOrigen).
+    /// </summary>
+    [JsonPropertyName("certificate")]
+    public string? Certificate { get; set; }
+
+    /// <summary>
+    /// Tipo de cambio a dólares (TipoCambioUSD).
+    /// </summary>
+    [JsonPropertyName("usd_rate")]
+    public required decimal UsdRate { get; set; }
+
+    /// <summary>
+    /// CURP del emisor persona física (Emisor Curp).
+    /// </summary>
+    [JsonPropertyName("issuer_curp")]
+    public string? IssuerCurp { get; set; }
+
+    /// <summary>
+    /// Domicilio del emisor (Emisor Domicilio): calle y números; lo demás sale de su código postal.
+    /// </summary>
+    [JsonPropertyName("issuer_address")]
+    public UpdateInvoiceParamsComercioExteriorIssuerAddress? IssuerAddress { get; set; }
+
+    /// <summary>
+    /// Domicilio del receptor en el extranjero (Receptor Domicilio).
+    /// </summary>
+    [JsonPropertyName("receiver_address")]
+    public UpdateInvoiceParamsComercioExteriorReceiverAddress? ReceiverAddress { get; set; }
+
+    /// <summary>
+    /// Destinatario, si no es el receptor (Destinatario).
+    /// </summary>
+    [JsonPropertyName("recipient")]
+    public UpdateInvoiceParamsComercioExteriorRecipient? Recipient { get; set; }
+
+    /// <summary>
+    /// Mercancías (Mercancia), una por concepto exportado.
+    /// </summary>
+    [JsonPropertyName("goods")]
+    public required List<UpdateInvoiceParamsComercioExteriorGoodsItem> Goods { get; set; }
+
+    /// <summary>
+    /// Observaciones del complemento (Observaciones).
+    /// </summary>
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsComercioExteriorGoodsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsComercioExteriorGoodsItem
+{
+    /// <summary>
+    /// Número de identificación de la mercancía (NoIdentificacion): el sku de su concepto.
+    /// </summary>
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+
+    /// <summary>
+    /// Fracción arancelaria (FraccionArancelaria), 10 dígitos con el NICO, vigente en c_FraccionArancelaria (búsquela en `GET /v1/sat_catalogs/customs_tariffs`); una que no lo esté se rechaza antes de timbrar.
+    /// </summary>
+    [JsonPropertyName("tariff")]
+    public string? Tariff { get; set; }
+
+    /// <summary>
+    /// Unidad aduana (UnidadAduana), c_UnidadAduana; 99 en un servicio. Con `tariff` puede omitirse: va la UMT de la fracción en el catálogo del SAT (otra la rechaza el SAT con CCE161).
+    /// </summary>
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    /// <summary>
+    /// Cantidad en la unidad aduana (CantidadAduana).
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal? Quantity { get; set; }
+
+    /// <summary>
+    /// Valor unitario en dólares (ValorUnitarioAduana).
+    /// </summary>
+    [JsonPropertyName("unit_value_usd")]
+    public decimal? UnitValueUsd { get; set; }
+}
+
+/// <summary>
+/// Domicilio del emisor (Emisor Domicilio): calle y números; lo demás sale de su código postal.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsComercioExteriorIssuerAddress
+{
+    /// <summary>
+    /// Calle (Calle).
+    /// </summary>
+    [JsonPropertyName("street")]
+    public required string Street { get; set; }
+
+    /// <summary>
+    /// Número exterior (NumeroExterior).
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior (NumeroInterior).
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Código postal del emisor (CodigoPostal).
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public string? Zip { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsComercioExteriorOwnersItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsComercioExteriorOwnersItem
+{
+    /// <summary>
+    /// Número de registro tributario del propietario (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// País de residencia del propietario (ResidenciaFiscal), c_Pais.
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+}
+
+/// <summary>
+/// Domicilio del receptor en el extranjero (Receptor Domicilio).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsComercioExteriorReceiverAddress
+{
+    /// <summary>
+    /// Calle (Calle).
+    /// </summary>
+    [JsonPropertyName("street")]
+    public required string Street { get; set; }
+
+    /// <summary>
+    /// Número exterior (NumeroExterior).
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior (NumeroInterior).
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia (Colonia), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("colony")]
+    public string? Colony { get; set; }
+
+    /// <summary>
+    /// Localidad (Localidad), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("locality")]
+    public string? Locality { get; set; }
+
+    /// <summary>
+    /// Municipio (Municipio), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public string? Municipality { get; set; }
+
+    /// <summary>
+    /// Estado (Estado), c_Estado para USA y CAN.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    /// <summary>
+    /// País (Pais), c_Pais.
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+
+    /// <summary>
+    /// Código postal en su país (CodigoPostal).
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+}
+
+/// <summary>
+/// Destinatario, si no es el receptor (Destinatario).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsComercioExteriorRecipient
+{
+    /// <summary>
+    /// Nombre del destinatario (Nombre).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    /// <summary>
+    /// Número de registro tributario del destinatario (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public string? TaxId { get; set; }
+
+    /// <summary>
+    /// Domicilio del destinatario (Domicilio).
+    /// </summary>
+    [JsonPropertyName("address")]
+    public required UpdateInvoiceParamsComercioExteriorRecipientAddress Address { get; set; }
+}
+
+/// <summary>
+/// Domicilio del destinatario (Domicilio).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsComercioExteriorRecipientAddress
+{
+    /// <summary>
+    /// Calle (Calle).
+    /// </summary>
+    [JsonPropertyName("street")]
+    public required string Street { get; set; }
+
+    /// <summary>
+    /// Número exterior (NumeroExterior).
+    /// </summary>
+    [JsonPropertyName("exterior")]
+    public string? Exterior { get; set; }
+
+    /// <summary>
+    /// Número interior (NumeroInterior).
+    /// </summary>
+    [JsonPropertyName("interior")]
+    public string? Interior { get; set; }
+
+    /// <summary>
+    /// Colonia (Colonia), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("colony")]
+    public string? Colony { get; set; }
+
+    /// <summary>
+    /// Localidad (Localidad), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("locality")]
+    public string? Locality { get; set; }
+
+    /// <summary>
+    /// Municipio (Municipio), en el extranjero como texto.
+    /// </summary>
+    [JsonPropertyName("municipality")]
+    public string? Municipality { get; set; }
+
+    /// <summary>
+    /// Estado (Estado): en el extranjero c_Estado para USA y CAN, o texto.
+    /// </summary>
+    [JsonPropertyName("state")]
+    public string? State { get; set; }
+
+    /// <summary>
+    /// País (Pais), c_Pais. Por omisión MEX.
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+
+    /// <summary>
+    /// Código postal (CodigoPostal). En México se deducen de él estado, municipio y localidad.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsCustomer&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCustomer
+{
+    /// <summary>
+    /// RFC (Rfc), 12 caracteres una persona moral y 13 una física.
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre o razón social tal como está en la constancia de situación fiscal, sin el régimen de capital (sin «S.A. de C.V.»).
+    /// </summary>
+    [JsonPropertyName("legal_name")]
+    public required string LegalName { get; set; }
+
+    /// <summary>
+    /// Régimen fiscal (RegimenFiscal), clave de c_RegimenFiscal: 601, 612, 626…
+    /// </summary>
+    [JsonPropertyName("tax_system")]
+    public required string TaxSystem { get; set; }
+
+    /// <summary>
+    /// Código postal del domicilio fiscal del cliente (DomicilioFiscalReceptor), 5 dígitos.
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+
+    /// <summary>
+    /// Correo a donde se envía (varios separados por comas). Solo se usa si se pide enviarlo.
+    /// </summary>
+    [JsonPropertyName("email")]
+    public string? Email { get; set; }
+
+    /// <summary>
+    /// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+    /// </summary>
+    [JsonPropertyName("foreign")]
+    public UpdateInvoiceParamsCustomerForeign? Foreign { get; set; }
+
+    /// <summary>
+    /// true si el cliente es contribuyente de IEPS: el IEPS va desglosado en vez de sumado al precio, salvo el del alcohol y los tabacos (tasas 0.5, 1.6 y 0.304), que va en el precio siempre (LIEPS art. 19 fr. II).
+    /// </summary>
+    [JsonPropertyName("ieps_taxpayer")]
+    public bool? IepsTaxpayer { get; set; }
+}
+
+/// <summary>
+/// Si es extranjero: su país de residencia (ResidenciaFiscal, c_Pais) y su número de registro tributario (NumRegIdTrib), con el RFC genérico XEXX010101000.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsCustomerForeign
+{
+    /// <summary>
+    /// País de residencia fiscal, clave de 3 letras de c_Pais (USA, CAN…).
+    /// </summary>
+    [JsonPropertyName("country")]
+    public required string Country { get; set; }
+
+    /// <summary>
+    /// Número de registro de identidad fiscal en su país (NumRegIdTrib).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+}
+
+/// <summary>
+/// Complemento de donatarias: un recibo de donativo. El emisor debe ser donataria (tax_system 603) con su oficio en donation_authorization (POST /v1/issuers/{id}).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsDonation
+{
+    /// <summary>
+    /// true si el donativo es en especie (bienes): va con forma de pago 12 (dación en pago) y un concepto por cada tipo de bien.
+    /// </summary>
+    [JsonPropertyName("in_kind")]
+    public bool? InKind { get; set; }
+
+    /// <summary>
+    /// true si el donante ya había deducido los bienes que dona: el recibo dice que el donativo no es deducible.
+    /// </summary>
+    [JsonPropertyName("deducted")]
+    public bool? Deducted { get; set; }
+}
+
+/// <summary>
+/// Factura global a público en general (InformacionGlobal): periodicidad, meses y año.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsGlobal
+{
+    /// <summary>
+    /// Periodicidad (Periodicidad), c_Periodicidad: 01 diario, 02 semanal, 03 quincenal, 04 mensual, 05 bimestral.
+    /// </summary>
+    [JsonPropertyName("periodicity")]
+    public required string Periodicity { get; set; }
+
+    /// <summary>
+    /// Meses (Meses), c_Meses: 01 a 12, o 13 a 18 bimestres.
+    /// </summary>
+    [JsonPropertyName("months")]
+    public required string Months { get; set; }
+
+    /// <summary>
+    /// Año (Año): el de la fecha de la factura o hasta cinco años antes (CFDI40136).
+    /// </summary>
+    [JsonPropertyName("year")]
+    public required long Year { get; set; }
+
+    /// <summary>
+    /// Solo emisores con régimen 603 (donatarias y asociaciones): true conserva la descripción, claves, unidad y cantidad de cada concepto en vez de «Venta», 01010101, ACT.
+    /// </summary>
+    [JsonPropertyName("keep_concepts")]
+    public bool? KeepConcepts { get; set; }
+}
+
+/// <summary>
+/// Complemento INE (procesos electorales).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsIne
+{
+    /// <summary>
+    /// Tipo de proceso (TipoProceso): Ordinario, Precampaña o Campaña.
+    /// <br/>
+    /// Valores: Ordinario, Precampaña, Campaña.
+    /// </summary>
+    [JsonPropertyName("process")]
+    public required string Process { get; set; }
+
+    /// <summary>
+    /// Tipo de comité (TipoComite), con el proceso Ordinario.
+    /// <br/>
+    /// Valores: Ejecutivo Nacional, Ejecutivo Estatal, Directivo Estatal.
+    /// </summary>
+    [JsonPropertyName("committee")]
+    public string? Committee { get; set; }
+
+    /// <summary>
+    /// Clave de contabilidad (IdContabilidad), hasta 6 dígitos.
+    /// </summary>
+    [JsonPropertyName("accounting_id")]
+    public string? AccountingId { get; set; }
+
+    /// <summary>
+    /// Entidades (Entidad): clave del estado, ámbito y claves de contabilidad.
+    /// </summary>
+    [JsonPropertyName("entities")]
+    public List<UpdateInvoiceParamsIneEntitiesItem>? Entities { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsIneEntitiesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsIneEntitiesItem
+{
+    /// <summary>
+    /// Clave de la entidad (ClaveEntidad): la del estado (JAL, QUE…), NAC (nacional) o la circunscripción CR1 a CR5; estas seis no van con ámbito Local.
+    /// </summary>
+    [JsonPropertyName("key")]
+    public required string Key { get; set; }
+
+    /// <summary>
+    /// Ámbito (Ambito): Local o Federal.
+    /// <br/>
+    /// Valores: Local, Federal.
+    /// </summary>
+    [JsonPropertyName("scope")]
+    public string? Scope { get; set; }
+
+    /// <summary>
+    /// Claves de contabilidad (IdContabilidad).
+    /// </summary>
+    [JsonPropertyName("accounting_ids")]
+    public List<string>? AccountingIds { get; set; }
+}
+
+/// <summary>
+/// Un concepto. description, product_key y unit_price son obligatorios, salvo que mande product (prd_…): entonces vienen de su catálogo y lo que mande encima gana.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsItemsItem
+{
+    /// <summary>
+    /// Un producto de su catálogo (prd_…): toma su clave, unidad, precio e impuestos.
+    /// </summary>
+    [JsonPropertyName("product")]
+    public string? Product { get; set; }
+
+    /// <summary>
+    /// Descripción del concepto (Descripcion), hasta 1,000 caracteres.
+    /// </summary>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Clave del producto o servicio (ClaveProdServ), 8 dígitos de c_ClaveProdServ. Búsquela con GET /v1/sat_catalogs/product_keys?q=…
+    /// </summary>
+    [JsonPropertyName("product_key")]
+    public string? ProductKey { get; set; }
+
+    /// <summary>
+    /// Clave de unidad (ClaveUnidad) de c_ClaveUnidad: E48 unidad de servicio, H87 pieza, ACT actividad… Por omisión H87 si la clave del producto es de un bien (segmentos 10 a 60) y E48 si es de un servicio.
+    /// </summary>
+    [JsonPropertyName("unit_key")]
+    public string? UnitKey { get; set; }
+
+    /// <summary>
+    /// Nombre de la unidad (Unidad), hasta 20 caracteres.
+    /// </summary>
+    [JsonPropertyName("unit_name")]
+    public string? UnitName { get; set; }
+
+    /// <summary>
+    /// Número de identificación o SKU (NoIdentificacion).
+    /// </summary>
+    [JsonPropertyName("sku")]
+    public string? Sku { get; set; }
+
+    /// <summary>
+    /// Cantidad (Cantidad). Por omisión 1.
+    /// </summary>
+    [JsonPropertyName("quantity")]
+    public decimal? Quantity { get; set; }
+
+    /// <summary>
+    /// Precio unitario antes de impuestos (ValorUnitario).
+    /// </summary>
+    [JsonPropertyName("unit_price")]
+    public decimal? UnitPrice { get; set; }
+
+    /// <summary>
+    /// Descuento (Descuento).
+    /// </summary>
+    [JsonPropertyName("discount")]
+    public decimal? Discount { get; set; }
+
+    /// <summary>
+    /// Objeto de impuesto (ObjetoImp), c_ObjetoImp: 01 no objeto, 02 sí objeto (por omisión), 03 sin desglose, 04 no causa…
+    /// <br/>
+    /// Valores: 01, 02, 03, 04, 05, 06, 07, 08.
+    /// </summary>
+    [JsonPropertyName("taxability")]
+    public string? Taxability { get; set; }
+
+    /// <summary>
+    /// Tasa de IVA trasladado: "0.16" (por omisión), "0.08" (región fronteriza), "0" o "exento". También como número (0.16, 16), con seis decimales ("0.160000") o en por ciento ("16%"); la respuesta la da como "0.16".
+    /// <br/>
+    /// Valores: 0, 0.16, 0.08, exento.
+    /// </summary>
+    [JsonPropertyName("iva")]
+    public string? Iva { get; set; }
+
+    /// <summary>
+    /// IEPS trasladado: tasa (0.265…) o cuota en pesos por unidad, según ieps_factor.
+    /// </summary>
+    [JsonPropertyName("ieps")]
+    public decimal? Ieps { get; set; }
+
+    /// <summary>
+    /// Tasa o Cuota (TipoFactor del IEPS).
+    /// <br/>
+    /// Valores: Tasa, Cuota.
+    /// </summary>
+    [JsonPropertyName("ieps_factor")]
+    public string? IepsFactor { get; set; }
+
+    /// <summary>
+    /// Unidades de IEPS a cuota (litros, cigarros…), si no son la cantidad.
+    /// </summary>
+    [JsonPropertyName("ieps_units")]
+    public decimal? IepsUnits { get; set; }
+
+    /// <summary>
+    /// Tasa de IVA retenido, en fracción (por ejemplo 0.106667, dos terceras partes del 16%).
+    /// </summary>
+    [JsonPropertyName("iva_retention")]
+    public decimal? IvaRetention { get; set; }
+
+    /// <summary>
+    /// Tasa de ISR retenido, en fracción (por ejemplo 0.10 honorarios, 0.0125 RESICO).
+    /// </summary>
+    [JsonPropertyName("isr_retention")]
+    public decimal? IsrRetention { get; set; }
+
+    /// <summary>
+    /// Números de cuenta predial (CuentaPredial) en arrendamiento.
+    /// </summary>
+    [JsonPropertyName("predial")]
+    public List<string>? Predial { get; set; }
+
+    /// <summary>
+    /// Números de pedimento (InformacionAduanera) de mercancía importada.
+    /// </summary>
+    [JsonPropertyName("pedimentos")]
+    public List<string>? Pedimentos { get; set; }
+
+    /// <summary>
+    /// A cuenta de terceros (ACuentaTerceros): RFC, nombre, régimen y código postal.
+    /// </summary>
+    [JsonPropertyName("third_party")]
+    public UpdateInvoiceParamsItemsItemThirdParty? ThirdParty { get; set; }
+
+    /// <summary>
+    /// Complemento de instituciones educativas privadas (IEDU): alumno, CURP, nivel y RVOE.
+    /// </summary>
+    [JsonPropertyName("iedu")]
+    public UpdateInvoiceParamsItemsItemIedu? Iedu { get; set; }
+
+    /// <summary>
+    /// Complemento de vehículo usado.
+    /// </summary>
+    [JsonPropertyName("used_vehicle")]
+    public UpdateInvoiceParamsItemsItemUsedVehicle? UsedVehicle { get; set; }
+
+    /// <summary>
+    /// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+    /// </summary>
+    [JsonPropertyName("hydrocarbon")]
+    public UpdateInvoiceParamsItemsItemHydrocarbon? Hydrocarbon { get; set; }
+
+    /// <summary>
+    /// Addenda del receptor (Walmart, Soriana…), con sus propios campos.
+    /// </summary>
+    [JsonPropertyName("addenda")]
+    public Dictionary<string, string>? Addenda { get; set; }
+}
+
+/// <summary>
+/// Complemento de Hidrocarburos y Petrolíferos: obligatorio en cada concepto de diésel (15101505) o gasolina (15101514, 15101515) de una factura o nota de crédito, en litros (LTR).
+/// </summary>
+public sealed partial class UpdateInvoiceParamsItemsItemHydrocarbon
+{
+    /// <summary>
+    /// Tipo de permiso de la CNE o la CRE (TipoPermiso, c_TipoPermiso): PER01 a PER11.
+    /// </summary>
+    [JsonPropertyName("permit_type")]
+    public required string PermitType { get; set; }
+
+    /// <summary>
+    /// Número de permiso de la CNE o la CRE (NumeroPermiso), como PL/12345/EXP/ES/2016: de 15 a 35 caracteres.
+    /// </summary>
+    [JsonPropertyName("permit_number")]
+    public required string PermitNumber { get; set; }
+
+    /// <summary>
+    /// Subproducto (SubProductoHYP, c_SubProductoHYP): SP16 gasolina regular, SP17 premium, SP18 diésel automotriz…
+    /// </summary>
+    [JsonPropertyName("subproduct")]
+    public required string Subproduct { get; set; }
+}
+
+/// <summary>
+/// Complemento de instituciones educativas privadas (IEDU): alumno, CURP, nivel y RVOE.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsItemsItemIedu
+{
+    /// <summary>
+    /// Nombre del alumno (nombreAlumno).
+    /// </summary>
+    [JsonPropertyName("student_name")]
+    public required string StudentName { get; set; }
+
+    /// <summary>
+    /// CURP, 18 caracteres.
+    /// </summary>
+    [JsonPropertyName("curp")]
+    public required string Curp { get; set; }
+
+    /// <summary>
+    /// Nivel educativo (nivelEducativo).
+    /// <br/>
+    /// Valores: Preescolar, Primaria, Secundaria, Profesional técnico, Bachillerato o su equivalente.
+    /// </summary>
+    [JsonPropertyName("level")]
+    public required string Level { get; set; }
+
+    /// <summary>
+    /// Reconocimiento de validez oficial de estudios (autRVOE).
+    /// </summary>
+    [JsonPropertyName("rvoe")]
+    public required string Rvoe { get; set; }
+
+    /// <summary>
+    /// RFC de quien paga, si no es el receptor (rfcPago).
+    /// </summary>
+    [JsonPropertyName("payer_tax_id")]
+    public string? PayerTaxId { get; set; }
+}
+
+/// <summary>
+/// A cuenta de terceros (ACuentaTerceros): RFC, nombre, régimen y código postal.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsItemsItemThirdParty
+{
+    /// <summary>
+    /// RFC de a cuenta de quién (RfcACuentaTerceros).
+    /// </summary>
+    [JsonPropertyName("tax_id")]
+    public required string TaxId { get; set; }
+
+    /// <summary>
+    /// Nombre (NombreACuentaTerceros).
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Régimen fiscal (RegimenFiscalACuentaTerceros), c_RegimenFiscal.
+    /// </summary>
+    [JsonPropertyName("tax_system")]
+    public required string TaxSystem { get; set; }
+
+    /// <summary>
+    /// Código postal de su domicilio fiscal (DomicilioFiscalACuentaTerceros).
+    /// </summary>
+    [JsonPropertyName("zip")]
+    public required string Zip { get; set; }
+}
+
+/// <summary>
+/// Complemento de vehículo usado.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsItemsItemUsedVehicle
+{
+    /// <summary>
+    /// Monto de adquisición (montoAdquisicion).
+    /// </summary>
+    [JsonPropertyName("purchase_amount")]
+    public required decimal PurchaseAmount { get; set; }
+
+    /// <summary>
+    /// Monto de enajenación (montoEnajenacion).
+    /// </summary>
+    [JsonPropertyName("sale_amount")]
+    public required decimal SaleAmount { get; set; }
+
+    /// <summary>
+    /// Clave vehicular (claveVehicular).
+    /// </summary>
+    [JsonPropertyName("vehicle_key")]
+    public required string VehicleKey { get; set; }
+
+    /// <summary>
+    /// Marca (marca).
+    /// </summary>
+    [JsonPropertyName("make")]
+    public required string Make { get; set; }
+
+    /// <summary>
+    /// Tipo o versión (tipo).
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
+
+    /// <summary>
+    /// Año del modelo (modelo), 4 dígitos.
+    /// </summary>
+    [JsonPropertyName("model")]
+    public required string Model { get; set; }
+
+    /// <summary>
+    /// Número de motor (numeroMotor).
+    /// </summary>
+    [JsonPropertyName("engine_number")]
+    public string? EngineNumber { get; set; }
+
+    /// <summary>
+    /// Número de serie (numeroSerie).
+    /// </summary>
+    [JsonPropertyName("serial_number")]
+    public string? SerialNumber { get; set; }
+
+    /// <summary>
+    /// Número de identificación vehicular (NIV).
+    /// </summary>
+    [JsonPropertyName("niv")]
+    public string? Niv { get; set; }
+
+    /// <summary>
+    /// Valor según la guía EBC o Libro Azul (valor).
+    /// </summary>
+    [JsonPropertyName("guide_value")]
+    public required decimal GuideValue { get; set; }
+
+    /// <summary>
+    /// Información aduanera de la importación del vehículo (InformacionAduanera).
+    /// </summary>
+    [JsonPropertyName("customs")]
+    public List<UpdateInvoiceParamsItemsItemUsedVehicleCustomsItem>? Customs { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsItemsItemUsedVehicleCustomsItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsItemsItemUsedVehicleCustomsItem
+{
+    /// <summary>
+    /// Número del documento de importación (numero).
+    /// </summary>
+    [JsonPropertyName("number")]
+    public required string Number { get; set; }
+
+    /// <summary>
+    /// Fecha del documento (fecha), AAAA-MM-DD.
+    /// </summary>
+    [JsonPropertyName("date")]
+    public required string Date { get; set; }
+
+    /// <summary>
+    /// Aduana (aduana).
+    /// </summary>
+    [JsonPropertyName("office")]
+    public string? Office { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsLeyendasItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsLeyendasItem
+{
+    /// <summary>
+    /// Texto de la leyenda (textoLeyenda).
+    /// </summary>
+    [JsonPropertyName("text")]
+    public required string Text { get; set; }
+
+    /// <summary>
+    /// Disposición fiscal (disposicionFiscal), por ejemplo LISR.
+    /// </summary>
+    [JsonPropertyName("disposition")]
+    public string? Disposition { get; set; }
+
+    /// <summary>
+    /// Norma o artículo (norma).
+    /// </summary>
+    [JsonPropertyName("norm")]
+    public string? Norm { get; set; }
+}
+
+/// <summary>
+/// &lt;c&gt;UpdateInvoiceParamsLocalTaxesItem&lt;/c&gt;.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsLocalTaxesItem
+{
+    /// <summary>
+    /// true si es una retención local; false si es un traslado.
+    /// </summary>
+    [JsonPropertyName("retention")]
+    public required bool Retention { get; set; }
+
+    /// <summary>
+    /// Nombre del impuesto local (ImpLocTrasladado o ImpLocRetenido), como ISH.
+    /// </summary>
+    [JsonPropertyName("name")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Tasa en por ciento (TasadeTraslado o TasadeRetencion).
+    /// </summary>
+    [JsonPropertyName("rate")]
+    public required decimal Rate { get; set; }
+
+    /// <summary>
+    /// Importe del impuesto local.
+    /// </summary>
+    [JsonPropertyName("amount")]
+    public required decimal Amount { get; set; }
+}
+
+/// <summary>
+/// CFDI relacionados (CfdiRelacionados): tipo de relación de c_TipoRelacion y los UUID.
+/// </summary>
+public sealed partial class UpdateInvoiceParamsRelated
+{
+    /// <summary>
+    /// Tipo de relación (TipoRelacion): 01 nota de crédito, 03 devolución, 04 sustitución, 07 anticipo…
+    /// </summary>
+    [JsonPropertyName("relationship")]
+    public required string Relationship { get; set; }
+
+    /// <summary>
+    /// Folios fiscales relacionados.
+    /// </summary>
+    [JsonPropertyName("uuids")]
+    public required List<string> Uuids { get; set; }
 }
 
 /// <summary>
@@ -57594,6 +62828,12 @@ public sealed partial class UpdatePriceListParams
     /// </summary>
     [JsonPropertyName("items")]
     public List<UpdatePriceListParamsItemsItem>? Items { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -57637,6 +62877,12 @@ public sealed partial class UpdatePriceListParamsItemsItem
 /// </summary>
 public sealed partial class UpdateProductParams
 {
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
     /// <summary>
     /// Nombre corto para encontrarlo, solo para usted; en el CFDI va description.
     /// </summary>
@@ -57908,6 +63154,12 @@ public sealed partial class UpdatePurchaseReceiptParams
     /// </summary>
     [JsonPropertyName("note")]
     public string? Note { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -57972,6 +63224,12 @@ public sealed partial class UpdateQuoteParams
     public string? PaymentMethod { get; set; }
 
     /// <summary>
+    /// Con PUE: true si aún no le pagan («Por cobrar» en la app) aunque se pagará este mes.
+    /// </summary>
+    [JsonPropertyName("paid_later")]
+    public bool? PaidLater { get; set; }
+
+    /// <summary>
     /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
     /// </summary>
     [JsonPropertyName("use")]
@@ -57994,6 +63252,12 @@ public sealed partial class UpdateQuoteParams
     /// </summary>
     [JsonPropertyName("terms")]
     public string? Terms { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -58358,7 +63622,7 @@ public sealed partial class UpdateRecurringInvoiceParams
     public UpdateRecurringInvoiceParamsInvoice? Invoice { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -58376,6 +63640,12 @@ public sealed partial class UpdateRecurringInvoiceParams
     /// </summary>
     [JsonPropertyName("active")]
     public bool? Active { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -58580,7 +63850,7 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     public string? Date { get; set; }
 
     /// <summary>
-    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía.
+    /// true para mandar el PDF y el XML por correo al timbrar, con el diseño de Fiscalisto. Por omisión no se envía. A un cliente con «Enviar al timbrar: Nunca» no se le envía aunque sea true: warnings lo dice y POST /v1/invoices/{id}/send sí se la manda.
     /// </summary>
     [JsonPropertyName("send_email")]
     public bool? SendEmail { get; set; }
@@ -58596,6 +63866,12 @@ public sealed partial class UpdateRecurringInvoiceParamsInvoice
     /// </summary>
     [JsonPropertyName("metadata")]
     public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
+    /// Solo en POST /v1/invoices. true: la guarda como borrador (status draft) sin timbrar ni usar timbres, con las mismas revisiones que al timbrar (un error responde invoice_invalid; los avisos vienen en warnings). Se cambia con POST /v1/invoices/{id}, se timbra con POST /v1/invoices/{id}/stamp y se borra con DELETE /v1/invoices/{id}; también aparece en Por facturar de Fiscalisto. Idempotency-Key es opcional: con ella, repetir la solicitud devuelve el mismo borrador. En las demás rutas que reciben una factura no cambia nada.
+    /// </summary>
+    [JsonPropertyName("draft")]
+    public bool? Draft { get; set; }
 
     /// <summary>
     /// Solo en POST /v1/invoices. true: responde 202 en cuanto la factura queda guardada con su folio (status processing) y la timbra después de responder; invoice.stamped o invoice.failed dicen cómo terminó. En las demás rutas que reciben una factura no cambia nada.
@@ -58738,6 +64014,12 @@ public sealed partial class UpdateRepseContractParams
     /// </summary>
     [JsonPropertyName("workers")]
     public List<UpdateRepseContractParamsWorkersItem>? Workers { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -59244,9 +64526,9 @@ public sealed partial class UpdateRuleParams
     public string? Name { get; set; }
 
     /// <summary>
-    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.cancelled (el SAT la cancela), invoice.approved (se aprueba en el Portal de proveedores), invoice.rejected (se rechaza en el portal), payout.submitted (se manda a firmar un pago que la incluye), payout.paid (se le paga una factura a un proveedor), payout.failed (falla o se devuelve su pago), invoice.daily (cada mañana a las 8, a cada factura con saldo, recibida o emitida, de Ingreso y no cancelada), purchase_order.daily (cada mañana a las 8, a cada orden que aún no llega toda ni está cerrada o cancelada), finding.created (aparece un hallazgo en una factura de los últimos 45 días), purchase_order.saved, .approved, .rejected, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered, bank.movement (llega un movimiento del banco: un retiro al importar el estado de cuenta, un depósito cuando Conciliación lo clasifica como préstamo, traspaso, devolución o intereses), sat.listed (un proveedor, cliente o RFC suyo aparece en una lista del SAT; cada mañana, una vez por RFC, lista y situación), sat.opinion (cambia la opinión de cumplimiento de un RFC suyo), sat.buzon (llega un comunicado, una notificación por abrir o el buzón no tiene medios de contacto), sat.certificate (cada mañana a las 8, a cada CSD y e.firma, con sus días para vencer).
+    /// Cuándo corre: invoice.received (llega una factura de un proveedor), invoice.issued (se emite una factura), invoice.paid (una factura PPD queda pagada), invoice.canceled (el SAT la cancela; también se acepta invoice.cancelled), invoice.approved (se aprueba en el Portal de proveedores), invoice.rejected (se rechaza en el portal), payout.submitted (se manda a firmar un pago que la incluye), payout.paid (se le paga una factura a un proveedor), payout.failed (falla o se devuelve su pago), invoice.daily (cada mañana a las 8, a cada factura con saldo, recibida o emitida, de Ingreso y no cancelada), purchase_order.daily (cada mañana a las 8, a cada orden que aún no llega toda ni está cerrada o cancelada), finding.created (aparece un hallazgo en una factura de los últimos 45 días), purchase_order.saved, .approved, .rejected, .sent, .confirmed, .received_part, .received_all, .invoiced_all, .price_variance, .registered, bank.movement (llega un movimiento del banco: un retiro al importar el estado de cuenta, un depósito cuando Conciliación lo clasifica como préstamo, traspaso, devolución o intereses), sat.listed (un proveedor, cliente o RFC suyo aparece en una lista del SAT; cada mañana, una vez por RFC, lista y situación), sat.opinion (cambia la opinión de cumplimiento de un RFC suyo), sat.buzon (llega un comunicado, una notificación por abrir o el buzón no tiene medios de contacto), sat.certificate (cada mañana a las 8, a cada CSD y e.firma, con sus días para vencer).
     /// <br/>
-    /// Valores: invoice.received, invoice.issued, invoice.paid, invoice.cancelled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
+    /// Valores: invoice.cancelled, invoice.received, invoice.issued, invoice.paid, invoice.canceled, invoice.approved, invoice.rejected, finding.created, payout.submitted, payout.paid, payout.failed, invoice.daily, purchase_order.daily, bank.movement, purchase_order.saved, purchase_order.approved, purchase_order.rejected, purchase_order.sent, purchase_order.confirmed, purchase_order.received_part, purchase_order.received_all, purchase_order.invoiced_all, purchase_order.price_variance, purchase_order.registered, sat.listed, sat.opinion, sat.buzon, sat.certificate.
     /// </summary>
     [JsonPropertyName("trigger")]
     public string? Trigger { get; set; }
@@ -59518,7 +64800,7 @@ public sealed partial class UpdateRuleParamsConditions
 public sealed partial class UpdateRuleParamsConditionsConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.canceled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -59588,7 +64870,7 @@ public sealed partial class UpdateRuleParamsConditionsGroupsItem
 public sealed partial class UpdateRuleParamsConditionsGroupsItemConditionsItem
 {
     /// <summary>
-    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.cancelled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
+    /// Qué se revisa. Facturas: supplier, customer, supplierGroup (recibidas: el grupo del proveedor, sgr_…), customerGroup (emitidas: el grupo del cliente, cgr_…), partyName, ownRfc, direction (received/issued, en invoice.paid e invoice.canceled), category (categoría de gasto), tags (tag_…), total, subtotal, iva, saldo, saldoPct (el saldo en % del total), orderDiff (recibidas: cuánto pasa de sus órdenes, en %), orderTotal (recibidas: el total de sus órdenes, en pesos), lastTotal (el total de la factura anterior de ese proveedor o cliente), avgTotal (el promedio de sus facturas en los últimos 6 meses), age (días desde su fecha), weekday (el día de su fecha: lun, mar, mie, jue, vie, sab, dom), newParty (la primera factura de ese proveedor o cliente), monthTotal (lo facturado ese mes por ese proveedor o cliente, en pesos), dayCount (sus facturas ese día), opinion (recibidas: la opinión 32-D del proveedor en el portal: positive, negative, expired o none), satList (está en una lista del SAT: 69-B o 69), hasOrder (recibidas: ligada a una orden de compra), payoutAmount, newAccount y accountCheck (en payout.*: lo que se le paga al proveedor en el pago, si es el primer pago a esa cuenta y cómo se verificó: bank, hand o none), tipo, metodo, forma, uso, moneda, serie, concept, clave, costCenter, ivaRetenido, isrRetenido, hasFindings. Órdenes de compra: supplier, supplierGroup (sgr_…), ownRfc, total, category, warehouse, stage, createdBy, moneda, note, project (el id del proyecto), paymentDays, deliveryDays (días para la entrega), advance (lleva anticipo), newSupplier (la primera orden a ese proveedor), monthTotal (lo ordenado ese mes a ese proveedor, en pesos), lastTotal (el total de la orden anterior a ese proveedor), avgTotal (el promedio de sus órdenes en los últimos 6 meses). Movimientos del banco: flow (out: retiro; in: depósito), description (el texto del banco), reference, amount, bankAccount (los últimos 4 dígitos de la cuenta), ownRfc, classification (de un depósito: prestamo, traspaso, devolucion o intereses), monthDay (el día del mes), weekday. Avisos del SAT (sat.*): party (supplier/customer/own), supplier, customer, supplierGroup, customerGroup, ownRfc, list (69b, 69b_bis, 69_no_localizados, 69_exigibles, 69_firmes, 69_sentencias, 69_cancelados, 69_csd_sin_efectos), situation (presunto, definitivo, desvirtuado, sentencia_favorable, listado), billed12m (lo facturado con ese RFC en 12 meses, en pesos), balance (su saldo pendiente) en sat.listed; sentido y previous (positivo, negativo, sin_obligaciones, suspendido; previous también ninguno) y pending (obligaciones pendientes) en sat.opinion; kind (comunicado, notificacion, sin_medios), urgency (urgente, atender, informativo) y text (el asunto) en sat.buzon; certificate (csd, efirma) y daysLeft (días para vencer; negativo si ya venció) en sat.certificate.
     /// </summary>
     [JsonPropertyName("field")]
     public required string Field { get; set; }
@@ -60040,6 +65322,12 @@ public sealed partial class UpdateSalesOrderParams
     public List<UpdateSalesOrderParamsItemsItem>? Items { get; set; }
 
     /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
+
+    /// <summary>
     /// Moneda, clave ISO 4217 de c_Moneda (MXN, USD, EUR…). Por omisión MXN.
     /// </summary>
     [JsonPropertyName("currency")]
@@ -60064,6 +65352,12 @@ public sealed partial class UpdateSalesOrderParams
     /// </summary>
     [JsonPropertyName("payment_method")]
     public string? PaymentMethod { get; set; }
+
+    /// <summary>
+    /// Con PUE: true si aún no le pagan («Por cobrar» en la app) aunque se pagará este mes.
+    /// </summary>
+    [JsonPropertyName("paid_later")]
+    public bool? PaidLater { get; set; }
 
     /// <summary>
     /// Uso del CFDI (UsoCFDI), clave de c_UsoCFDI. Por omisión G03, o S01 con régimen 616.
@@ -61720,6 +67014,12 @@ public sealed partial class UpdateSupplierGroupParams
     /// </summary>
     [JsonPropertyName("remove_suppliers")]
     public List<string>? RemoveSuppliers { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -61740,6 +67040,12 @@ public sealed partial class UpdateTagParams
     /// </summary>
     [JsonPropertyName("color")]
     public string? Color { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -61980,6 +67286,12 @@ public sealed partial class UpdateWebhookEndpointParams
     /// </summary>
     [JsonPropertyName("api_version")]
     public string? ApiVersion { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string>? Metadata { get; set; }
 }
 
 /// <summary>
@@ -62115,7 +67427,7 @@ public sealed partial class VacationRequest
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// El nombre del empleado.
@@ -62267,7 +67579,7 @@ public sealed partial class VariableSalary
     /// El emisor (iss_…).
     /// </summary>
     [JsonPropertyName("issuer")]
-    public string Issuer { get; set; } = default!;
+    public StringOr<Issuer> Issuer { get; set; } = default!;
 
     /// <summary>
     /// AAAA-B: 1 es enero–febrero, 6 noviembre–diciembre.
@@ -62315,7 +67627,7 @@ public sealed partial class VariableSalaryEmployeesItem
     /// El empleado (emp_…).
     /// </summary>
     [JsonPropertyName("employee")]
-    public string Employee { get; set; } = default!;
+    public StringOr<Employee> Employee { get; set; } = default!;
 
     /// <summary>
     /// Su número de empleado.
@@ -62863,13 +68175,13 @@ public sealed partial class WebhookDelivery
     /// El webhook (whe_…).
     /// </summary>
     [JsonPropertyName("webhook_endpoint")]
-    public string WebhookEndpoint { get; set; } = default!;
+    public StringOr<WebhookEndpoint> WebhookEndpoint { get; set; } = default!;
 
     /// <summary>
     /// El evento (evt_…). Reenvíelo con POST /v1/events/{id}/resend.
     /// </summary>
     [JsonPropertyName("event")]
-    public string Event { get; set; } = default!;
+    public StringOr<Event> Event { get; set; } = default!;
 
     /// <summary>
     /// El tipo del evento (invoice.stamped…).
@@ -62989,7 +68301,7 @@ public sealed partial class WebhookEndpoint
     /// El entorno de prueba (sbx_…) al que pertenece, o null si es de la cuenta. Vea /v1/sandboxes.
     /// </summary>
     [JsonPropertyName("sandbox")]
-    public string? Sandbox { get; set; }
+    public StringOr<Sandbox>? Sandbox { get; set; }
 
     /// <summary>
     /// Dirección https de su servidor que recibe los avisos.
@@ -63040,6 +68352,12 @@ public sealed partial class WebhookEndpoint
     /// </summary>
     [JsonPropertyName("api_version")]
     public string? ApiVersion { get; set; }
+
+    /// <summary>
+    /// Sus propios datos: hasta 50 llaves de 40 caracteres con valores de texto de hasta 500. No van al CFDI; vuelven en el objeto y en los webhooks.
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Dictionary<string, string> Metadata { get; set; } = default!;
 
     /// <summary>
     /// Cuándo se creó, ISO 8601 con la hora de la Ciudad de México (-06:00).
@@ -63099,7 +68417,7 @@ public sealed partial class WebhookRecovery
     /// El webhook (whe_…) al que se mandaron.
     /// </summary>
     [JsonPropertyName("endpoint")]
-    public string Endpoint { get; set; } = default!;
+    public StringOr<WebhookEndpoint> Endpoint { get; set; } = default!;
 
     /// <summary>
     /// Desde cuándo se buscaron: el since que mandó, o la creación del webhook si es posterior.

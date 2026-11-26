@@ -54,6 +54,14 @@ public sealed class RequestOptions
 
     /// <summary>Otro número de reintentos para esta llamada.</summary>
     public int? MaxRetries { get; set; }
+
+    /// <summary>
+    /// Campos que guardan el id de otro objeto y deben llegar como el objeto completo
+    /// (expand[], https://fiscalisto.com/docs/api/expandir). El campo es un <see cref="StringOr{T}"/>:
+    /// <c>invoice.Issuer.Value</c> trae el emisor e <c>invoice.Issuer.Id</c> su id.
+    /// </summary>
+    /// <example><code>new RequestOptions { Expand = ["issuer", "recurring_invoice"] }</code></example>
+    public IList<string> Expand { get; set; } = new List<string>();
 }
 
 /// <summary>
@@ -88,10 +96,10 @@ public sealed class Page<T>
 public sealed partial class FiscalistoClient : IDisposable
 {
     /// <summary>La versión del SDK.</summary>
-    public const string Version = "0.1.224";
+    public const string Version = "0.1.225";
 
     /// <summary>La versión de la API para la que se hizo este SDK (encabezado Fiscalisto-Version).</summary>
-    public const string ApiVersion = "2026-10-24";
+    public const string ApiVersion = "2026-11-25";
 
     /// <summary>
     /// Cómo se escribe y lee el JSON de la API: snake_case, sin los campos null. Úselas para
@@ -108,6 +116,7 @@ public sealed partial class FiscalistoClient : IDisposable
     private readonly FiscalistoClientOptions _options;
     private readonly HttpClient _http;
     private readonly bool _ownsHttp;
+    private int _warnedExpiry;
 
     /// <summary>Para las pruebas del SDK: cómo espera entre reintentos.</summary>
     internal Func<TimeSpan, CancellationToken, Task> Delay { get; set; } = Task.Delay;
@@ -180,12 +189,15 @@ public sealed partial class FiscalistoClient : IDisposable
         string path, object? query, RequestOptions? options, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         string? after = null;
+        // ending_before: pages go to newer ones, each read oldest first.
+        var forward = QueryPairs(query).Any(p => p.Key == "ending_before" && p.Value != "");
         while (true)
         {
-            var (page, lastId) = await PageAsync<T>(path, query, after, options, cancellationToken).ConfigureAwait(false);
-            foreach (var item in page.Data) yield return item;
-            if (!page.HasMore || page.Data.Count == 0 || lastId is null) yield break;
-            after = lastId;
+            var (page, nextId) = await PageAsync<T>(path, query, after, options, cancellationToken).ConfigureAwait(false);
+            for (var i = 0; i < page.Data.Count; i++)
+                yield return page.Data[forward ? page.Data.Count - 1 - i : i];
+            if (!page.HasMore || page.Data.Count == 0 || nextId is null) yield break;
+            after = nextId;
         }
     }
 
@@ -193,18 +205,21 @@ public sealed partial class FiscalistoClient : IDisposable
         string path, object? query, string? startingAfter, RequestOptions? options, CancellationToken cancellationToken)
     {
         var pairs = QueryPairs(query);
+        // ending_before: the next page is the newer one, after the first of data.
+        var forward = pairs.Any(p => p.Key == "ending_before" && p.Value != "");
+        var cursorKey = forward ? "ending_before" : "starting_after";
         if (startingAfter is not null)
         {
-            pairs.RemoveAll(p => p.Key == "starting_after");
-            pairs.Add(new("starting_after", startingAfter));
+            pairs.RemoveAll(p => p.Key == cursorKey);
+            pairs.Add(new(cursorKey, startingAfter));
         }
         var bytes = await SendAsync("GET", path, null, pairs, options, false, cancellationToken, expectJson: true).ConfigureAwait(false);
         using var doc = JsonDocument.Parse(bytes);
-        string? lastId = null;
+        string? nextId = null;
         if (doc.RootElement.TryGetProperty("data", out var data) && data.GetArrayLength() > 0
-            && data[data.GetArrayLength() - 1].TryGetProperty("id", out var id))
-            lastId = id.GetString();
-        return (JsonSerializer.Deserialize<Page<T>>(bytes, JsonOptions)!, lastId);
+            && data[forward ? 0 : data.GetArrayLength() - 1].TryGetProperty("id", out var id))
+            nextId = id.GetString();
+        return (JsonSerializer.Deserialize<Page<T>>(bytes, JsonOptions)!, nextId);
     }
 
     /// <summary>A query object's fields as name=value (an anonymous object, a dictionary or a Params class).</summary>
@@ -217,6 +232,13 @@ public sealed partial class FiscalistoClient : IDisposable
         if (element.ValueKind != JsonValueKind.Object) return pairs;
         foreach (var p in element.EnumerateObject())
         {
+            if (p.Value.ValueKind == JsonValueKind.Object)
+            {
+                // metadata[pedido]=A-1042, one pair per key.
+                foreach (var s in p.Value.EnumerateObject())
+                    if (s.Value.ValueKind == JsonValueKind.String) pairs.Add(new($"{p.Name}[{s.Name}]", s.Value.GetString()!));
+                continue;
+            }
             var value = p.Value.ValueKind switch
             {
                 JsonValueKind.String => p.Value.GetString(),
@@ -234,6 +256,25 @@ public sealed partial class FiscalistoClient : IDisposable
     private static readonly Random Jitter = new();
 
     /// <summary>0.5 s, 1 s, 2 s… hasta 8 s, con algo de azar para no llegar todos juntos.</summary>
+    private static string? Header(HttpResponseMessage response, string name) =>
+        response.Headers.TryGetValues(name, out var values) ? values.FirstOrDefault() : null;
+
+    /// <summary>
+    /// The console message when the API says the key ends soon (Fiscalisto-Key-Expires-At within
+    /// 7 days, or Fiscalisto-Warning: api_key_expires_soon); null otherwise.
+    /// </summary>
+    internal static string? ExpiryWarning(string? expiresAt, string? warning, DateTimeOffset now)
+    {
+        DateTimeOffset? at = DateTimeOffset.TryParse(expiresAt, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed)
+            ? parsed
+            : null;
+        var flagged = warning != null && System.Text.RegularExpressions.Regex.IsMatch(warning, @"\bapi_key_expires_soon\b");
+        var near = at is { } a && a > now && a - now <= TimeSpan.FromDays(7);
+        if (!flagged && !near) return null;
+        var when = at is { } t ? "el " + t.UtcDateTime.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'", CultureInfo.InvariantCulture) : "en menos de 7 días";
+        return $"[fiscalisto] Su llave de la API vence {when}. Cámbiela antes en Desarrolladores › Llaves (Cambiar llave) para que sus solicitudes no fallen con api_key_expired.";
+    }
+
     private static TimeSpan Backoff(int attempt)
     {
         double factor;
@@ -248,6 +289,8 @@ public sealed partial class FiscalistoClient : IDisposable
         // A proxy's path stays: https://proxy.example.com/fiscalisto + /v1/invoices.
         var url = new Uri(_options.BaseUrl.ToString().TrimEnd('/') + path);
         var pairs = QueryPairs(query);
+        foreach (var field in options?.Expand ?? [])
+            pairs.Add(new("expand[]", field));
         if (pairs.Count > 0)
             url = new Uri($"{url}?{string.Join("&", pairs.Select(p => $"{Uri.EscapeDataString(p.Key)}={Uri.EscapeDataString(p.Value)}"))}");
         var idempotencyKey = idempotent ? options?.IdempotencyKey ?? Guid.NewGuid().ToString() : null;
@@ -309,6 +352,11 @@ public sealed partial class FiscalistoClient : IDisposable
                 var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
                 var status = (int)response.StatusCode;
                 var requestId = response.Headers.TryGetValues("Request-Id", out var ids) ? ids.FirstOrDefault() : null;
+                if (Volatile.Read(ref _warnedExpiry) == 0)
+                {
+                    var warning = ExpiryWarning(Header(response, "Fiscalisto-Key-Expires-At"), Header(response, "Fiscalisto-Warning"), DateTimeOffset.UtcNow);
+                    if (warning != null && Interlocked.Exchange(ref _warnedExpiry, 1) == 0) Console.Error.WriteLine(warning);
+                }
                 if (status is >= 200 and < 300)
                 {
                     if (expectJson && !IsJson(bytes)) throw InvalidResponse(bytes, status, requestId);
@@ -327,7 +375,11 @@ public sealed partial class FiscalistoClient : IDisposable
                 }
                 var code = error is { } err && err.TryGetProperty("code", out var c) ? c.GetString() : null;
                 var retryAfter = response.Headers.RetryAfter?.Delta
-                    ?? (response.Headers.RetryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : null);
+                    ?? (response.Headers.RetryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : (TimeSpan?)null)
+                    // No Retry-After: RateLimit-Reset (seconds until the window starts again) on a 429.
+                    ?? (status == 429 && double.TryParse(Header(response, "RateLimit-Reset"), NumberStyles.Float, CultureInfo.InvariantCulture, out var reset)
+                        ? TimeSpan.FromSeconds(reset)
+                        : (TimeSpan?)null);
                 var retryable = status == 429 || code == "request_in_progress" || (safe && status >= 500);
                 if (retryable && attempt < retries && !(retryAfter > TimeSpan.FromSeconds(60)))
                 {

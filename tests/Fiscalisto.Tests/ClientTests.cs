@@ -176,6 +176,27 @@ public class ClientTests
         Assert.Equal("?limit=2", handler.Sent[0].Request.RequestUri!.Query);
         Assert.Equal("?limit=2&starting_after=cus_2", handler.Sent[1].Request.RequestUri!.Query);
     }
+
+    [Fact]
+    public async Task ExpandReadsTheIdOrTheObject()
+    {
+        var (client, handler, _) = Client(new FakeHandler()
+            .Answer(200, """{"id":"inv_1","issuer":"iss_1","recurring_invoice":null,"tickets":["tkt_1"]}""")
+            .Answer(200, """{"id":"inv_1","issuer":{"id":"iss_1","legal_name":"ESCUELA KEMPER URGATE"},"recurring_invoice":"rin_1","tickets":[{"id":"tkt_1","object":"ticket"}]}"""));
+
+        var plain = await client.Invoices.GetAsync("inv_1");
+        Assert.Equal("iss_1", plain.Issuer.Id);
+        Assert.False(plain.Issuer.IsExpanded);
+        Assert.Null(plain.RecurringInvoice);
+        Assert.Equal("tkt_1", plain.Tickets![0].Id);
+
+        var invoice = await client.Invoices.GetAsync("inv_1", options: new RequestOptions { Expand = ["issuer", "tickets"] });
+        Assert.Equal("https://api.example.test/v1/invoices/inv_1?expand%5B%5D=issuer&expand%5B%5D=tickets", handler.Sent[1].Request.RequestUri!.AbsoluteUri);
+        Assert.Equal("iss_1", invoice.Issuer.Id);
+        Assert.Equal("ESCUELA KEMPER URGATE", invoice.Issuer.Value!.LegalName);
+        Assert.Equal("rin_1", invoice.RecurringInvoice!.Value.Id);
+        Assert.Equal("tkt_1", invoice.Tickets![0].Value!.Id);
+    }
 }
 
 public class WebhookTests

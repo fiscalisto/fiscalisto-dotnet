@@ -655,6 +655,11 @@ public sealed partial class FiscalistoClient
     /// <summary>Pedidos.</summary>
     public SalesOrdersResource SalesOrders => _salesOrders ??= new SalesOrdersResource(this);
 
+    private ApiKeysResource? _apiKeys;
+
+    /// <summary>Llaves de API.</summary>
+    public ApiKeysResource ApiKeys => _apiKeys ??= new ApiKeysResource(this);
+
     private WebhookEndpointsResource? _webhookEndpoints;
 
     /// <summary>Webhooks.</summary>
@@ -762,8 +767,8 @@ public sealed class SandboxesResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/entornos-de-prueba/list-sandboxes"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<SandboxList> ListAsync(RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<SandboxList>("GET", "/v1/sandboxes", null, null, options, false, cancellationToken);
+    public Task<SandboxList> ListAsync(ListSandboxesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<SandboxList>("GET", "/v1/sandboxes", null, @params, options, false, cancellationToken);
 
     /// <summary>
     /// Ver un entorno de prueba
@@ -1351,7 +1356,7 @@ public sealed class InvoicesResource
     /// Buscar facturas
     /// </summary>
     /// <remarks>
-    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por customer (RFC), customer_name, uuid, series, folio, total, status (valid, pending, canceled, rejected o processing) y created. Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
+    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por customer (RFC), customer_name, uuid, series, folio, total, status (valid, pending, canceled, rejected o processing), created y metadata (metadata['order_id']:'123', con la llave entre corchetes). Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
     /// <br/>
     /// <c>GET /v1/invoices/search</c>
     /// <br/>
@@ -1371,7 +1376,7 @@ public sealed class InvoicesResource
     /// Ver una factura
     /// </summary>
     /// <remarks>
-    /// Por su id (inv_…) o por su folio fiscal (UUID).
+    /// Por su id (inv_…) o por su folio fiscal (UUID). Un borrador responde con status draft; ya timbrado, su id responde con la factura timbrada (que tiene su propio id).
     /// <br/>
     /// <c>GET /v1/invoices/{id}</c>
     /// <br/>
@@ -1382,10 +1387,10 @@ public sealed class InvoicesResource
         => _client.RequestAsync<Invoice>("GET", $"/v1/invoices/{Uri.EscapeDataString(id)}", null, @params, options, false, cancellationToken);
 
     /// <summary>
-    /// Actualizar una factura
+    /// Actualizar una factura o un borrador
     /// </summary>
     /// <remarks>
-    /// Lo que se puede cambiar de una factura timbrada sin tocar el CFDI: su centro de costo (cost_center, o null para quitárselo; los complementos de pago y los traslados no llevan) y la nota para el cliente del PDF (notes, o null para quitarla; el XML no cambia y el siguiente PDF y correo ya la llevan).
+    /// Un borrador (status draft) se cambia completo: mande la factura entera, con el mismo cuerpo y las mismas revisiones que POST /v1/invoices (un error responde invoice_invalid; los avisos vienen en warnings); metadata que no mande se queda como estaba. Si esperaba la aprobación de un administrador en Fiscalisto, la solicitud se retira. De una factura timbrada solo cambia lo que no toca el CFDI: su centro de costo (cost_center, o null para quitárselo; los complementos de pago y los traslados no llevan) y la nota para el cliente del PDF (notes, o null para quitarla; el XML no cambia y el siguiente PDF y correo ya la llevan).
     /// <br/>
     /// <c>POST /v1/invoices/{id}</c>
     /// <br/>
@@ -1394,6 +1399,34 @@ public sealed class InvoicesResource
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
     public Task<Invoice> UpdateAsync(string id, UpdateInvoiceParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
         => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Borrar un borrador
+    /// </summary>
+    /// <remarks>
+    /// Borra un borrador (status draft), hecho con la API o en Fiscalisto. Una factura timbrada no se borra: responde invoice_not_draft; cancélela con POST /v1/invoices/{id}/cancel.
+    /// <br/>
+    /// <c>DELETE /v1/invoices/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas/delete-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> DeleteAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/invoices/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Timbrar un borrador
+    /// </summary>
+    /// <remarks>
+    /// Timbra un borrador tal como está guardado (no lleva cuerpo; cámbielo antes con POST /v1/invoices/{id}), con las mismas revisiones y respuestas que POST /v1/invoices: 201 timbrada, o 202 en processing si el PAC tarda. Pide Idempotency-Key; además, un borrador se timbra una sola vez aunque lo timbren a la vez desde la API y desde Fiscalisto. Ya timbrado, responde con esa factura. Uno que espera la aprobación de un administrador responde draft_awaiting_approval.
+    /// <br/>
+    /// <c>POST /v1/invoices/{id}/stamp</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/facturas/stamp-invoice"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Invoice> StampAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Invoice>("POST", $"/v1/invoices/{Uri.EscapeDataString(id)}/stamp", null, null, options, true, cancellationToken);
 
     /// <summary>
     /// Descargar el PDF
@@ -1599,7 +1632,7 @@ public sealed class CustomersResource
     /// Buscar clientes
     /// </summary>
     /// <remarks>
-    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por tax_id, legal_name, email, zip, tax_system, use y created. Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
+    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por tax_id, legal_name, email, zip, tax_system, use, created y metadata (metadata['order_id']:'123', con la llave entre corchetes). Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
     /// <br/>
     /// <c>GET /v1/customers/search</c>
     /// <br/>
@@ -2478,8 +2511,14 @@ public sealed class VacationRequestsResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/nomina/list-vacation-requests"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<VacationRequestList> ListAsync(ListVacationRequestsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<VacationRequestList>("GET", "/v1/vacation_requests", null, @params, options, false, cancellationToken);
+    public Task<Page<VacationRequest>> ListAsync(ListVacationRequestsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<VacationRequest>("/v1/vacation_requests", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar solicitudes de vacaciones: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<VacationRequest> ListAutoPagingAsync(ListVacationRequestsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<VacationRequest>("/v1/vacation_requests", @params, options, cancellationToken);
 
     /// <summary>
     /// Ver una solicitud de vacaciones
@@ -3795,7 +3834,7 @@ public sealed class TrainingCoursesResource
     /// Borrar un curso de capacitación
     /// </summary>
     /// <remarks>
-    /// Lo borra si nadie tiene su constancia; si alguien la tiene, lo cancela (cancelled true), porque las copias se conservan a disposición de la STPS (artículo 26, fracción III).
+    /// Lo borra si nadie tiene su constancia; si alguien la tiene, lo cancela (canceled true), porque las copias se conservan a disposición de la STPS (artículo 26, fracción III).
     /// <br/>
     /// <c>DELETE /v1/training_courses/{id}</c>
     /// <br/>
@@ -4762,8 +4801,8 @@ public sealed class RulesResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/reglas/list-rule-versions"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<RuleVersionList> ListVersionsAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<RuleVersionList>("GET", $"/v1/rules/{Uri.EscapeDataString(id)}/versions", null, null, options, false, cancellationToken);
+    public Task<RuleVersionList> ListVersionsAsync(string id, ListRuleVersionsParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<RuleVersionList>("GET", $"/v1/rules/{Uri.EscapeDataString(id)}/versions", null, @params, options, false, cancellationToken);
 
     /// <summary>
     /// Regresar una regla a una versión
@@ -5965,7 +6004,7 @@ public sealed class ProductsResource
     /// Buscar productos
     /// </summary>
     /// <remarks>
-    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por name, description, sku, product_key, unit_key, unit_price y created. Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
+    /// Con un lenguaje de búsqueda, como el de Stripe: campo:'valor' (igual, sin importar mayúsculas), campo~'valor' (contiene, 3 caracteres o más), &gt;, &gt;=, &lt; y &lt;= en números y fechas, -campo:'valor' (no) y campo:null; hasta 10 cláusulas unidas con AND o con OR. Se busca por name, description, sku, product_key, unit_key, unit_price, created y metadata (metadata['order_id']:'123', con la llave entre corchetes). Los más recientes primero, por páginas como las listas. Una búsqueda que no se entiende responde search_query_invalid diciendo dónde.
     /// <br/>
     /// <c>GET /v1/products/search</c>
     /// <br/>
@@ -6613,7 +6652,7 @@ public sealed class ProductionOrdersResource
     /// Cancelar una orden de producción
     /// </summary>
     /// <remarks>
-    /// Los componentes regresan a su almacén y lo producido sale (status cancelled). Una ya cancelada: 400 inventory_refused.
+    /// Los componentes regresan a su almacén y lo producido sale (status canceled). Una ya cancelada: 400 inventory_refused.
     /// <br/>
     /// <c>POST /v1/production_orders/{id}/cancel</c>
     /// <br/>
@@ -7384,8 +7423,14 @@ public sealed class PayableInvoicesResource
     /// <see href="https://fiscalisto.com/docs/api/referencia/pagos-a-proveedores/list-payable-invoices"/>
     /// </remarks>
     /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
-    public Task<PayableInvoiceList> ListAsync(ListPayableInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
-        => _client.RequestAsync<PayableInvoiceList>("GET", "/v1/payable_invoices", null, @params, options, false, cancellationToken);
+    public Task<Page<PayableInvoice>> ListAsync(ListPayableInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<PayableInvoice>("/v1/payable_invoices", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar lo que falta por pagar: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<PayableInvoice> ListAutoPagingAsync(ListPayableInvoicesParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<PayableInvoice>("/v1/payable_invoices", @params, options, cancellationToken);
 }
 
 /// <summary>
@@ -8009,7 +8054,7 @@ public sealed class AccountingResource
     /// Descargar la contabilidad electrónica
     /// </summary>
     /// <remarks>
-    /// El ZIP del mes para el Buzón Tributario: el catálogo (CT) y la balanza (BN, o BC si es complementaria), cada uno en su ZIP con el nombre que espera el SAT, en el formato 1.3 del Anexo 24. Con journal_request, también las pólizas (PL), que se entregan cuando el SAT las pide. Con month AAAA-13, la balanza de comprobación ajustada al cierre del ejercicio (regla 2.8.1.6 RMF): solo la balanza, con los saldos finales de diciembre como saldos iniciales y, con closing_entry, la póliza de cierre.
+    /// El ZIP del mes para el Buzón Tributario: el catálogo (CT) y la balanza (BN, o BC si es complementaria), cada uno en su ZIP con el nombre que espera el SAT, en el formato 1.3 del Anexo 24. Con journal_request, también las pólizas (PL), que se entregan cuando el SAT las pide. Con month AAAA-13, la balanza de comprobación ajustada al cierre del ejercicio (regla 2.8.1.6 RMF), con los saldos finales de diciembre como saldos iniciales y, con closing_entry, la póliza de cierre, y el catálogo como mes 12 (se envía con ella si no cambió en el ejercicio, fr. I); sin pólizas.
     /// <br/>
     /// <c>GET /v1/accounting/electronic_accounting</c>
     /// <br/>
@@ -9901,6 +9946,106 @@ public sealed class SalesOrdersResource
 }
 
 /// <summary>
+/// Llaves de API: <c>fiscalisto.ApiKeys</c>.
+/// </summary>
+public sealed class ApiKeysResource
+{
+    private readonly FiscalistoClient _client;
+
+    internal ApiKeysResource(FiscalistoClient client) => _client = client;
+
+    /// <summary>
+    /// Crear una llave
+    /// </summary>
+    /// <remarks>
+    /// Una llave nueva con permisos por recurso, para dar a cada uno de sus clientes (o a cada servidor) la suya. La respuesta trae la llave completa (secret) una sola vez. Nunca tiene más que la llave que la crea: el mismo modo y entorno de prueba, en cada recurso como mucho su acceso, dentro de sus emisores y sus IP, y vence antes o al mismo tiempo. Una llave de producción solo la crea otra de producción. Hasta 30 por hora por cuenta.
+    /// <br/>
+    /// <c>POST /v1/api_keys</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/llaves-de-api/create-api-key"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ApiKey> CreateAsync(CreateApiKeyParams @params, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ApiKey>("POST", "/v1/api_keys", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Listar llaves
+    /// </summary>
+    /// <remarks>
+    /// Las llaves vigentes del modo que la llave puede manejar (las que no tienen más que ella), la más nueva primero. Sin el secreto. Hasta 50 por modo.
+    /// <br/>
+    /// <c>GET /v1/api_keys</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/llaves-de-api/list-api-keys"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Page<ApiKey>> ListAsync(ListApiKeysParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAsync<ApiKey>("/v1/api_keys", @params, null, options, cancellationToken);
+
+    /// <summary>
+    /// Listar llaves: todos, página por página, con await foreach.
+    /// </summary>
+    public IAsyncEnumerable<ApiKey> ListAutoPagingAsync(ListApiKeysParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.ListAllAsync<ApiKey>("/v1/api_keys", @params, options, cancellationToken);
+
+    /// <summary>
+    /// Ver una llave
+    /// </summary>
+    /// <remarks>
+    /// Sus permisos, emisores, IP, vencimiento y último uso. El secreto solo viene al crearla o cambiarla.
+    /// <br/>
+    /// <c>GET /v1/api_keys/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/llaves-de-api/get-api-key"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ApiKey> GetAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ApiKey>("GET", $"/v1/api_keys/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Actualizar una llave
+    /// </summary>
+    /// <remarks>
+    /// Cambia su nombre, sus permisos, sus emisores o sus IP, con el mismo secreto. Solo cambia lo que mande, con los mismos límites que al crearla. Su vencimiento no se cambia.
+    /// <br/>
+    /// <c>POST /v1/api_keys/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/llaves-de-api/update-api-key"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ApiKey> UpdateAsync(string id, UpdateApiKeyParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ApiKey>("POST", $"/v1/api_keys/{Uri.EscapeDataString(id)}", @params, null, options, true, cancellationToken);
+
+    /// <summary>
+    /// Revocar una llave
+    /// </summary>
+    /// <remarks>
+    /// Deja de funcionar en ese momento. No se puede deshacer.
+    /// <br/>
+    /// <c>DELETE /v1/api_keys/{id}</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/llaves-de-api/revoke-api-key"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<Deleted> RevokeAsync(string id, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<Deleted>("DELETE", $"/v1/api_keys/{Uri.EscapeDataString(id)}", null, null, options, false, cancellationToken);
+
+    /// <summary>
+    /// Cambiar una llave
+    /// </summary>
+    /// <remarks>
+    /// Una llave nueva con el mismo nombre, permisos, emisores, IP y duración, que la respuesta trae una sola vez. La anterior sigue funcionando el tiempo que elija (expires_in), 24 horas por omisión, para que la cambie sin cortar el servicio. Si se filtró, mande expires_in: 0.
+    /// <br/>
+    /// <c>POST /v1/api_keys/{id}/roll</c>
+    /// <br/>
+    /// <see href="https://fiscalisto.com/docs/api/referencia/llaves-de-api/roll-api-key"/>
+    /// </remarks>
+    /// <exception cref="FiscalistoException">La API contestó con un error o no contestó.</exception>
+    public Task<ApiKey> RollAsync(string id, RollApiKeyParams? @params = null, RequestOptions? options = null, CancellationToken cancellationToken = default)
+        => _client.RequestAsync<ApiKey>("POST", $"/v1/api_keys/{Uri.EscapeDataString(id)}/roll", @params, null, options, true, cancellationToken);
+}
+
+/// <summary>
 /// Webhooks: <c>fiscalisto.WebhookEndpoints</c>.
 /// </summary>
 public sealed class WebhookEndpointsResource
@@ -10061,7 +10206,7 @@ public sealed class EventsResource
     /// Listar eventos
     /// </summary>
     /// <remarks>
-    /// Los de los últimos 30 días, los más recientes primero.
+    /// Los de los últimos 30 días, los más recientes primero. Para leer hacia adelante sin perder ninguno (lo que llegó después del último que procesó), mande ending_before con ese evento y repita con el primero de data mientras has_more sea true.
     /// <br/>
     /// <c>GET /v1/events</c>
     /// <br/>
